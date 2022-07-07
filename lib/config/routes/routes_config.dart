@@ -1,0 +1,85 @@
+import 'package:flutter/material.dart';
+import 'package:vip_picnic/view/about_us/about_us.dart';
+import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
+import 'package:vip_picnic/view/chat/chat_head.dart';
+import 'package:vip_picnic/view/chat/group_chat/create_new_group.dart';
+import 'package:vip_picnic/view/events/customize_event.dart';
+import 'package:vip_picnic/view/events/packages/picnic_packages.dart';
+import 'package:vip_picnic/view/events/purchase_events.dart';
+import 'package:vip_picnic/view/home/home.dart';
+import 'package:vip_picnic/view/launch/get_started.dart';
+import 'package:vip_picnic/view/launch/splash_screen.dart';
+import 'package:vip_picnic/view/notifications/notifications.dart';
+import 'package:vip_picnic/view/home/add_new_post.dart';
+import 'package:vip_picnic/view/profile/edit_profile.dart';
+import 'package:vip_picnic/view/profile/profile.dart';
+import 'package:vip_picnic/view/settings/settings.dart';
+import 'package:vip_picnic/view/user/fotgot_password/create_new_password.dart';
+import 'package:vip_picnic/view/user/fotgot_password/forgot_password.dart';
+import 'package:vip_picnic/view/user/login.dart';
+import 'package:vip_picnic/view/user/signup.dart';
+import 'package:vip_picnic/view/user/social_login.dart';
+import 'package:vip_picnic/view/user/verification/create_password.dart';
+import 'package:vip_picnic/view/user/verification/verification_code.dart';
+import 'package:vip_picnic/view/user/verification/verify_email.dart';
+
+class RoutesConfig {
+  static final routes = <String, WidgetBuilder>{
+    AppLinks.splashScreen: (_) => SplashScreen(),
+    AppLinks.getStarted: (_) => GetStarted(),
+    AppLinks.socialLogin: (_) => SocialLogin(),
+    AppLinks.login: (_) => Login(),
+    AppLinks.signup: (_) => Signup(),
+    AppLinks.verifyEmail: (_) => VerifyEmail(),
+    AppLinks.verificationCode: (_) => VerificationCode(),
+    AppLinks.createPassword: (_) => CreatePassword(),
+    AppLinks.forgotPassword: (_) => ForgotPassword(),
+    AppLinks.createNewPassword: (_) => CreateNewPassword(),
+    AppLinks.bottomNavBar: (_) => BottomNavBar(),
+    AppLinks.home: (_) => Home(),
+    //Chat
+    AppLinks.chatHead: (_) => ChatHead(),
+    AppLinks.createNewGroup: (_) => CreateNewGroup(),
+    //  settings
+    AppLinks.settings: (_) => Settings(),
+    AppLinks.aboutUs: (_) => AboutUs(),
+    AppLinks.notifications: (_) => Notifications(),
+    AppLinks.profile: (_) => Profile(),
+    AppLinks.editProfile: (_) => EditProfile(),
+    AppLinks.addNewPost: (_) => AddNewPost(),
+    //Events
+    AppLinks.purchaseEvents: (_) => PurchaseEvents(),
+    AppLinks.picnicPackages: (_) => PicnicPackages(),
+    AppLinks.customizeEvent: (_) => CustomizeEvent(),
+  };
+}
+
+class AppLinks {
+  static const splashScreen = '/splash_screen';
+  static const getStarted = '/get_started';
+  static const socialLogin = '/social_login';
+  static const login = '/login';
+  static const signup = '/signup';
+  static const verifyEmail = '/verify_email';
+  static const verificationCode = '/verification_code';
+  static const createPassword = '/create_password';
+  static const forgotPassword = '/forgot_password';
+  static const createNewPassword = '/create_new_password';
+  static const bottomNavBar = '/bottom_nav_bar';
+  static const home = '/home';
+  static const settings = '/settings';
+  static const aboutUs = '/about_us';
+  static const notifications = '/notifications';
+  static const profile = '/profile';
+  static const editProfile = '/edit_profile';
+  static const addNewPost = '/add_new_post';
+
+  //chat
+  static const chatHead = '/chat_head';
+  static const createNewGroup = '/create_new_group';
+
+  //Events
+  static const purchaseEvents = '/purchase_events';
+  static const picnicPackages = '/picnic_packages';
+  static const customizeEvent = '/customize_event';
+}
