@@ -6,6 +6,8 @@ import 'package:vip_picnic/view/home/add_new_post.dart';
 import 'package:vip_picnic/view/home/post_details.dart';
 import 'package:vip_picnic/view/profile/profile.dart';
 import 'package:vip_picnic/view/search_friends/search_friends.dart';
+import 'package:vip_picnic/view/story/post_new_story.dart';
+import 'package:vip_picnic/view/story/story.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:vip_picnic/view/widget/my_textfields.dart';
@@ -86,23 +88,62 @@ class Home extends StatelessWidget {
           ),
         ),
       ),
-      body: ListView.builder(
+      body: ListView(
         shrinkWrap: true,
         physics: BouncingScrollPhysics(),
         padding: EdgeInsets.symmetric(
           vertical: 20,
         ),
-        itemCount: 4,
-        itemBuilder: (context, index) {
-          return PostWidget(
-            profileImage: Assets.imagesDummyProfileImage,
-            name: 'Username',
-            postedTime: '11 feb',
-            title: 'It was a great event 😀',
-            isMyPost: index.isOdd ? true : false,
-            postImage: Assets.imagesPicnicKids,
-          );
-        },
+        children: [
+          SizedBox(
+            height: 80,
+            child: ListView(
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              children: [
+                addStoryButton(context),
+                ListView.builder(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: 6,
+                  padding: const EdgeInsets.only(
+                    right: 8,
+                  ),
+                  physics: const BouncingScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    return stories(
+                      context,
+                      index.isOdd
+                          ? 'assets/images/baby_shower.png'
+                          : 'assets/images/baby_shower.png',
+                      index.isOdd ? 'Khan' : 'Stephan',
+                      index,
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: BouncingScrollPhysics(),
+            padding: EdgeInsets.symmetric(
+              vertical: 30,
+            ),
+            itemCount: 4,
+            itemBuilder: (context, index) {
+              return PostWidget(
+                profileImage: Assets.imagesDummyProfileImage,
+                name: 'Username',
+                postedTime: '11 feb',
+                title: 'It was a great event 😀',
+                isMyPost: index.isOdd ? true : false,
+                postImage: Assets.imagesPicnicKids,
+              );
+            },
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(
@@ -118,6 +159,96 @@ class Home extends StatelessWidget {
           height: 22.68,
           color: kPrimaryColor,
         ),
+      ),
+    );
+  }
+
+  Widget stories(
+    BuildContext context,
+    String profileImage,
+    name,
+    int index,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 7,
+      ),
+      child: GestureDetector(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => Story(
+              profileImage: profileImage,
+              name: name,
+            ),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Image.asset(
+                  Assets.imagesStoryBg,
+                  height: 55,
+                  width: 55,
+                ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(100),
+                  child: Image.asset(
+                    profileImage,
+                    height: 47,
+                    width: 47,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ],
+            ),
+            MyText(
+              text: name,
+              size: 12,
+              weight: FontWeight.w600,
+              color: kSecondaryColor,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget addStoryButton(
+    BuildContext context,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: 15,
+        right: 7,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => PostNewStory(),
+              ),
+            ),
+            child: Image.asset(
+              Assets.imagesAddStory,
+              height: 55,
+              width: 55,
+              fit: BoxFit.cover,
+            ),
+          ),
+          MyText(
+            text: 'Add story',
+            size: 12,
+            weight: FontWeight.w600,
+            color: kSecondaryColor,
+          ),
+        ],
       ),
     );
   }

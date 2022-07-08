@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/config/theme/light_theme.dart';
 import 'package:vip_picnic/provider/chat_provider/chat_provider.dart';
+import 'package:vip_picnic/provider/story_provider/story_provider.dart';
 
 import 'provider/chat_provider/chat_head_provider.dart';
 import 'provider/user_provider/user_provider.dart';
@@ -18,6 +19,9 @@ void main() => runApp(
           ),
           ChangeNotifierProvider(
             create: (_) => ChatProvider(),
+          ),
+          ChangeNotifierProvider(
+            create: (_) => StoryProvider(),
           ),
         ],
         child: MyApp(),

@@ -71,6 +71,20 @@ class Settings extends StatelessWidget {
             title: 'Invite',
             goTo: Profile(),
           ),
+          settingsTiles(
+            context,
+            icon: Assets.imagesDisable,
+            iconSize: 26.83,
+            title: 'Deactivate Account',
+            goTo: Profile(),
+          ),
+          settingsTiles(
+            context,
+            icon: Assets.imagesTrash,
+            iconSize: 26.83,
+            title: 'Delete Account',
+            goTo: Profile(),
+          ),
         ],
       ),
     );

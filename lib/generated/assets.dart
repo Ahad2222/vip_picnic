@@ -4,6 +4,7 @@ class Assets {
 
   static const String imagesAdd = 'assets/images/add.png';
   static const String imagesAddPost = 'assets/images/add_post.png';
+  static const String imagesAddStory = 'assets/images/add_story.png';
   static const String imagesAlerts = 'assets/images/alerts.png';
   static const String imagesApple = 'assets/images/apple.png';
   static const String imagesArrowBack = 'assets/images/arrow_back.png';
@@ -11,11 +12,13 @@ class Assets {
   static const String imagesAttachFiles = 'assets/images/attach_files.png';
   static const String imagesBabyShower = 'assets/images/baby_shower.png';
   static const String imagesBirthdayPicnic = 'assets/images/birthday_picnic.png';
+  static const String imagesBottomGradient = 'assets/images/bottom_gradient.png';
   static const String imagesCautionSign = 'assets/images/caution_sign.png';
   static const String imagesChat = 'assets/images/chat.png';
   static const String imagesClose = 'assets/images/close.png';
   static const String imagesComment = 'assets/images/comment.png';
   static const String imagesCustomize = 'assets/images/customize.png';
+  static const String imagesDisable = 'assets/images/disable.png';
   static const String imagesDummyImage = 'assets/images/dummy_image.png';
   static const String imagesDummyImg = 'assets/images/dummy_img.png';
   static const String imagesDummyProfileImage = 'assets/images/dummy_profile_image.png';
@@ -38,6 +41,7 @@ class Assets {
   static const String imagesLogo = 'assets/images/logo.png';
   static const String imagesLogout = 'assets/images/logout.png';
   static const String imagesMail = 'assets/images/mail.png';
+  static const String imagesMoreHoriz = 'assets/images/more_horiz.png';
   static const String imagesParties = 'assets/images/parties.png';
   static const String imagesPerPeople = 'assets/images/per_people.png';
   static const String imagesPhoto = 'assets/images/photo.png';
@@ -50,11 +54,15 @@ class Assets {
   static const String imagesSearch = 'assets/images/search.png';
   static const String imagesSearchWithBg = 'assets/images/search_with_bg.png';
   static const String imagesSend = 'assets/images/send.png';
+  static const String imagesSendIconNew = 'assets/images/send_icon_new.png';
   static const String imagesSettings = 'assets/images/settings.png';
   static const String imagesShare = 'assets/images/share.png';
   static const String imagesSimpleLock = 'assets/images/simpleLock.png';
+  static const String imagesStoryBg = 'assets/images/story_bg.png';
   static const String imagesSupport = 'assets/images/support.png';
+  static const String imagesTrash = 'assets/images/trash.png';
   static const String imagesUploadPicture = 'assets/images/upload_picture.png';
+  static const String imagesUpperGradient = 'assets/images/upper_gradient.png';
   static const String imagesUser = 'assets/images/user.png';
 
 }
