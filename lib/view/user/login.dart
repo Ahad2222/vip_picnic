@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
@@ -47,10 +48,8 @@ class Login extends StatelessWidget {
                   height: 15,
                 ),
                 MyButton(
-                  onTap: () => Navigator.pushNamedAndRemoveUntil(
-                    context,
+                  onTap: () => Get.offAllNamed(
                     AppLinks.bottomNavBar,
-                    (route) => false,
                   ),
                   buttonText: 'login',
                 ),
@@ -62,8 +61,7 @@ class Login extends StatelessWidget {
                   children: [
                     keepMeLoggedIn(UserProvider),
                     MyText(
-                      onTap: () => Navigator.pushNamed(
-                        context,
+                      onTap: () => Get.toNamed(
                         AppLinks.forgotPassword,
                       ),
                       text: 'Forgot?',
@@ -76,8 +74,7 @@ class Login extends StatelessWidget {
                   height: 40,
                 ),
                 createAccountButton(
-                  onTap: () => Navigator.pushNamed(
-                    context,
+                  onTap: () => Get.toNamed(
                     AppLinks.signup,
                   ),
                 ),

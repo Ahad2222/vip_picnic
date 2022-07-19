@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
@@ -200,7 +201,7 @@ class SearchBar extends StatelessWidget {
   TextEditingController? controller;
   ValueChanged<String>? onChanged;
   double? textSize;
-  Color? fillColor,borderColor;
+  Color? fillColor, borderColor;
   bool? isReadOnly;
   FormFieldValidator<String>? validator;
   VoidCallback? onSearchTap;
@@ -221,11 +222,11 @@ class SearchBar extends StatelessWidget {
         color: kSecondaryColor,
       ),
       decoration: InputDecoration(
-        hintStyle:  TextStyle(
+        hintStyle: TextStyle(
           fontSize: textSize,
           color: kSecondaryColor,
         ),
-        hintText: 'Search...',
+        hintText: 'search'.tr,
         contentPadding: EdgeInsets.symmetric(
           horizontal: 15,
         ),
@@ -288,7 +289,7 @@ class SimpleTextField extends StatelessWidget {
     this.maxLines = 1,
   }) : super(key: key);
 
-  String? hintText,initialValue;
+  String? hintText, initialValue;
   int? maxLines;
   TextEditingController? controller;
   ValueChanged<String>? onChanged;

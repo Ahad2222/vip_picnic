@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
@@ -24,11 +25,8 @@ class Home extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             GestureDetector(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => Profile(),
-                ),
+              onTap: () => Get.toNamed(
+                AppLinks.profile,
               ),
               child: Container(
                 height: 54,
@@ -61,7 +59,7 @@ class Home extends StatelessWidget {
           ],
         ),
         title: MyText(
-          text: 'Welcome',
+          text: 'welcome'.tr,
           size: 20,
           color: kSecondaryColor,
         ),
@@ -75,11 +73,8 @@ class Home extends StatelessWidget {
             ),
             child: SearchBar(
               isReadOnly: true,
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => SearchFriends(),
-                ),
+              onTap: () => Get.to(
+                () => SearchFriends(),
               ),
               textSize: 16,
               borderColor: Colors.transparent,
@@ -174,13 +169,10 @@ class Home extends StatelessWidget {
         horizontal: 7,
       ),
       child: GestureDetector(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => Story(
-              profileImage: profileImage,
-              name: name,
-            ),
+        onTap: () => Get.to(
+          () => Story(
+            profileImage: profileImage,
+            name: name,
           ),
         ),
         child: Column(
@@ -229,11 +221,8 @@ class Home extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           GestureDetector(
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => PostNewStory(),
-              ),
+            onTap: () => Get.to(
+              () => PostNewStory(),
             ),
             child: Image.asset(
               Assets.imagesAddStory,
@@ -243,7 +232,7 @@ class Home extends StatelessWidget {
             ),
           ),
           MyText(
-            text: 'Add story',
+            text: 'addStory'.tr,
             size: 12,
             weight: FontWeight.w600,
             color: kSecondaryColor,
@@ -285,12 +274,9 @@ class PostWidget extends StatelessWidget {
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: GestureDetector(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => Profile(
-                        isMyProfile: isMyPost! ? true : false,
-                      ),
+                  onTap: () => Get.to(
+                    () => Profile(
+                      isMyProfile: isMyPost! ? true : false,
                     ),
                   ),
                   child: Container(
@@ -325,7 +311,7 @@ class PostWidget extends StatelessWidget {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     MyText(
-                      text: isMyPost! ? 'Your Post' : '$name',
+                      text: isMyPost! ? 'yourPost'.tr : '$name',
                       size: 17,
                       weight: FontWeight.w600,
                       color: kSecondaryColor,
@@ -353,24 +339,21 @@ class PostWidget extends StatelessWidget {
                           return [
                             PopupMenuItem(
                               child: MyText(
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => AddNewPost(
-                                      editPost: true,
-                                      postImage: postImage,
-                                      title: title,
-                                    ),
+                                onTap: () => Get.to(
+                                  () => AddNewPost(
+                                    editPost: true,
+                                    postImage: postImage,
+                                    title: title,
                                   ),
                                 ),
-                                text: 'Edit Post',
+                                text: 'editPost'.tr,
                                 size: 14,
                                 color: kSecondaryColor,
                               ),
                             ),
                             PopupMenuItem(
                               child: MyText(
-                                text: 'Delete Post',
+                                text: 'deletePost'.tr,
                                 size: 14,
                                 color: kSecondaryColor,
                               ),
@@ -389,12 +372,9 @@ class PostWidget extends StatelessWidget {
                 height: 10,
               ),
               GestureDetector(
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => PostDetails(
-                      postImage: postImage,
-                    ),
+                onTap: () => Get.to(
+                  () => PostDetails(
+                    postImage: postImage,
                   ),
                 ),
                 child: ClipRRect(

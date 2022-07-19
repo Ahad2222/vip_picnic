@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
@@ -29,14 +30,14 @@ class Profile extends StatelessWidget {
               backgroundColor: kPrimaryColor,
               floating: false,
               leading: IconButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Get.back(),
                 icon: Image.asset(
                   Assets.imagesArrowBack,
                   height: 22.04,
                 ),
               ),
               title: MyText(
-                text: 'Profile',
+                text: 'profile'.tr,
                 size: 20,
                 color: kSecondaryColor,
               ),
@@ -72,7 +73,7 @@ class Profile extends StatelessWidget {
                       children: [
                         eventFollowingFollower(
                           count: 20,
-                          title: 'Events',
+                          title: 'events'.tr,
                         ),
                         Container(
                           height: 15,
@@ -81,7 +82,7 @@ class Profile extends StatelessWidget {
                         ),
                         eventFollowingFollower(
                           count: 563,
-                          title: 'Following',
+                          title: 'following'.tr,
                         ),
                         Container(
                           height: 15,
@@ -90,7 +91,7 @@ class Profile extends StatelessWidget {
                         ),
                         eventFollowingFollower(
                           count: 15,
-                          title: 'Followers',
+                          title: 'followers'.tr,
                         ),
                       ],
                     ),
@@ -102,9 +103,8 @@ class Profile extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               profileButtons(
-                                buttonText: 'Edit Account',
-                                onTap: () => Navigator.pushNamed(
-                                  context,
+                                buttonText: 'editAccount'.tr,
+                                onTap: () => Get.toNamed(
                                   AppLinks.editProfile,
                                 ),
                               ),
@@ -112,12 +112,9 @@ class Profile extends StatelessWidget {
                                 width: 20,
                               ),
                               profileButtons(
-                                buttonText: 'Your Posts',
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => MyPosts(),
-                                  ),
+                                buttonText: 'yourPost'.tr,
+                                onTap: () => Get.to(
+                                  () => MyPosts(),
                                 ),
                               ),
                             ],
@@ -126,14 +123,14 @@ class Profile extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               profileButtons(
-                                buttonText: 'Follow',
+                                buttonText: 'follow'.tr,
                                 onTap: () {},
                               ),
                               SizedBox(
                                 width: 20,
                               ),
                               profileButtons(
-                                buttonText: 'Message',
+                                buttonText: 'message'.tr,
                                 onTap: () {},
                               ),
                             ],
@@ -192,7 +189,7 @@ class Profile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           MyText(
-            text: 'Bio:',
+            text: 'bio'.tr,
             size: 16,
             weight: FontWeight.w600,
             color: kSecondaryColor,

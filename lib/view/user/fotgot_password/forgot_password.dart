@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/view/widget/headings.dart';
@@ -35,7 +36,8 @@ class ForgotPassword extends StatelessWidget {
             ),
             Center(
               child: registerSubHeading(
-                text: 'Enter your email and we will send you instructions on how to reset your password',
+                text:
+                    'Enter your email and we will send you instructions on how to reset your password',
               ),
             ),
             SizedBox(
@@ -48,8 +50,7 @@ class ForgotPassword extends StatelessWidget {
               height: 15,
             ),
             MyButton(
-              onTap: () => Navigator.pushNamed(
-                context,
+              onTap: () => Get.toNamed(
                 AppLinks.createNewPassword,
               ),
               buttonText: 'Reset password',

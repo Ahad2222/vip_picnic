@@ -4,9 +4,11 @@ import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/view/about_us/about_us.dart';
 import 'package:vip_picnic/view/about_us/support.dart';
 import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
+import 'package:vip_picnic/view/choose_language/choose_language.dart';
 import 'package:vip_picnic/view/profile/profile.dart';
 import 'package:vip_picnic/view/report_problem/report_problem.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
+import 'package:get/get.dart';
 
 class Settings extends StatelessWidget {
   @override
@@ -14,76 +16,86 @@ class Settings extends StatelessWidget {
     return Scaffold(
       appBar: settingsAppBar(
         context,
-        title: 'Settings',
+        title: 'settings'.tr,
         haveLogoutButton: true,
         isOnSettingScreen: true,
       ),
       body: ListView(
         shrinkWrap: true,
         physics: BouncingScrollPhysics(),
-        padding: EdgeInsets.only(
-          top: 40,
+        padding: EdgeInsets.symmetric(
+          vertical: 15,
         ),
         children: [
           settingsTiles(
             context,
             icon: Assets.imagesUser,
-            title: 'Profile',
-            goTo: Profile(),
+            title: 'profile'.tr,
+            onTap: () => Get.to(
+              () => Profile(),
+            ),
           ),
           settingsTiles(
             context,
             icon: Assets.imagesSimpleLock,
             iconSize: 24.6,
-            title: 'Privacy',
-            goTo: Profile(),
+            title: 'privacy'.tr,
+            onTap: () {},
           ),
           settingsTiles(
             context,
             icon: Assets.imagesLanguage,
             iconSize: 24.48,
-            title: 'Idiom',
-            goTo: Profile(),
+            title: 'language'.tr,
+            onTap: () => Get.to(
+              () => ChooseLanguage(),
+            ),
           ),
           settingsTiles(
             context,
             icon: Assets.imagesSupport,
-            title: 'Support',
-            goTo: Support(),
+            title: 'support'.tr,
+            onTap: () => Get.to(
+              () => Support(),
+            ),
           ),
           settingsTiles(
             context,
             icon: Assets.imagesCautionSign,
-            title: 'Report Problem',
-            goTo: ReportProblem(),
+            title: 'reportProblem'.tr,
+            onTap: () => Get.to(
+              () => ReportProblem(),
+            ),
           ),
           settingsTiles(
             context,
             icon: Assets.imagesInfo,
             iconSize: 22.87,
-            title: 'About Us',
-            goTo: AboutUs(),
+            title: 'aboutUs'.tr,
+            onTap: () => Get.to(
+              () => AboutUs(),
+            ),
           ),
           settingsTiles(
             context,
             icon: Assets.imagesMail,
             iconSize: 26.83,
-            title: 'Invite',
-            goTo: Profile(),
+            title: 'invite'.tr,
+            onTap: () {},
           ),
           settingsTiles(
             context,
             icon: Assets.imagesDisable,
             iconSize: 26.83,
-            title: 'Deactivate Account',
-            goTo: Profile(),
+            title: 'deactivateAccount'.tr,
+            onTap: () {},
           ),
           settingsTiles(
             context,
             icon: Assets.imagesTrash,
             iconSize: 26.83,
-            title: 'Delete Account',
-            goTo: Profile(),
+            title: 'deleteAccount'.tr,
+            onTap: () {},
           ),
         ],
       ),
@@ -95,15 +107,10 @@ class Settings extends StatelessWidget {
     String? icon,
     String? title,
     double? iconSize = 23.97,
-    Widget? goTo,
+    VoidCallback? onTap,
   }) {
     return ListTile(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => goTo!,
-        ),
-      ),
+      onTap: onTap!,
       contentPadding: EdgeInsets.symmetric(
         horizontal: 35,
         vertical: 10,
@@ -142,16 +149,12 @@ AppBar settingsAppBar(
     ),
     leading: IconButton(
       onPressed: isOnSettingScreen!
-          ? () => Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BottomNavBar(
-                    currentIndex: 0,
-                  ),
+          ? () => Get.offAll(
+                BottomNavBar(
+                  currentIndex: 0,
                 ),
-                (route) => route.isCurrent,
               )
-          : () => Navigator.pop(context),
+          : () => Get.back(),
       icon: Image.asset(
         Assets.imagesArrowBack,
         height: 22.04,

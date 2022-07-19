@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/view/settings/settings.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
+import 'package:get/get.dart';
 
 class Support extends StatelessWidget {
   @override
@@ -9,7 +10,7 @@ class Support extends StatelessWidget {
     return Scaffold(
       appBar: settingsAppBar(
         context,
-        title: 'Support',
+        title: 'support'.tr,
       ),
       body: ListView(
         shrinkWrap: true,
@@ -22,7 +23,7 @@ class Support extends StatelessWidget {
         ),
         children: [
           MyText(
-            text: 'If you have any question please feel free to contact us.',
+            text: 'contactUs'.tr,
             size: 18,
             color: kSecondaryColor,
             weight: FontWeight.w600,
@@ -30,7 +31,7 @@ class Support extends StatelessWidget {
           MyText(
             paddingTop: 30,
             paddingBottom: 5,
-            text: 'Email:',
+            text: 'emailUs'.tr,
             size: 16,
             color: kSecondaryColor,
             weight: FontWeight.w600,
@@ -44,7 +45,7 @@ class Support extends StatelessWidget {
           MyText(
             paddingTop: 30,
             paddingBottom: 5,
-            text: 'Website:',
+            text: 'webSite'.tr,
             size: 16,
             color: kSecondaryColor,
             weight: FontWeight.w600,

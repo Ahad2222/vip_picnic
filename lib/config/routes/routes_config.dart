@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:vip_picnic/view/about_us/about_us.dart';
 import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:vip_picnic/view/chat/chat_head.dart';
@@ -22,6 +23,110 @@ import 'package:vip_picnic/view/user/social_login.dart';
 import 'package:vip_picnic/view/user/verification/create_password.dart';
 import 'package:vip_picnic/view/user/verification/verification_code.dart';
 import 'package:vip_picnic/view/user/verification/verify_email.dart';
+
+class Routes {
+  static final List<GetPage> pages = [
+    GetPage(
+      name: AppLinks.splashScreen,
+      page: () => SplashScreen(),
+    ),
+    GetPage(
+      name: AppLinks.getStarted,
+      page: () => GetStarted(),
+    ),
+    GetPage(
+      name: AppLinks.socialLogin,
+      page: () => SocialLogin(),
+    ),
+    GetPage(
+      name: AppLinks.login,
+      page: () => Login(),
+    ),
+    GetPage(
+      name: AppLinks.signup,
+      page: () => Signup(),
+    ),
+    GetPage(
+      name: AppLinks.verifyEmail,
+      page: () => VerifyEmail(),
+    ),
+    GetPage(
+      name: AppLinks.verificationCode,
+      page: () => VerificationCode(),
+    ),
+    GetPage(
+      name: AppLinks.createPassword,
+      page: () => CreatePassword(),
+    ),
+    GetPage(
+      name: AppLinks.forgotPassword,
+      page: () => ForgotPassword(),
+    ),
+    GetPage(
+      name: AppLinks.createNewPassword,
+      page: () => CreateNewPassword(),
+    ),
+    //Bottom Nav Bar
+    GetPage(
+      name: AppLinks.bottomNavBar,
+      page: () => BottomNavBar(),
+    ),
+    GetPage(
+      name: AppLinks.home,
+      page: () => Home(),
+    ),
+
+    //  Chat
+    GetPage(
+      name: AppLinks.chatHead,
+      page: () => ChatHead(),
+    ),
+    GetPage(
+      name: AppLinks.createNewGroup,
+      page: () => CreateNewGroup(),
+    ),
+
+    //  settings
+    GetPage(
+      name: AppLinks.settings,
+      page: () => Settings(),
+    ),
+    GetPage(
+      name: AppLinks.aboutUs,
+      page: () => AboutUs(),
+    ),
+    GetPage(
+      name: AppLinks.notifications,
+      page: () => Notifications(),
+    ),
+    GetPage(
+      name: AppLinks.profile,
+      page: () => Profile(),
+    ),
+    GetPage(
+      name: AppLinks.editProfile,
+      page: () => EditProfile(),
+    ),
+    GetPage(
+      name: AppLinks.addNewPost,
+      page: () => AddNewPost(),
+    ),
+
+    //Events
+    GetPage(
+      name: AppLinks.purchaseEvents,
+      page: () => PurchaseEvents(),
+    ),
+    GetPage(
+      name: AppLinks.picnicPackages,
+      page: () => PicnicPackages(),
+    ),
+    GetPage(
+      name: AppLinks.customizeEvent,
+      page: () => CustomizeEvent(),
+    ),
+  ];
+}
 
 class RoutesConfig {
   static final routes = <String, WidgetBuilder>{

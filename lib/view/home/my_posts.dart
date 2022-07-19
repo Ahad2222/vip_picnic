@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/view/home/home.dart';
 import 'package:vip_picnic/view/widget/my_appbar.dart';
+import 'package:get/get.dart';
 
 class MyPosts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: myAppBar(
-        title: 'My Posts',
+        title: 'myPosts'.tr,
         onTap: () => Navigator.pop(context),
       ),
       body: ListView.builder(

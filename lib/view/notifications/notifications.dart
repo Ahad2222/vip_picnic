@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
@@ -11,18 +12,12 @@ class Notifications extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: myAppBar(
-        onTap: () {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => BottomNavBar(
-                currentIndex: 0,
-              ),
-            ),
-            (route) => route.isCurrent,
-          );
-        },
-        title: 'Alerts',
+        onTap: () => Get.offAll(
+          BottomNavBar(
+            currentIndex: 0,
+          ),
+        ),
+        title: 'alerts'.tr,
       ),
       body: ListView.builder(
         shrinkWrap: true,
@@ -33,9 +28,10 @@ class Notifications extends StatelessWidget {
         itemCount: 3,
         itemBuilder: (context, index) {
           return NotificationTiles(
-            notifyType: index == 0 ? 'follower' : 'simple',
             profileImage: Assets.imagesDummyImage,
-            notifyText: index == 1 ? 'Invite to an Event' : 'Invite to a Group',
+            isNewFollower: index == 0 ? true : false,
+            isEventInvite: index == 1 ? true : false,
+            isGroupInvite: index == 2 ? true : false,
             time: index == 0 ? 'Today' : '15 March',
           );
         },
@@ -50,11 +46,13 @@ class NotificationTiles extends StatelessWidget {
     Key? key,
     this.profileImage,
     this.time,
-    this.notifyType,
-    this.notifyText,
+    this.isEventInvite = false,
+    this.isGroupInvite = false,
+    this.isNewFollower = false,
   }) : super(key: key);
 
-  String? profileImage, time, notifyType, notifyText;
+  bool? isEventInvite, isGroupInvite, isNewFollower;
+  String? profileImage, time;
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +66,7 @@ class NotificationTiles extends StatelessWidget {
             color: Colors.transparent,
             child: ListTile(
               onTap: () {},
-              leading: notifyType == 'follower'
+              leading: isNewFollower!
                   ? Container(
                       height: 48,
                       width: 48,
@@ -106,7 +104,13 @@ class NotificationTiles extends StatelessWidget {
                       ),
                     ),
               title: MyText(
-                text: notifyType == 'follower' ? 'New Follower' : '$notifyText',
+                text: isNewFollower!
+                    ? 'follower'.tr
+                    : isEventInvite!
+                        ? 'inviteToEvent'.tr
+                        : isGroupInvite!
+                            ? 'inviteToGroup'.tr
+                            : '',
                 size: 18,
                 color: kSecondaryColor,
               ),

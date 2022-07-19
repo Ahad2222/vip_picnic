@@ -5,6 +5,7 @@ import 'package:vip_picnic/view/settings/settings.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/my_button.dart';
 import 'package:vip_picnic/view/widget/my_textfields.dart';
+import 'package:get/get.dart';
 
 // ignore: must_be_immutable
 class ReportProblem extends StatelessWidget {
@@ -16,7 +17,7 @@ class ReportProblem extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       appBar: settingsAppBar(
         context,
-        title: 'Report Problem',
+        title: 'reportProblem'.tr,
       ),
       body: Column(
         children: [
@@ -60,7 +61,7 @@ class ReportProblem extends StatelessWidget {
                   height: 20,
                 ),
                 SimpleTextField(
-                  hintText: 'Description...',
+                  hintText: '${'description'.tr}...',
                   maxLines: 6,
                 ),
               ],
@@ -73,7 +74,7 @@ class ReportProblem extends StatelessWidget {
             ),
             child: MyButton(
               onTap: () {},
-              buttonText: 'submit',
+              buttonText: 'submit'.tr,
             ),
           ),
         ],

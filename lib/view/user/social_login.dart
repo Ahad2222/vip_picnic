@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
@@ -44,8 +45,7 @@ class SocialLogin extends StatelessWidget {
             ),
             MyButton(
               buttonText: 'login with email',
-              onTap: () => Navigator.pushNamed(
-                context,
+              onTap: () => Get.toNamed(
                 AppLinks.login,
               ),
             ),

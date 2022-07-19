@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/view/settings/settings.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
+import 'package:get/get.dart';
 
 class AboutUs extends StatelessWidget {
   @override
@@ -9,7 +10,7 @@ class AboutUs extends StatelessWidget {
     return Scaffold(
       appBar: settingsAppBar(
         context,
-        title: 'About Us',
+        title: 'aboutUs'.tr,
       ),
       body: ListView(
         shrinkWrap: true,

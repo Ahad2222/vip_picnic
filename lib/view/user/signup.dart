@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
@@ -19,7 +20,7 @@ class Signup extends StatelessWidget {
           resizeToAvoidBottomInset: false,
           appBar: myAppBar(
             title: 'Register',
-            onTap: () => Navigator.pop(context),
+            onTap: () => Get.back(),
           ),
           body: Column(
             children: [

@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/view/widget/edit_bottom_sheet.dart';
@@ -13,7 +13,7 @@ class EditProfile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: myAppBar(
-        onTap: () => Navigator.pop(context),
+        onTap: () => Get.back(),
         title: 'Edit Account',
       ),
       body: ListView(
@@ -224,7 +224,6 @@ class EditProfile extends StatelessWidget {
       ),
     );
   }
-
 
   Widget pickProfileImage(
     BuildContext context,

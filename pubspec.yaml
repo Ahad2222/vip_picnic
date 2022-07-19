@@ -21,6 +21,7 @@ dependencies:
   flutter_chat_bubble: ^2.0.0
   story_view: ^0.13.2
   flutter_switch: ^0.3.2
+  get:
 
 dev_dependencies:
   flutter_test:

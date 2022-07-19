@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/view/widget/headings.dart';
@@ -56,10 +57,8 @@ class CreateNewPassword extends StatelessWidget {
               height: 15,
             ),
             MyButton(
-              onTap: () => Navigator.pushNamedAndRemoveUntil(
-                context,
+              onTap: () => Get.offAllNamed(
                 AppLinks.login,
-                (route) => route.isCurrent,
               ),
               buttonText: 'save password',
             ),

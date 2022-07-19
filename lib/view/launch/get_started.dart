@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
@@ -15,7 +16,7 @@ class GetStarted extends StatelessWidget {
           Column(
             children: [
               MyText(
-                text: 'Welcome to',
+                text: 'welcomeTo'.tr,
                 size: 18,
                 weight: FontWeight.w700,
                 align: TextAlign.center,
@@ -33,8 +34,7 @@ class GetStarted extends StatelessWidget {
             height: 250.0,
           ),
           MyText(
-            text:
-                'Create your event\nAdd and invite Friends\nRegister your moments',
+            text: 'introMsg'.tr,
             size: 22,
             align: TextAlign.center,
           ),
@@ -49,8 +49,7 @@ class GetStarted extends StatelessWidget {
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  onTap: () => Navigator.pushReplacementNamed(
-                    context,
+                  onTap: () => Get.offAllNamed(
                     AppLinks.socialLogin,
                   ),
                   borderRadius: BorderRadius.circular(100),
