@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "545429896539",
+    "project_id": "vip-picnic-77641",
+    "storage_bucket": "vip-picnic-77641.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:545429896539:android:bdaaff862ada322f0eae7e",
+        "android_client_info": {
+          "package_name": "com.example.vip_picnic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "545429896539-o2u3nv86j4v8unv28o2kighnu1oha7na.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcsZe1h7VBOnl0WmTwiWYcjM301JvibC0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "545429896539-o2u3nv86j4v8unv28o2kighnu1oha7na.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
