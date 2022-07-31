@@ -1,5 +1,5 @@
+import 'dart:developer';
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -7,8 +7,9 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:vip_picnic/utils/firebase_instance.dart';
 import 'package:vip_picnic/main.dart';
-import 'package:vip_picnic/view/user/login.dart';
+import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/snack_bar.dart';
 
@@ -56,11 +57,11 @@ class SignupController extends GetxController {
   }
 
   Future uploadPhoto() async {
-    Reference ref = await FirebaseStorage.instance
-        .ref()
-        .child('ProfileImages/${pickedImage!.path}');
+    Reference ref =
+        await FirebaseStorage.instance.ref().child('ProfileImages/');
     await ref.putFile(pickedImage!);
     ref.getDownloadURL().then((value) {
+      log('Profile Image URL $value');
       profileImage = value;
       update();
     });
@@ -92,16 +93,18 @@ class SignupController extends GetxController {
         },
       );
       try {
-        uploadPhoto();
-        await FirebaseAuth.instance
+        await uploadPhoto();
+        await fa
             .createUserWithEmailAndPassword(
               email: emailCon.text.trim(),
               password: passCon.text.trim(),
             )
             .then(
-              (value) => FirebaseFirestore.instance
+              (value) => fs
                   .collection('${accountType!} Accounts')
-                  .doc(emailCon.text.trim())
+                  .doc(
+                    fa.currentUser!.uid,
+                  )
                   .set(
                 {
                   'profileImageUrl': profileImage,
@@ -132,7 +135,7 @@ class SignupController extends GetxController {
             addressCon.clear();
             accountType = '';
             Get.offAll(
-              () => Login(),
+              () => BottomNavBar(),
             );
             navigatorKey.currentState!.popUntil((route) => route.isCurrent);
           },

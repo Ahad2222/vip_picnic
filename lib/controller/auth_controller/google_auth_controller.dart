@@ -1,9 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
+import 'package:vip_picnic/utils/collections.dart';
+import 'package:vip_picnic/utils/firebase_instance.dart';
 import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:vip_picnic/view/widget/snack_bar.dart';
 
@@ -23,14 +24,11 @@ class GoogleAuthController extends GetxController {
           idToken: gAuth.idToken,
         );
         UserCredential userCredential =
-            await FirebaseAuth.instance.signInWithCredential(credential);
+            await fa.signInWithCredential(credential);
 
         if (userCredential.user != null) {
           if (userCredential.additionalUserInfo!.isNewUser) {
-            await FirebaseFirestore.instance
-                .collection('Private Accounts')
-                .doc(userCredential.user!.email)
-                .set(
+            await privateAccCol.doc(userCredential.user!.uid).set(
               {
                 'profileImageUrl': userCredential.user!.photoURL,
                 'fullName': userCredential.user!.displayName,

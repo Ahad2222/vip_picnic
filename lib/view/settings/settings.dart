@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/view/about_us/about_us.dart';
@@ -176,6 +177,7 @@ AppBar settingsAppBar(
               child: IconButton(
                 onPressed: () {
                   FirebaseAuth.instance.signOut();
+                  GoogleSignIn().signOut();
                   Get.offAll(
                     () => SocialLogin(),
                   );

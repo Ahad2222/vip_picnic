@@ -1,6 +1,11 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
+import 'package:vip_picnic/utils/collections.dart';
+import 'package:vip_picnic/utils/firebase_instance.dart';
 import 'package:vip_picnic/main.dart';
 import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
@@ -11,9 +16,10 @@ class EmailAuthController extends GetxController {
   bool isKeepMeLoggedIn = false;
   final emailCon = TextEditingController();
   final passCon = TextEditingController();
-  FirebaseAuth _auth = FirebaseAuth.instance;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+  UserDetailsModel userDetailsModel = UserDetailsModel();
 
   Future login(BuildContext context) async {
     final isValid = formKey.currentState!.validate();
@@ -30,18 +36,33 @@ class EmailAuthController extends GetxController {
       );
 
       try {
-        await _auth
+        await fa
             .signInWithEmailAndPassword(
           email: emailCon.text.trim(),
           password: passCon.text.trim(),
         )
             .then(
-          (value) {
+          (value) async {
             emailCon.clear();
             passCon.clear();
-          },
-        ).then(
-          (value) {
+            await privateAccCol.doc(fa.currentUser!.uid).get().then(
+              (value) async {
+                if (value.exists) {
+                  userDetailsModel = UserDetailsModel.fromJson(
+                    value.data(),
+                  );
+                } else {
+                  await businessAccCol.doc(fa.currentUser!.uid).get().then(
+                    (value) {
+                      if (value.exists) {
+                      } else {
+                        log('No Record Found!');
+                      }
+                    },
+                  );
+                }
+              },
+            );
             Get.offAll(() => BottomNavBar());
             navigatorKey.currentState!.popUntil(
               (route) => route.isFirst,

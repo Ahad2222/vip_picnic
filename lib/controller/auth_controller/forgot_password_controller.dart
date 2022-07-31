@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:vip_picnic/utils/firebase_instance.dart';
 import 'package:vip_picnic/main.dart';
 import 'package:vip_picnic/view/user/login.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
@@ -26,7 +27,7 @@ class ForgotPasswordController extends GetxController {
       );
       try {
         formKey.currentState!.save();
-        await FirebaseAuth.instance
+        await fa
             .sendPasswordResetEmail(
           email: emailCon.text.trim(),
         )
