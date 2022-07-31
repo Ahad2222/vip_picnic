@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
@@ -40,81 +41,105 @@ class _BottomNavBarState extends State<BottomNavBar> {
           topLeft: Radius.circular(28),
           topRight: Radius.circular(28),
         ),
-        child: BottomNavigationBar(
-          elevation: 3,
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: kPrimaryColor,
-          showUnselectedLabels: false,
-          showSelectedLabels: false,
-          selectedItemColor: kSecondaryColor,
-          unselectedItemColor: kLightPurpleColor,
-          currentIndex: widget.currentIndex!,
-          onTap: (index) => setState(() {
-            widget.currentIndex = index;
-          }),
-          items: [
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.only(top: 5),
-                child: ImageIcon(
-                  AssetImage(
-                    Assets.imagesHome,
+        child: SizedBox(
+          height: 76,
+          child: BottomNavigationBar(
+            elevation: 3,
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: kPrimaryColor,
+            showUnselectedLabels: false,
+            unselectedLabelStyle: TextStyle(
+              fontSize: 12,
+              color: kLightPurpleColor,
+            ),
+            selectedLabelStyle: TextStyle(
+              fontSize: 12,
+              color: kDarkBlueColor,
+            ),
+            selectedItemColor: kSecondaryColor,
+            unselectedItemColor: kLightPurpleColor,
+            currentIndex: widget.currentIndex!,
+            onTap: (index) => setState(() {
+              widget.currentIndex = index;
+            }),
+            items: [
+              BottomNavigationBarItem(
+                icon: Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: ImageIcon(
+                    AssetImage(
+                      Assets.imagesHome,
+                    ),
+                    size: 27.21,
                   ),
-                  size: 45.0,
                 ),
+                label: 'home'.tr,
               ),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.only(top: 5),
-                child: ImageIcon(
-                  AssetImage(
-                    Assets.imagesChat,
+              BottomNavigationBarItem(
+                icon: Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: ImageIcon(
+                    AssetImage(
+                      Assets.imagesChat,
+                    ),
+                    size: 27.3,
                   ),
-                  size: 45.0,
                 ),
+                label: 'chat'.tr,
               ),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: GestureDetector(
-                onTap: () => Navigator.pushNamed(
-                  context,
-                  AppLinks.purchaseEvents,
-                ),
-                child: Image.asset(
-                  Assets.imagesAdd,
-                  height: 48.66,
-                ),
-              ),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.only(top: 5),
-                child: ImageIcon(
-                  AssetImage(
-                    Assets.imagesAlerts,
+              BottomNavigationBarItem(
+                icon: Padding(
+                  padding: const EdgeInsets.only(
+                    top: 2,
                   ),
-                  size: 45.0,
-                ),
-              ),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Padding(
-                padding: const EdgeInsets.only(top: 5),
-                child: ImageIcon(
-                  AssetImage(
-                    Assets.imagesSettings,
+                  child: GestureDetector(
+                    onTap: () => Navigator.pushNamed(
+                      context,
+                      AppLinks.purchaseEvents,
+                    ),
+                    child: Container(
+                      height: 46,
+                      width: 46,
+                      decoration: BoxDecoration(
+                        color: kTertiaryColor,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.add,
+                        color: kPrimaryColor,
+                        size: 40,
+                      ),
+                    ),
                   ),
-                  size: 45.0,
                 ),
+                label: '',
               ),
-              label: '',
-            ),
-          ],
+              BottomNavigationBarItem(
+                icon: Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: ImageIcon(
+                    AssetImage(
+                      Assets.imagesAlerts,
+                    ),
+                    size: 29.5,
+                  ),
+                ),
+                label: 'alerts'.tr,
+              ),
+              BottomNavigationBarItem(
+                icon: Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: ImageIcon(
+                    AssetImage(
+                      Assets.imagesSettings,
+                    ),
+                    size: 26.93,
+                  ),
+                ),
+                label: 'settings'.tr,
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -3,6 +3,8 @@ const Map<String, String> english = {
   'introMsg':
       'Create your event\nAdd and invite Friends\nRegister your moments',
   'welcome': 'Welcome',
+  'home': 'Home',
+  'chat': 'Chat',
   'login': 'Login',
   'with': 'with',
   'email': 'Email',

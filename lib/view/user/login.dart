@@ -12,96 +12,96 @@ import 'package:vip_picnic/view/widget/my_textfields.dart';
 import 'package:vip_picnic/view/widget/terms_and_condition_text.dart';
 
 class Login extends StatelessWidget {
+  EmailAuthController _emailAuthController = Get.put(
+    EmailAuthController(),
+    permanent: true,
+  );
+
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<EmailAuthController>(
-      init: EmailAuthController(),
-      builder: (controller) {
-        return Scaffold(
-          resizeToAvoidBottomInset: false,
-          body: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 30,
-            ),
-            height: height(context, 1.0),
-            width: width(context, 1.0),
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(Assets.imagesLoginBg),
-                fit: BoxFit.cover,
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: 30,
+        ),
+        height: height(context, 1.0),
+        width: width(context, 1.0),
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(Assets.imagesLoginBg),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Form(
+          key: _emailAuthController.formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              MyTextField(
+                hintText: 'email'.tr,
+                controller: _emailAuthController.emailCon,
+                validator: (value) => emailValidator(value!),
               ),
-            ),
-            child: Form(
-              key: controller.formKey,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.end,
+              SizedBox(
+                height: 15,
+              ),
+              MyTextField(
+                hintText: 'password'.tr,
+                controller: _emailAuthController.passCon,
+                validator: (value) => passwordValidator(value!),
+                isObSecure: true,
+              ),
+              SizedBox(
+                height: 15,
+              ),
+              MyButton(
+                onTap: () => _emailAuthController.login(context),
+                buttonText: 'login'.tr,
+              ),
+              SizedBox(
+                height: 15,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  MyTextField(
-                    hintText: 'email'.tr,
-                    controller: controller.emailCon,
-                    validator: (value) => emailValidator(value!),
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  MyTextField(
-                    hintText: 'password'.tr,
-                    controller: controller.passCon,
-                    validator: (value) => passwordValidator(value!),
-                    isObSecure: true,
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  MyButton(
-                    onTap: () => controller.login(context),
-                    buttonText: 'login'.tr,
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      keepMeLoggedIn(controller),
-                      Expanded(
-                        child: MyText(
-                          align: TextAlign.end,
-                          onTap: () => Get.toNamed(
-                            AppLinks.forgotPassword,
-                          ),
-                          text: 'forgot'.tr + '?',
-                          size: 18,
-                          maxLines: 1,
-                          overFlow: TextOverflow.ellipsis,
-                          color: kTertiaryColor,
-                        ),
+                  keepMeLoggedIn(_emailAuthController),
+                  Expanded(
+                    child: MyText(
+                      align: TextAlign.end,
+                      onTap: () => Get.toNamed(
+                        AppLinks.forgotPassword,
                       ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 40,
-                  ),
-                  createAccountButton(
-                    onTap: () => Get.toNamed(
-                      AppLinks.signup,
+                      text: 'forgot'.tr + '?',
+                      size: 18,
+                      maxLines: 1,
+                      overFlow: TextOverflow.ellipsis,
+                      color: kTertiaryColor,
                     ),
-                  ),
-                  SizedBox(
-                    height: 40,
-                  ),
-                  termsAndConditionsText(),
-                  SizedBox(
-                    height: 20,
                   ),
                 ],
               ),
-            ),
+              SizedBox(
+                height: 40,
+              ),
+              createAccountButton(
+                onTap: () => Get.toNamed(
+                  AppLinks.signup,
+                ),
+              ),
+              SizedBox(
+                height: 40,
+              ),
+              termsAndConditionsText(),
+              SizedBox(
+                height: 20,
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -170,15 +170,17 @@ class Login extends StatelessWidget {
               splashColor: kSecondaryColor.withOpacity(0.1),
               highlightColor: kSecondaryColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(100),
-              child: Center(
-                child: controller.isKeepMeLoggedIn
-                    ? Icon(
-                        Icons.check,
-                        size: 18,
-                        color: kSecondaryColor,
-                      )
-                    : SizedBox(),
-              ),
+              child: Obx(() {
+                return Center(
+                  child: controller.isKeepMeLoggedIn.value
+                      ? Icon(
+                          Icons.check,
+                          size: 18,
+                          color: kSecondaryColor,
+                        )
+                      : SizedBox(),
+                );
+              }),
             ),
           ),
         ),

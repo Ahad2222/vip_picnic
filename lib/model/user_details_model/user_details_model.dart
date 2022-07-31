@@ -1,4 +1,6 @@
 class UserDetailsModel {
+  static UserDetailsModel instance = UserDetailsModel();
+
   String? profileImageUrl;
   String? fullName;
   String? email;

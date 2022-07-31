@@ -2,6 +2,8 @@ const Map<String, String> spanish = {
   'welcomeTo': 'Bienvenida a',
   'introMsg': 'Crea tu evento\nAgrega e invita Amigos\nRegistra tus momentos',
   'welcome': 'Bienvenidos',
+  'home': 'Hogar',
+  'chat': 'Charlar',
   'login': 'Acceso',
   'with': 'con',
   'email': 'Email',

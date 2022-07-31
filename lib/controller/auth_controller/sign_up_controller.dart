@@ -7,7 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:vip_picnic/utils/firebase_instance.dart';
+import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
+import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/main.dart';
 import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
@@ -15,14 +16,14 @@ import 'package:vip_picnic/view/widget/snack_bar.dart';
 
 class SignupController extends GetxController {
   // static SignupController instance = Get.find();
-  final fullNameCon = TextEditingController();
-  final phoneCon = TextEditingController();
-  final emailCon = TextEditingController();
-  final passCon = TextEditingController();
-  final cityCon = TextEditingController();
-  final stateCon = TextEditingController();
-  final zipCon = TextEditingController();
-  final addressCon = TextEditingController();
+  late final TextEditingController fullNameCon;
+  late final TextEditingController phoneCon;
+  late final TextEditingController emailCon;
+  late final TextEditingController passCon;
+  late final TextEditingController cityCon;
+  late final TextEditingController stateCon;
+  late final TextEditingController zipCon;
+  late final TextEditingController addressCon;
   String? profileImage = '';
   String? accountType = '';
   int? selectedAccountTypeIndex;
@@ -32,13 +33,13 @@ class SignupController extends GetxController {
 
   File? pickedImage;
 
-  Future pickImage(BuildContext context, bool isGallery) async {
+  Future pickImage(
+    BuildContext context,
+    bool isGallery,
+  ) async {
     try {
       final img = await ImagePicker().pickImage(
         source: isGallery ? ImageSource.gallery : ImageSource.camera,
-        maxWidth: 525,
-        maxHeight: 525,
-        imageQuality: 75,
       );
       if (img == null)
         return;
@@ -58,7 +59,7 @@ class SignupController extends GetxController {
 
   Future uploadPhoto() async {
     Reference ref =
-        await FirebaseStorage.instance.ref().child('ProfileImages/');
+        await FirebaseStorage.instance.ref().child('Images/Profile Images/${DateTime.now().toString()}');
     await ref.putFile(pickedImage!);
     ref.getDownloadURL().then((value) {
       log('Profile Image URL $value');
@@ -96,33 +97,32 @@ class SignupController extends GetxController {
         await uploadPhoto();
         await fa
             .createUserWithEmailAndPassword(
-              email: emailCon.text.trim(),
-              password: passCon.text.trim(),
-            )
-            .then(
-              (value) => fs
-                  .collection('${accountType!} Accounts')
-                  .doc(
-                    fa.currentUser!.uid,
-                  )
-                  .set(
-                {
-                  'profileImageUrl': profileImage,
-                  'fullName': fullNameCon.text.trim(),
-                  'email': emailCon.text.trim(),
-                  'password': passCon.text.trim(),
-                  'phone': phoneCon.text.trim(),
-                  'city': cityCon.text.trim(),
-                  'state': stateCon.text.trim(),
-                  'zip': zipCon.text.trim(),
-                  'address': addressCon.text.trim(),
-                  'accountType': accountType,
-                  'createdAt':
-                      DateFormat.yMEd().add_jms().format(createdAt).toString(),
-                },
-              ),
-            )
-            .then(
+          email: emailCon.text.trim(),
+          password: passCon.text.trim(),
+        )
+            .then((value) async {
+          userDetailsModel = UserDetailsModel(
+            profileImageUrl: profileImage,
+            fullName: fullNameCon.text.trim(),
+            email: emailCon.text.trim(),
+            password: passCon.text.trim(),
+            phone: phoneCon.text.trim(),
+            city: cityCon.text.trim(),
+            state: stateCon.text.trim(),
+            zip: zipCon.text.trim(),
+            address: addressCon.text.trim(),
+            accountType: accountType,
+            createdAt: DateFormat.yMEd().add_jms().format(createdAt).toString(),
+          );
+          await fs
+              .collection('${accountType!} Accounts')
+              .doc(
+                fa.currentUser!.uid,
+              )
+              .set(
+                userDetailsModel.toJson(),
+              );
+        }).then(
           (value) {
             profileImage = '';
             fullNameCon.clear();
@@ -161,8 +161,20 @@ class SignupController extends GetxController {
   }
 
   @override
+  void onInit() {
+    super.onInit();
+    fullNameCon = TextEditingController();
+    phoneCon = TextEditingController();
+    emailCon = TextEditingController();
+    passCon = TextEditingController();
+    cityCon = TextEditingController();
+    stateCon = TextEditingController();
+    zipCon = TextEditingController();
+    addressCon = TextEditingController();
+  }
+
+  @override
   void onClose() {
-    // TODO: implement onClose
     super.onClose();
     fullNameCon.dispose();
     phoneCon.dispose();

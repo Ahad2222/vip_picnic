@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
+import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
+import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/home/my_posts.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
@@ -52,7 +54,7 @@ class Profile extends StatelessWidget {
                     ),
                     profileImage(context),
                     MyText(
-                      text: 'User name',
+                      text: userDetailsModel.fullName,
                       size: 20,
                       weight: FontWeight.w600,
                       color: kSecondaryColor,
@@ -283,8 +285,8 @@ class Profile extends StatelessWidget {
         child: Center(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(100),
-            child: Image.asset(
-              Assets.imagesDummyImage,
+            child: Image.network(
+              userDetailsModel.profileImageUrl!,
               height: height(context, 1.0),
               width: width(context, 1.0),
               fit: BoxFit.cover,

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
+import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/home/add_new_post.dart';
 import 'package:vip_picnic/view/home/post_details.dart';
 import 'package:vip_picnic/view/profile/profile.dart';
@@ -46,8 +47,8 @@ class Home extends StatelessWidget {
                 child: Center(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(100),
-                    child: Image.asset(
-                      Assets.imagesDummyProfileImage,
+                    child: Image.network(
+                      userDetailsModel.profileImageUrl!,
                       height: height(context, 1.0),
                       width: width(context, 1.0),
                       fit: BoxFit.cover,
@@ -295,15 +296,25 @@ class PostWidget extends StatelessWidget {
                       ],
                     ),
                     child: Center(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(100),
-                        child: Image.asset(
-                          profileImage!,
-                          height: height(context, 1.0),
-                          width: width(context, 1.0),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+                      child: isMyPost!
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(100),
+                              child: Image.network(
+                                userDetailsModel.profileImageUrl!,
+                                height: height(context, 1.0),
+                                width: width(context, 1.0),
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(100),
+                              child: Image.asset(
+                                profileImage!,
+                                height: height(context, 1.0),
+                                width: width(context, 1.0),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                     ),
                   ),
                 ),

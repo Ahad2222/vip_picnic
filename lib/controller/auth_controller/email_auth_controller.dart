@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/collections.dart';
-import 'package:vip_picnic/utils/firebase_instance.dart';
+import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/main.dart';
 import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
@@ -13,13 +13,11 @@ import 'package:vip_picnic/view/widget/snack_bar.dart';
 
 class EmailAuthController extends GetxController {
   // static LoginWithEmailController instance = Get.find();
-  bool isKeepMeLoggedIn = false;
-  final emailCon = TextEditingController();
-  final passCon = TextEditingController();
+  RxBool isKeepMeLoggedIn = false.obs;
+  late final TextEditingController emailCon;
+  late final TextEditingController passCon;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
-  UserDetailsModel userDetailsModel = UserDetailsModel();
 
   Future login(BuildContext context) async {
     final isValid = formKey.currentState!.validate();
@@ -43,8 +41,6 @@ class EmailAuthController extends GetxController {
         )
             .then(
           (value) async {
-            emailCon.clear();
-            passCon.clear();
             await privateAccCol.doc(fa.currentUser!.uid).get().then(
               (value) async {
                 if (value.exists) {
@@ -55,6 +51,9 @@ class EmailAuthController extends GetxController {
                   await businessAccCol.doc(fa.currentUser!.uid).get().then(
                     (value) {
                       if (value.exists) {
+                        userDetailsModel = UserDetailsModel.fromJson(
+                          value.data() as Map<String, dynamic>,
+                        );
                       } else {
                         log('No Record Found!');
                       }
@@ -63,6 +62,8 @@ class EmailAuthController extends GetxController {
                 }
               },
             );
+            emailCon.clear();
+            passCon.clear();
             Get.offAll(() => BottomNavBar());
             navigatorKey.currentState!.popUntil(
               (route) => route.isFirst,
@@ -81,8 +82,16 @@ class EmailAuthController extends GetxController {
   }
 
   void yesKeepLoggedIn() {
-    isKeepMeLoggedIn = !isKeepMeLoggedIn;
+    isKeepMeLoggedIn.value = !isKeepMeLoggedIn.value;
     update();
+  }
+
+  @override
+  void onInit() {
+    // TODO: implement onInit
+    emailCon = TextEditingController();
+    passCon = TextEditingController();
+    super.onInit();
   }
 
   @override

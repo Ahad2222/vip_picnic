@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:vip_picnic/utils/firebase_instance.dart';
+import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/main.dart';
 import 'package:vip_picnic/view/user/login.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
@@ -9,7 +9,7 @@ import 'package:vip_picnic/view/widget/snack_bar.dart';
 
 class ForgotPasswordController extends GetxController {
   // static ForgotPasswordController instance = Get.find();
-  final emailCon = TextEditingController();
+  late final TextEditingController emailCon;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -56,6 +56,13 @@ class ForgotPasswordController extends GetxController {
         navigatorKey.currentState!.pop();
       }
     }
+  }
+
+  @override
+  void onInit() {
+    // TODO: implement onInit
+    super.onInit();
+    emailCon = TextEditingController();
   }
 
   @override

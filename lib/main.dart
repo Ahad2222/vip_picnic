@@ -10,10 +10,6 @@ import 'package:vip_picnic/firebase_options.dart';
 import 'package:vip_picnic/provider/chat_provider/chat_provider.dart';
 import 'package:vip_picnic/provider/story_provider/story_provider.dart';
 import 'package:vip_picnic/utils/localization.dart';
-import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
-import 'package:vip_picnic/view/user/social_login.dart';
-import 'package:vip_picnic/view/widget/loading.dart';
-import 'package:vip_picnic/view/widget/snack_bar.dart';
 import 'provider/chat_provider/chat_head_provider.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {

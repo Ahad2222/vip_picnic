@@ -3,6 +3,8 @@ const Map<String, String> portuguese = {
   'introMsg':
       'Crie seu evento\nAdicione e convide amigos\nRegistre seus momentos',
   'welcome': 'Bem-Vindo',
+  'home': 'Casa',
+  'chat': 'Bater papo',
   'login': 'Conecte-se',
   'with': 'com',
   'email': 'O Email',

@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
+import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/view/about_us/about_us.dart';
 import 'package:vip_picnic/view/about_us/support.dart';
 import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
@@ -178,9 +182,11 @@ AppBar settingsAppBar(
                 onPressed: () {
                   FirebaseAuth.instance.signOut();
                   GoogleSignIn().signOut();
-                  Get.offAll(
-                    () => SocialLogin(),
-                  );
+                  if (Platform.isAndroid) {
+                    SystemNavigator.pop();
+                  } else {
+                    exit(0);
+                  }
                 },
                 icon: Image.asset(
                   Assets.imagesLogout,
