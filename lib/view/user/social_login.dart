@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
+import 'package:vip_picnic/controller/auth_controller/google_auth_controller.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/my_button.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
+import 'package:vip_picnic/view/widget/terms_and_condition_text.dart';
 
 class SocialLogin extends StatelessWidget {
+  GoogleAuthController _googleAuthController = Get.put(
+    GoogleAuthController(),
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +36,7 @@ class SocialLogin extends StatelessWidget {
             socialLoginButton(
               Assets.imagesGoogle,
               'google',
-              () {},
+              () => _googleAuthController.googleSignIn(context),
             ),
             socialLoginButton(
               Assets.imagesFacebook,
@@ -44,7 +49,9 @@ class SocialLogin extends StatelessWidget {
               () {},
             ),
             MyButton(
-              buttonText: 'login with email',
+              buttonText: 'login'.tr.toUpperCase() +
+                  ' with'.tr.toUpperCase() +
+                  ' email'.tr.toUpperCase(),
               onTap: () => Get.toNamed(
                 AppLinks.login,
               ),
@@ -52,38 +59,7 @@ class SocialLogin extends StatelessWidget {
             SizedBox(
               height: 40,
             ),
-            RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w300,
-                  color: kDarkBlueColor,
-                  decoration: TextDecoration.none,
-                  fontFamily: GoogleFonts.openSans().fontFamily,
-                ),
-                children: [
-                  TextSpan(
-                    text: 'By tapping Log In, you agree with our\n',
-                  ),
-                  TextSpan(
-                    text: 'Terms of Service',
-                    style: TextStyle(
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                  TextSpan(
-                    text: ' and ',
-                  ),
-                  TextSpan(
-                    text: 'Privacy Policy',
-                    style: TextStyle(
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            termsAndConditionsText(),
             SizedBox(
               height: 20,
             ),
@@ -119,11 +95,16 @@ class SocialLogin extends StatelessWidget {
             ),
             Expanded(
               child: MyText(
-                align: TextAlign.center,
-                text: 'login with $buttonText'.toUpperCase(),
+                paddingLeft: 40,
+                align: TextAlign.start,
+                text: 'login'.tr.toUpperCase() +
+                    ' with'.tr.toUpperCase() +
+                    ' $buttonText'.toUpperCase(),
                 size: 15,
                 weight: FontWeight.w500,
                 paddingRight: 15,
+                maxLines: 1,
+                overFlow: TextOverflow.ellipsis,
                 color: kGreyColor,
               ),
             ),

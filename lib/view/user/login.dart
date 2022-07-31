@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
+import 'package:vip_picnic/controller/auth_controller/email_auth_controller.dart';
 import 'package:vip_picnic/generated/assets.dart';
-import 'package:vip_picnic/provider/user_provider/user_provider.dart';
+import 'package:vip_picnic/utils/validators.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/my_button.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:vip_picnic/view/widget/my_textfields.dart';
+import 'package:vip_picnic/view/widget/terms_and_condition_text.dart';
 
 class Login extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserProvider>(
-      builder: (context, UserProvider, child) {
+    return GetBuilder<EmailAuthController>(
+      init: EmailAuthController(),
+      builder: (controller) {
         return Scaffold(
           resizeToAvoidBottomInset: false,
           body: Container(
@@ -30,93 +31,73 @@ class Login extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                MyTextField(
-                  hintText: 'Username',
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                MyTextField(
-                  hintText: 'Password',
-                  isObSecure: false,
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                MyButton(
-                  onTap: () => Get.offAllNamed(
-                    AppLinks.bottomNavBar,
+            child: Form(
+              key: controller.formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  MyTextField(
+                    hintText: 'email'.tr,
+                    controller: controller.emailCon,
+                    validator: (value) => emailValidator(value!),
                   ),
-                  buttonText: 'login',
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    keepMeLoggedIn(UserProvider),
-                    MyText(
-                      onTap: () => Get.toNamed(
-                        AppLinks.forgotPassword,
-                      ),
-                      text: 'Forgot?',
-                      size: 18,
-                      color: kTertiaryColor,
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 40,
-                ),
-                createAccountButton(
-                  onTap: () => Get.toNamed(
-                    AppLinks.signup,
+                  SizedBox(
+                    height: 15,
                   ),
-                ),
-                SizedBox(
-                  height: 40,
-                ),
-                RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w300,
-                      color: kDarkBlueColor,
-                      decoration: TextDecoration.none,
-                      fontFamily: GoogleFonts.openSans().fontFamily,
-                    ),
+                  MyTextField(
+                    hintText: 'password'.tr,
+                    controller: controller.passCon,
+                    validator: (value) => passwordValidator(value!),
+                    isObSecure: true,
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  MyButton(
+                    onTap: () => controller.login(context),
+                    buttonText: 'login'.tr,
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      TextSpan(
-                        text: 'By tapping Log In, you agree with our\n',
-                      ),
-                      TextSpan(
-                        text: 'Terms of Service',
-                        style: TextStyle(
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                      TextSpan(
-                        text: ' and ',
-                      ),
-                      TextSpan(
-                        text: 'Privacy Policy',
-                        style: TextStyle(
-                          decoration: TextDecoration.underline,
+                      keepMeLoggedIn(controller),
+                      Expanded(
+                        child: MyText(
+                          align: TextAlign.end,
+                          onTap: () => Get.toNamed(
+                            AppLinks.forgotPassword,
+                          ),
+                          text: 'forgot'.tr + '?',
+                          size: 18,
+                          maxLines: 1,
+                          overFlow: TextOverflow.ellipsis,
+                          color: kTertiaryColor,
                         ),
                       ),
                     ],
                   ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-              ],
+                  SizedBox(
+                    height: 40,
+                  ),
+                  createAccountButton(
+                    onTap: () => Get.toNamed(
+                      AppLinks.signup,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 40,
+                  ),
+                  termsAndConditionsText(),
+                  SizedBox(
+                    height: 20,
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -150,7 +131,7 @@ class Login extends StatelessWidget {
                 Container(),
                 MyText(
                   size: 19,
-                  text: 'Create account'.toUpperCase(),
+                  text: 'createAccount'.tr.toUpperCase(),
                   color: kDarkBlueColor,
                 ),
                 Image.asset(
@@ -166,7 +147,9 @@ class Login extends StatelessWidget {
     );
   }
 
-  Widget keepMeLoggedIn(UserProvider UserProvider) {
+  Widget keepMeLoggedIn(
+    EmailAuthController controller,
+  ) {
     return Row(
       children: [
         Container(
@@ -183,12 +166,12 @@ class Login extends StatelessWidget {
           child: Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => UserProvider.yesKeepLoggedIn(),
+              onTap: () => controller.yesKeepLoggedIn(),
               splashColor: kSecondaryColor.withOpacity(0.1),
               highlightColor: kSecondaryColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(100),
               child: Center(
-                child: UserProvider.isKeepMeLoggedIn
+                child: controller.isKeepMeLoggedIn
                     ? Icon(
                         Icons.check,
                         size: 18,
@@ -201,7 +184,7 @@ class Login extends StatelessWidget {
         ),
         MyText(
           paddingLeft: 10,
-          text: 'Keep me logged in',
+          text: 'keepMeLoggedIn'.tr,
           size: 18,
           color: kDarkBlueColor,
         ),

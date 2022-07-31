@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
+import 'package:vip_picnic/controller/auth_controller/forgot_password_controller.dart';
 import 'package:vip_picnic/generated/assets.dart';
+import 'package:vip_picnic/utils/validators.dart';
 import 'package:vip_picnic/view/widget/headings.dart';
 import 'package:vip_picnic/view/widget/my_button.dart';
 import 'package:vip_picnic/view/widget/my_textfields.dart';
 
 class ForgotPassword extends StatelessWidget {
+  ForgotPasswordController forgotPasswordController = Get.put(
+    ForgotPasswordController(),
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,7 +34,7 @@ class ForgotPassword extends StatelessWidget {
             ),
             Center(
               child: registerHeading(
-                text: 'Forgot Password?',
+                text: 'forgotPassword'.tr + '?',
               ),
             ),
             SizedBox(
@@ -36,24 +42,27 @@ class ForgotPassword extends StatelessWidget {
             ),
             Center(
               child: registerSubHeading(
-                text:
-                    'Enter your email and we will send you instructions on how to reset your password',
+                text: 'passwordResetIns'.tr,
               ),
             ),
             SizedBox(
               height: 30,
             ),
-            MyTextField(
-              hintText: 'email@mail.com',
+            Form(
+              key: forgotPasswordController.formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: MyTextField(
+                hintText: 'email123@mail.com',
+                controller: forgotPasswordController.emailCon,
+                validator: (value) => emailValidator(value!),
+              ),
             ),
             SizedBox(
               height: 15,
             ),
             MyButton(
-              onTap: () => Get.toNamed(
-                AppLinks.createNewPassword,
-              ),
-              buttonText: 'Reset password',
+              onTap: () => forgotPasswordController.resetPassword(context),
+              buttonText: 'resetPassword'.tr,
             ),
           ],
         ),

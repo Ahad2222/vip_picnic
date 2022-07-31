@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -9,9 +10,11 @@ import 'package:vip_picnic/firebase_options.dart';
 import 'package:vip_picnic/provider/chat_provider/chat_provider.dart';
 import 'package:vip_picnic/provider/story_provider/story_provider.dart';
 import 'package:vip_picnic/utils/localization.dart';
-
+import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
+import 'package:vip_picnic/view/user/social_login.dart';
+import 'package:vip_picnic/view/widget/loading.dart';
+import 'package:vip_picnic/view/widget/snack_bar.dart';
 import 'provider/chat_provider/chat_head_provider.dart';
-import 'provider/user_provider/user_provider.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -61,9 +64,6 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => UserProvider(),
-        ),
-        ChangeNotifierProvider(
           create: (_) => ChatHeadProvider(),
         ),
         ChangeNotifierProvider(
@@ -78,10 +78,13 @@ Future<void> main() async {
   );
 }
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       debugShowMaterialGrid: false,
       locale: Localization.locale,
@@ -90,7 +93,7 @@ class MyApp extends StatelessWidget {
       title: 'Vip Picnic',
       themeMode: ThemeMode.light,
       theme: lightTheme,
-      initialRoute: AppLinks.bottomNavBar,
+      initialRoute: AppLinks.splashScreen,
       getPages: Routes.pages,
     );
   }

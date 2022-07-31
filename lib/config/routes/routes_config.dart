@@ -24,7 +24,9 @@ import 'package:vip_picnic/view/user/verification/create_password.dart';
 import 'package:vip_picnic/view/user/verification/verification_code.dart';
 import 'package:vip_picnic/view/user/verification/verify_email.dart';
 
-class Routes {
+abstract class Routes {
+  Routes._();
+
   static final List<GetPage> pages = [
     GetPage(
       name: AppLinks.splashScreen,
@@ -46,10 +48,10 @@ class Routes {
       name: AppLinks.signup,
       page: () => Signup(),
     ),
-    GetPage(
-      name: AppLinks.verifyEmail,
-      page: () => VerifyEmail(),
-    ),
+    // GetPage(
+    //   name: AppLinks.verifyEmail,
+    //   page: () => VerifyEmail(),
+    // ),
     GetPage(
       name: AppLinks.verificationCode,
       page: () => VerificationCode(),
@@ -135,7 +137,7 @@ class RoutesConfig {
     AppLinks.socialLogin: (_) => SocialLogin(),
     AppLinks.login: (_) => Login(),
     AppLinks.signup: (_) => Signup(),
-    AppLinks.verifyEmail: (_) => VerifyEmail(),
+    // AppLinks.verifyEmail: (_) => VerifyEmail(),
     AppLinks.verificationCode: (_) => VerificationCode(),
     AppLinks.createPassword: (_) => CreatePassword(),
     AppLinks.forgotPassword: (_) => ForgotPassword(),
@@ -159,13 +161,14 @@ class RoutesConfig {
   };
 }
 
-class AppLinks {
+abstract class AppLinks {
+  AppLinks._();
   static const splashScreen = '/splash_screen';
   static const getStarted = '/get_started';
   static const socialLogin = '/social_login';
   static const login = '/login';
   static const signup = '/signup';
-  static const verifyEmail = '/verify_email';
+  // static const verifyEmail = '/verify_email';
   static const verificationCode = '/verification_code';
   static const createPassword = '/create_password';
   static const forgotPassword = '/forgot_password';

@@ -13,6 +13,8 @@ class MyTextField extends StatelessWidget {
     this.controller,
     this.onChanged,
     this.validator,
+    this.keyboardType,
+    this.autoValidateMode,
   }) : super(key: key);
 
   String? hintText;
@@ -20,13 +22,17 @@ class MyTextField extends StatelessWidget {
   TextEditingController? controller;
   ValueChanged<String>? onChanged;
   FormFieldValidator<String>? validator;
+  AutovalidateMode? autoValidateMode;
+  TextInputType? keyboardType;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      autovalidateMode: autoValidateMode,
       controller: controller,
       onChanged: onChanged,
       validator: validator,
+      keyboardType: keyboardType,
       obscureText: isObSecure!,
       obscuringCharacter: '*',
       cursorColor: kSecondaryColor,
@@ -92,6 +98,8 @@ class ETextField extends StatelessWidget {
     this.validator,
     this.isReadOnly = false,
     this.isEditAble = false,
+    this.autoValidateMode,
+    this.keyboardType,
     this.onEditTap,
   }) : super(key: key);
 
@@ -100,22 +108,26 @@ class ETextField extends StatelessWidget {
   TextEditingController? controller;
   ValueChanged<String>? onChanged;
   FormFieldValidator<String>? validator;
+  AutovalidateMode? autoValidateMode;
   VoidCallback? onEditTap;
+  TextInputType? keyboardType;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      autovalidateMode: autoValidateMode,
       initialValue: initialValue,
       readOnly: isReadOnly!,
       controller: controller,
       onChanged: onChanged,
       validator: validator,
+      keyboardType: keyboardType,
       obscureText: isObSecure!,
       obscuringCharacter: '*',
       cursorColor: kSecondaryColor,
       cursorWidth: 1.0,
       style: TextStyle(
-        fontSize: 19,
+        fontSize: 16,
         color: kGreyColor,
       ),
       decoration: InputDecoration(
@@ -135,6 +147,9 @@ class ETextField extends StatelessWidget {
               color: kGreyColor,
             ),
           ],
+        ),
+        suffixIconConstraints: BoxConstraints(
+          minWidth: isEditAble! ? 50 : 0,
         ),
         suffixIcon: isEditAble!
             ? Column(

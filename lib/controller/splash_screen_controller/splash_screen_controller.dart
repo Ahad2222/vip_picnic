@@ -1,27 +1,37 @@
 import 'dart:async';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
-import 'package:vip_picnic/config/routes/routes_config.dart';
+import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
+import 'package:vip_picnic/view/user/social_login.dart';
 
 class SplashScreenController extends GetxController {
-  @override
-  void onInit() {
-    // TODO: implement onInit
-    super.onInit();
-    Timer(
-      Duration(
-        seconds: 3,
-      ),
-      () => Get.offAllNamed(
-        AppLinks.getStarted,
-      ),
-    );
-  }
+  User? _user = FirebaseAuth.instance.currentUser;
 
   @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    Get.delete<SplashScreenController>();
+  void onInit() {
+    checkUser();
+    super.onInit();
+  }
+
+  checkUser() {
+    if (_user != null) {
+      Timer(
+        const Duration(
+          seconds: 1,
+        ),
+        () => Get.offAll(
+          () => BottomNavBar(),
+        ),
+      );
+    } else {
+      Timer(
+        const Duration(
+          seconds: 2,
+        ),
+        () => Get.offAll(
+          () => SocialLogin(),
+        ),
+      );
+    }
   }
 }

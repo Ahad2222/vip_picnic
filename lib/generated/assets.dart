@@ -13,6 +13,7 @@ class Assets {
   static const String imagesBabyShower = 'assets/images/baby_shower.png';
   static const String imagesBirthdayPicnic = 'assets/images/birthday_picnic.png';
   static const String imagesBottomGradient = 'assets/images/bottom_gradient.png';
+  static const String imagesCamera = 'assets/images/camera.png';
   static const String imagesCautionSign = 'assets/images/caution_sign.png';
   static const String imagesChat = 'assets/images/chat.png';
   static const String imagesClose = 'assets/images/close.png';
@@ -26,6 +27,7 @@ class Assets {
   static const String imagesEmoji = 'assets/images/emoji.png';
   static const String imagesEvents = 'assets/images/events.png';
   static const String imagesFacebook = 'assets/images/facebook.png';
+  static const String imagesGallery = 'assets/images/gallery.png';
   static const String imagesGenderReveal = 'assets/images/gender_reveal.png';
   static const String imagesGetStarted = 'assets/images/get_started.png';
   static const String imagesGoogle = 'assets/images/google.png';

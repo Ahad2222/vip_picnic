@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
@@ -7,6 +8,7 @@ import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:vip_picnic/view/choose_language/choose_language.dart';
 import 'package:vip_picnic/view/profile/profile.dart';
 import 'package:vip_picnic/view/report_problem/report_problem.dart';
+import 'package:vip_picnic/view/user/social_login.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:get/get.dart';
 
@@ -172,7 +174,12 @@ AppBar settingsAppBar(
                 right: 5,
               ),
               child: IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  FirebaseAuth.instance.signOut();
+                  Get.offAll(
+                    () => SocialLogin(),
+                  );
+                },
                 icon: Image.asset(
                   Assets.imagesLogout,
                   height: 20.96,

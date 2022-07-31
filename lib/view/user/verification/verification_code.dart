@@ -78,9 +78,29 @@ class _VerificationCodeState extends State<VerificationCode> {
             SizedBox(
               height: 10,
             ),
-            Center(
-              child: registerSubHeading(
-                text: 'Please enter Code',
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w300,
+                  color: kDarkBlueColor,
+                  decoration: TextDecoration.none,
+                  height: 1.4,
+                  fontFamily: GoogleFonts.openSans().fontFamily,
+                ),
+                children: [
+                  TextSpan(
+                    text: 'We have sent the verification code to\n',
+                  ),
+                  TextSpan(
+                    text: '+00000000',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: kBlackColor),
+                  ),
+                ],
               ),
             ),
             SizedBox(
@@ -165,10 +185,13 @@ class _VerificationCodeState extends State<VerificationCode> {
               height: 20,
             ),
             MyButton(
-              onTap: () => Navigator.pushNamed(
-                context,
-                AppLinks.createPassword,
-              ),
+              // onTap: () => Navigator.pushNamed(
+              //   context,
+              //   AppLinks.createPassword,
+              // ),
+              onTap: () {
+
+              },
               buttonText: 'verify',
             ),
             MyText(
