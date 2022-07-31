@@ -49,7 +49,7 @@ class EmailAuthController extends GetxController {
               (value) async {
                 if (value.exists) {
                   userDetailsModel = UserDetailsModel.fromJson(
-                    value.data(),
+                    value.data() as Map<String, dynamic>,
                   );
                 } else {
                   await businessAccCol.doc(fa.currentUser!.uid).get().then(
