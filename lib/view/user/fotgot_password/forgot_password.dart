@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/controller/auth_controller/forgot_password_controller.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/utils/validators.dart';

@@ -8,6 +8,7 @@ import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/view/chat/simple_chat_screen.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 
+// ignore: must_be_immutable
 class MessageBubbles extends StatelessWidget {
   MessageBubbles({
     Key? key,

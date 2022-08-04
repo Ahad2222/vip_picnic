@@ -11,6 +11,7 @@ import 'package:vip_picnic/view/widget/my_button.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:vip_picnic/view/widget/my_textfields.dart';
 
+// ignore: must_be_immutable
 class Signup extends StatelessWidget {
   DateTime currentTime = DateTime.now();
   DateFormat? format;

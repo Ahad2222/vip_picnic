@@ -1,8 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/config/theme/light_theme.dart';
@@ -56,6 +56,7 @@ Future<void> main() async {
 
   debugPrint('User granted permission: ${settings.authorizationStatus}');
 
+  await GetStorage.init();
   runApp(
     MultiProvider(
       providers: [

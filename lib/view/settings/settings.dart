@@ -6,14 +6,12 @@ import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
-import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/view/about_us/about_us.dart';
 import 'package:vip_picnic/view/about_us/support.dart';
 import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:vip_picnic/view/choose_language/choose_language.dart';
 import 'package:vip_picnic/view/profile/profile.dart';
 import 'package:vip_picnic/view/report_problem/report_problem.dart';
-import 'package:vip_picnic/view/user/social_login.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:get/get.dart';
 

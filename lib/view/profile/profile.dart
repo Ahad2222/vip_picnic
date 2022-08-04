@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
-import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/home/my_posts.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';

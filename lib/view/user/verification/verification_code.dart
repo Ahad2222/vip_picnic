@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/view/widget/headings.dart';
 import 'package:vip_picnic/view/widget/my_button.dart';

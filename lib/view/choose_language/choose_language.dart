@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/constant/color.dart';
+import 'package:vip_picnic/get_storage/get_storage.dart';
 import 'package:vip_picnic/utils/localization.dart';
 import 'package:vip_picnic/view/settings/settings.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
@@ -19,7 +22,7 @@ class ChooseLanguage extends StatelessWidget {
           body: Column(
             children: List.generate(
               controller.languages.length,
-                  (index) {
+              (index) {
                 return ListTile(
                   onTap: () => controller.selectedIndex(
                     index,
@@ -52,8 +55,18 @@ class ChooseLanguageController extends GetxController {
     'Portuguese',
   ];
 
-  void selectedIndex(int index, String lang) {
+  @override
+  void onInit() async {
+    // TODO: implement onInit
+    super.onInit();
+    currentIndex = await UserSimplePreference.getLanguageIndex() ?? 0;
+    log(currentIndex.toString());
+    update();
+  }
+
+  void selectedIndex(int index, String lang) async {
     currentIndex = index;
+    await UserSimplePreference.setLanguageIndex(currentIndex);
     Localization().selectedLocale(lang);
     update();
   }

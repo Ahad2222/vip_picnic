@@ -9,6 +9,7 @@ import 'package:vip_picnic/view/widget/my_button.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:vip_picnic/view/widget/terms_and_condition_text.dart';
 
+// ignore: must_be_immutable
 class SocialLogin extends StatelessWidget {
   GoogleAuthController _googleAuthController = Get.put(
     GoogleAuthController(),

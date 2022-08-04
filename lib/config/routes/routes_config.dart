@@ -22,7 +22,6 @@ import 'package:vip_picnic/view/user/signup.dart';
 import 'package:vip_picnic/view/user/social_login.dart';
 import 'package:vip_picnic/view/user/verification/create_password.dart';
 import 'package:vip_picnic/view/user/verification/verification_code.dart';
-import 'package:vip_picnic/view/user/verification/verify_email.dart';
 
 abstract class Routes {
   Routes._();
