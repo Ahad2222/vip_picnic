@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/constant/color.dart';
-import 'package:vip_picnic/get_storage/get_storage.dart';
+import 'package:vip_picnic/get_storage_data/get_storage_data.dart';
 import 'package:vip_picnic/utils/localization.dart';
 import 'package:vip_picnic/view/settings/settings.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
