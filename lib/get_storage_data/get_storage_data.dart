@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:get_storage/get_storage.dart';
 
 class UserSimplePreference {
@@ -6,6 +8,7 @@ class UserSimplePreference {
   static const _keyProfileImageUrl = 'profileImageUrl';
   static const _keyFullName = 'fullName';
   static const _keyEmail = 'email';
+  static const _keyUID = 'uID';
   static const _keyPassword = 'password';
   static const _keyPhone = 'phoneNumber';
   static const _keyCity = 'city';
@@ -14,7 +17,6 @@ class UserSimplePreference {
   static const _keyZip = 'zip';
   static const _keyAccountType = 'accountType';
   static const _keyCreatedAt = 'createdAt';
-
   static const _keyLanguageIndex = 'languageIndex';
 
   static Future setProfileImageUrl(String imageUrl) async {
@@ -22,87 +24,103 @@ class UserSimplePreference {
   }
 
   static Future getProfileImageUrl() async {
-    pref.read(_keyProfileImageUrl);
+    await pref.read(_keyProfileImageUrl);
   }
 
   static Future setFullName(String fullName) async {
-    pref.write(_keyFullName, fullName);
+    await pref.write(_keyFullName, fullName);
   }
 
   static Future getFullName() async {
-    pref.read(_keyFullName);
+    await pref.read(_keyFullName);
   }
 
   static Future setEmail(String email) async {
-    pref.write(_keyEmail, email);
+    await pref.write(_keyEmail, email);
   }
 
   static Future getEmail() async {
-    pref.read(_keyEmail);
+    await pref.read(_keyEmail);
+  }
+
+  static Future setUID(String uID) async {
+    await pref.write(_keyUID, uID);
+  }
+
+  static Future getUID() async {
+    await pref.read(_keyUID);
   }
 
   static Future setPassword(String password) async {
-    pref.write(_keyPassword, password);
+    await pref.write(_keyPassword, password);
   }
 
   static Future getPassword() async {
-    pref.read(_keyPassword);
+    await pref.read(_keyPassword);
   }
 
   static Future setPhoneNumber(String phoneNumber) async {
-    pref.write(_keyPhone, phoneNumber);
+    await pref.write(_keyPhone, phoneNumber);
   }
 
   static Future getPhoneNumber() async {
-    pref.read(_keyPhone);
+    await pref.read(_keyPhone);
   }
 
   static Future setCity(String city) async {
-    pref.write(_keyCity, city);
+    await pref.write(_keyCity, city);
   }
 
   static Future getCity() async {
-    pref.read(_keyCity);
+    await pref.read(_keyCity);
   }
 
   static Future setState(String state) async {
-    pref.write(_keyState, state);
+    await pref.write(_keyState, state);
   }
 
   static Future getState() async {
-    pref.read(_keyState);
+    await pref.read(_keyState);
   }
 
   static Future setAddress(String address) async {
-    pref.write(_keyAddress, address);
+    await pref.write(_keyAddress, address);
   }
 
   static Future getAddress() async {
-    pref.read(_keyAddress);
+    await pref.read(_keyAddress);
   }
 
   static Future setZip(String zip) async {
-    pref.write(_keyZip, zip);
+    await pref.write(_keyZip, zip);
   }
 
   static Future getZip() async {
-    pref.read(_keyZip);
+    await pref.read(_keyZip);
   }
 
   static Future setAccountType(String accountType) async {
-    pref.write(_keyAccountType, accountType);
+    await pref.write(_keyAccountType, accountType);
   }
 
   static Future getAccountType() async {
-    pref.read(_keyAccountType);
+    await pref.read(_keyAccountType);
+  }
+
+  static Future setCreatedAt(String createdAt) async {
+    await pref.write(_keyCreatedAt, createdAt);
+  }
+
+  static Future getCreatedAt() async {
+    await pref.read(_keyCreatedAt);
   }
 
   //Used for storing selected application language
   static Future setLanguageIndex(int index) async {
-    pref.write(_keyLanguageIndex, index);
+    await pref.write(_keyLanguageIndex, index);
   }
 
   static Future getLanguageIndex() async {
-    pref.read(_keyLanguageIndex);
+    await pref.read(_keyLanguageIndex);
   }
 }

@@ -12,8 +12,8 @@ import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/snack_bar.dart';
 
 class EmailAuthController extends GetxController {
-  // static LoginWithEmailController instance = Get.find();
-  RxBool isKeepMeLoggedIn = false.obs;
+  static EmailAuthController instance = Get.find<EmailAuthController>();
+  RxBool? isKeepMeLoggedIn = false.obs;
   late final TextEditingController emailCon;
   late final TextEditingController passCon;
 
@@ -41,25 +41,11 @@ class EmailAuthController extends GetxController {
         )
             .then(
           (value) async {
-            await privateAccCol.doc(fa.currentUser!.uid).get().then(
+            await accounts.doc(fa.currentUser!.uid).get().then(
               (value) async {
-                if (value.exists) {
-                  userDetailsModel = UserDetailsModel.fromJson(
-                    value.data() as Map<String, dynamic>,
-                  );
-                } else {
-                  await businessAccCol.doc(fa.currentUser!.uid).get().then(
-                    (value) {
-                      if (value.exists) {
-                        userDetailsModel = UserDetailsModel.fromJson(
-                          value.data() as Map<String, dynamic>,
-                        );
-                      } else {
-                        log('No Record Found!');
-                      }
-                    },
-                  );
-                }
+                userDetailsModel = UserDetailsModel.fromJson(
+                  value.data() as Map<String, dynamic>,
+                );
               },
             );
             emailCon.clear();
@@ -82,7 +68,7 @@ class EmailAuthController extends GetxController {
   }
 
   void yesKeepLoggedIn() {
-    isKeepMeLoggedIn.value = !isKeepMeLoggedIn.value;
+    isKeepMeLoggedIn!.value = !isKeepMeLoggedIn!.value;
     update();
   }
 

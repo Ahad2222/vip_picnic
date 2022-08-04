@@ -4,6 +4,7 @@ import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/controller/auth_controller/email_auth_controller.dart';
 import 'package:vip_picnic/generated/assets.dart';
+import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/utils/validators.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/my_button.dart';
@@ -13,11 +14,6 @@ import 'package:vip_picnic/view/widget/terms_and_condition_text.dart';
 
 // ignore: must_be_immutable
 class Login extends StatelessWidget {
-  EmailAuthController _emailAuthController = Get.put(
-    EmailAuthController(),
-    permanent: true,
-  );
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,7 +31,7 @@ class Login extends StatelessWidget {
           ),
         ),
         child: Form(
-          key: _emailAuthController.formKey,
+          key: emailAuthController.formKey,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -43,7 +39,7 @@ class Login extends StatelessWidget {
             children: [
               MyTextField(
                 hintText: 'email'.tr,
-                controller: _emailAuthController.emailCon,
+                controller: emailAuthController.emailCon,
                 validator: (value) => emailValidator(value!),
               ),
               SizedBox(
@@ -51,7 +47,7 @@ class Login extends StatelessWidget {
               ),
               MyTextField(
                 hintText: 'password'.tr,
-                controller: _emailAuthController.passCon,
+                controller: emailAuthController.passCon,
                 validator: (value) => passwordValidator(value!),
                 isObSecure: true,
               ),
@@ -59,7 +55,7 @@ class Login extends StatelessWidget {
                 height: 15,
               ),
               MyButton(
-                onTap: () => _emailAuthController.login(context),
+                onTap: () => emailAuthController.login(context),
                 buttonText: 'login'.tr,
               ),
               SizedBox(
@@ -68,7 +64,7 @@ class Login extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  keepMeLoggedIn(_emailAuthController),
+                  keepMeLoggedIn(emailAuthController),
                   Expanded(
                     child: MyText(
                       align: TextAlign.end,
@@ -173,7 +169,7 @@ class Login extends StatelessWidget {
               borderRadius: BorderRadius.circular(100),
               child: Obx(() {
                 return Center(
-                  child: controller.isKeepMeLoggedIn.value
+                  child: controller.isKeepMeLoggedIn!.value
                       ? Icon(
                           Icons.check,
                           size: 18,

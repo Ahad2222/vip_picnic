@@ -289,6 +289,12 @@ class Profile extends StatelessWidget {
               height: height(context, 1.0),
               width: width(context, 1.0),
               fit: BoxFit.cover,
+              // errorBuilder: (context, exception, stackTrace) {
+              //   return Image.asset(
+              //     "assets/images/add_story.png",
+              //     height: 25,
+              //   );
+              // },
             ),
           ),
         ),

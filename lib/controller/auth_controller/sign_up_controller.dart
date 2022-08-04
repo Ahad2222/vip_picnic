@@ -7,7 +7,9 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:vip_picnic/get_storage_data/get_storage_data.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
+import 'package:vip_picnic/utils/collections.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/main.dart';
 import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
@@ -15,7 +17,7 @@ import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/snack_bar.dart';
 
 class SignupController extends GetxController {
-  // static SignupController instance = Get.find();
+  static SignupController instance = Get.find<SignupController>();
   late final TextEditingController fullNameCon;
   late final TextEditingController phoneCon;
   late final TextEditingController emailCon;
@@ -26,7 +28,7 @@ class SignupController extends GetxController {
   late final TextEditingController addressCon;
   String? profileImage = '';
   String? accountType = '';
-  int? selectedAccountTypeIndex;
+  RxInt? selectedAccountTypeIndex = 0.obs;
   DateTime createdAt = DateTime.now();
   DateFormat? format;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -35,11 +37,11 @@ class SignupController extends GetxController {
 
   Future pickImage(
     BuildContext context,
-    bool isGallery,
+    ImageSource source,
   ) async {
     try {
       final img = await ImagePicker().pickImage(
-        source: isGallery ? ImageSource.gallery : ImageSource.camera,
+        source: source,
       );
       if (img == null)
         return;
@@ -58,8 +60,9 @@ class SignupController extends GetxController {
   }
 
   Future uploadPhoto() async {
-    Reference ref =
-        await FirebaseStorage.instance.ref().child('Images/Profile Images/${DateTime.now().toString()}');
+    Reference ref = await FirebaseStorage.instance
+        .ref()
+        .child('Images/Profile Images/${DateTime.now().toString()}');
     await ref.putFile(pickedImage!);
     ref.getDownloadURL().then((value) {
       log('Profile Image URL $value');
@@ -105,6 +108,7 @@ class SignupController extends GetxController {
             profileImageUrl: profileImage,
             fullName: fullNameCon.text.trim(),
             email: emailCon.text.trim(),
+            uID: fa.currentUser!.uid,
             password: passCon.text.trim(),
             phone: phoneCon.text.trim(),
             city: cityCon.text.trim(),
@@ -114,8 +118,7 @@ class SignupController extends GetxController {
             accountType: accountType,
             createdAt: DateFormat.yMEd().add_jms().format(createdAt).toString(),
           );
-          await fs
-              .collection('${accountType!} Accounts')
+          await accounts
               .doc(
                 fa.currentUser!.uid,
               )
@@ -123,7 +126,21 @@ class SignupController extends GetxController {
                 userDetailsModel.toJson(),
               );
         }).then(
-          (value) {
+          (value) async {
+            await UserSimplePreference.setProfileImageUrl(profileImage!);
+            await UserSimplePreference.setFullName(fullNameCon.text.trim());
+            await UserSimplePreference.setEmail(emailCon.text.trim());
+            await UserSimplePreference.setUID(fa.currentUser!.uid);
+            await UserSimplePreference.setPassword(passCon.text.trim());
+            await UserSimplePreference.setPhoneNumber(phoneCon.text.trim());
+            await UserSimplePreference.setCity(cityCon.text.trim());
+            await UserSimplePreference.setState(stateCon.text.trim());
+            await UserSimplePreference.setZip(zipCon.text.trim());
+            await UserSimplePreference.setAddress(addressCon.text.trim());
+            await UserSimplePreference.setAccountType(accountType!);
+            await UserSimplePreference.setCreatedAt(
+              DateFormat.yMEd().add_jms().format(createdAt).toString(),
+            );
             profileImage = '';
             fullNameCon.clear();
             phoneCon.clear();
@@ -155,7 +172,7 @@ class SignupController extends GetxController {
     String type,
     int index,
   ) {
-    selectedAccountTypeIndex = index;
+    selectedAccountTypeIndex!.value = index;
     accountType = type;
     update();
   }

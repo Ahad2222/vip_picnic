@@ -3,18 +3,29 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
+import 'package:vip_picnic/main.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/collections.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
+import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/snack_bar.dart';
 
 class GoogleAuthController extends GetxController {
+  static GoogleAuthController instance = Get.find<GoogleAuthController>();
+
   DateTime createdAt = DateTime.now();
   DateFormat? format;
 
   Future googleSignIn(BuildContext context) async {
     try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return loading();
+        },
+      );
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       final GoogleSignInAuthentication? gAuth =
           await googleUser?.authentication;
@@ -30,6 +41,7 @@ class GoogleAuthController extends GetxController {
         if (userCredential.user != null) {
           if (userCredential.additionalUserInfo!.isNewUser) {
             userDetailsModel = UserDetailsModel(
+              uID: userCredential.user!.uid,
               profileImageUrl: userCredential.user!.photoURL,
               fullName: userCredential.user!.displayName,
               email: userCredential.user!.email,
@@ -37,14 +49,15 @@ class GoogleAuthController extends GetxController {
               createdAt:
                   DateFormat.yMEd().add_jms().format(createdAt).toString(),
             );
-            await privateAccCol.doc(userCredential.user!.uid).set(
+            await accounts.doc(userCredential.user!.uid).set(
                   userDetailsModel.toJson(),
                 );
             Get.offAll(
               () => BottomNavBar(),
             );
+            navigatorKey.currentState!.popUntil((route) => route.isCurrent);
           } else {
-            privateAccCol.doc(userCredential.user!.uid).get().then(
+            accounts.doc(userCredential.user!.uid).get().then(
               (value) {
                 userDetailsModel = UserDetailsModel.fromJson(
                   value.data() as Map<String, dynamic>,

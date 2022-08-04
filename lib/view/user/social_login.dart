@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
-import 'package:vip_picnic/controller/auth_controller/google_auth_controller.dart';
 import 'package:vip_picnic/generated/assets.dart';
+import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/my_button.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
@@ -11,10 +11,6 @@ import 'package:vip_picnic/view/widget/terms_and_condition_text.dart';
 
 // ignore: must_be_immutable
 class SocialLogin extends StatelessWidget {
-  GoogleAuthController _googleAuthController = Get.put(
-    GoogleAuthController(),
-  );
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +33,7 @@ class SocialLogin extends StatelessWidget {
             socialLoginButton(
               Assets.imagesGoogle,
               'google',
-              () => _googleAuthController.googleSignIn(context),
+              () => googleAuthController.googleSignIn(context),
             ),
             socialLoginButton(
               Assets.imagesFacebook,

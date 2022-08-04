@@ -5,6 +5,7 @@ import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:vip_picnic/view/user/social_login.dart';
 
 class SplashScreenController extends GetxController {
+  static SplashScreenController instance = Get.find<SplashScreenController>();
   User? _user = FirebaseAuth.instance.currentUser;
 
   @override

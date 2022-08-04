@@ -8,7 +8,8 @@ import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/snack_bar.dart';
 
 class ForgotPasswordController extends GetxController {
-  // static ForgotPasswordController instance = Get.find();
+  static ForgotPasswordController instance =
+      Get.find<ForgotPasswordController>();
   late final TextEditingController emailCon;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();

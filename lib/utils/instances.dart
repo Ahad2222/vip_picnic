@@ -1,9 +1,34 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:vip_picnic/controller/auth_controller/email_auth_controller.dart';
+import 'package:vip_picnic/controller/auth_controller/forgot_password_controller.dart';
+import 'package:vip_picnic/controller/auth_controller/google_auth_controller.dart';
+import 'package:vip_picnic/controller/auth_controller/sign_up_controller.dart';
+import 'package:vip_picnic/controller/home_controller/home_controller.dart';
+import 'package:vip_picnic/controller/splash_screen_controller/splash_screen_controller.dart';
+import 'package:vip_picnic/model/home_model/add_post_model.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
+import 'package:vip_picnic/view/choose_language/choose_language.dart';
 
+//FIREBASE INSTANCES
 FirebaseAuth fa = FirebaseAuth.instance;
 FirebaseFirestore fs = FirebaseFirestore.instance;
 FirebaseStorage fsg = FirebaseStorage.instance;
+//FIREBASE INSTANCES
+
+//GETX CONTROLLER INSTANCES
+SplashScreenController splashScreenController = SplashScreenController.instance;
+EmailAuthController emailAuthController = EmailAuthController.instance;
+GoogleAuthController googleAuthController = GoogleAuthController.instance;
+SignupController signupController = SignupController.instance;
+ForgotPasswordController forgotPasswordController =
+    ForgotPasswordController.instance;
+HomeController homeController = HomeController.instance;
+ChooseLanguageController languageController = ChooseLanguageController.instance;
+//GETX CONTROLLER INSTANCES
+
+//MODELS INSTANCES
 UserDetailsModel userDetailsModel = UserDetailsModel.instance;
+AddPostModel addPostModel = AddPostModel.instance;
+//MODELS INSTANCES

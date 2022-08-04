@@ -4,6 +4,7 @@ class UserDetailsModel {
   String? profileImageUrl;
   String? fullName;
   String? email;
+  String? uID;
   String? password;
   String? phone;
   String? city;
@@ -17,6 +18,7 @@ class UserDetailsModel {
     this.profileImageUrl = '',
     this.fullName = '',
     this.email = '',
+    this.uID = '',
     this.password = '',
     this.phone = '',
     this.city = '',
@@ -32,6 +34,7 @@ class UserDetailsModel {
         profileImageUrl: json['profileImageUrl'],
         fullName: json['fullName'],
         email: json['email'],
+        uID: json['uID'],
         password: json['password'],
         phone: json['phone'],
         city: json['city'],
@@ -46,6 +49,7 @@ class UserDetailsModel {
         "profileImageUrl": profileImageUrl,
         'fullName': fullName,
         'email': email,
+        'uID': uID,
         'password': password,
         'phone': phone,
         'city': city,
