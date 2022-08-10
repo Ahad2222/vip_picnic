@@ -15,6 +15,9 @@ import 'package:vip_picnic/view/choose_language/choose_language.dart';
 FirebaseAuth fa = FirebaseAuth.instance;
 FirebaseFirestore fs = FirebaseFirestore.instance;
 FirebaseStorage fsg = FirebaseStorage.instance;
+
+
+FirebaseAuth auth = FirebaseAuth.instance;
 //FIREBASE INSTANCES
 
 //GETX CONTROLLER INSTANCES

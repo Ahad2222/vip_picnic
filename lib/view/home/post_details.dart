@@ -1,18 +1,46 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
+import 'package:vip_picnic/model/comment_model/comment_model.dart';
+import 'package:vip_picnic/model/home_model/add_post_model.dart';
+import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/widget/curved_header.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 
 // ignore: must_be_immutable
-class PostDetails extends StatelessWidget {
+class PostDetails extends StatefulWidget {
   PostDetails({
-    this.postImage,
+    this.isLikeByMe = false,
+    this.postDocModel,
   });
 
-  String? postImage;
+  bool? isLikeByMe;
+  AddPostModel? postDocModel;
+
+  @override
+  State<PostDetails> createState() => _PostDetailsState();
+}
+
+class _PostDetailsState extends State<PostDetails> {
+  Rx<AddPostModel> addPostModel = AddPostModel().obs;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    addPostModel.value = widget.postDocModel!;
+    fs.collection("Posts").doc(widget.postDocModel!.postID).snapshots().listen((event) {
+      addPostModel.value = AddPostModel.fromJson(event.data() ?? {});
+      log("inside stream and addPostModel: ${addPostModel.toJson()}");
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +71,8 @@ class PostDetails extends StatelessWidget {
                   flexibleSpace: FlexibleSpaceBar(
                     background: Stack(
                       children: [
-                        Image.asset(
-                          postImage!,
+                        Image.network(
+                          widget.postDocModel!.postImages![0],
                           height: height(context, 1.0),
                           width: width(context, 1.0),
                           fit: BoxFit.cover,
@@ -77,19 +105,167 @@ class PostDetails extends StatelessWidget {
                 alignment: WrapAlignment.spaceEvenly,
                 spacing: 30.0,
                 children: [
+                  // StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                  //   stream: fs.collection("Posts").doc(postDocModel!.postID).snapshots(),
+                  //   builder: (
+                  //       BuildContext context,
+                  //       AsyncSnapshot<DocumentSnapshot> snapshot,
+                  //       ) {
+                  //     int? previousCount = 0;
+                  //     log("inside stream-builder");
+                  //     if (snapshot.connectionState == ConnectionState.waiting) {
+                  //       log("inside stream-builder in waiting state");
+                  //       return MyText(
+                  //         text: '$previousCount',
+                  //         size: 18,
+                  //         color: kDarkBlueColor.withOpacity(0.60),
+                  //       );
+                  //     } else if (snapshot.connectionState == ConnectionState.active ||
+                  //         snapshot.connectionState == ConnectionState.done) {
+                  //       if (snapshot.hasError) {
+                  //         return MyText(
+                  //           text: '0',
+                  //           size: 18,
+                  //           color: kDarkBlueColor.withOpacity(0.60),
+                  //         );
+                  //       } else if (snapshot.hasData) {
+                  //         // log("inside hasData and ${snapshot.data!.docs}");
+                  //         if (snapshot.data!.exists) {
+                  //           AddPostModel addPostModel = AddPostModel.fromJson(snapshot.data!.data() as Map<String, dynamic>);
+                  //           previousCount = addPostModel.likeCount;
+                  //           return MyText(
+                  //             text: snapshot.data!.docs.length,
+                  //             size: 18,
+                  //             color: kDarkBlueColor.withOpacity(0.60),
+                  //           );
+                  //           // return ListView.builder(
+                  //           //   // shrinkWrap: true,
+                  //           //   physics: BouncingScrollPhysics(),
+                  //           //   itemCount: snapshot.data!.docs.length,
+                  //           //   itemBuilder: (BuildContext context, int index) {
+                  //           //     AddPostModel addPostModel = AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                  //           //     log("addPostModel = ${addPostModel.toJson()}");
+                  //           //     return ListView(
+                  //           //       shrinkWrap: true,
+                  //           //       physics: BouncingScrollPhysics(),
+                  //           //       padding: EdgeInsets.symmetric(
+                  //           //         vertical: 20,
+                  //           //       ),
+                  //           //       children: [
+                  //           //         SizedBox(
+                  //           //           height: 80,
+                  //           //           child: ListView(
+                  //           //             shrinkWrap: true,
+                  //           //             scrollDirection: Axis.horizontal,
+                  //           //             physics: const BouncingScrollPhysics(),
+                  //           //             children: [
+                  //           //               addStoryButton(context),
+                  //           //               ListView.builder(
+                  //           //                 shrinkWrap: true,
+                  //           //                 scrollDirection: Axis.horizontal,
+                  //           //                 itemCount: 6,
+                  //           //                 padding: const EdgeInsets.only(
+                  //           //                   right: 8,
+                  //           //                 ),
+                  //           //                 physics: const BouncingScrollPhysics(),
+                  //           //                 itemBuilder: (context, index) {
+                  //           //                   return stories(
+                  //           //                     context,
+                  //           //                     'assets/images/baby_shower.png',
+                  //           //                     index.isOdd ? 'Khan' : 'Stephan',
+                  //           //                     index,
+                  //           //                   );
+                  //           //                 },
+                  //           //               ),
+                  //           //             ],
+                  //           //           ),
+                  //           //         ),
+                  //           //         ListView.builder(
+                  //           //           shrinkWrap: true,
+                  //           //           physics: BouncingScrollPhysics(),
+                  //           //           padding: EdgeInsets.symmetric(
+                  //           //             vertical: 30,
+                  //           //           ),
+                  //           //           itemCount: 4,
+                  //           //           itemBuilder: (context, index) {
+                  //           //             return PostWidget(
+                  //           //               profileImage: Assets.imagesDummyProfileImage,
+                  //           //               name: 'Username',
+                  //           //               postedTime: '11 feb',
+                  //           //               title: 'It was a great event 😀',
+                  //           //               isMyPost: index.isOdd ? true : false,
+                  //           //               postImage: Assets.imagesPicnicKids,
+                  //           //             );
+                  //           //           },
+                  //           //         ),
+                  //           //       ],
+                  //           //     );
+                  //           //   },
+                  //           //
+                  //           // );
+                  //         } else {
+                  //           return MyText(
+                  //             text: '0',
+                  //             size: 18,
+                  //             color: kDarkBlueColor.withOpacity(0.60),
+                  //           );
+                  //         }
+                  //       } else {
+                  //         log("in else of hasData done and: ${snapshot.connectionState} and"
+                  //             " snapshot.hasData: ${snapshot.hasData}");
+                  //         return MyText(
+                  //           text: '0',
+                  //           size: 18,
+                  //           color: kDarkBlueColor.withOpacity(0.60),
+                  //         );
+                  //       }
+                  //     } else {
+                  //       log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+                  //       return MyText(
+                  //         text: '0',
+                  //         size: 18,
+                  //         color: kDarkBlueColor.withOpacity(0.60),
+                  //       );
+                  //     }
+                  //   },
+                  // ),
                   Wrap(
                     crossAxisAlignment: WrapCrossAlignment.center,
                     spacing: 10.0,
                     children: [
-                      Image.asset(
-                        Assets.imagesHeart,
-                        height: 20.89,
+                      GestureDetector(
+                        onTap: () async {
+                          await fs.collection("Posts").doc(widget.postDocModel!.postID).update({
+                            "likeCount": FieldValue.increment(widget.isLikeByMe! ? -1 : 1),
+                            "likeIDs": !widget.isLikeByMe! ? FieldValue.arrayUnion([auth.currentUser!.uid]) : FieldValue
+                                .arrayRemove([auth.currentUser!.uid]),
+                          });
+                          // await fs.collection("Posts").doc(postID).collection("likes")
+                          //     .doc(auth.currentUser!.uid).set({
+                          //   "likerId": auth.currentUser!.uid,
+                          //   "postID": postID!,
+                          // });
+                          // update({
+                          //   "likeCount" : FieldValue.increment(isLikeByMe! ? -1 : 1),
+                          //   "likeIDs" : !isLikeByMe! ? FieldValue.arrayUnion([auth.currentUser!.uid]) : FieldValue.arrayRemove([auth.currentUser!.uid]),
+                          // });
+                        },
+                        child: Obx(() {
+                          return Image.asset(
+                            Assets.imagesHeart,
+                            height: 20.89,
+                            color: addPostModel.value.likeIDs!.asMap().containsValue(auth.currentUser!.uid) ? Colors
+                                .red : Colors.grey,
+                          );
+                        }),
                       ),
-                      MyText(
-                        text: '12',
-                        size: 18,
-                        color: kDarkBlueColor.withOpacity(0.60),
-                      ),
+                      Obx(() {
+                        return MyText(
+                          text: addPostModel.value.likeIDs!.length,
+                          size: 18,
+                          color: kDarkBlueColor.withOpacity(0.60),
+                        );
+                      }),
                     ],
                   ),
                   Wrap(
@@ -100,10 +276,128 @@ class PostDetails extends StatelessWidget {
                         Assets.imagesComment,
                         height: 23.76,
                       ),
-                      MyText(
-                        text: '32',
-                        size: 18,
-                        color: kDarkBlueColor.withOpacity(0.60),
+                      StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                        stream: fs.collection("Posts").doc(widget.postDocModel!.postID)
+                            .collection("comments")
+                            .snapshots(),
+                        builder: (BuildContext context,
+                            AsyncSnapshot<QuerySnapshot> snapshot,) {
+                          int previousCount = 0;
+                          log("inside stream-builder");
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            log("inside stream-builder in waiting state");
+                            return MyText(
+                              text: '$previousCount',
+                              size: 18,
+                              color: kDarkBlueColor.withOpacity(0.60),
+                            );
+                          } else if (snapshot.connectionState == ConnectionState.active ||
+                              snapshot.connectionState == ConnectionState.done) {
+                            if (snapshot.hasError) {
+                              return MyText(
+                                text: '0',
+                                size: 18,
+                                color: kDarkBlueColor.withOpacity(0.60),
+                              );
+                            } else if (snapshot.hasData) {
+                              log("inside hasData and ${snapshot.data!.docs}");
+                              if (snapshot.data!.docs.length > 0) {
+                                previousCount = snapshot.data!.docs.length;
+                                return MyText(
+                                  text: snapshot.data!.docs.length,
+                                  size: 18,
+                                  color: kDarkBlueColor.withOpacity(0.60),
+                                );
+                                // return ListView.builder(
+                                //   // shrinkWrap: true,
+                                //   physics: BouncingScrollPhysics(),
+                                //   itemCount: snapshot.data!.docs.length,
+                                //   itemBuilder: (BuildContext context, int index) {
+                                //     AddPostModel addPostModel = AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                                //     log("addPostModel = ${addPostModel.toJson()}");
+                                //     return ListView(
+                                //       shrinkWrap: true,
+                                //       physics: BouncingScrollPhysics(),
+                                //       padding: EdgeInsets.symmetric(
+                                //         vertical: 20,
+                                //       ),
+                                //       children: [
+                                //         SizedBox(
+                                //           height: 80,
+                                //           child: ListView(
+                                //             shrinkWrap: true,
+                                //             scrollDirection: Axis.horizontal,
+                                //             physics: const BouncingScrollPhysics(),
+                                //             children: [
+                                //               addStoryButton(context),
+                                //               ListView.builder(
+                                //                 shrinkWrap: true,
+                                //                 scrollDirection: Axis.horizontal,
+                                //                 itemCount: 6,
+                                //                 padding: const EdgeInsets.only(
+                                //                   right: 8,
+                                //                 ),
+                                //                 physics: const BouncingScrollPhysics(),
+                                //                 itemBuilder: (context, index) {
+                                //                   return stories(
+                                //                     context,
+                                //                     'assets/images/baby_shower.png',
+                                //                     index.isOdd ? 'Khan' : 'Stephan',
+                                //                     index,
+                                //                   );
+                                //                 },
+                                //               ),
+                                //             ],
+                                //           ),
+                                //         ),
+                                //         ListView.builder(
+                                //           shrinkWrap: true,
+                                //           physics: BouncingScrollPhysics(),
+                                //           padding: EdgeInsets.symmetric(
+                                //             vertical: 30,
+                                //           ),
+                                //           itemCount: 4,
+                                //           itemBuilder: (context, index) {
+                                //             return PostWidget(
+                                //               profileImage: Assets.imagesDummyProfileImage,
+                                //               name: 'Username',
+                                //               postedTime: '11 feb',
+                                //               title: 'It was a great event 😀',
+                                //               isMyPost: index.isOdd ? true : false,
+                                //               postImage: Assets.imagesPicnicKids,
+                                //             );
+                                //           },
+                                //         ),
+                                //       ],
+                                //     );
+                                //   },
+                                //
+                                // );
+                              } else {
+                                return MyText(
+                                  text: '0',
+                                  size: 18,
+                                  color: kDarkBlueColor.withOpacity(0.60),
+                                );
+                              }
+                            } else {
+                              log("in else of hasData done and: ${snapshot.connectionState} and"
+                                  " snapshot.hasData: ${snapshot.hasData}");
+                              return MyText(
+                                text: '0',
+                                size: 18,
+                                color: kDarkBlueColor.withOpacity(0.60),
+                              );
+                            }
+                          } else {
+                            log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+                            return MyText(
+                              text: '0',
+                              size: 18,
+                              color: kDarkBlueColor.withOpacity(0.60),
+                            );
+                          }
+                        },
                       ),
                     ],
                   ),
@@ -126,20 +420,115 @@ class PostDetails extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: ListView.builder(
-                shrinkWrap: true,
-                physics: BouncingScrollPhysics(),
-                padding: EdgeInsets.symmetric(
-                  vertical: 20,
-                ),
-                itemCount: 3,
-                itemBuilder: (context, index) {
-                  return CommentsTiles(
-                    profileImage: Assets.imagesDummyImage,
-                    name:
-                        index == 1 ? 'Invite to an Event' : 'Invite to a Group',
-                    comment: 'Good eye for details.',
-                  );
+              child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                stream: fs.collection("Posts").doc(widget.postDocModel!.postID).collection("comments").snapshots(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<QuerySnapshot> snapshot,) {
+                  log("inside stream-builder");
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    log("inside stream-builder in waiting state");
+                    return const Center(child: Text('Loading...'));
+                  } else if (snapshot.connectionState == ConnectionState.active ||
+                      snapshot.connectionState == ConnectionState.done) {
+                    if (snapshot.hasError) {
+                      return const Center(child: Text('No Comments Yet'));
+                    } else if (snapshot.hasData) {
+                      log("inside hasData and ${snapshot.data!.docs}");
+                      if (snapshot.data!.docs.length > 0) {
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          physics: BouncingScrollPhysics(),
+                          padding: EdgeInsets.symmetric(
+                            vertical: 20,
+                          ),
+                          itemCount: snapshot.data!.docs.length,
+                          itemBuilder: (context, index) {
+                            CommentModel cmdl = CommentModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                            return CommentsTiles(
+                              profileImage: cmdl.commenterImage,
+                              name: cmdl.commenterName,
+                              // index == 1 ? 'Invite to an Event' : 'Invite to a Group',
+                              comment: cmdl.commentText,
+                            );
+                          },
+                        );
+                        // return ListView.builder(
+                        //   // shrinkWrap: true,
+                        //   physics: BouncingScrollPhysics(),
+                        //   itemCount: snapshot.data!.docs.length,
+                        //   itemBuilder: (BuildContext context, int index) {
+                        //     AddPostModel addPostModel = AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                        //     log("addPostModel = ${addPostModel.toJson()}");
+                        //     return ListView(
+                        //       shrinkWrap: true,
+                        //       physics: BouncingScrollPhysics(),
+                        //       padding: EdgeInsets.symmetric(
+                        //         vertical: 20,
+                        //       ),
+                        //       children: [
+                        //         SizedBox(
+                        //           height: 80,
+                        //           child: ListView(
+                        //             shrinkWrap: true,
+                        //             scrollDirection: Axis.horizontal,
+                        //             physics: const BouncingScrollPhysics(),
+                        //             children: [
+                        //               addStoryButton(context),
+                        //               ListView.builder(
+                        //                 shrinkWrap: true,
+                        //                 scrollDirection: Axis.horizontal,
+                        //                 itemCount: 6,
+                        //                 padding: const EdgeInsets.only(
+                        //                   right: 8,
+                        //                 ),
+                        //                 physics: const BouncingScrollPhysics(),
+                        //                 itemBuilder: (context, index) {
+                        //                   return stories(
+                        //                     context,
+                        //                     'assets/images/baby_shower.png',
+                        //                     index.isOdd ? 'Khan' : 'Stephan',
+                        //                     index,
+                        //                   );
+                        //                 },
+                        //               ),
+                        //             ],
+                        //           ),
+                        //         ),
+                        //         ListView.builder(
+                        //           shrinkWrap: true,
+                        //           physics: BouncingScrollPhysics(),
+                        //           padding: EdgeInsets.symmetric(
+                        //             vertical: 30,
+                        //           ),
+                        //           itemCount: 4,
+                        //           itemBuilder: (context, index) {
+                        //             return PostWidget(
+                        //               profileImage: Assets.imagesDummyProfileImage,
+                        //               name: 'Username',
+                        //               postedTime: '11 feb',
+                        //               title: 'It was a great event 😀',
+                        //               isMyPost: index.isOdd ? true : false,
+                        //               postImage: Assets.imagesPicnicKids,
+                        //             );
+                        //           },
+                        //         ),
+                        //       ],
+                        //     );
+                        //   },
+                        //
+                        // );
+                      } else {
+                        return const Center(child: Text('No Comments Yet'));
+                      }
+                    } else {
+                      log("in else of hasData done and: ${snapshot.connectionState} and"
+                          " snapshot.hasData: ${snapshot.hasData}");
+                      return const Center(child: Text('No Comments Yet'));
+                    }
+                  } else {
+                    log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+                    return const Center(child: Text('Loading...'));
+                  }
                 },
               ),
             ),
@@ -151,6 +540,7 @@ class PostDetails extends StatelessWidget {
   }
 
   Widget commentField() {
+    TextEditingController commentController = TextEditingController();
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: 30,
@@ -161,6 +551,7 @@ class PostDetails extends StatelessWidget {
           Expanded(
             child: TextFormField(
               cursorColor: kSecondaryColor,
+              controller: commentController,
               cursorWidth: 1.0,
               style: TextStyle(
                 fontSize: 15,
@@ -223,9 +614,28 @@ class PostDetails extends StatelessWidget {
           SizedBox(
             width: 15,
           ),
-          Image.asset(
-            Assets.imagesSend,
-            height: 45.16,
+          GestureDetector(
+            onTap: () async {
+              var commentText = commentController.text.trim();
+              commentController.clear();
+              CommentModel cmdl = CommentModel(
+                commentCount: 0,
+                commentText: commentText,
+                commenterID: auth.currentUser!.uid,
+                commenterImage: userDetailsModel.profileImageUrl ?? "",
+                commenterName: userDetailsModel.fullName ?? "",
+                createdAt: DateFormat.yMEd().add_jms().format(DateTime.now()).toString(),
+                likeCount: 0,
+                likeIDs: [],
+                postID: addPostModel.value.postID,
+              );
+              await fs.collection("Posts").doc(widget.postDocModel!.postID)
+                  .collection("comments").add(cmdl.toJson());
+            },
+            child: Image.asset(
+              Assets.imagesSend,
+              height: 45.16,
+            ),
           ),
         ],
       ),
@@ -255,6 +665,7 @@ class CommentsTiles extends StatelessWidget {
           Material(
             color: Colors.transparent,
             child: ListTile(
+              //+open other user profile from here
               onTap: () {},
               leading: Container(
                 height: 44.45,
@@ -274,7 +685,7 @@ class CommentsTiles extends StatelessWidget {
                 child: Center(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(100),
-                    child: Image.asset(
+                    child: Image.network(
                       profileImage!,
                       height: height(context, 1.0),
                       width: width(context, 1.0),

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
 import 'package:vip_picnic/main.dart';
 import 'package:vip_picnic/model/home_model/add_post_model.dart';
 import 'package:vip_picnic/utils/collections.dart';
@@ -57,10 +58,12 @@ class HomeController extends GetxController {
       },
     );
     if (selectedImages.isNotEmpty && descriptionCon.text.isNotEmpty) {
+      var postID = Uuid().v1();
       try {
         await uploadAllImages();
         log('Images UPLOADED!');
         addPostModel = AddPostModel(
+          postID: postID,
           uID: userDetailsModel.uID,
           postBy: userDetailsModel.fullName,
           profileImage: userDetailsModel.profileImageUrl,
@@ -75,7 +78,7 @@ class HomeController extends GetxController {
         );
         log('Data assigned to POST MODEL CLASS!');
         await posts
-            .doc(userDetailsModel.email)
+            .doc(postID)
             .set(
               addPostModel.toJson(),
             )

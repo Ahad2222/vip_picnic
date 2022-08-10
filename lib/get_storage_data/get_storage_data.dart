@@ -18,6 +18,15 @@ class UserSimplePreference {
   static const _keyAccountType = 'accountType';
   static const _keyCreatedAt = 'createdAt';
   static const _keyLanguageIndex = 'languageIndex';
+  // static const _keyLikeList = 'likeList';
+
+  // static Future setLikeList(Map<String,dynamic> likedIdMap) async {
+  //   pref.write(_keyLikeList, likedIdMap);
+  // }
+  //
+  // static Future getLikeList() async {
+  //   await pref.read(_keyLikeList);
+  // }
 
   static Future setProfileImageUrl(String imageUrl) async {
     pref.write(_keyProfileImageUrl, imageUrl);

@@ -1,8 +1,12 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
+import 'package:vip_picnic/model/home_model/add_post_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/home/add_new_post.dart';
 import 'package:vip_picnic/view/home/post_details.dart';
@@ -84,6 +88,7 @@ class Home extends StatelessWidget {
           ),
         ),
       ),
+      //+ USE this part for the post and put a streambuilder here
       body: ListView(
         shrinkWrap: true,
         physics: BouncingScrollPhysics(),
@@ -110,9 +115,7 @@ class Home extends StatelessWidget {
                   itemBuilder: (context, index) {
                     return stories(
                       context,
-                      index.isOdd
-                          ? 'assets/images/baby_shower.png'
-                          : 'assets/images/baby_shower.png',
+                      'assets/images/baby_shower.png',
                       index.isOdd ? 'Khan' : 'Stephan',
                       index,
                     );
@@ -121,26 +124,249 @@ class Home extends StatelessWidget {
               ],
             ),
           ),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: BouncingScrollPhysics(),
-            padding: EdgeInsets.symmetric(
-              vertical: 30,
-            ),
-            itemCount: 4,
-            itemBuilder: (context, index) {
-              return PostWidget(
-                profileImage: Assets.imagesDummyProfileImage,
-                name: 'Username',
-                postedTime: '11 feb',
-                title: 'It was a great event 😀',
-                isMyPost: index.isOdd ? true : false,
-                postImage: Assets.imagesPicnicKids,
-              );
+          /**/ //+ starting stream builder
+          StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: fs.collection("Posts").where("uID", isNotEqualTo: userDetailsModel.uID).snapshots(),
+            builder: (
+              BuildContext context,
+              AsyncSnapshot<QuerySnapshot> snapshot,
+            ) {
+              log("inside stream-builder");
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                log("inside stream-builder in waiting state");
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.connectionState == ConnectionState.active ||
+                  snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.hasError) {
+                  return const Text('Some unknown error occurred');
+                } else if (snapshot.hasData) {
+                  log("inside hasData and ${snapshot.data!.docs}");
+                  if (snapshot.data!.docs.length > 0) {
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      physics: BouncingScrollPhysics(),
+                      padding: EdgeInsets.symmetric(
+                        vertical: 30,
+                      ),
+                      itemCount: snapshot.data!.docs.length,
+                      itemBuilder: (context, index) {
+                        AddPostModel addPostModel =
+                            AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                        return PostWidget(
+                          postDocModel: addPostModel,
+                          postID: addPostModel.postID,
+                          isLikeByMe: addPostModel.likeIDs!.asMap().containsValue(auth.currentUser!.uid),
+                          profileImage: addPostModel.profileImage,
+                          name: addPostModel.postBy,
+                          postedTime: addPostModel.createdAt,
+                          title: addPostModel.postTitle,
+                          likeCount: addPostModel.likeIDs!.length,
+                          isMyPost: false,
+                          postImage: addPostModel.postImages![0],
+                        );
+                      },
+                    );
+                    // return ListView.builder(
+                    //   // shrinkWrap: true,
+                    //   physics: BouncingScrollPhysics(),
+                    //   itemCount: snapshot.data!.docs.length,
+                    //   itemBuilder: (BuildContext context, int index) {
+                    //     AddPostModel addPostModel = AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                    //     log("addPostModel = ${addPostModel.toJson()}");
+                    //     return ListView(
+                    //       shrinkWrap: true,
+                    //       physics: BouncingScrollPhysics(),
+                    //       padding: EdgeInsets.symmetric(
+                    //         vertical: 20,
+                    //       ),
+                    //       children: [
+                    //         SizedBox(
+                    //           height: 80,
+                    //           child: ListView(
+                    //             shrinkWrap: true,
+                    //             scrollDirection: Axis.horizontal,
+                    //             physics: const BouncingScrollPhysics(),
+                    //             children: [
+                    //               addStoryButton(context),
+                    //               ListView.builder(
+                    //                 shrinkWrap: true,
+                    //                 scrollDirection: Axis.horizontal,
+                    //                 itemCount: 6,
+                    //                 padding: const EdgeInsets.only(
+                    //                   right: 8,
+                    //                 ),
+                    //                 physics: const BouncingScrollPhysics(),
+                    //                 itemBuilder: (context, index) {
+                    //                   return stories(
+                    //                     context,
+                    //                     'assets/images/baby_shower.png',
+                    //                     index.isOdd ? 'Khan' : 'Stephan',
+                    //                     index,
+                    //                   );
+                    //                 },
+                    //               ),
+                    //             ],
+                    //           ),
+                    //         ),
+                    //         ListView.builder(
+                    //           shrinkWrap: true,
+                    //           physics: BouncingScrollPhysics(),
+                    //           padding: EdgeInsets.symmetric(
+                    //             vertical: 30,
+                    //           ),
+                    //           itemCount: 4,
+                    //           itemBuilder: (context, index) {
+                    //             return PostWidget(
+                    //               profileImage: Assets.imagesDummyProfileImage,
+                    //               name: 'Username',
+                    //               postedTime: '11 feb',
+                    //               title: 'It was a great event 😀',
+                    //               isMyPost: index.isOdd ? true : false,
+                    //               postImage: Assets.imagesPicnicKids,
+                    //             );
+                    //           },
+                    //         ),
+                    //       ],
+                    //     );
+                    //   },
+                    //
+                    // );
+                  } else {
+                    return Center(child: const Text('No Posts Available'));
+                  }
+                } else {
+                  log("in else of hasData done and: ${snapshot.connectionState} and"
+                      " snapshot.hasData: ${snapshot.hasData}");
+                  return Center(child: const Text('No Posts Available'));
+                }
+              } else {
+                log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+                return Center(child: Text('Some Error occurred while fetching the posts'));
+              }
             },
           ),
+          /**/ //+ ending stream builder
+          /**/
+          // ListView.builder(
+          //   shrinkWrap: true,
+          //   physics: BouncingScrollPhysics(),
+          //   padding: EdgeInsets.symmetric(
+          //     vertical: 30,
+          //   ),
+          //   itemCount: 4,
+          //   itemBuilder: (context, index) {
+          //     return PostWidget(
+          //       profileImage: Assets.imagesDummyProfileImage,
+          //       name: 'Username',
+          //       postedTime: '11 feb',
+          //       title: 'It was a great event 😀',
+          //       isMyPost: index.isOdd ? true : false,
+          //       postImage: Assets.imagesPicnicKids,
+          //     );
+          //   },
+          // ),
         ],
       ),
+
+      // StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      //   stream: fs
+      //       .collection("Posts")
+      //       .where("uID", isNotEqualTo: userDetailsModel.uID)
+      //       .snapshots(),
+      //   builder: (
+      //       BuildContext context,
+      //       AsyncSnapshot<QuerySnapshot> snapshot,
+      //       ) {
+      //     log("inside stream-builder");
+      //     if (snapshot.connectionState == ConnectionState.waiting) {
+      //       log("inside stream-builder in waiting state");
+      //       return Center(child: CircularProgressIndicator());
+      //     } else if (snapshot.connectionState == ConnectionState.active ||
+      //         snapshot.connectionState == ConnectionState.done) {
+      //       if (snapshot.hasError) {
+      //         return const Text('Some unknown error occurred');
+      //       } else if (snapshot.hasData) {
+      //         log("inside hasData and ${snapshot.data!.docs}");
+      //         if (snapshot.data!.docs.length > 0) {
+      //           return ListView.builder(
+      //             // shrinkWrap: true,
+      //             physics: BouncingScrollPhysics(),
+      //             itemCount: snapshot.data!.docs.length,
+      //             itemBuilder: (BuildContext context, int index) {
+      //               AddPostModel addPostModel = AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+      //               log("addPostModel = ${addPostModel.toJson()}");
+      //               return ListView(
+      //                 shrinkWrap: true,
+      //                 physics: BouncingScrollPhysics(),
+      //                 padding: EdgeInsets.symmetric(
+      //                   vertical: 20,
+      //                 ),
+      //                 children: [
+      //                   SizedBox(
+      //                     height: 80,
+      //                     child: ListView(
+      //                       shrinkWrap: true,
+      //                       scrollDirection: Axis.horizontal,
+      //                       physics: const BouncingScrollPhysics(),
+      //                       children: [
+      //                         addStoryButton(context),
+      //                         ListView.builder(
+      //                           shrinkWrap: true,
+      //                           scrollDirection: Axis.horizontal,
+      //                           itemCount: 6,
+      //                           padding: const EdgeInsets.only(
+      //                             right: 8,
+      //                           ),
+      //                           physics: const BouncingScrollPhysics(),
+      //                           itemBuilder: (context, index) {
+      //                             return stories(
+      //                               context,
+      //                               'assets/images/baby_shower.png',
+      //                               index.isOdd ? 'Khan' : 'Stephan',
+      //                               index,
+      //                             );
+      //                           },
+      //                         ),
+      //                       ],
+      //                     ),
+      //                   ),
+      //                   ListView.builder(
+      //                     shrinkWrap: true,
+      //                     physics: BouncingScrollPhysics(),
+      //                     padding: EdgeInsets.symmetric(
+      //                       vertical: 30,
+      //                     ),
+      //                     itemCount: 4,
+      //                     itemBuilder: (context, index) {
+      //                       return PostWidget(
+      //                         profileImage: Assets.imagesDummyProfileImage,
+      //                         name: 'Username',
+      //                         postedTime: '11 feb',
+      //                         title: 'It was a great event 😀',
+      //                         isMyPost: index.isOdd ? true : false,
+      //                         postImage: Assets.imagesPicnicKids,
+      //                       );
+      //                     },
+      //                   ),
+      //                 ],
+      //               );
+      //             },
+      //
+      //           );
+      //         } else {
+      //           return Center(child: const Text('No Posts Available'));
+      //         }
+      //       } else {
+      //         log("in else of hasData done and: ${snapshot.connectionState} and"
+      //             " snapshot.hasData: ${snapshot.hasData}");
+      //         return Center(child: const Text('No Posts Available'));
+      //       }
+      //     } else {
+      //       log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+      //       return Center(child: Text('Some Error occurred while fetching the posts'));
+      //     }
+      //   },
+      // ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(
           context,
@@ -248,17 +474,23 @@ class Home extends StatelessWidget {
 class PostWidget extends StatelessWidget {
   PostWidget({
     Key? key,
+    this.postID,
+    this.postDocModel,
     this.profileImage,
     this.name,
     this.postedTime,
     this.title,
     this.postImage,
+    this.likeCount = 0,
     this.isMyPost = false,
+    this.isLikeByMe = false,
   }) : super(key: key);
 
-  String? profileImage, name, postedTime, title, postImage;
+  String? postID, profileImage, name, postedTime, title, postImage;
+  int? likeCount;
+  AddPostModel? postDocModel;
 
-  bool? isMyPost;
+  bool? isMyPost, isLikeByMe;
 
   @override
   Widget build(BuildContext context) {
@@ -308,7 +540,7 @@ class PostWidget extends StatelessWidget {
                             )
                           : ClipRRect(
                               borderRadius: BorderRadius.circular(100),
-                              child: Image.asset(
+                              child: Image.network(
                                 profileImage!,
                                 height: height(context, 1.0),
                                 width: width(context, 1.0),
@@ -385,12 +617,13 @@ class PostWidget extends StatelessWidget {
               GestureDetector(
                 onTap: () => Get.to(
                   () => PostDetails(
-                    postImage: postImage,
+                    isLikeByMe: isLikeByMe,
+                    postDocModel: postDocModel,
                   ),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: Image.asset(
+                  child: Image.network(
                     postImage!,
                     height: 220,
                     fit: BoxFit.cover,
@@ -408,12 +641,30 @@ class PostWidget extends StatelessWidget {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     spacing: 10.0,
                     children: [
-                      Image.asset(
-                        Assets.imagesHeart,
-                        height: 20.89,
+                      GestureDetector(
+                        onTap: () async {
+                          await fs.collection("Posts").doc(postID).update({
+                            "likeCount" : FieldValue.increment(isLikeByMe! ? -1 : 1),
+                            "likeIDs" : !isLikeByMe! ? FieldValue.arrayUnion([auth.currentUser!.uid]) : FieldValue.arrayRemove([auth.currentUser!.uid]),
+                          });
+                          // await fs.collection("Posts").doc(postID).collection("likes")
+                          //     .doc(auth.currentUser!.uid).set({
+                          //   "likerId": auth.currentUser!.uid,
+                          //   "postID": postID!,
+                          // });
+                          // update({
+                          //   "likeCount" : FieldValue.increment(isLikeByMe! ? -1 : 1),
+                          //   "likeIDs" : !isLikeByMe! ? FieldValue.arrayUnion([auth.currentUser!.uid]) : FieldValue.arrayRemove([auth.currentUser!.uid]),
+                          // });
+                        },
+                        child: Image.asset(
+                          Assets.imagesHeart,
+                          height: 20.89,
+                          color: isLikeByMe! ? Colors.red : Colors.grey,
+                        ),
                       ),
                       MyText(
-                        text: '12',
+                        text: likeCount!,
                         size: 18,
                         color: kDarkBlueColor.withOpacity(0.60),
                       ),
@@ -427,10 +678,128 @@ class PostWidget extends StatelessWidget {
                         Assets.imagesComment,
                         height: 23.76,
                       ),
-                      MyText(
-                        text: '32',
-                        size: 18,
-                        color: kDarkBlueColor.withOpacity(0.60),
+                      StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                        stream: fs.collection("Posts").doc(postID).collection("comments").snapshots(),
+                        builder: (
+                          BuildContext context,
+                          AsyncSnapshot<QuerySnapshot> snapshot,
+                        ) {
+                          int previousCount = 0;
+                          log("inside stream-builder");
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            log("inside stream-builder in waiting state");
+                            return MyText(
+                              text: '$previousCount',
+                              size: 18,
+                              color: kDarkBlueColor.withOpacity(0.60),
+                            );
+                          } else if (snapshot.connectionState == ConnectionState.active ||
+                              snapshot.connectionState == ConnectionState.done) {
+                            if (snapshot.hasError) {
+                              return MyText(
+                                text: '0',
+                                size: 18,
+                                color: kDarkBlueColor.withOpacity(0.60),
+                              );
+                            } else if (snapshot.hasData) {
+                              log("inside hasData and ${snapshot.data!.docs}");
+                              if (snapshot.data!.docs.length > 0) {
+                                previousCount = snapshot.data!.docs.length;
+                                return MyText(
+                                  text: snapshot.data!.docs.length,
+                                  size: 18,
+                                  color: kDarkBlueColor.withOpacity(0.60),
+                                );
+                                // return ListView.builder(
+                                //   // shrinkWrap: true,
+                                //   physics: BouncingScrollPhysics(),
+                                //   itemCount: snapshot.data!.docs.length,
+                                //   itemBuilder: (BuildContext context, int index) {
+                                //     AddPostModel addPostModel = AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                                //     log("addPostModel = ${addPostModel.toJson()}");
+                                //     return ListView(
+                                //       shrinkWrap: true,
+                                //       physics: BouncingScrollPhysics(),
+                                //       padding: EdgeInsets.symmetric(
+                                //         vertical: 20,
+                                //       ),
+                                //       children: [
+                                //         SizedBox(
+                                //           height: 80,
+                                //           child: ListView(
+                                //             shrinkWrap: true,
+                                //             scrollDirection: Axis.horizontal,
+                                //             physics: const BouncingScrollPhysics(),
+                                //             children: [
+                                //               addStoryButton(context),
+                                //               ListView.builder(
+                                //                 shrinkWrap: true,
+                                //                 scrollDirection: Axis.horizontal,
+                                //                 itemCount: 6,
+                                //                 padding: const EdgeInsets.only(
+                                //                   right: 8,
+                                //                 ),
+                                //                 physics: const BouncingScrollPhysics(),
+                                //                 itemBuilder: (context, index) {
+                                //                   return stories(
+                                //                     context,
+                                //                     'assets/images/baby_shower.png',
+                                //                     index.isOdd ? 'Khan' : 'Stephan',
+                                //                     index,
+                                //                   );
+                                //                 },
+                                //               ),
+                                //             ],
+                                //           ),
+                                //         ),
+                                //         ListView.builder(
+                                //           shrinkWrap: true,
+                                //           physics: BouncingScrollPhysics(),
+                                //           padding: EdgeInsets.symmetric(
+                                //             vertical: 30,
+                                //           ),
+                                //           itemCount: 4,
+                                //           itemBuilder: (context, index) {
+                                //             return PostWidget(
+                                //               profileImage: Assets.imagesDummyProfileImage,
+                                //               name: 'Username',
+                                //               postedTime: '11 feb',
+                                //               title: 'It was a great event 😀',
+                                //               isMyPost: index.isOdd ? true : false,
+                                //               postImage: Assets.imagesPicnicKids,
+                                //             );
+                                //           },
+                                //         ),
+                                //       ],
+                                //     );
+                                //   },
+                                //
+                                // );
+                              } else {
+                                return MyText(
+                                  text: '0',
+                                  size: 18,
+                                  color: kDarkBlueColor.withOpacity(0.60),
+                                );
+                              }
+                            } else {
+                              log("in else of hasData done and: ${snapshot.connectionState} and"
+                                  " snapshot.hasData: ${snapshot.hasData}");
+                              return MyText(
+                                text: '0',
+                                size: 18,
+                                color: kDarkBlueColor.withOpacity(0.60),
+                              );
+                            }
+                          } else {
+                            log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+                            return MyText(
+                              text: '0',
+                              size: 18,
+                              color: kDarkBlueColor.withOpacity(0.60),
+                            );
+                          }
+                        },
                       ),
                     ],
                   ),
