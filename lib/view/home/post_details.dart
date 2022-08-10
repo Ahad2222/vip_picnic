@@ -237,8 +237,9 @@ class _PostDetailsState extends State<PostDetails> {
                         onTap: () async {
                           await fs.collection("Posts").doc(widget.postDocModel!.postID).update({
                             "likeCount": FieldValue.increment(widget.isLikeByMe! ? -1 : 1),
-                            "likeIDs": !widget.isLikeByMe! ? FieldValue.arrayUnion([auth.currentUser!.uid]) : FieldValue
-                                .arrayRemove([auth.currentUser!.uid]),
+                            "likeIDs": !addPostModel.value.likeIDs!.asMap().containsValue(auth.currentUser!.uid)
+                                ? FieldValue.arrayUnion([auth.currentUser!.uid])
+                                : FieldValue.arrayRemove([auth.currentUser!.uid]),
                           });
                           // await fs.collection("Posts").doc(postID).collection("likes")
                           //     .doc(auth.currentUser!.uid).set({
