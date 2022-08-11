@@ -34,6 +34,8 @@ class Assets {
   static const String imagesGradientEffect = 'assets/images/gradient_effect.png';
   static const String imagesGradientEffectTwo = 'assets/images/gradient_effect_two.png';
   static const String imagesHeart = 'assets/images/heart.png';
+  static const String imagesHeartEmpty = 'assets/images/heart_empty.png';
+  static const String imagesHeartFull = 'assets/images/heart_full.png';
   static const String imagesHome = 'assets/images/home.png';
   static const String imagesInfo = 'assets/images/info.png';
   static const String imagesInvite = 'assets/images/invite.png';

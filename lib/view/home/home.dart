@@ -22,6 +22,7 @@ import 'package:vip_picnic/view/widget/my_textfields.dart';
 class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    log('${userDetailsModel.profileImageUrl!} Main BUILD');
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -136,6 +137,7 @@ class Home extends StatelessWidget {
               AsyncSnapshot<DocumentSnapshot> snapshot,
             ) {
               log("inside stream-builder");
+              log(userDetailsModel.profileImageUrl!);
               if (snapshot.connectionState == ConnectionState.waiting) {
                 log("inside stream-builder in waiting state");
                 return Center(child: CircularProgressIndicator());

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
+import 'package:vip_picnic/get_storage_data/get_storage_data.dart';
 import 'package:vip_picnic/main.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/collections.dart';
@@ -63,6 +64,7 @@ class GoogleAuthController extends GetxController {
                   value.data() as Map<String, dynamic>,
                 );
               },
+
             );
             Get.offAll(
               () => BottomNavBar(),
