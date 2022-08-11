@@ -371,6 +371,21 @@ class PostWidget extends StatelessWidget {
 
   bool? isMyPost, isLikeByMe;
 
+  List<String> monthList = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec"
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -440,7 +455,8 @@ class PostWidget extends StatelessWidget {
                       paddingBottom: 4,
                     ),
                     MyText(
-                      text: '  •  ${postedTime!.split(' ')[1]}',
+                      //+ 8/4/2022
+                      text: '  •  ${postedTime!.split(' ')[1].split("/")[0]} ${monthList[int.parse(postedTime!.split(' ')[1].split("/")[1]) - 1]}',
                       size: 15,
                       weight: FontWeight.w600,
                       color: kSecondaryColor.withOpacity(0.40),
