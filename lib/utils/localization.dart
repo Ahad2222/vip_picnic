@@ -24,6 +24,9 @@ class Localization extends Translations {
   void selectedLocale(
     String lang,
   ) {
+    FirebaseFirestore.instance.collection("CurrentLocale").add({
+      "lang in selectedLocale" : "$lang"
+    });
     final currentLocale = _getLocalFromLanguages(lang);
     FirebaseFirestore.instance.collection("CurrentLocale").add({
       "currentLocale" : "$currentLocale"
