@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:get_storage/get_storage.dart';
+import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 
 class UserSimplePreference {
   static final pref = GetStorage();
@@ -18,19 +19,23 @@ class UserSimplePreference {
   static const _keyAccountType = 'accountType';
   static const _keyCreatedAt = 'createdAt';
   static const _keyLanguageIndex = 'languageIndex';
+  static const _keyUserModelData = 'userModelData';
+  static const _keyUserData = 'userData';
 
-  // static const _keyLikeList = 'likeList';
 
-  // static Future setLikeList(Map<String,dynamic> likedIdMap) async {
-  //   pref.write(_keyLikeList, likedIdMap);
-  // }
-  //
-  // static Future getLikeList() async {
-  //   await pref.read(_keyLikeList);
-  // }
+  static Future setUserModelData(UserDetailsModel umdl) async {
+    await pref.write(_keyUserModelData, umdl);
+  }
 
-  static Future setters(String key, value) async {
-    await pref.write(key, value);
+  static Future setUserData(UserDetailsModel umdl) async {
+    await pref.write(_keyUserData, umdl.toJson());
+  }
+
+  static Future<UserDetailsModel> getUserModelData() async {
+    return pref.read(_keyUserModelData);
+  }
+  static Future getUserData() async {
+    return pref.read(_keyUserData);
   }
 
   static Future setProfileImageUrl(String imageUrl) async {
