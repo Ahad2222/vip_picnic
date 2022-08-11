@@ -6,7 +6,7 @@ import 'package:vip_picnic/translations/es_SP.dart';
 import 'package:vip_picnic/translations/pt_PO.dart';
 
 class Localization extends Translations {
-  static final locale = Locale('en', 'US');
+  static Locale locale = Locale('en', 'US');
   static final fallBackLocale = Locale('en', 'US');
 
   static final languages = [
@@ -31,6 +31,7 @@ class Localization extends Translations {
     FirebaseFirestore.instance.collection("CurrentLocale").add({
       "currentLocale" : "$currentLocale"
     });
+    locale = currentLocale;
     Get.updateLocale(currentLocale);
   }
 
