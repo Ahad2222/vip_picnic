@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -17,6 +19,7 @@ import 'package:vip_picnic/view/widget/my_textfields.dart';
 class Signup extends StatelessWidget {
   DateTime currentTime = DateTime.now();
   DateFormat? format;
+  List<String> userSearchParameters = [];
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +51,26 @@ class Signup extends StatelessWidget {
                     controller: signupController.fullNameCon,
                     validator: (value) => emptyFieldValidator(value!),
                     labelText: 'fullName'.tr + ':',
+                    onChanged: (value) {
+                      if (value.contains(" ")) {
+                        var valueList = value.split(" ");
+                        log("valueList is: ${valueList} and ");
+                        final spaceCounter = valueList.length - 1;
+                        log("spaceCounter is: ${spaceCounter} and ");
+                        log("adding ${valueList[spaceCounter]} in if value.contains(' ')");
+                        userSearchParameters.addIf(
+                            !userSearchParameters.asMap().containsValue(valueList[spaceCounter].toLowerCase()),
+                            valueList[spaceCounter].toLowerCase());
+                        userSearchParameters.addIf(
+                            !userSearchParameters.asMap().containsValue(value.toLowerCase()), value.toLowerCase());
+                        log("searchTerms in if value.contains(' ') is: ${userSearchParameters}");
+                      } else {
+                        log("in else of onChange means there's no space.");
+                        userSearchParameters.addIf(
+                            !userSearchParameters.asMap().containsValue(value.toLowerCase()), value.toLowerCase());
+                      }
+                      log("added $value to array: ${userSearchParameters}");
+                    },
                   ),
                   SizedBox(
                     height: 15,
@@ -140,8 +163,7 @@ class Signup extends StatelessWidget {
                               child: Material(
                                 color: Colors.transparent,
                                 child: InkWell(
-                                  onTap: () =>
-                                      signupController.signupAccountType(
+                                  onTap: () => signupController.signupAccountType(
                                     index == 0 ? 'Private' : 'Business',
                                     index,
                                   ),
@@ -152,10 +174,7 @@ class Signup extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(100),
                                   child: Obx(() {
                                     return Center(
-                                      child: signupController
-                                                  .selectedAccountTypeIndex!
-                                                  .value ==
-                                              index
+                                      child: signupController.selectedAccountTypeIndex!.value == index
                                           ? Icon(
                                               Icons.check,
                                               size: 18,

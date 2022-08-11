@@ -13,6 +13,9 @@ class UserDetailsModel {
   String? zip;
   String? accountType;
   String? createdAt;
+  List<String>? userSearchParameters;
+  List<String>? TheyFollowed;
+  List<String>? iFollowed;
 
   UserDetailsModel({
     this.profileImageUrl = '',
@@ -27,6 +30,9 @@ class UserDetailsModel {
     this.zip = '',
     this.accountType = '',
     this.createdAt = '',
+    this.userSearchParameters,
+    this.TheyFollowed,
+    this.iFollowed,
   });
 
   factory UserDetailsModel.fromJson(Map<String, dynamic> json) =>
@@ -43,6 +49,9 @@ class UserDetailsModel {
         zip: json['zip'],
         accountType: json['accountType'],
         createdAt: json['createdAt'],
+        userSearchParameters: json['userSearchParameters'] != null ? List<String>.from(json['userSearchParameters'].map((x) => x)) : [],
+        TheyFollowed: json['TheyFollowed'] != null ? List<String>.from(json['TheyFollowed'].map((x) => x)) : [],
+        iFollowed: json['iFollowed'] != null ? List<String>.from(json['iFollowed'].map((x) => x)) : [],
       );
 
   Map<String, dynamic> toJson() => {
@@ -58,5 +67,8 @@ class UserDetailsModel {
         'zip': zip,
         'accountType': accountType,
         'createdAt': createdAt,
+        'userSearchParameters': userSearchParameters != null ? List<String>.from(userSearchParameters!.map((x) => x)) : [],
+        'TheyFollowed': TheyFollowed != null ? List<String>.from(TheyFollowed!.map((x) => x)) : [],
+        'iFollowed': iFollowed != null ? List<String>.from(iFollowed!.map((x) => x)) : [],
       };
 }

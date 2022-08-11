@@ -7,6 +7,7 @@ import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/model/home_model/add_post_model.dart';
+import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/home/add_new_post.dart';
 import 'package:vip_picnic/view/home/post_details.dart';
@@ -125,12 +126,12 @@ class Home extends StatelessWidget {
             ),
           ),
           /**/ //+ starting stream builder
-          StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-            stream: fs.collection("Posts").where("uID", isNotEqualTo: userDetailsModel.uID).snapshots(),
+          StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+            stream: fs.collection("Accounts").doc(auth.currentUser!.uid).snapshots(),
             builder: (
-              BuildContext context,
-              AsyncSnapshot<QuerySnapshot> snapshot,
-            ) {
+                BuildContext context,
+                AsyncSnapshot<DocumentSnapshot> snapshot,
+                ) {
               log("inside stream-builder");
               if (snapshot.connectionState == ConnectionState.waiting) {
                 log("inside stream-builder in waiting state");
@@ -140,97 +141,130 @@ class Home extends StatelessWidget {
                 if (snapshot.hasError) {
                   return const Text('Some unknown error occurred');
                 } else if (snapshot.hasData) {
-                  log("inside hasData and ${snapshot.data!.docs}");
-                  if (snapshot.data!.docs.length > 0) {
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      physics: BouncingScrollPhysics(),
-                      padding: EdgeInsets.symmetric(
-                        vertical: 30,
-                      ),
-                      itemCount: snapshot.data!.docs.length,
-                      itemBuilder: (context, index) {
-                        AddPostModel addPostModel =
-                            AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
-                        return PostWidget(
-                          postDocModel: addPostModel,
-                          postID: addPostModel.postID,
-                          isLikeByMe: addPostModel.likeIDs!.asMap().containsValue(auth.currentUser!.uid),
-                          profileImage: addPostModel.profileImage,
-                          name: addPostModel.postBy,
-                          postedTime: addPostModel.createdAt,
-                          title: addPostModel.postTitle,
-                          likeCount: addPostModel.likeIDs!.length,
-                          isMyPost: false,
-                          postImage: addPostModel.postImages![0],
-                        );
+                  // log("inside hasData and ${snapshot.data!.docs}");
+                  if (snapshot.data!.exists) {
+                    userDetailsModel = UserDetailsModel.fromJson(snapshot.data!.data() as Map<String, dynamic>);
+                    var followedListToBeChecked = userDetailsModel.iFollowed!.length > 0 ? userDetailsModel.iFollowed : ["something"];
+                    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                      stream: fs.collection("Posts").where("uID", whereIn: followedListToBeChecked).snapshots(),
+                      builder: (
+                          BuildContext context,
+                          AsyncSnapshot<QuerySnapshot> snapshot,
+                          ) {
+                        log("inside stream-builder");
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          log("inside stream-builder in waiting state");
+                          return Center(child: CircularProgressIndicator());
+                        } else if (snapshot.connectionState == ConnectionState.active ||
+                            snapshot.connectionState == ConnectionState.done) {
+                          if (snapshot.hasError) {
+                            return const Text('Some unknown error occurred');
+                          } else if (snapshot.hasData) {
+                            log("inside hasData and ${snapshot.data!.docs}");
+                            if (snapshot.data!.docs.length > 0) {
+                              return ListView.builder(
+                                shrinkWrap: true,
+                                physics: BouncingScrollPhysics(),
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 30,
+                                ),
+                                itemCount: snapshot.data!.docs.length,
+                                itemBuilder: (context, index) {
+                                  AddPostModel addPostModel =
+                                  AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                                  return PostWidget(
+                                    postDocModel: addPostModel,
+                                    postID: addPostModel.postID,
+                                    isLikeByMe: addPostModel.likeIDs!.asMap().containsValue(auth.currentUser!.uid),
+                                    profileImage: addPostModel.profileImage,
+                                    name: addPostModel.postBy,
+                                    postedTime: addPostModel.createdAt,
+                                    title: addPostModel.postTitle,
+                                    likeCount: addPostModel.likeIDs!.length,
+                                    isMyPost: false,
+                                    postImage: addPostModel.postImages![0],
+                                  );
+                                },
+                              );
+                              // return ListView.builder(
+                              //   // shrinkWrap: true,
+                              //   physics: BouncingScrollPhysics(),
+                              //   itemCount: snapshot.data!.docs.length,
+                              //   itemBuilder: (BuildContext context, int index) {
+                              //     AddPostModel addPostModel = AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                              //     log("addPostModel = ${addPostModel.toJson()}");
+                              //     return ListView(
+                              //       shrinkWrap: true,
+                              //       physics: BouncingScrollPhysics(),
+                              //       padding: EdgeInsets.symmetric(
+                              //         vertical: 20,
+                              //       ),
+                              //       children: [
+                              //         SizedBox(
+                              //           height: 80,
+                              //           child: ListView(
+                              //             shrinkWrap: true,
+                              //             scrollDirection: Axis.horizontal,
+                              //             physics: const BouncingScrollPhysics(),
+                              //             children: [
+                              //               addStoryButton(context),
+                              //               ListView.builder(
+                              //                 shrinkWrap: true,
+                              //                 scrollDirection: Axis.horizontal,
+                              //                 itemCount: 6,
+                              //                 padding: const EdgeInsets.only(
+                              //                   right: 8,
+                              //                 ),
+                              //                 physics: const BouncingScrollPhysics(),
+                              //                 itemBuilder: (context, index) {
+                              //                   return stories(
+                              //                     context,
+                              //                     'assets/images/baby_shower.png',
+                              //                     index.isOdd ? 'Khan' : 'Stephan',
+                              //                     index,
+                              //                   );
+                              //                 },
+                              //               ),
+                              //             ],
+                              //           ),
+                              //         ),
+                              //         ListView.builder(
+                              //           shrinkWrap: true,
+                              //           physics: BouncingScrollPhysics(),
+                              //           padding: EdgeInsets.symmetric(
+                              //             vertical: 30,
+                              //           ),
+                              //           itemCount: 4,
+                              //           itemBuilder: (context, index) {
+                              //             return PostWidget(
+                              //               profileImage: Assets.imagesDummyProfileImage,
+                              //               name: 'Username',
+                              //               postedTime: '11 feb',
+                              //               title: 'It was a great event 😀',
+                              //               isMyPost: index.isOdd ? true : false,
+                              //               postImage: Assets.imagesPicnicKids,
+                              //             );
+                              //           },
+                              //         ),
+                              //       ],
+                              //     );
+                              //   },
+                              //
+                              // );
+                            } else {
+                              return Center(child: const Text('No Posts Available'));
+                            }
+                          } else {
+                            log("in else of hasData done and: ${snapshot.connectionState} and"
+                                " snapshot.hasData: ${snapshot.hasData}");
+                            return Center(child: const Text('No Posts Available'));
+                          }
+                        } else {
+                          log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+                          return Center(child: Text('Some Error occurred while fetching the posts'));
+                        }
                       },
                     );
-                    // return ListView.builder(
-                    //   // shrinkWrap: true,
-                    //   physics: BouncingScrollPhysics(),
-                    //   itemCount: snapshot.data!.docs.length,
-                    //   itemBuilder: (BuildContext context, int index) {
-                    //     AddPostModel addPostModel = AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
-                    //     log("addPostModel = ${addPostModel.toJson()}");
-                    //     return ListView(
-                    //       shrinkWrap: true,
-                    //       physics: BouncingScrollPhysics(),
-                    //       padding: EdgeInsets.symmetric(
-                    //         vertical: 20,
-                    //       ),
-                    //       children: [
-                    //         SizedBox(
-                    //           height: 80,
-                    //           child: ListView(
-                    //             shrinkWrap: true,
-                    //             scrollDirection: Axis.horizontal,
-                    //             physics: const BouncingScrollPhysics(),
-                    //             children: [
-                    //               addStoryButton(context),
-                    //               ListView.builder(
-                    //                 shrinkWrap: true,
-                    //                 scrollDirection: Axis.horizontal,
-                    //                 itemCount: 6,
-                    //                 padding: const EdgeInsets.only(
-                    //                   right: 8,
-                    //                 ),
-                    //                 physics: const BouncingScrollPhysics(),
-                    //                 itemBuilder: (context, index) {
-                    //                   return stories(
-                    //                     context,
-                    //                     'assets/images/baby_shower.png',
-                    //                     index.isOdd ? 'Khan' : 'Stephan',
-                    //                     index,
-                    //                   );
-                    //                 },
-                    //               ),
-                    //             ],
-                    //           ),
-                    //         ),
-                    //         ListView.builder(
-                    //           shrinkWrap: true,
-                    //           physics: BouncingScrollPhysics(),
-                    //           padding: EdgeInsets.symmetric(
-                    //             vertical: 30,
-                    //           ),
-                    //           itemCount: 4,
-                    //           itemBuilder: (context, index) {
-                    //             return PostWidget(
-                    //               profileImage: Assets.imagesDummyProfileImage,
-                    //               name: 'Username',
-                    //               postedTime: '11 feb',
-                    //               title: 'It was a great event 😀',
-                    //               isMyPost: index.isOdd ? true : false,
-                    //               postImage: Assets.imagesPicnicKids,
-                    //             );
-                    //           },
-                    //         ),
-                    //       ],
-                    //     );
-                    //   },
-                    //
-                    // );
                   } else {
                     return Center(child: const Text('No Posts Available'));
                   }
