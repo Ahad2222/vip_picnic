@@ -35,7 +35,7 @@ class CommentModel {
     postID: json['postID'] ?? "",
     commenterID: json['commenterID'] ?? "",
     commenterName: json['commenterName'] ?? "",
-    commenterImage: json['profileImage'] ?? "",
+    commenterImage: json['commenterImage'] ?? "",
     commentText: json['commentText'] ?? "",
     // location: json['location'] ?? "",
     createdAt: json['createdAt'] ?? "",

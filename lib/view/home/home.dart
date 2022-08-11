@@ -127,11 +127,14 @@ class Home extends StatelessWidget {
           ),
           /**/ //+ starting stream builder
           StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-            stream: fs.collection("Accounts").doc(auth.currentUser!.uid).snapshots(),
+            stream: fs
+                .collection("Accounts")
+                .doc(auth.currentUser!.uid)
+                .snapshots(),
             builder: (
-                BuildContext context,
-                AsyncSnapshot<DocumentSnapshot> snapshot,
-                ) {
+              BuildContext context,
+              AsyncSnapshot<DocumentSnapshot> snapshot,
+            ) {
               log("inside stream-builder");
               if (snapshot.connectionState == ConnectionState.waiting) {
                 log("inside stream-builder in waiting state");
@@ -143,19 +146,28 @@ class Home extends StatelessWidget {
                 } else if (snapshot.hasData) {
                   // log("inside hasData and ${snapshot.data!.docs}");
                   if (snapshot.data!.exists) {
-                    userDetailsModel = UserDetailsModel.fromJson(snapshot.data!.data() as Map<String, dynamic>);
-                    var followedListToBeChecked = userDetailsModel.iFollowed!.length > 0 ? userDetailsModel.iFollowed : ["something"];
+                    userDetailsModel = UserDetailsModel.fromJson(
+                        snapshot.data!.data() as Map<String, dynamic>);
+                    var followedListToBeChecked =
+                        userDetailsModel.iFollowed!.length > 0
+                            ? userDetailsModel.iFollowed
+                            : ["something"];
                     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                      stream: fs.collection("Posts").where("uID", whereIn: followedListToBeChecked).snapshots(),
+                      stream: fs
+                          .collection("Posts")
+                          .where("uID", whereIn: followedListToBeChecked)
+                          .snapshots(),
                       builder: (
-                          BuildContext context,
-                          AsyncSnapshot<QuerySnapshot> snapshot,
-                          ) {
+                        BuildContext context,
+                        AsyncSnapshot<QuerySnapshot> snapshot,
+                      ) {
                         log("inside stream-builder");
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           log("inside stream-builder in waiting state");
                           return Center(child: CircularProgressIndicator());
-                        } else if (snapshot.connectionState == ConnectionState.active ||
+                        } else if (snapshot.connectionState ==
+                                ConnectionState.active ||
                             snapshot.connectionState == ConnectionState.done) {
                           if (snapshot.hasError) {
                             return const Text('Some unknown error occurred');
@@ -171,11 +183,15 @@ class Home extends StatelessWidget {
                                 itemCount: snapshot.data!.docs.length,
                                 itemBuilder: (context, index) {
                                   AddPostModel addPostModel =
-                                  AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                                      AddPostModel.fromJson(
+                                          snapshot.data!.docs[index].data()
+                                              as Map<String, dynamic>);
                                   return PostWidget(
                                     postDocModel: addPostModel,
                                     postID: addPostModel.postID,
-                                    isLikeByMe: addPostModel.likeIDs!.asMap().containsValue(auth.currentUser!.uid),
+                                    isLikeByMe: addPostModel.likeIDs!
+                                        .asMap()
+                                        .containsValue(auth.currentUser!.uid),
                                     profileImage: addPostModel.profileImage,
                                     name: addPostModel.postBy,
                                     postedTime: addPostModel.createdAt,
@@ -186,222 +202,40 @@ class Home extends StatelessWidget {
                                   );
                                 },
                               );
-                              // return ListView.builder(
-                              //   // shrinkWrap: true,
-                              //   physics: BouncingScrollPhysics(),
-                              //   itemCount: snapshot.data!.docs.length,
-                              //   itemBuilder: (BuildContext context, int index) {
-                              //     AddPostModel addPostModel = AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
-                              //     log("addPostModel = ${addPostModel.toJson()}");
-                              //     return ListView(
-                              //       shrinkWrap: true,
-                              //       physics: BouncingScrollPhysics(),
-                              //       padding: EdgeInsets.symmetric(
-                              //         vertical: 20,
-                              //       ),
-                              //       children: [
-                              //         SizedBox(
-                              //           height: 80,
-                              //           child: ListView(
-                              //             shrinkWrap: true,
-                              //             scrollDirection: Axis.horizontal,
-                              //             physics: const BouncingScrollPhysics(),
-                              //             children: [
-                              //               addStoryButton(context),
-                              //               ListView.builder(
-                              //                 shrinkWrap: true,
-                              //                 scrollDirection: Axis.horizontal,
-                              //                 itemCount: 6,
-                              //                 padding: const EdgeInsets.only(
-                              //                   right: 8,
-                              //                 ),
-                              //                 physics: const BouncingScrollPhysics(),
-                              //                 itemBuilder: (context, index) {
-                              //                   return stories(
-                              //                     context,
-                              //                     'assets/images/baby_shower.png',
-                              //                     index.isOdd ? 'Khan' : 'Stephan',
-                              //                     index,
-                              //                   );
-                              //                 },
-                              //               ),
-                              //             ],
-                              //           ),
-                              //         ),
-                              //         ListView.builder(
-                              //           shrinkWrap: true,
-                              //           physics: BouncingScrollPhysics(),
-                              //           padding: EdgeInsets.symmetric(
-                              //             vertical: 30,
-                              //           ),
-                              //           itemCount: 4,
-                              //           itemBuilder: (context, index) {
-                              //             return PostWidget(
-                              //               profileImage: Assets.imagesDummyProfileImage,
-                              //               name: 'Username',
-                              //               postedTime: '11 feb',
-                              //               title: 'It was a great event 😀',
-                              //               isMyPost: index.isOdd ? true : false,
-                              //               postImage: Assets.imagesPicnicKids,
-                              //             );
-                              //           },
-                              //         ),
-                              //       ],
-                              //     );
-                              //   },
-                              //
-                              // );
                             } else {
-                              return Center(child: const Text('No Posts Available'));
+                              return noPostYet();
                             }
                           } else {
                             log("in else of hasData done and: ${snapshot.connectionState} and"
                                 " snapshot.hasData: ${snapshot.hasData}");
-                            return Center(child: const Text('No Posts Available'));
+                            return noPostYet();
                           }
                         } else {
                           log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
-                          return Center(child: Text('Some Error occurred while fetching the posts'));
+                          return noPostYet();
                         }
                       },
                     );
                   } else {
-                    return Center(child: const Text('No Posts Available'));
+                    return noPostYet();
                   }
                 } else {
                   log("in else of hasData done and: ${snapshot.connectionState} and"
                       " snapshot.hasData: ${snapshot.hasData}");
-                  return Center(child: const Text('No Posts Available'));
+                  return noPostYet();
                 }
               } else {
                 log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
-                return Center(child: Text('Some Error occurred while fetching the posts'));
+                return Center(
+                    child:
+                        Text('Some Error occurred while fetching the posts'));
               }
             },
           ),
-          /**/ //+ ending stream builder
-          /**/
-          // ListView.builder(
-          //   shrinkWrap: true,
-          //   physics: BouncingScrollPhysics(),
-          //   padding: EdgeInsets.symmetric(
-          //     vertical: 30,
-          //   ),
-          //   itemCount: 4,
-          //   itemBuilder: (context, index) {
-          //     return PostWidget(
-          //       profileImage: Assets.imagesDummyProfileImage,
-          //       name: 'Username',
-          //       postedTime: '11 feb',
-          //       title: 'It was a great event 😀',
-          //       isMyPost: index.isOdd ? true : false,
-          //       postImage: Assets.imagesPicnicKids,
-          //     );
-          //   },
-          // ),
         ],
       ),
-
-      // StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      //   stream: fs
-      //       .collection("Posts")
-      //       .where("uID", isNotEqualTo: userDetailsModel.uID)
-      //       .snapshots(),
-      //   builder: (
-      //       BuildContext context,
-      //       AsyncSnapshot<QuerySnapshot> snapshot,
-      //       ) {
-      //     log("inside stream-builder");
-      //     if (snapshot.connectionState == ConnectionState.waiting) {
-      //       log("inside stream-builder in waiting state");
-      //       return Center(child: CircularProgressIndicator());
-      //     } else if (snapshot.connectionState == ConnectionState.active ||
-      //         snapshot.connectionState == ConnectionState.done) {
-      //       if (snapshot.hasError) {
-      //         return const Text('Some unknown error occurred');
-      //       } else if (snapshot.hasData) {
-      //         log("inside hasData and ${snapshot.data!.docs}");
-      //         if (snapshot.data!.docs.length > 0) {
-      //           return ListView.builder(
-      //             // shrinkWrap: true,
-      //             physics: BouncingScrollPhysics(),
-      //             itemCount: snapshot.data!.docs.length,
-      //             itemBuilder: (BuildContext context, int index) {
-      //               AddPostModel addPostModel = AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
-      //               log("addPostModel = ${addPostModel.toJson()}");
-      //               return ListView(
-      //                 shrinkWrap: true,
-      //                 physics: BouncingScrollPhysics(),
-      //                 padding: EdgeInsets.symmetric(
-      //                   vertical: 20,
-      //                 ),
-      //                 children: [
-      //                   SizedBox(
-      //                     height: 80,
-      //                     child: ListView(
-      //                       shrinkWrap: true,
-      //                       scrollDirection: Axis.horizontal,
-      //                       physics: const BouncingScrollPhysics(),
-      //                       children: [
-      //                         addStoryButton(context),
-      //                         ListView.builder(
-      //                           shrinkWrap: true,
-      //                           scrollDirection: Axis.horizontal,
-      //                           itemCount: 6,
-      //                           padding: const EdgeInsets.only(
-      //                             right: 8,
-      //                           ),
-      //                           physics: const BouncingScrollPhysics(),
-      //                           itemBuilder: (context, index) {
-      //                             return stories(
-      //                               context,
-      //                               'assets/images/baby_shower.png',
-      //                               index.isOdd ? 'Khan' : 'Stephan',
-      //                               index,
-      //                             );
-      //                           },
-      //                         ),
-      //                       ],
-      //                     ),
-      //                   ),
-      //                   ListView.builder(
-      //                     shrinkWrap: true,
-      //                     physics: BouncingScrollPhysics(),
-      //                     padding: EdgeInsets.symmetric(
-      //                       vertical: 30,
-      //                     ),
-      //                     itemCount: 4,
-      //                     itemBuilder: (context, index) {
-      //                       return PostWidget(
-      //                         profileImage: Assets.imagesDummyProfileImage,
-      //                         name: 'Username',
-      //                         postedTime: '11 feb',
-      //                         title: 'It was a great event 😀',
-      //                         isMyPost: index.isOdd ? true : false,
-      //                         postImage: Assets.imagesPicnicKids,
-      //                       );
-      //                     },
-      //                   ),
-      //                 ],
-      //               );
-      //             },
-      //
-      //           );
-      //         } else {
-      //           return Center(child: const Text('No Posts Available'));
-      //         }
-      //       } else {
-      //         log("in else of hasData done and: ${snapshot.connectionState} and"
-      //             " snapshot.hasData: ${snapshot.hasData}");
-      //         return Center(child: const Text('No Posts Available'));
-      //       }
-      //     } else {
-      //       log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
-      //       return Center(child: Text('Some Error occurred while fetching the posts'));
-      //     }
-      //   },
-      // ),
       floatingActionButton: FloatingActionButton(
+        heroTag: '',
         onPressed: () => Navigator.pushNamed(
           context,
           AppLinks.addNewPost,
@@ -415,6 +249,17 @@ class Home extends StatelessWidget {
           height: 22.68,
           color: kPrimaryColor,
         ),
+      ),
+    );
+  }
+
+  Widget noPostYet() {
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: 50,
+      ),
+      child: Center(
+        child: Image.asset(Assets.imagesNoPostYet),
       ),
     );
   }
@@ -595,7 +440,7 @@ class PostWidget extends StatelessWidget {
                       paddingBottom: 4,
                     ),
                     MyText(
-                      text: '  •  $postedTime',
+                      text: '  •  ${postedTime!.split(' ')[1]}',
                       size: 15,
                       weight: FontWeight.w600,
                       color: kSecondaryColor.withOpacity(0.40),
@@ -678,8 +523,12 @@ class PostWidget extends StatelessWidget {
                       GestureDetector(
                         onTap: () async {
                           await fs.collection("Posts").doc(postID).update({
-                            "likeCount" : FieldValue.increment(isLikeByMe! ? -1 : 1),
-                            "likeIDs" : !isLikeByMe! ? FieldValue.arrayUnion([auth.currentUser!.uid]) : FieldValue.arrayRemove([auth.currentUser!.uid]),
+                            "likeCount":
+                                FieldValue.increment(isLikeByMe! ? -1 : 1),
+                            "likeIDs": !isLikeByMe!
+                                ? FieldValue.arrayUnion([auth.currentUser!.uid])
+                                : FieldValue.arrayRemove(
+                                    [auth.currentUser!.uid]),
                           });
                           // await fs.collection("Posts").doc(postID).collection("likes")
                           //     .doc(auth.currentUser!.uid).set({
@@ -713,22 +562,29 @@ class PostWidget extends StatelessWidget {
                         height: 23.76,
                       ),
                       StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                        stream: fs.collection("Posts").doc(postID).collection("comments").snapshots(),
+                        stream: fs
+                            .collection("Posts")
+                            .doc(postID)
+                            .collection("comments")
+                            .snapshots(),
                         builder: (
                           BuildContext context,
                           AsyncSnapshot<QuerySnapshot> snapshot,
                         ) {
                           int previousCount = 0;
                           log("inside stream-builder");
-                          if (snapshot.connectionState == ConnectionState.waiting) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
                             log("inside stream-builder in waiting state");
                             return MyText(
                               text: '$previousCount',
                               size: 18,
                               color: kDarkBlueColor.withOpacity(0.60),
                             );
-                          } else if (snapshot.connectionState == ConnectionState.active ||
-                              snapshot.connectionState == ConnectionState.done) {
+                          } else if (snapshot.connectionState ==
+                                  ConnectionState.active ||
+                              snapshot.connectionState ==
+                                  ConnectionState.done) {
                             if (snapshot.hasError) {
                               return MyText(
                                 text: '0',

@@ -57,7 +57,7 @@ class GoogleAuthController extends GetxController {
             );
             navigatorKey.currentState!.popUntil((route) => route.isCurrent);
           } else {
-            accounts.doc(userCredential.user!.uid).get().then(
+            await accounts.doc(userCredential.user!.uid).get().then(
               (value) {
                 userDetailsModel = UserDetailsModel.fromJson(
                   value.data() as Map<String, dynamic>,

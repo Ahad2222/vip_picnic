@@ -241,15 +241,6 @@ class _PostDetailsState extends State<PostDetails> {
                                 ? FieldValue.arrayUnion([auth.currentUser!.uid])
                                 : FieldValue.arrayRemove([auth.currentUser!.uid]),
                           });
-                          // await fs.collection("Posts").doc(postID).collection("likes")
-                          //     .doc(auth.currentUser!.uid).set({
-                          //   "likerId": auth.currentUser!.uid,
-                          //   "postID": postID!,
-                          // });
-                          // update({
-                          //   "likeCount" : FieldValue.increment(isLikeByMe! ? -1 : 1),
-                          //   "likeIDs" : !isLikeByMe! ? FieldValue.arrayUnion([auth.currentUser!.uid]) : FieldValue.arrayRemove([auth.currentUser!.uid]),
-                          // });
                         },
                         child: Obx(() {
                           return Image.asset(
@@ -309,71 +300,6 @@ class _PostDetailsState extends State<PostDetails> {
                                   size: 18,
                                   color: kDarkBlueColor.withOpacity(0.60),
                                 );
-                                // return ListView.builder(
-                                //   // shrinkWrap: true,
-                                //   physics: BouncingScrollPhysics(),
-                                //   itemCount: snapshot.data!.docs.length,
-                                //   itemBuilder: (BuildContext context, int index) {
-                                //     AddPostModel addPostModel = AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
-                                //     log("addPostModel = ${addPostModel.toJson()}");
-                                //     return ListView(
-                                //       shrinkWrap: true,
-                                //       physics: BouncingScrollPhysics(),
-                                //       padding: EdgeInsets.symmetric(
-                                //         vertical: 20,
-                                //       ),
-                                //       children: [
-                                //         SizedBox(
-                                //           height: 80,
-                                //           child: ListView(
-                                //             shrinkWrap: true,
-                                //             scrollDirection: Axis.horizontal,
-                                //             physics: const BouncingScrollPhysics(),
-                                //             children: [
-                                //               addStoryButton(context),
-                                //               ListView.builder(
-                                //                 shrinkWrap: true,
-                                //                 scrollDirection: Axis.horizontal,
-                                //                 itemCount: 6,
-                                //                 padding: const EdgeInsets.only(
-                                //                   right: 8,
-                                //                 ),
-                                //                 physics: const BouncingScrollPhysics(),
-                                //                 itemBuilder: (context, index) {
-                                //                   return stories(
-                                //                     context,
-                                //                     'assets/images/baby_shower.png',
-                                //                     index.isOdd ? 'Khan' : 'Stephan',
-                                //                     index,
-                                //                   );
-                                //                 },
-                                //               ),
-                                //             ],
-                                //           ),
-                                //         ),
-                                //         ListView.builder(
-                                //           shrinkWrap: true,
-                                //           physics: BouncingScrollPhysics(),
-                                //           padding: EdgeInsets.symmetric(
-                                //             vertical: 30,
-                                //           ),
-                                //           itemCount: 4,
-                                //           itemBuilder: (context, index) {
-                                //             return PostWidget(
-                                //               profileImage: Assets.imagesDummyProfileImage,
-                                //               name: 'Username',
-                                //               postedTime: '11 feb',
-                                //               title: 'It was a great event 😀',
-                                //               isMyPost: index.isOdd ? true : false,
-                                //               postImage: Assets.imagesPicnicKids,
-                                //             );
-                                //           },
-                                //         ),
-                                //       ],
-                                //     );
-                                //   },
-                                //
-                                // );
                               } else {
                                 return MyText(
                                   text: '0',
@@ -453,71 +379,6 @@ class _PostDetailsState extends State<PostDetails> {
                             );
                           },
                         );
-                        // return ListView.builder(
-                        //   // shrinkWrap: true,
-                        //   physics: BouncingScrollPhysics(),
-                        //   itemCount: snapshot.data!.docs.length,
-                        //   itemBuilder: (BuildContext context, int index) {
-                        //     AddPostModel addPostModel = AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
-                        //     log("addPostModel = ${addPostModel.toJson()}");
-                        //     return ListView(
-                        //       shrinkWrap: true,
-                        //       physics: BouncingScrollPhysics(),
-                        //       padding: EdgeInsets.symmetric(
-                        //         vertical: 20,
-                        //       ),
-                        //       children: [
-                        //         SizedBox(
-                        //           height: 80,
-                        //           child: ListView(
-                        //             shrinkWrap: true,
-                        //             scrollDirection: Axis.horizontal,
-                        //             physics: const BouncingScrollPhysics(),
-                        //             children: [
-                        //               addStoryButton(context),
-                        //               ListView.builder(
-                        //                 shrinkWrap: true,
-                        //                 scrollDirection: Axis.horizontal,
-                        //                 itemCount: 6,
-                        //                 padding: const EdgeInsets.only(
-                        //                   right: 8,
-                        //                 ),
-                        //                 physics: const BouncingScrollPhysics(),
-                        //                 itemBuilder: (context, index) {
-                        //                   return stories(
-                        //                     context,
-                        //                     'assets/images/baby_shower.png',
-                        //                     index.isOdd ? 'Khan' : 'Stephan',
-                        //                     index,
-                        //                   );
-                        //                 },
-                        //               ),
-                        //             ],
-                        //           ),
-                        //         ),
-                        //         ListView.builder(
-                        //           shrinkWrap: true,
-                        //           physics: BouncingScrollPhysics(),
-                        //           padding: EdgeInsets.symmetric(
-                        //             vertical: 30,
-                        //           ),
-                        //           itemCount: 4,
-                        //           itemBuilder: (context, index) {
-                        //             return PostWidget(
-                        //               profileImage: Assets.imagesDummyProfileImage,
-                        //               name: 'Username',
-                        //               postedTime: '11 feb',
-                        //               title: 'It was a great event 😀',
-                        //               isMyPost: index.isOdd ? true : false,
-                        //               postImage: Assets.imagesPicnicKids,
-                        //             );
-                        //           },
-                        //         ),
-                        //       ],
-                        //     );
-                        //   },
-                        //
-                        // );
                       } else {
                         return const Center(child: Text('No Comments Yet'));
                       }

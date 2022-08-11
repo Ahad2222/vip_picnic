@@ -44,6 +44,7 @@ class Assets {
   static const String imagesLogout = 'assets/images/logout.png';
   static const String imagesMail = 'assets/images/mail.png';
   static const String imagesMoreHoriz = 'assets/images/more_horiz.png';
+  static const String imagesNoPostYet = 'assets/images/no_post_yet.png';
   static const String imagesParties = 'assets/images/parties.png';
   static const String imagesPerPeople = 'assets/images/per_people.png';
   static const String imagesPhoto = 'assets/images/photo.png';
