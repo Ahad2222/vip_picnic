@@ -35,7 +35,11 @@ class _PostDetailsState extends State<PostDetails> {
   void initState() {
     // TODO: implement initState
     addPostModel.value = widget.postDocModel!;
-    fs.collection("Posts").doc(widget.postDocModel!.postID).snapshots().listen((event) {
+    fs
+        .collection("Posts")
+        .doc(widget.postDocModel!.postID)
+        .snapshots()
+        .listen((event) {
       addPostModel.value = AddPostModel.fromJson(event.data() ?? {});
       log("inside stream and addPostModel: ${addPostModel.toJson()}");
     });
@@ -235,19 +239,33 @@ class _PostDetailsState extends State<PostDetails> {
                     children: [
                       GestureDetector(
                         onTap: () async {
-                          await fs.collection("Posts").doc(widget.postDocModel!.postID).update({
-                            "likeCount": FieldValue.increment(widget.isLikeByMe! ? -1 : 1),
-                            "likeIDs": !addPostModel.value.likeIDs!.asMap().containsValue(auth.currentUser!.uid)
+                          await fs
+                              .collection("Posts")
+                              .doc(widget.postDocModel!.postID)
+                              .update({
+                            "likeCount": FieldValue.increment(
+                                widget.isLikeByMe! ? -1 : 1),
+                            "likeIDs": !addPostModel.value.likeIDs!
+                                    .asMap()
+                                    .containsValue(auth.currentUser!.uid)
                                 ? FieldValue.arrayUnion([auth.currentUser!.uid])
-                                : FieldValue.arrayRemove([auth.currentUser!.uid]),
+                                : FieldValue.arrayRemove(
+                                    [auth.currentUser!.uid]),
                           });
                         },
                         child: Obx(() {
                           return Image.asset(
-                            Assets.imagesHeart,
-                            height: 20.89,
-                            color: addPostModel.value.likeIDs!.asMap().containsValue(auth.currentUser!.uid) ? Colors
-                                .red : Colors.grey,
+                            addPostModel.value.likeIDs!
+                                    .asMap()
+                                    .containsValue(auth.currentUser!.uid)
+                                ? Assets.imagesHeartFull
+                                : Assets.imagesHeartEmpty,
+                            height: 24.0,
+                            color: addPostModel.value.likeIDs!
+                                    .asMap()
+                                    .containsValue(auth.currentUser!.uid)
+                                ? Color(0xffe31b23)
+                                : kDarkBlueColor.withOpacity(0.60),
                           );
                         }),
                       ),
@@ -267,24 +285,32 @@ class _PostDetailsState extends State<PostDetails> {
                       Image.asset(
                         Assets.imagesComment,
                         height: 23.76,
+                        color: kDarkBlueColor.withOpacity(0.60),
                       ),
                       StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                        stream: fs.collection("Posts").doc(widget.postDocModel!.postID)
+                        stream: fs
+                            .collection("Posts")
+                            .doc(widget.postDocModel!.postID)
                             .collection("comments")
                             .snapshots(),
-                        builder: (BuildContext context,
-                            AsyncSnapshot<QuerySnapshot> snapshot,) {
+                        builder: (
+                          BuildContext context,
+                          AsyncSnapshot<QuerySnapshot> snapshot,
+                        ) {
                           int previousCount = 0;
                           log("inside stream-builder");
-                          if (snapshot.connectionState == ConnectionState.waiting) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
                             log("inside stream-builder in waiting state");
                             return MyText(
                               text: '$previousCount',
                               size: 18,
                               color: kDarkBlueColor.withOpacity(0.60),
                             );
-                          } else if (snapshot.connectionState == ConnectionState.active ||
-                              snapshot.connectionState == ConnectionState.done) {
+                          } else if (snapshot.connectionState ==
+                                  ConnectionState.active ||
+                              snapshot.connectionState ==
+                                  ConnectionState.done) {
                             if (snapshot.hasError) {
                               return MyText(
                                 text: '0',
@@ -334,6 +360,7 @@ class _PostDetailsState extends State<PostDetails> {
                       Image.asset(
                         Assets.imagesShare,
                         height: 25.23,
+                        color: kDarkBlueColor.withOpacity(0.60),
                       ),
                       MyText(
                         text: '04',
@@ -347,14 +374,21 @@ class _PostDetailsState extends State<PostDetails> {
             ),
             Expanded(
               child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                stream: fs.collection("Posts").doc(widget.postDocModel!.postID).collection("comments").snapshots(),
-                builder: (BuildContext context,
-                    AsyncSnapshot<QuerySnapshot> snapshot,) {
+                stream: fs
+                    .collection("Posts")
+                    .doc(widget.postDocModel!.postID)
+                    .collection("comments")
+                    .snapshots(),
+                builder: (
+                  BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot,
+                ) {
                   log("inside stream-builder");
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     log("inside stream-builder in waiting state");
                     return const Center(child: Text('Loading...'));
-                  } else if (snapshot.connectionState == ConnectionState.active ||
+                  } else if (snapshot.connectionState ==
+                          ConnectionState.active ||
                       snapshot.connectionState == ConnectionState.done) {
                     if (snapshot.hasError) {
                       return const Center(child: Text('No Comments Yet'));
@@ -369,7 +403,9 @@ class _PostDetailsState extends State<PostDetails> {
                           ),
                           itemCount: snapshot.data!.docs.length,
                           itemBuilder: (context, index) {
-                            CommentModel cmdl = CommentModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                            CommentModel cmdl = CommentModel.fromJson(
+                                snapshot.data!.docs[index].data()
+                                    as Map<String, dynamic>);
                             return CommentsTiles(
                               profileImage: cmdl.commenterImage,
                               name: cmdl.commenterName,
@@ -485,13 +521,19 @@ class _PostDetailsState extends State<PostDetails> {
                 commenterID: auth.currentUser!.uid,
                 commenterImage: userDetailsModel.profileImageUrl ?? "",
                 commenterName: userDetailsModel.fullName ?? "",
-                createdAt: DateFormat.yMEd().add_jms().format(DateTime.now()).toString(),
+                createdAt: DateFormat.yMEd()
+                    .add_jms()
+                    .format(DateTime.now())
+                    .toString(),
                 likeCount: 0,
                 likeIDs: [],
                 postID: addPostModel.value.postID,
               );
-              await fs.collection("Posts").doc(widget.postDocModel!.postID)
-                  .collection("comments").add(cmdl.toJson());
+              await fs
+                  .collection("Posts")
+                  .doc(widget.postDocModel!.postID)
+                  .collection("comments")
+                  .add(cmdl.toJson());
             },
             child: Image.asset(
               Assets.imagesSend,

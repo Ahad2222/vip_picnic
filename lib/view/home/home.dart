@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
@@ -16,6 +17,7 @@ import 'package:vip_picnic/view/search_friends/search_friends.dart';
 import 'package:vip_picnic/view/story/post_new_story.dart';
 import 'package:vip_picnic/view/story/story.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
+import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:vip_picnic/view/widget/my_textfields.dart';
 
@@ -140,7 +142,7 @@ class Home extends StatelessWidget {
               log(userDetailsModel.profileImageUrl!);
               if (snapshot.connectionState == ConnectionState.waiting) {
                 log("inside stream-builder in waiting state");
-                return Center(child: CircularProgressIndicator());
+                return noPostYet();
               } else if (snapshot.connectionState == ConnectionState.active ||
                   snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasError) {
@@ -167,7 +169,7 @@ class Home extends StatelessWidget {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
                           log("inside stream-builder in waiting state");
-                          return Center(child: CircularProgressIndicator());
+                          return noPostYet();
                         } else if (snapshot.connectionState ==
                                 ConnectionState.active ||
                             snapshot.connectionState == ConnectionState.done) {
@@ -458,17 +460,13 @@ class PostWidget extends StatelessWidget {
                     ),
                     MyText(
                       //+ 8/4/2022
-                      text: '  •  ${postedTime!.split(' ')[1].split("/")[0]} ${monthList[int.parse(postedTime!.split(' ')[1].split("/")[1]) - 1]}',
+                      text:
+                          '  •  ${postedTime!.split(' ')[1].split("/")[0]} ${monthList[int.parse(postedTime!.split(' ')[1].split("/")[1]) - 1]}',
                       size: 15,
                       weight: FontWeight.w600,
                       color: kSecondaryColor.withOpacity(0.40),
                     ),
                   ],
-                ),
-                subtitle: MyText(
-                  text: '$title',
-                  size: 18,
-                  color: kSecondaryColor,
                 ),
                 trailing: isMyPost!
                     ? PopupMenuButton(
@@ -508,9 +506,6 @@ class PostWidget extends StatelessWidget {
                       )
                     : SizedBox(),
               ),
-              SizedBox(
-                height: 10,
-              ),
               GestureDetector(
                 onTap: () => Get.to(
                   () => PostDetails(
@@ -518,13 +513,28 @@ class PostWidget extends StatelessWidget {
                     postDocModel: postDocModel,
                   ),
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.network(
-                    postImage!,
-                    height: 220,
-                    fit: BoxFit.cover,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    MyText(
+                      paddingTop: 13,
+                      paddingLeft: 5,
+                      paddingBottom: 5,
+                      text: '$title',
+                      size: 18,
+                      maxLines: 3,
+                      overFlow: TextOverflow.ellipsis,
+                      color: kSecondaryColor,
+                    ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.network(
+                        postImage!,
+                        height: 220,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               SizedBox(
@@ -559,9 +569,13 @@ class PostWidget extends StatelessWidget {
                           // });
                         },
                         child: Image.asset(
-                          Assets.imagesHeart,
-                          height: 20.89,
-                          color: isLikeByMe! ? Colors.red : Colors.grey,
+                          isLikeByMe!
+                              ? Assets.imagesHeartFull
+                              : Assets.imagesHeartEmpty,
+                          height: 24.0,
+                          color: isLikeByMe!
+                              ? Color(0xffe31b23)
+                              : kDarkBlueColor.withOpacity(0.60),
                         ),
                       ),
                       MyText(
@@ -578,6 +592,7 @@ class PostWidget extends StatelessWidget {
                       Image.asset(
                         Assets.imagesComment,
                         height: 23.76,
+                        color: kDarkBlueColor.withOpacity(0.60),
                       ),
                       StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                         stream: fs
@@ -718,6 +733,7 @@ class PostWidget extends StatelessWidget {
                       Image.asset(
                         Assets.imagesShare,
                         height: 25.23,
+                        color: kDarkBlueColor.withOpacity(0.60),
                       ),
                       MyText(
                         text: '04',

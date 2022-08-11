@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:story_view/story_view.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
@@ -30,7 +31,7 @@ class _StoryState extends State<Story> {
     super.initState();
     storyItems.add(
       StoryItem.text(
-        title: 'Switch APP',
+        title: 'VIP PICNIC',
         backgroundColor: kSecondaryColor,
       ),
     );
@@ -75,7 +76,7 @@ class _StoryState extends State<Story> {
             repeat: true,
             // should the stories be slid forever
             onStoryShow: (s) {},
-            onComplete: () {},
+            onComplete: () => Get.back(),
             onVerticalSwipeComplete: (direction) {
               if (direction == Direction.down) {
                 Navigator.pop(context);
@@ -99,53 +100,6 @@ class _StoryState extends State<Story> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 30,
-                        vertical: 20,
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(50),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(
-                            sigmaX: 20,
-                            sigmaY: 20,
-                          ),
-                          child: Container(
-                            height: 50,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                            ),
-                            color: const Color(0xff323232).withOpacity(0.50),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                MyText(
-                                  text: '🤔',
-                                  size: 28,
-                                ),
-                                MyText(
-                                  text: '👏',
-                                  size: 28,
-                                ),
-                                MyText(
-                                  text: '😲',
-                                  size: 28,
-                                ),
-                                MyText(
-                                  text: '😂',
-                                  size: 28,
-                                ),
-                                MyText(
-                                  text: '😍',
-                                  size: 28,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(50),
                       child: BackdropFilter(
@@ -251,17 +205,7 @@ class _StoryState extends State<Story> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             GestureDetector(
-              // onTap: () => Get.to(
-              //   () => ControlStoryActions(),
-              // ),
-              child: Image.asset(
-                Assets.imagesMoreHoriz,
-                height: 28,
-                color: kPrimaryColor,
-              ),
-            ),
-            GestureDetector(
-              onTap: () {},
+              onTap: () => Get.back(),
               child: const Icon(
                 Icons.close,
                 size: 25,
