@@ -19,21 +19,13 @@ class UserSimplePreference {
   static const _keyAccountType = 'accountType';
   static const _keyCreatedAt = 'createdAt';
   static const _keyLanguageIndex = 'languageIndex';
-  static const _keyUserModelData = 'userModelData';
   static const _keyUserData = 'userData';
 
 
-  static Future setUserModelData(UserDetailsModel umdl) async {
-    await pref.write(_keyUserModelData, umdl);
+  static Future setUserData(UserDetailsModel obj) async {
+    await pref.write(_keyUserData, obj.toJson());
   }
 
-  static Future setUserData(UserDetailsModel umdl) async {
-    await pref.write(_keyUserData, umdl.toJson());
-  }
-
-  static Future<UserDetailsModel> getUserModelData() async {
-    return pref.read(_keyUserModelData);
-  }
   static Future getUserData() async {
     return pref.read(_keyUserData);
   }
@@ -51,7 +43,7 @@ class UserSimplePreference {
   }
 
   static Future getFullName() async {
-    await pref.read(_keyFullName);
+    return pref.read(_keyFullName);
   }
 
   static Future setEmail(String email) async {
@@ -59,7 +51,7 @@ class UserSimplePreference {
   }
 
   static Future getEmail() async {
-    await pref.read(_keyEmail);
+    return pref.read(_keyEmail);
   }
 
   static Future setUID(String uID) async {
@@ -67,7 +59,7 @@ class UserSimplePreference {
   }
 
   static Future getUID() async {
-    await pref.read(_keyUID);
+    return pref.read(_keyUID);
   }
 
   static Future setPassword(String password) async {
@@ -75,7 +67,7 @@ class UserSimplePreference {
   }
 
   static Future getPassword() async {
-    await pref.read(_keyPassword);
+    return pref.read(_keyPassword);
   }
 
   static Future setPhoneNumber(String phoneNumber) async {
@@ -83,7 +75,7 @@ class UserSimplePreference {
   }
 
   static Future getPhoneNumber() async {
-    await pref.read(_keyPhone);
+    return pref.read(_keyPhone);
   }
 
   static Future setCity(String city) async {
@@ -91,7 +83,7 @@ class UserSimplePreference {
   }
 
   static Future getCity() async {
-    await pref.read(_keyCity);
+    return pref.read(_keyCity);
   }
 
   static Future setState(String state) async {
@@ -99,7 +91,7 @@ class UserSimplePreference {
   }
 
   static Future getState() async {
-    await pref.read(_keyState);
+    return pref.read(_keyState);
   }
 
   static Future setAddress(String address) async {
@@ -107,7 +99,7 @@ class UserSimplePreference {
   }
 
   static Future getAddress() async {
-    await pref.read(_keyAddress);
+    return pref.read(_keyAddress);
   }
 
   static Future setZip(String zip) async {
@@ -115,7 +107,7 @@ class UserSimplePreference {
   }
 
   static Future getZip() async {
-    await pref.read(_keyZip);
+    return pref.read(_keyZip);
   }
 
   static Future setAccountType(String accountType) async {
@@ -123,7 +115,7 @@ class UserSimplePreference {
   }
 
   static Future getAccountType() async {
-    await pref.read(_keyAccountType);
+    return pref.read(_keyAccountType);
   }
 
   static Future setCreatedAt(String createdAt) async {
@@ -131,7 +123,7 @@ class UserSimplePreference {
   }
 
   static Future getCreatedAt() async {
-    await pref.read(_keyCreatedAt);
+    return pref.read(_keyCreatedAt);
   }
 
   //Used for storing selected application language
@@ -140,6 +132,7 @@ class UserSimplePreference {
   }
 
   static Future getLanguageIndex() async {
-    await pref.read(_keyLanguageIndex);
+    return pref.read(_keyLanguageIndex);
   }
+
 }

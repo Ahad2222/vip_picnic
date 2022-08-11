@@ -53,18 +53,19 @@ class GoogleAuthController extends GetxController {
             await accounts.doc(userCredential.user!.uid).set(
                   userDetailsModel.toJson(),
                 );
+            await UserSimplePreference.setUserData(userDetailsModel);
             Get.offAll(
               () => BottomNavBar(),
             );
             navigatorKey.currentState!.popUntil((route) => route.isCurrent);
           } else {
             await accounts.doc(userCredential.user!.uid).get().then(
-              (value) {
+              (value) async {
                 userDetailsModel = UserDetailsModel.fromJson(
                   value.data() as Map<String, dynamic>,
                 );
+                await UserSimplePreference.setUserData(userDetailsModel);
               },
-
             );
             Get.offAll(
               () => BottomNavBar(),

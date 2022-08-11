@@ -83,7 +83,6 @@ class _SearchFriendsState extends State<SearchFriends> {
                 if (snapshot.hasError) {
                   return const Text('Some unknown error occurred');
                 } else if (snapshot.hasData) {
-                  log("inside hasData and ${snapshot.data!.docs}");
                   if (snapshot.data!.docs.length > 0) {
                     return ListView.builder(
                       shrinkWrap: true,
@@ -205,7 +204,7 @@ class _SearchFriendsState extends State<SearchFriends> {
                 if (snapshot.hasError) {
                   return const Text('Some unknown error occurred');
                 } else if (snapshot.hasData) {
-                  log("inside hasData and ${snapshot.data!.docs}");
+                  // log("inside hasData and ${snapshot.data!.docs}");
                   if (snapshot.data!.docs.length > 0) {
                     return ListView.builder(
                       shrinkWrap: true,

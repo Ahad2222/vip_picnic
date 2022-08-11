@@ -58,13 +58,14 @@ class ChooseLanguageController extends GetxController {
     // TODO: implement onInit
     super.onInit();
     currentIndex.value = await UserSimplePreference.getLanguageIndex() ?? 0;
+    Localization().selectedLocale(languages[currentIndex.value]);
     update();
   }
 
   void selectedIndex(int index, String lang) async {
     currentIndex.value = index;
     await UserSimplePreference.setLanguageIndex(currentIndex.value);
-    Localization().selectedLocale(lang);
+    Localization().selectedLocale(languages[currentIndex.value]);
     update();
   }
 }

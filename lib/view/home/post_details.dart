@@ -292,7 +292,6 @@ class _PostDetailsState extends State<PostDetails> {
                                 color: kDarkBlueColor.withOpacity(0.60),
                               );
                             } else if (snapshot.hasData) {
-                              log("inside hasData and ${snapshot.data!.docs}");
                               if (snapshot.data!.docs.length > 0) {
                                 previousCount = snapshot.data!.docs.length;
                                 return MyText(
@@ -360,7 +359,7 @@ class _PostDetailsState extends State<PostDetails> {
                     if (snapshot.hasError) {
                       return const Center(child: Text('No Comments Yet'));
                     } else if (snapshot.hasData) {
-                      log("inside hasData and ${snapshot.data!.docs}");
+                      // log("inside hasData and ${snapshot.data!.docs}");
                       if (snapshot.data!.docs.length > 0) {
                         return ListView.builder(
                           shrinkWrap: true,
