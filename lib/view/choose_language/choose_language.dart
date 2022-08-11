@@ -59,10 +59,6 @@ class ChooseLanguageController extends GetxController {
     // TODO: implement onInit
     super.onInit();
     currentIndex.value = await UserSimplePreference.getLanguageIndex() ?? 0;
-    FirebaseFirestore.instance.collection("CurrentIndex").add({
-      "currentIndex.value" : "${currentIndex.value}",
-      "languages[currentIndex.value]" : "${languages[currentIndex.value]}",
-    });
     Localization().selectedLocale(languages[currentIndex.value]);
     update();
   }

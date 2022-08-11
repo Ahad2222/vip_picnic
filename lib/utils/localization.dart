@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/translations/en_US.dart';
 import 'package:vip_picnic/translations/es_SP.dart';
@@ -24,13 +23,7 @@ class Localization extends Translations {
   void selectedLocale(
     String lang,
   ) {
-    FirebaseFirestore.instance.collection("CurrentLocale").add({
-      "lang in selectedLocale" : "$lang"
-    });
     final currentLocale = _getLocalFromLanguages(lang);
-    FirebaseFirestore.instance.collection("CurrentLocale").add({
-      "currentLocale" : "$currentLocale"
-    });
     locale = currentLocale;
     Get.updateLocale(currentLocale);
   }
