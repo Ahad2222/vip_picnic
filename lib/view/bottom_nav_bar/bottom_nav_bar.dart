@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
+import 'package:vip_picnic/utils/dynamic_link_handler.dart';
 import 'package:vip_picnic/view/chat/chat_head.dart';
 import 'package:vip_picnic/view/home/home.dart';
 import 'package:vip_picnic/view/notifications/notifications.dart';
@@ -21,6 +22,14 @@ class BottomNavBar extends StatefulWidget {
 }
 
 class _BottomNavBarState extends State<BottomNavBar> {
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    DynamicLinkHandler.initDynamicLink();
+  }
+
   final List<Widget> screens = [
     Home(),
     ChatHead(),
