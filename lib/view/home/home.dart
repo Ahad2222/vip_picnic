@@ -694,7 +694,9 @@ class PostWidget extends StatelessWidget {
                         short: true,
                       );
                       log("fetched shareLink: $shareLink");
-                      Share.share(shareLink);
+                      ShareResult sr = await Share.shareWithResult(shareLink);
+                      log("ShareResult is: ${sr.status} sr.status == ShareResultStatus.success: ${sr.status == ShareResultStatus.success}");
+                      log("ShareResult is: ${sr.status} sr.status == ShareResultStatus.dismissed: ${sr.status == ShareResultStatus.dismissed}");
                     },
                     child: Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
