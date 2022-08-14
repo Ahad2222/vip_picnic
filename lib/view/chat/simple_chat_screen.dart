@@ -130,7 +130,10 @@ class _ChatScreenState extends State<ChatScreen> {
     log("'audio-time in uploadAudio': '${minutes}:${seconds}'");
     final firebaseStorageRef = FirebaseStorage.instance
         .ref()
-        .child('${chatRoomID}/audio${DateTime.now().millisecondsSinceEpoch.toString()}.mp3');
+        .child('${chatRoomID}/audio${DateTime
+        .now()
+        .millisecondsSinceEpoch
+        .toString()}.mp3');
 
     UploadTask task = firebaseStorageRef.putFile(File(chatController.recordFilePath ?? ""));
     task.then((value) async {
@@ -156,7 +159,9 @@ class _ChatScreenState extends State<ChatScreen> {
     bool isAudioMsgEmpty = audioMsg?.isNotEmpty ?? false;
     if (isAudioMsgEmpty) {
       await FirebaseFirestore.instance.runTransaction((transaction) async {
-        var time = DateTime.now().millisecondsSinceEpoch;
+        var time = DateTime
+            .now()
+            .millisecondsSinceEpoch;
 
         Map<String, dynamic> messageMap = {
           "sendById": userDetailsModel.uID,
@@ -247,6 +252,7 @@ class _ChatScreenState extends State<ChatScreen> {
   getRoomId() async {
     // SharedPreferences _prefs = await SharedPreferences.getInstance();
     userID = userDetailsModel.uID!;
+    log("userID: $userID");
     if (userDetailsModel.uID! != widget.docs!['user2Model']['uID']) {
       anotherUserID = widget.docs!['user2Model']['uID'];
       anotherUserName = widget.docs!['user2Model']['fullName'];
@@ -256,6 +262,9 @@ class _ChatScreenState extends State<ChatScreen> {
       anotherUserName = widget.docs!['user1Model']['fullName'];
       anotherUserImage = widget.docs!['user1Model']['profileImageUrl'];
     }
+    log("anotherUserID: $anotherUserID");
+    log("anotherUserName: $anotherUserName");
+    log("anotherUserImage: $anotherUserImage");
     /**/
     // anotherUserID = authController.userModel.value.id != crm.value.user2Model.id
     //     ? widget.docs['user2Model']['id']
@@ -1009,7 +1018,9 @@ class _ChatScreenState extends State<ChatScreen> {
       messageEditingController.value.text = "";
       // var encryptedMessage =
       print("inside the text part");
-      var time = DateTime.now().millisecondsSinceEpoch;
+      var time = DateTime
+          .now()
+          .millisecondsSinceEpoch;
       Map<String, dynamic> messageMap = {
         "sendById": userDetailsModel.uID,
         "sendByName": userDetailsModel.fullName,
@@ -1031,7 +1042,9 @@ class _ChatScreenState extends State<ChatScreen> {
       chatController.addConversationMessage(chatRoomID, time, "text", messageMap, messageText);
       log("index is: ${lastIndex.value}");
     } else if (imageFile != null && (imageUrl != null || imageUrl != "")) {
-      var time = DateTime.now().millisecondsSinceEpoch;
+      var time = DateTime
+          .now()
+          .millisecondsSinceEpoch;
 
       Map<String, dynamic> messageMap = {
         "sendById": userDetailsModel.uID,
@@ -1071,130 +1084,146 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget chatMessageList() {
     return
-        // isWaiting
-        //   ? Container(
-        // color: Colors.transparent,
-        //       child: Center(
-        //       child: CircularProgressIndicator(),
-        //     ))
-        //   :
-        StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream:
-          fs.collection(chatRoomCollection).doc(chatRoomID).collection(messagesCollection).orderBy('time').snapshots(),
-      builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (snapshot.hasData) {
-          // scrollController.animateTo(
-          //   scrollController.position.maxScrollExtent,
-          //   curve: Curves.easeOut,
-          //   duration: const Duration(milliseconds: 500),
-          // );
-          // /*
-          WidgetsBinding.instance?.addPostFrameCallback((_) {
-            if (scrollController.hasClients) {
-              scrollController.jumpTo(
-                scrollController.position.maxScrollExtent,
-                // curve: Curves.easeIn, duration: Duration(milliseconds: 1000)
-              );
-            }
-            // else {
-            //    // setState(() => null);
-            //  }
-          });
-          // * */
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(
-              vertical: 15,
-            ),
-            controller: scrollController,
-            // reverse: true,
-            // shrinkWrap: true,
-            itemCount: snapshot.data?.docs.length,
-            itemBuilder: (context, index) {
-              // if (index == snapshot.data.docs.length) {
-              //   if (MediaQuery
-              //       .of(context)
-              //       .viewInsets
-              //       .bottom != 0) {
-              //     log("inside keyboard visible");
-              //     return Container(
-              //       height: 150,
-              //     );
-              //   }
-              //   return Container(
-              //     height: 60,
-              //   );
-              // }
-              // if (messageSnap.connectionState == ConnectionState.none && messageSnap.hasData == null) {
-              //   print("messageSnap.data is ${messageSnap.data}");
-              //   //print('project snapshot data is: ${messageSnap.data}');
-              //   return Container();
-              // }
-              // print("messageSnap.data is ${messageSnap.data}");
-
-              Map<String, dynamic> data = snapshot.data?.docs[index].data() as Map<String, dynamic>;
-              print("snapshot.data.docs[index].data()[type] is: ${data["type"]}");
-              //TODO: Beware, here the widgets to show data start.
-              //TODO: Beware, here the widgets to show data start.
-              String type = data["type"];
-              String message = data["message"] != null ? data["message"] : "what is this?";
-              bool sendByMe = userDetailsModel.uID == data["sendById"];
-              String time = data["time"].toString();
-
-              var day = DateTime.fromMillisecondsSinceEpoch(
-                int.parse(time),
-              ).day.toString();
-              var month = DateTime.fromMillisecondsSinceEpoch(
-                int.parse(time),
-              ).month.toString();
-              var year = DateTime.fromMillisecondsSinceEpoch(
-                int.parse(time),
-              ).year.toString().substring(2);
-              var date = day + '-' + month + '-' + year;
-              var hour = DateTime.fromMillisecondsSinceEpoch(
-                int.parse(time),
-              ).hour;
-              var min = DateTime.fromMillisecondsSinceEpoch(
-                int.parse(time),
-              ).minute;
-              var ampm;
-              if (hour > 12) {
-                hour = hour % 12;
-                ampm = 'pm';
-              } else if (hour == 12) {
-                ampm = 'pm';
-              } else if (hour == 0) {
-                hour = 12;
-                ampm = 'am';
-              } else {
-                ampm = 'am';
+      // isWaiting
+      //   ? Container(
+      // color: Colors.transparent,
+      //       child: Center(
+      //       child: CircularProgressIndicator(),
+      //     ))
+      //   :
+      StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream:
+        fs.collection(chatRoomCollection).doc(chatRoomID).collection(messagesCollection).orderBy('time').snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasData) {
+            // scrollController.animateTo(
+            //   scrollController.position.maxScrollExtent,
+            //   curve: Curves.easeOut,
+            //   duration: const Duration(milliseconds: 500),
+            // );
+            // /*
+            WidgetsBinding.instance?.addPostFrameCallback((_) {
+              if (scrollController.hasClients) {
+                scrollController.jumpTo(
+                  scrollController.position.maxScrollExtent,
+                  // curve: Curves.easeIn, duration: Duration(milliseconds: 1000)
+                );
               }
-              switch (type) {
-                case 'text':
-                  return MessageBubbles(
-                    receiveImage: anotherUserImage,
-                    msg: message,
-                    time: "${hour.toString()}:"
-                        "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
-                        "${ampm}",
-                    senderType: !sendByMe ? 'receiver' : 'sender',
-                  );
-                  // return sendByMe
-                  //     ? RightBubble(
-                  //         type: 'text',
-                  //         time: "${hour.toString()}:"
-                  //             "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
-                  //             "${ampm}",
-                  //         msg: message,
-                  //       )
-                  //     : LeftBubble(
-                  //         personImage: anotherUserImage,
-                  //         type: 'text',
-                  //         time: "${hour.toString()}:"
-                  //             "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
-                  //             "${ampm}",
-                  //         msg: message,
-                  //       );
-                  break;
+              // else {
+              //    // setState(() => null);
+              //  }
+            });
+            // * */
+            return ListView.builder(
+              padding: const EdgeInsets.symmetric(
+                vertical: 15,
+              ),
+              controller: scrollController,
+              // reverse: true,
+              // shrinkWrap: true,
+              itemCount: snapshot.data?.docs.length,
+              itemBuilder: (context, index) {
+                // if (index == snapshot.data.docs.length) {
+                //   if (MediaQuery
+                //       .of(context)
+                //       .viewInsets
+                //       .bottom != 0) {
+                //     log("inside keyboard visible");
+                //     return Container(
+                //       height: 150,
+                //     );
+                //   }
+                //   return Container(
+                //     height: 60,
+                //   );
+                // }
+                // if (messageSnap.connectionState == ConnectionState.none && messageSnap.hasData == null) {
+                //   print("messageSnap.data is ${messageSnap.data}");
+                //   //print('project snapshot data is: ${messageSnap.data}');
+                //   return Container();
+                // }
+                // print("messageSnap.data is ${messageSnap.data}");
+
+                Map<String, dynamic> data = snapshot.data?.docs[index].data() as Map<String, dynamic>;
+                print("snapshot.data.docs[index].data()[type] is: ${data["type"]}");
+                //TODO: Beware, here the widgets to show data start.
+                //TODO: Beware, here the widgets to show data start.
+                String type = data["type"];
+                String message = data["message"] != null ? data["message"] : "what is this?";
+                bool sendByMe = userDetailsModel.uID == data["sendById"];
+                String time = data["time"].toString();
+
+                var day = DateTime
+                    .fromMillisecondsSinceEpoch(
+                  int.parse(time),
+                )
+                    .day
+                    .toString();
+                var month = DateTime
+                    .fromMillisecondsSinceEpoch(
+                  int.parse(time),
+                )
+                    .month
+                    .toString();
+                var year = DateTime
+                    .fromMillisecondsSinceEpoch(
+                  int.parse(time),
+                )
+                    .year
+                    .toString()
+                    .substring(2);
+                var date = day + '-' + month + '-' + year;
+                var hour = DateTime
+                    .fromMillisecondsSinceEpoch(
+                  int.parse(time),
+                )
+                    .hour;
+                var min = DateTime
+                    .fromMillisecondsSinceEpoch(
+                  int.parse(time),
+                )
+                    .minute;
+                var ampm;
+                if (hour > 12) {
+                  hour = hour % 12;
+                  ampm = 'pm';
+                } else if (hour == 12) {
+                  ampm = 'pm';
+                } else if (hour == 0) {
+                  hour = 12;
+                  ampm = 'am';
+                } else {
+                  ampm = 'am';
+                }
+                switch (type) {
+                  case 'text':
+                    return MessageBubbles(
+                      receiveImage: anotherUserImage,
+                      msg: message,
+                      time: "${hour.toString()}:"
+                          "${(min
+                          .toString()
+                          .length < 2) ? "0${min.toString()}" : min.toString()} "
+                          "${ampm}",
+                      senderType: !sendByMe ? 'receiver' : 'sender',
+                    );
+                    // return sendByMe
+                    //     ? RightBubble(
+                    //         type: 'text',
+                    //         time: "${hour.toString()}:"
+                    //             "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
+                    //             "${ampm}",
+                    //         msg: message,
+                    //       )
+                    //     : LeftBubble(
+                    //         personImage: anotherUserImage,
+                    //         type: 'text',
+                    //         time: "${hour.toString()}:"
+                    //             "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
+                    //             "${ampm}",
+                    //         msg: message,
+                    //       );
+                    break;
                 // case 'image':
                 //   return MessageBubbles(
                 //     receiveImage: widget.receiveImage,
@@ -1223,29 +1252,29 @@ class _ChatScreenState extends State<ChatScreen> {
                 //   //       );
                 //   /**/
                 //   break;
-                default:
-                  return Container();
-              }
-              // return MessageTile(
-              //   type: snapshot.data.docs[index].data()["type"],
-              //   message: messageSnap.data != null
-              //       ? messageSnap.data
-              //       : "what is this?",
-              //   sendByMe: authController.userModel.value.id ==
-              //       snapshot.data.docs[index].data()["sendById"],
-              //   time: snapshot.data.docs[index].data()["time"].toString(),
-              // );
-            },
-          );
-        } else {
-          return Container(
-            child: Center(
-              child: Text("Loading...."),
-            ),
-          );
-        }
-      },
-    );
+                  default:
+                    return Container();
+                }
+                // return MessageTile(
+                //   type: snapshot.data.docs[index].data()["type"],
+                //   message: messageSnap.data != null
+                //       ? messageSnap.data
+                //       : "what is this?",
+                //   sendByMe: authController.userModel.value.id ==
+                //       snapshot.data.docs[index].data()["sendById"],
+                //   time: snapshot.data.docs[index].data()["time"].toString(),
+                // );
+              },
+            );
+          } else {
+            return Container(
+              child: Center(
+                child: Text("Loading...."),
+              ),
+            );
+          }
+        },
+      );
   }
 
   @override
@@ -1283,21 +1312,27 @@ class _ChatScreenState extends State<ChatScreen> {
           title: chatController.showSearch.value
               ? SearchBar()
               : Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 10.0,
-                  children: [
-                    profileImage(
-                      context,
-                      size: 34.0,
-                      profileImage: anotherUserImage,
-                    ),
-                    MyText(
-                      text: '${anotherUserName}',
-                      size: 19,
-                      color: kSecondaryColor,
-                    ),
-                  ],
-                ),
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 10.0,
+            children: [
+              Obx(() {
+                return profileImage(
+                  context,
+                  size: 34.0,
+                  profileImage: anotherUserModel.value.profileImageUrl != null
+                      ? anotherUserModel.value.profileImageUrl : anotherUserImage,
+                );
+              }),
+              Obx(() {
+                return MyText(
+                  text: anotherUserModel.value.fullName != null
+                      ? anotherUserModel.value.fullName : anotherUserName,
+                  size: 19,
+                  color: kSecondaryColor,
+                );
+              }),
+            ],
+          ),
           actions: [
             Padding(
               padding: const EdgeInsets.only(
@@ -1341,9 +1376,7 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget sendField(
-    BuildContext context,
-  ) {
+  Widget sendField(BuildContext context,) {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Container(
@@ -1391,8 +1424,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           GestureDetector(
-                            onTap: () {
-                            },
+                            onTap: () {},
                             child: Image.asset(
                               Assets.imagesEmoji,
                               height: 19.31,
@@ -1478,8 +1510,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 }
 
-Widget profileImage(
-  BuildContext context, {
+Widget profileImage(BuildContext context, {
   String? profileImage,
   double? size = 44.45,
 }) {
@@ -1502,7 +1533,7 @@ Widget profileImage(
       child: ClipRRect(
         borderRadius: BorderRadius.circular(100),
         child: Image.network(
-          profileImage!,
+          profileImage ?? "",
           height: height(context, 1.0),
           width: width(context, 1.0),
           fit: BoxFit.cover,
