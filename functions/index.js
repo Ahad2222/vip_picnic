@@ -117,7 +117,7 @@ async function ImageChatsNotiSingle(token_o, msg, profileImageUrl, generalImageU
 }
 
 exports.notifyReceiverForChat = functions.firestore
-  .document("/ChatRoom/{documentId}/chats/{chatDocumentId}")
+  .document("/ChatRoom/{documentId}/messages/{chatDocumentId}")
   .onCreate(async (snap, context) => {
     var recId = snap.data().receivedById;
     var senId = snap.data().sendById;
@@ -130,7 +130,7 @@ exports.notifyReceiverForChat = functions.firestore
 
     var imageUrl = "No Name";
     var generalImage = "";
-    var myRetToken = "Not Retrieved Yet from Users Collection";
+    var myRetToken = "Not Retrieved Yet from Accounts Collection";
     functions.logger.info(recId.toString());
     functions.logger.info("Message By the Sender is:");
     functions.logger.info(message.toString());
@@ -140,7 +140,7 @@ exports.notifyReceiverForChat = functions.firestore
       generalImage = snap.data().message;
       await admin
         .firestore()
-        .collection("Users")
+        .collection("Accounts")
         .doc(recId)
         .get()
         .then((snapshot) => {
@@ -160,12 +160,13 @@ exports.notifyReceiverForChat = functions.firestore
         recName,
         chatRoomId
       );
-    } else if (snap.data().type == "text") {
+    }
+    else if (snap.data().type == "text") {
       //getting image and token of receiver from the firestore through admin sdk
       functions.logger.info("In Chat function: type is text");
       await admin
         .firestore()
-        .collection("Users")
+        .collection("Accounts")
         .doc(recId)
         .get()
         .then((snapshot) => {
@@ -189,7 +190,7 @@ exports.notifyReceiverForChat = functions.firestore
       //getting image and token of receiver from the firestore through admin sdk
       await admin
         .firestore()
-        .collection("Users")
+        .collection("Accounts")
         .doc(recId)
         .get()
         .then((snapshot) => {
@@ -213,7 +214,7 @@ exports.notifyReceiverForChat = functions.firestore
       //getting image and token of receiver from the firestore through admin sdk
       await admin
         .firestore()
-        .collection("Users")
+        .collection("Accounts")
         .doc(recId)
         .get()
         .then((snapshot) => {
