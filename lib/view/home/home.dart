@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
+import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/model/home_model/add_post_model.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
@@ -152,61 +153,61 @@ class Home extends StatelessWidget {
                     userDetailsModel = UserDetailsModel.fromJson(snapshot.data!.data() as Map<String, dynamic>);
                     var followedListToBeChecked =
                         userDetailsModel.iFollowed!.length > 0 ? userDetailsModel.iFollowed : ["something"];
-                    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                      stream: fs.collection("Posts").where("uID", whereIn: followedListToBeChecked).snapshots(),
-                      builder: (
-                        BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot,
-                      ) {
-                        log("inside stream-builder");
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          log("inside stream-builder in waiting state");
-                          return noPostYet();
-                        } else if (snapshot.connectionState == ConnectionState.active ||
-                            snapshot.connectionState == ConnectionState.done) {
-                          if (snapshot.hasError) {
-                            return const Text('Some unknown error occurred');
-                          } else if (snapshot.hasData) {
-                            // log("inside hasData and ${snapshot.data!.docs}");
-                            if (snapshot.data!.docs.length > 0) {
-                              return ListView.builder(
-                                shrinkWrap: true,
-                                physics: BouncingScrollPhysics(),
-                                padding: EdgeInsets.symmetric(
-                                  vertical: 30,
-                                ),
-                                itemCount: snapshot.data!.docs.length,
-                                itemBuilder: (context, index) {
-                                  AddPostModel addPostModel =
-                                      AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
-                                  return PostWidget(
-                                    postDocModel: addPostModel,
-                                    postID: addPostModel.postID,
-                                    isLikeByMe: addPostModel.likeIDs!.asMap().containsValue(auth.currentUser!.uid),
-                                    profileImage: addPostModel.profileImage,
-                                    name: addPostModel.postBy,
-                                    postedTime: addPostModel.createdAt,
-                                    title: addPostModel.postTitle,
-                                    likeCount: addPostModel.likeIDs!.length,
-                                    isMyPost: false,
-                                    postImage: addPostModel.postImages![0],
-                                  );
-                                },
-                              );
+                      return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                        stream: fs.collection("Posts").where("uID", whereIn: followedListToBeChecked).snapshots(),
+                        builder: (
+                            BuildContext context,
+                            AsyncSnapshot<QuerySnapshot> snapshot,
+                            ) {
+                          log("inside stream-builder");
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            log("inside stream-builder in waiting state");
+                            return noPostYet();
+                          } else if (snapshot.connectionState == ConnectionState.active ||
+                              snapshot.connectionState == ConnectionState.done) {
+                            if (snapshot.hasError) {
+                              return const Text('Some unknown error occurred');
+                            } else if (snapshot.hasData) {
+                              // log("inside hasData and ${snapshot.data!.docs}");
+                              if (snapshot.data!.docs.length > 0) {
+                                return ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: BouncingScrollPhysics(),
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: 30,
+                                  ),
+                                  itemCount: snapshot.data!.docs.length,
+                                  itemBuilder: (context, index) {
+                                    AddPostModel addPostModel =
+                                    AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                                    return PostWidget(
+                                      postDocModel: addPostModel,
+                                      postID: addPostModel.postID,
+                                      isLikeByMe: addPostModel.likeIDs!.asMap().containsValue(auth.currentUser!.uid),
+                                      profileImage: addPostModel.profileImage,
+                                      name: addPostModel.postBy,
+                                      postedTime: addPostModel.createdAt,
+                                      title: addPostModel.postTitle,
+                                      likeCount: addPostModel.likeIDs!.length,
+                                      isMyPost: false,
+                                      postImage: addPostModel.postImages![0],
+                                    );
+                                  },
+                                );
+                              } else {
+                                return noPostYet();
+                              }
                             } else {
+                              log("in else of hasData done and: ${snapshot.connectionState} and"
+                                  " snapshot.hasData: ${snapshot.hasData}");
                               return noPostYet();
                             }
                           } else {
-                            log("in else of hasData done and: ${snapshot.connectionState} and"
-                                " snapshot.hasData: ${snapshot.hasData}");
+                            log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
                             return noPostYet();
                           }
-                        } else {
-                          log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
-                          return noPostYet();
-                        }
-                      },
-                    );
+                        },
+                      );
                   } else {
                     return noPostYet();
                   }
@@ -555,10 +556,19 @@ class PostWidget extends StatelessWidget {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     spacing: 10.0,
                     children: [
-                      Image.asset(
-                        Assets.imagesComment,
-                        height: 23.76,
-                        color: kDarkBlueColor.withOpacity(0.60),
+                      GestureDetector(
+                        onTap: () async {
+                          UserDetailsModel umdl = UserDetailsModel();
+                          await fs.collection("Accounts").doc(postDocModel!.uID).get().then((value) {
+                            umdl = UserDetailsModel.fromJson(value.data() ?? {});
+                          });
+                          await chatController.createChatRoomAndStartConversation(user1Model: userDetailsModel, user2Model: umdl);
+                        },
+                        child: Image.asset(
+                          Assets.imagesComment,
+                          height: 23.76,
+                          color: kDarkBlueColor.withOpacity(0.60),
+                        ),
                       ),
                       StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                         stream: fs.collection("Posts").doc(postID).collection("comments").snapshots(),
@@ -566,7 +576,7 @@ class PostWidget extends StatelessWidget {
                           BuildContext context,
                           AsyncSnapshot<QuerySnapshot> snapshot,
                         ) {
-                          int previousCount = 0;
+                          int previousCount = snapshot.data != null ? snapshot.data!.docs.length : 0;
                           log("inside stream-builder");
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             log("inside stream-builder in waiting state");
@@ -579,7 +589,7 @@ class PostWidget extends StatelessWidget {
                               snapshot.connectionState == ConnectionState.done) {
                             if (snapshot.hasError) {
                               return MyText(
-                                text: '0',
+                                text: "$previousCount",
                                 size: 18,
                                 color: kDarkBlueColor.withOpacity(0.60),
                               );
@@ -659,7 +669,7 @@ class PostWidget extends StatelessWidget {
                                 // );
                               } else {
                                 return MyText(
-                                  text: '0',
+                                  text: "$previousCount",
                                   size: 18,
                                   color: kDarkBlueColor.withOpacity(0.60),
                                 );

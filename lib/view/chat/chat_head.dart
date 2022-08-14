@@ -1,340 +1,341 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:vip_picnic/config/routes/routes_config.dart';
-import 'package:vip_picnic/constant/color.dart';
-import 'package:vip_picnic/generated/assets.dart';
-import 'package:vip_picnic/provider/chat_provider/chat_head_provider.dart';
-import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
-import 'package:vip_picnic/view/chat/group_chat/g_chat_screen.dart';
-import 'package:vip_picnic/view/chat/simple_chat_screen.dart';
-import 'package:vip_picnic/view/widget/height_width.dart';
-import 'package:vip_picnic/view/widget/my_text.dart';
-import 'package:vip_picnic/view/widget/my_textfields.dart';
-
-class ChatHead extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<ChatHeadProvider>(
-      builder: (context, ChatHeadProvider, child) {
-        return Scaffold(
-          appBar: AppBar(
-            centerTitle: true,
-            toolbarHeight: 75,
-            leading: Padding(
-              padding: const EdgeInsets.only(
-                left: 5,
-              ),
-              child: IconButton(
-                onPressed: () => Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BottomNavBar(
-                      currentIndex: 0,
-                    ),
-                  ),
-                  (route) => route.isCurrent,
-                ),
-                icon: Image.asset(
-                  Assets.imagesArrowBack,
-                  height: 22.04,
-                ),
-              ),
-            ),
-            title: ChatHeadProvider.showSearch
-                ? SearchBar()
-                : MyText(
-                    text: 'Messages',
-                    size: 20,
-                    color: kSecondaryColor,
-                  ),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(
-                  right: 15,
-                ),
-                child: Center(
-                  child: GestureDetector(
-                    onTap: () => ChatHeadProvider.showSearchBar(),
-                    child: Image.asset(
-                      Assets.imagesSearchWithBg,
-                      height: 35,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          body: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 15,
-                  vertical: 15,
-                ),
-                child: Row(
-                  children: List.generate(
-                    ChatHeadProvider.tabs.length,
-                    (index) {
-                      return Container(
-                        height: 44,
-                        margin: EdgeInsets.only(
-                          right: 10,
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 15,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(50),
-                          color: ChatHeadProvider.currentTab == index
-                              ? kSecondaryColor
-                              : kPrimaryColor,
-                        ),
-                        child: InkWell(
-                          onTap: () => ChatHeadProvider.selectedTab(index),
-                          child: Center(
-                            child: MyText(
-                              text: ChatHeadProvider.tabs[index],
-                              size: 16,
-                              color: ChatHeadProvider.currentTab == index
-                                  ? kPrimaryColor
-                                  : kSecondaryColor,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              Expanded(
-                child: ChatHeadProvider.currentTab == 0
-                    ? SimpleChatHeads()
-                    : GroupChatHeads(),
-              ),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: ChatHeadProvider.currentTab == 0
-                ? () {}
-                : () => Navigator.pushNamed(
-                      context,
-                      AppLinks.createNewGroup,
-                    ),
-            elevation: 1,
-            highlightElevation: 1,
-            splashColor: kPrimaryColor.withOpacity(0.1),
-            backgroundColor: kGreenColor,
-            child: Image.asset(
-              Assets.imagesPlusIcon,
-              height: 22.68,
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class SimpleChatHeads extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      shrinkWrap: true,
-      padding: EdgeInsets.symmetric(
-        horizontal: 15,
-      ),
-      physics: BouncingScrollPhysics(),
-      itemCount: 6,
-      itemBuilder: (context, index) {
-        return chatHeadTiles(
-          context,
-          profileImage: Assets.imagesProfileAvatar,
-          name: 'Username',
-          msg: 'Hi Good morning, how we...',
-          time: 'Today',
-        );
-      },
-    );
-  }
-
-  Widget chatHeadTiles(
-    BuildContext context, {
-    String? profileImage,
-    name,
-    msg,
-    time,
-  }) {
-    return Container(
-      margin: EdgeInsets.only(
-        bottom: 10,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Color(0xffF5F5F6),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: ListTile(
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ChatScreen(
-                receiveImage: profileImage,
-                receiveName: name,
-              ),
-            ),
-          ),
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 15,
-            vertical: 10,
-          ),
-          leading: Container(
-            height: 56.4,
-            width: 56.4,
-            padding: EdgeInsets.all(5),
-            decoration: BoxDecoration(
-              color: kPrimaryColor,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: kBlackColor.withOpacity(0.16),
-                  blurRadius: 6,
-                  offset: Offset(0, 0),
-                ),
-              ],
-            ),
-            child: Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(100),
-                child: Image.asset(
-                  '$profileImage',
-                  height: height(context, 1.0),
-                  width: width(context, 1.0),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ),
-          title: MyText(
-            text: '$name',
-            size: 14,
-            weight: FontWeight.w600,
-            color: kSecondaryColor,
-          ),
-          subtitle: MyText(
-            paddingTop: 8,
-            text: '$msg',
-            size: 14,
-            weight: FontWeight.w300,
-            color: kSecondaryColor,
-            maxLines: 1,
-            overFlow: TextOverflow.ellipsis,
-          ),
-          trailing: Column(
-            children: [
-              MyText(
-                paddingTop: 5,
-                text: '$time',
-                weight: FontWeight.w300,
-                color: kSecondaryColor,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class GroupChatHeads extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      shrinkWrap: true,
-      padding: EdgeInsets.symmetric(
-        horizontal: 15,
-      ),
-      physics: BouncingScrollPhysics(),
-      itemCount: 6,
-      itemBuilder: (context, index) {
-        return groupChatHeadsTiles(
-          context,
-          groupPhoto: Assets.imagesDummyImg,
-          name: 'Event Name',
-          totalMembers: '8',
-          time: '11 March',
-        );
-      },
-    );
-  }
-
-  Widget groupChatHeadsTiles(
-    BuildContext context, {
-    String? groupPhoto,
-    name,
-    totalMembers,
-    time,
-  }) {
-    return Container(
-      margin: EdgeInsets.only(
-        bottom: 10,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Color(0xffF5F5F6),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: ListTile(
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => GroupChat(
-                groupName: name,
-              ),
-            ),
-          ),
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 15,
-            vertical: 10,
-          ),
-          leading: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              '$groupPhoto',
-              height: 56,
-              width: 56,
-              fit: BoxFit.cover,
-            ),
-          ),
-          title: MyText(
-            text: '$name',
-            size: 14,
-            weight: FontWeight.w600,
-            color: kSecondaryColor,
-          ),
-          subtitle: MyText(
-            paddingTop: 8,
-            text: '$totalMembers members',
-            size: 14,
-            weight: FontWeight.w300,
-            color: kSecondaryColor,
-            maxLines: 1,
-            overFlow: TextOverflow.ellipsis,
-          ),
-          trailing: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              MyText(
-                paddingBottom: 5,
-                text: '$time',
-                weight: FontWeight.w300,
-                color: kSecondaryColor,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+// import 'dart:developer';
+//
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_screenutil/flutter_screenutil.dart';
+// import 'package:get/get.dart';
+// import 'package:hop_on_passenger/constant/all_controller.dart';
+// import 'package:hop_on_passenger/model/chat_head_model.dart';
+// import 'package:hop_on_passenger/widget/my_text.dart';
+// import '../../constant/constant.dart';
+// import '../../model/message_page.dart';
+// import 'chat_screen.dart';
+//
+// class ChatHead extends StatefulWidget {
+//   @override
+//   _ChatHeadState createState() => _ChatHeadState();
+// }
+//
+// class _ChatHeadState extends State<ChatHead> {
+//   TextEditingController searchController = TextEditingController();
+//   @override
+//   Widget build(BuildContext context) {
+//     return SafeArea(
+//       child: Scaffold(
+//         resizeToAvoidBottomInset: false,
+//         backgroundColor: KPrimaryColor,
+//         appBar: AppBar(
+//           title: Text(
+//             "Message",
+//             style: MediumBlackHeading,
+//           ),
+//           backgroundColor: KPrimaryColor,
+//           leading: GestureDetector(
+//             onTap: () {
+//               Get.back();
+//             },
+//             child: Card(
+//               margin: EdgeInsets.only(left: 15, bottom: 5),
+//               child: Container(
+//                 height: 35,
+//                 width: 40,
+//                 decoration: BoxDecoration(
+//                   borderRadius: BorderRadius.circular(10),
+//                   color: KPrimaryColor,
+//                 ),
+//                 child: Center(
+//                   child: Image.asset(
+//                     "assets/Group 1 (2).png",
+//                     height: 15.8,
+//                   ),
+//                 ),
+//               ),
+//             ),
+//           ),
+//           centerTitle: true,
+//           elevation: 0,
+//         ),
+//         body: Container(
+//           margin: EdgeInsets.symmetric(horizontal: 10),
+//           child: ListView(
+//             children: [
+//               SizedBox(height: 20.h),
+//               //+Search Field
+//               Container(
+//                 decoration: BoxDecoration(
+//                   color: KGreyColor,
+//                   borderRadius: BorderRadius.circular(100),
+//                 ),
+//                 child: TextField(
+//                   controller: searchController,
+//                   style: inputText,
+//                   cursorColor: KSecondaryColor,
+//                   decoration: InputDecoration(
+//                     prefixIcon: Column(
+//                       mainAxisAlignment: MainAxisAlignment.center,
+//                       children: [
+//                         Image.asset(
+//                           "assets/Vector - 2022-03-21T235828.129.png",
+//                           height: 18.h,
+//                         ),
+//                       ],
+//                     ),
+//                     hintText: "Search here...",
+//                     hintStyle: GreyLightTextSmall,
+//                     contentPadding: EdgeInsets.symmetric(vertical: 18.h, horizontal: 20),
+//                     border: InputBorder.none,
+//                   ),
+//                 ),
+//               ),
+//               // searchController.text.trim().isEmpty
+//               //     ?
+//               StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+//                       stream: ffstore
+//                           .collection(chatRoomCollection)
+//                           .where('users', arrayContains: authController.passengerModel.value.currentUserId)
+//                           .snapshots(),
+//                       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+//                         if (snapshot.connectionState == ConnectionState.waiting) {
+//                           return SizedBox();
+//                         } else if (snapshot.connectionState == ConnectionState.active ||
+//                             snapshot.connectionState == ConnectionState.done) {
+//                           if (snapshot.hasError) {
+//                             return const Text('Error');
+//                           } else if (snapshot.hasData) {
+//                             return ListView.builder(
+//                               itemCount: snapshot.data!.docs.length,
+//                               shrinkWrap: true,
+//                               padding: const EdgeInsets.symmetric(horizontal: 15),
+//                               physics: const BouncingScrollPhysics(),
+//                               itemBuilder: (context, index) {
+//                                 var myId = authController.passengerModel.value.currentUserId;
+//                                 Rx<ChatHeadModel> data = ChatHeadModel().obs;
+//                                 QueryDocumentSnapshot<Object?>? doc = snapshot.data?.docs[index];
+//
+//                                 data.value = ChatHeadModel.fromDocumentSnapshot(doc!);
+//                                 return Obx(() {
+//                                   return ReadMessage(
+//                                     img: data.value.driverModel?.imgUrl,
+//                                     chatRoomId: data.value.chatRoomId,
+//                                     message: data.value.lastMessage,
+//                                     name:
+//                                         "${data.value.driverModel?.firstName} ${data.value.driverModel?.lastName}",
+//                                     time: data.value.lastMessageAt,
+//                                   );
+//                                 });
+//                               },
+//                             );
+//                           } else {
+//                             log("in else of hasData done and: ${snapshot.connectionState} and"
+//                                 " snapshot.hasData: ${snapshot.hasData}");
+//                             return SizedBox();
+//                           }
+//                         } else {
+//                           log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+//                           return SizedBox();
+//                         }
+//                       },
+//                     )
+//                   // : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+//                   //     // ffstore.collection(chatRoomCollection)
+//                   //     //     .where("passengerId", isEqualTo: authController.passengerModel.value.currentUserId)
+//                   //     //     .where("searchParameters", arrayContains: "varToSearch").snapshots();
+//                   //
+//                   //     stream: ffstore
+//                   //         .collection(chatRoomCollection)
+//                   //       .where('users', arrayContains: authController.passengerModel.value.currentUserId)
+//                   //         .where("passengerId", isEqualTo: authController.passengerModel.value.currentUserId)
+//                   //         .where("searchParameters", arrayContains: searchController.text)
+//                   //         .snapshots(),
+//                   //     builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+//                   //       if (snapshot.connectionState == ConnectionState.waiting) {
+//                   //         return SizedBox();
+//                   //       } else if (snapshot.connectionState == ConnectionState.active ||
+//                   //           snapshot.connectionState == ConnectionState.done) {
+//                   //         if (snapshot.hasError) {
+//                   //           return const Text('Error');
+//                   //         } else if (snapshot.hasData) {
+//                   //           return ListView.builder(
+//                   //             itemCount: snapshot.data!.docs.length,
+//                   //             shrinkWrap: true,
+//                   //             padding: const EdgeInsets.symmetric(horizontal: 15),
+//                   //             physics: const BouncingScrollPhysics(),
+//                   //             itemBuilder: (context, index) {
+//                   //               var myId = authController.passengerModel.value.currentUserId;
+//                   //               Rx<ChatHeadModel> data = ChatHeadModel().obs;
+//                   //               QueryDocumentSnapshot<Object?>? doc = snapshot.data?.docs[index];
+//                   //
+//                   //               data.value = ChatHeadModel.fromDocumentSnapshot(doc!);
+//                   //               return Obx(() {
+//                   //                 return ReadMessage(
+//                   //                   img: data.value.driverModel?.imgUrl,
+//                   //                   chatRoomId: data.value.chatRoomId,
+//                   //                   message: data.value.lastMessage,
+//                   //                   name:
+//                   //                       "${data.value.driverModel?.firstName} ${data.value.driverModel?.lastName}",
+//                   //                   time: data.value.lastMessageAt,
+//                   //                 );
+//                   //               });
+//                   //             },
+//                   //           );
+//                   //         } else {
+//                   //           log("in else of hasData done and: ${snapshot.connectionState} and"
+//                   //               " snapshot.hasData: ${snapshot.hasData}");
+//                   //           return SizedBox();
+//                   //         }
+//                   //       } else {
+//                   //         log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+//                   //         return SizedBox();
+//                   //       }
+//                   //     },
+//                   //   )
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+//
+// class ReadMessage extends StatefulWidget {
+//   const ReadMessage({
+//     this.img,
+//     this.chatRoomId,
+//     this.name,
+//     this.message,
+//     this.time,
+//   });
+//
+//   final img;
+//   final chatRoomId;
+//   final name;
+//   final message;
+//   final time;
+//
+//   @override
+//   _ReadMessageState createState() => _ReadMessageState();
+// }
+//
+// class _ReadMessageState extends State<ReadMessage> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return GestureDetector(
+//       onTap: () async {
+//         var chatRoomMap;
+//         chatRoomMap = await chatController.getAChatRoomInfo(widget.chatRoomId);
+//         Get.to(() => ChatScreen(docs: chatRoomMap), transition: Transition.leftToRight);
+//         Get.to(ChatScreen(), transition: Transition.leftToRight);
+//       },
+//       child: Card(
+//         margin: EdgeInsets.only(top: 10),
+//         child: Container(
+//           decoration: BoxDecoration(
+//             borderRadius: BorderRadius.circular(9),
+//           ),
+//           child: Row(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               Container(
+//                 width: Get.width * 0.8,
+//                 child: ListTile(
+//                   contentPadding: EdgeInsets.symmetric(horizontal: 5),
+//                   leading: Column(
+//                     mainAxisAlignment: MainAxisAlignment.center,
+//                     children: [
+//                       Container(
+//                         height: 50,
+//                         width: 50,
+//                         child: ClipRRect(
+//                           borderRadius: BorderRadius.circular(100),
+//                           child: Image.network(
+//                             widget.img,
+//                             fit: BoxFit.cover,
+//                           ),
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                   title: Container(
+//                       width: Get.width * 0.30,
+//                       child: Text(
+//                         widget.name,
+//                         style: BlackSmallStyle,
+//                         overflow: TextOverflow.ellipsis,
+//                         maxLines: 1,
+//                       )),
+//                   subtitle: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+//                     stream: ffstore
+//                         .collection(chatRoomCollection)
+//                         .doc(widget.chatRoomId)
+//                         .collection(messageCollection)
+//                         .where("isRead", isEqualTo: false)
+//                         .where("receivedById", isEqualTo: authController.passengerModel.value.currentUserId)
+//                         .snapshots(),
+//                     builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+//                       log("inside streambuilder");
+//                       if (snapshot.connectionState == ConnectionState.waiting) {
+//                         log("inside streambuilder in waiting state");
+//                         return Text(
+//                           widget.message,
+//                           style: GreyLightTextSmall,
+//                           maxLines: 1,
+//                           overflow: TextOverflow.ellipsis,
+//                         );
+//                       } else if (snapshot.connectionState == ConnectionState.active ||
+//                           snapshot.connectionState == ConnectionState.done) {
+//                         if (snapshot.hasError) {
+//                           return const Text('Error');
+//                         } else if (snapshot.hasData) {
+//                           log("inside hasdata and ${snapshot.data!.docs}");
+//                           if (snapshot.data!.docs.length > 0) {
+//                             return Text(
+//                               widget.message,
+//                               style: BlackSmallTextStyle,
+//                               // style: TextStyle(color: Colors.pink),
+//                               maxLines: 1,
+//                               overflow: TextOverflow.ellipsis,
+//                             );
+//                           } else {
+//                             return Text(
+//                               widget.message,
+//                               style: GreyLightTextSmall,
+//                               // style: TextStyle(color: Colors.orange),
+//                               maxLines: 1,
+//                               overflow: TextOverflow.ellipsis,
+//                             );
+//                           }
+//                         } else {
+//                           log("in else of hasData done and: ${snapshot.connectionState} and"
+//                               " snapshot.hasData: ${snapshot.hasData}");
+//                           return SizedBox();
+//                         }
+//                       } else {
+//                         log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+//                         return SizedBox();
+//                       }
+//                     },
+//                   ),
+//                   trailing: Text(
+//                     DateTime.now().difference(DateTime.fromMillisecondsSinceEpoch(widget.time)).inMinutes <
+//                             60
+//                         ? "${DateTime.now().difference(DateTime.fromMillisecondsSinceEpoch(widget.time)).inMinutes} m ago"
+//                         : DateTime.now()
+//                                     .difference(DateTime.fromMillisecondsSinceEpoch(widget.time))
+//                                     .inHours <
+//                                 24
+//                             ? "${DateTime.now().difference(DateTime.fromMillisecondsSinceEpoch(widget.time)).inHours} hrs ago"
+//                             : "${DateTime.now().difference(DateTime.fromMillisecondsSinceEpoch(widget.time)).inDays} days ago",
+//                     // "${DateTime.fromMillisecondsSinceEpoch(widget.time).toString().split(" ")[1].split(":")[0]}"
+//                     //     ":"
+//                     //     "${DateTime.fromMillisecondsSinceEpoch(widget.time).toString().split(" ")[1].split(":")[1]}",
+//                     style: GreyLightTextSmall,
+//                   ),
+//                 ),
+//               )
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }

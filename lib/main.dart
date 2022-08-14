@@ -77,9 +77,9 @@ Future<void> main() async {
         ChangeNotifierProvider(
           create: (_) => ChatHeadProvider(),
         ),
-        ChangeNotifierProvider(
-          create: (_) => ChatProvider(),
-        ),
+        // ChangeNotifierProvider(
+        //   create: (_) => ChatProvider(),
+        // ),
         ChangeNotifierProvider(
           create: (_) => StoryProvider(),
         ),

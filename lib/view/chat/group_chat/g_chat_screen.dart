@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
-import 'package:vip_picnic/provider/chat_provider/chat_provider.dart';
+import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/message_bubbles.dart';
 import 'package:vip_picnic/view/widget/my_button.dart';
@@ -21,148 +20,144 @@ class GroupChat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ChatProvider>(
-      builder: (context, ChatProvider, child) {
-        return Scaffold(
-          appBar: AppBar(
-            centerTitle: true,
-            toolbarHeight: 75,
-            leading: Padding(
-              padding: const EdgeInsets.only(
-                left: 5,
-              ),
-              child: IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: Image.asset(
-                  Assets.imagesArrowBack,
-                  height: 22.04,
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        toolbarHeight: 75,
+        leading: Padding(
+          padding: const EdgeInsets.only(
+            left: 5,
+          ),
+          child: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: Image.asset(
+              Assets.imagesArrowBack,
+              height: 22.04,
+            ),
+          ),
+        ),
+        title: chatController.showSearch.value
+            ? SearchBar()
+            : MyText(
+          text: '$groupName',
+          size: 19,
+          color: kSecondaryColor,
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(
+              right: 10,
+              left: 15,
+            ),
+            child: Center(
+              child: GestureDetector(
+                onTap: () => chatController.showSearchBar(),
+                child: Image.asset(
+                  Assets.imagesSearchWithBg,
+                  height: 35,
                 ),
               ),
             ),
-            title: ChatProvider.showSearch
-                ? SearchBar()
-                : MyText(
-                    text: '$groupName',
-                    size: 19,
-                    color: kSecondaryColor,
-                  ),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(
-                  right: 10,
-                  left: 15,
-                ),
-                child: Center(
-                  child: GestureDetector(
-                    onTap: () => ChatProvider.showSearchBar(),
-                    child: Image.asset(
-                      Assets.imagesSearchWithBg,
-                      height: 35,
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(
-                  right: 15,
-                ),
-                child: Center(
-                  child: GestureDetector(
-                    onTap: () {
-                      showModalBottomSheet(
-                        backgroundColor: Colors.transparent,
-                        elevation: 0,
-                        context: context,
-                        builder: (context) {
-                          return Container(
-                            height: 387,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 30,
-                            ),
-                            decoration: BoxDecoration(
-                              color: kPrimaryColor,
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(28),
-                                topRight: Radius.circular(28),
-                              ),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(
+              right: 15,
+            ),
+            child: Center(
+              child: GestureDetector(
+                onTap: () {
+                  showModalBottomSheet(
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                    context: context,
+                    builder: (context) {
+                      return Container(
+                        height: 387,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 30,
+                        ),
+                        decoration: BoxDecoration(
+                          color: kPrimaryColor,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(28),
+                            topRight: Radius.circular(28),
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Row(
+                              mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
                               children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Container(),
-                                    MyText(
-                                      text: 'Send invitation',
-                                      size: 19,
-                                      color: kSecondaryColor,
-                                    ),
-                                    GestureDetector(
-                                      onTap: () => Navigator.pop(context),
-                                      child: Image.asset(
-                                        Assets.imagesRoundedClose,
-                                        height: 22.44,
-                                      ),
-                                    ),
-                                  ],
+                                Container(),
+                                MyText(
+                                  text: 'Send invitation',
+                                  size: 19,
+                                  color: kSecondaryColor,
                                 ),
-                                SimpleTextField(
-                                  hintText: 'Type username,  email...',
-                                ),
-                                SimpleTextField(
-                                  maxLines: 5,
-                                  hintText: 'Message...',
-                                ),
-                                MyButton(
-                                  onTap: () {},
-                                  buttonText: 'Invite to the group',
+                                GestureDetector(
+                                  onTap: () => Navigator.pop(context),
+                                  child: Image.asset(
+                                    Assets.imagesRoundedClose,
+                                    height: 22.44,
+                                  ),
                                 ),
                               ],
                             ),
-                          );
-                        },
-                        isScrollControlled: true,
+                            SimpleTextField(
+                              hintText: 'Type username,  email...',
+                            ),
+                            SimpleTextField(
+                              maxLines: 5,
+                              hintText: 'Message...',
+                            ),
+                            MyButton(
+                              onTap: () {},
+                              buttonText: 'Invite to the group',
+                            ),
+                          ],
+                        ),
                       );
                     },
-                    child: Image.asset(
-                      Assets.imagesInvite,
-                      height: 35,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          body: Stack(
-            children: [
-              ListView.builder(
-                shrinkWrap: true,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-                physics: const BouncingScrollPhysics(),
-                itemCount: 4,
-                itemBuilder: (context, index) {
-                  return MessageBubbles(
-                    receiveImage: Assets.imagesDummyProfileImage,
-                    msg: index == 0
-                        ? 'Lorem Ipsum is simply dummy text of the printing and industry. '
-                        : index == 1
-                            ? 'Lorem Ipsum is simply dummy text of the printing and industry. '
-                            : index == 2
-                                ? 'Lorem Ipsum is simply dummy text of the printing and industry. '
-                                : 'Thanks, i\'ll be there.',
-                    time: '11:21 AM',
-                    senderType: index == 0 ? 'sender' : 'receiver',
+                    isScrollControlled: true,
                   );
                 },
+                child: Image.asset(
+                  Assets.imagesInvite,
+                  height: 35,
+                ),
               ),
-              sendField(context),
-            ],
+            ),
           ),
-        );
-      },
+        ],
+      ),
+      body: Stack(
+        children: [
+          ListView.builder(
+            shrinkWrap: true,
+            padding:
+            const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+            physics: const BouncingScrollPhysics(),
+            itemCount: 4,
+            itemBuilder: (context, index) {
+              return MessageBubbles(
+                receiveImage: Assets.imagesDummyProfileImage,
+                msg: index == 0
+                    ? 'Lorem Ipsum is simply dummy text of the printing and industry. '
+                    : index == 1
+                    ? 'Lorem Ipsum is simply dummy text of the printing and industry. '
+                    : index == 2
+                    ? 'Lorem Ipsum is simply dummy text of the printing and industry. '
+                    : 'Thanks, i\'ll be there.',
+                time: '11:21 AM',
+                senderType: index == 0 ? 'sender' : 'receiver',
+              );
+            },
+          ),
+          sendField(context),
+        ],
+      ),
     );
   }
 

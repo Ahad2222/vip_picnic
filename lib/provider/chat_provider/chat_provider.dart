@@ -1,11 +1,10 @@
-import 'package:flutter/cupertino.dart';
+import 'package:get/get.dart';
 
-class ChatProvider with ChangeNotifier {
-  bool showSearch = false;
+class ChatProvider extends GetxController {
+  RxBool showSearch = false.obs;
 
 
   void showSearchBar() {
-    showSearch = !showSearch;
-    notifyListeners();
+    showSearch.value = !showSearch.value;
   }
 }

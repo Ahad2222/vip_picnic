@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/view/about_us/about_us.dart';
 import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
-import 'package:vip_picnic/view/chat/chat_head.dart';
+import 'package:vip_picnic/view/chat/chat_head_a.dart';
 import 'package:vip_picnic/view/chat/group_chat/create_new_group.dart';
 import 'package:vip_picnic/view/events/customize_event.dart';
 import 'package:vip_picnic/view/events/packages/picnic_packages.dart';
