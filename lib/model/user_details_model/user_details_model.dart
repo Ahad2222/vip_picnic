@@ -57,7 +57,7 @@ class UserDetailsModel {
         TheyFollowed: json['TheyFollowed'] != null ? List<String>.from(json['TheyFollowed'].map((x) => x)) : [],
         iFollowed: json['iFollowed'] != null ? List<String>.from(json['iFollowed'].map((x) => x)) : [],
         fcmToken: json["fcmToken"] ?? "",
-        fcmCreatedAt: json["fcmCreatedAt"] != null ? DateTime.parse(json["fcmCreatedAt"]) : DateTime.now(),
+        fcmCreatedAt: (json["fcmCreatedAt"] != null && json["fcmCreatedAt"] != "") ? DateTime.parse(json["fcmCreatedAt"]) : DateTime.now(),
       );
 
   Map<String, dynamic> toJson() => {
