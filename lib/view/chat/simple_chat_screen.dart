@@ -1171,7 +1171,7 @@ class _ChatScreenState extends State<ChatScreen> {
               switch (type) {
                 case 'text':
                   return MessageBubbles(
-                    receiveImage: widget.receiveImage,
+                    receiveImage: anotherUserImage,
                     msg: message,
                     time: "${hour.toString()}:"
                         "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
@@ -1289,10 +1289,10 @@ class _ChatScreenState extends State<ChatScreen> {
                     profileImage(
                       context,
                       size: 34.0,
-                      profileImage: widget.receiveImage,
+                      profileImage: anotherUserImage,
                     ),
                     MyText(
-                      text: '${widget.receiveName}',
+                      text: '${anotherUserName}',
                       size: 19,
                       color: kSecondaryColor,
                     ),
