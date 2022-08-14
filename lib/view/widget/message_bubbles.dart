@@ -5,6 +5,7 @@ import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_1.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
+import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/chat/simple_chat_screen.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 
@@ -83,7 +84,7 @@ class MessageBubbles extends StatelessWidget {
               ? SizedBox()
               : profileImage(
             context,
-            profileImage: Assets.imagesDummyProfileImage,
+            profileImage: userDetailsModel.profileImageUrl,
             size: 53.0,
           ),
         ],

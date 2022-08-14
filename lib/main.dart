@@ -10,6 +10,7 @@ import 'package:vip_picnic/controller/auth_controller/email_auth_controller.dart
 import 'package:vip_picnic/controller/auth_controller/forgot_password_controller.dart';
 import 'package:vip_picnic/controller/auth_controller/google_auth_controller.dart';
 import 'package:vip_picnic/controller/auth_controller/sign_up_controller.dart';
+import 'package:vip_picnic/controller/chat_controller/chat_controller.dart';
 import 'package:vip_picnic/controller/home_controller/home_controller.dart';
 import 'package:vip_picnic/controller/splash_screen_controller/splash_screen_controller.dart';
 import 'package:vip_picnic/firebase_options.dart';
@@ -71,6 +72,7 @@ Future<void> main() async {
   Get.put(ForgotPasswordController());
   Get.put(HomeController());
   Get.put(ChooseLanguageController());
+  Get.put(ChatController());
   runApp(
     MultiProvider(
       providers: [

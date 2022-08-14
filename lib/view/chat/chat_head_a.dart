@@ -177,13 +177,14 @@ class SimpleChatHeads extends StatelessWidget {
                   return chatHeadTiles(
                     context,
                     profileImage:  data.user1Id != userDetailsModel.uID
-                        ? data.user1model!.profileImageUrl
-                        : data.user2model!.profileImageUrl,
+                        ? data.user1Model!.profileImageUrl
+                        : data.user2Model!.profileImageUrl,
                     name: data.user1Id != userDetailsModel.uID
-                        ? data.user1model!.fullName
-                        : data.user2model!.fullName,
+                        ? data.user1Model!.fullName
+                        : data.user2Model!.fullName,
                     msg: data.lastMessage,
                     time: data.lastMessageAt,
+                    docs: snapshot.data!.docs[index].data() as Map<String, dynamic>,
                   );
                 },
               );
@@ -226,6 +227,7 @@ class SimpleChatHeads extends StatelessWidget {
     name,
     msg,
     time,
+    Map<String, dynamic>? docs,
   }) {
     return Container(
       margin: EdgeInsets.only(
@@ -244,6 +246,8 @@ class SimpleChatHeads extends StatelessWidget {
               builder: (_) => ChatScreen(
                 receiveImage: profileImage,
                 receiveName: name,
+                docs: docs,
+
               ),
             ),
           ),
@@ -269,7 +273,7 @@ class SimpleChatHeads extends StatelessWidget {
             child: Center(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(100),
-                child: Image.asset(
+                child: Image.network(
                   '$profileImage',
                   height: height(context, 1.0),
                   width: width(context, 1.0),
@@ -297,7 +301,9 @@ class SimpleChatHeads extends StatelessWidget {
             children: [
               MyText(
                 paddingTop: 5,
-                text: '$time',
+                text: "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[0]}"
+                    ":"
+                    "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[1]}",
                 weight: FontWeight.w300,
                 color: kSecondaryColor,
               ),

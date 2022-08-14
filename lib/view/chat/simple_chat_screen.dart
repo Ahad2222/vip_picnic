@@ -33,7 +33,7 @@ class ChatScreen extends StatefulWidget {
     this.receiveImage,
     this.receiveName,
     this.docs,
-    this.isArchived,
+    this.isArchived = false,
   }) : super(key: key);
 
   // ignore: prefer_typing_uninitialized_variables
@@ -236,25 +236,25 @@ class _ChatScreenState extends State<ChatScreen> {
     // });
     isArchivedRoom.value = widget.isArchived!;
 
-    chatController.getConversationMessage(chatRoomID).then((value) {
-      setState(() {
-        log("\n\n\n\n\n\ngetting conversation message without setState\n\n\n\n\n\n");
-        chatMessageStream = value;
-      });
-    });
+    // chatController.getConversationMessage(chatRoomID).then((value) {
+    //   setState(() {
+    //     log("\n\n\n\n\n\ngetting conversation message without setState\n\n\n\n\n\n");
+    //     chatMessageStream = value;
+    //   });
+    // });
   }
 
   getRoomId() async {
     // SharedPreferences _prefs = await SharedPreferences.getInstance();
     userID = userDetailsModel.uID!;
-    if (userDetailsModel.uID! != widget.docs!['user2Model']['id']) {
-      anotherUserID = widget.docs!['user2Model']['id'];
-      anotherUserName = widget.docs!['user2Model']['name'];
-      anotherUserImage = widget.docs!['user2Model']['primaryImageUrl'];
+    if (userDetailsModel.uID! != widget.docs!['user2Model']['uID']) {
+      anotherUserID = widget.docs!['user2Model']['uID'];
+      anotherUserName = widget.docs!['user2Model']['fullName'];
+      anotherUserImage = widget.docs!['user2Model']['profileImageUrl'];
     } else {
-      anotherUserID = widget.docs!['user1Model']['id'];
-      anotherUserName = widget.docs!['user1Model']['name'];
-      anotherUserImage = widget.docs!['user1Model']['primaryImageUrl'];
+      anotherUserID = widget.docs!['user1Model']['uID'];
+      anotherUserName = widget.docs!['user1Model']['fullName'];
+      anotherUserImage = widget.docs!['user1Model']['profileImageUrl'];
     }
     /**/
     // anotherUserID = authController.userModel.value.id != crm.value.user2Model.id
@@ -1392,7 +1392,6 @@ class _ChatScreenState extends State<ChatScreen> {
                         children: [
                           GestureDetector(
                             onTap: () {
-                              sendMessage();
                             },
                             child: Image.asset(
                               Assets.imagesEmoji,
@@ -1461,9 +1460,14 @@ class _ChatScreenState extends State<ChatScreen> {
                 SizedBox(
                   width: 15,
                 ),
-                Image.asset(
-                  Assets.imagesSend,
-                  height: 45.16,
+                GestureDetector(
+                  onTap: () {
+                    sendMessage();
+                  },
+                  child: Image.asset(
+                    Assets.imagesSend,
+                    height: 45.16,
+                  ),
                 ),
               ],
             ),
@@ -1497,7 +1501,7 @@ Widget profileImage(
     child: Center(
       child: ClipRRect(
         borderRadius: BorderRadius.circular(100),
-        child: Image.asset(
+        child: Image.network(
           profileImage!,
           height: height(context, 1.0),
           width: width(context, 1.0),
