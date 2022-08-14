@@ -202,23 +202,6 @@ class SimpleChatHeads extends StatelessWidget {
         }
       },
     );
-    // return ListView.builder(
-    //   shrinkWrap: true,
-    //   padding: EdgeInsets.symmetric(
-    //     horizontal: 15,
-    //   ),
-    //   physics: BouncingScrollPhysics(),
-    //   itemCount: 6,
-    //   itemBuilder: (context, index) {
-    //     return chatHeadTiles(
-    //       context,
-    //       profileImage: Assets.imagesProfileAvatar,
-    //       name: 'Username',
-    //       msg: 'Hi Good morning, how we...',
-    //       time: 'Today',
-    //     );
-    //   },
-    // );
   }
 
   Widget chatHeadTiles(

@@ -14,118 +14,109 @@ admin.firestore().settings({ ignoreUndefinedProperties: true });
 // });
 
 async function TextChatsNotiSingle(
-    token_o,
-    msg,
-    url,
-    senderName,
-    recName,
-    chatRoomId
-  ) {
-    functions.logger.log("Single Token function is executed");
-    functions.logger.log("ChatRoomID is ");
-    functions.logger.log(chatRoomId);
-  
-    await admin
-      .messaging()
-      .send({
-        token: token_o,
-        notification: {
-          title: `${senderName}`,
-          body: msg,
-          //Below line has use in terminated or background state of app
-          imageUrl: url,
-        },
-        data: {
-          imageUrl: url,
-          chatRoomId: chatRoomId,
-          screenName: "chatScreen",
-        },
-      })
-      .then((value) => {
-        functions.logger.log("Notifications sent to the Receiver");
-      })
-      .catch((e) => {
-        functions.logger.log(e.toString());
-      });
-  }
+  token_o,
+  msg,
+  url,
+  senderName,
+  recName,
+  chatRoomId
+) {
+  functions.logger.log("Single Token function is executed");
+  functions.logger.log("ChatRoomID is ");
+  functions.logger.log(chatRoomId);
 
-  async function AudioChatsNotiSingle(
-    token_o,
-    msg,
-    url,
-    senderName,
-    recName,
-    chatRoomId
-  ) {
-    functions.logger.log("Single Token function is executed");
-    functions.logger.log("ChatRoomID is ");
-    functions.logger.log(chatRoomId);
-  
-    await admin
-      .messaging()
-      .send({
-        token: token_o,
-        notification: {
-          title: `You received an Audio message from  ${recName}`,
-          body: {},
-          //Below line has use in terminated or background state of app
-          imageUrl: url,
-        },
-        data: {
-          imageUrl: url,
-          chatRoomId: chatRoomId,
-          screenName: "chatScreen",
-        },
-      })
-      .then((value) => {
-        functions.logger.log("Notifications sent to the Receiver");
-      })
-      .catch((e) => {
-        functions.logger.log(e.toString());
-      });
-  }
-  
-  //When chat is of type image,  profile image and general image will be sent
-  // in the payload
-  async function ImageChatsNotiSingle(
-    token_o,
-    msg,
-    profileImageUrl,
-    generalImageUrl,
-    senderName,
-    recName,
-    chatRoomId
-  ) {
-    functions.logger.log("Single Token function is executed");
-    functions.logger.log("ChatRoomID is ");
-    functions.logger.log(chatRoomId);
-  
-    await admin
-      .messaging()
-      .send({
-        token: token_o,
-        notification: {
-          title: `You received an Image from  ${recName}`,
-          body: {},
-          //Below line has use in terminated or background state of app
-          imageUrl: generalImageUrl,
-        },
-        data: {
-          imageUrl: profileImageUrl,
-          generalImageUrl: generalImageUrl,
-          chatRoomId: chatRoomId,
-          screenName: "chatScreen",
-        },
-      })
-      .then((value) => {
-        functions.logger.log("Notifications sent to the Receiver");
-      })
-      .catch((e) => {
-        functions.logger.log(e.toString());
-      });
-  }
+  await admin
+    .messaging()
+    .send({
+      token: token_o,
+      notification: {
+        title: `${senderName}`,
+        body: msg,
+        //Below line has use in terminated or background state of app
+        imageUrl: url,
+      },
+      data: {
+        imageUrl: url,
+        chatRoomId: chatRoomId,
+        screenName: "chatScreen",
+      },
+    })
+    .then((value) => {
+      functions.logger.log("Notifications sent to the Receiver");
+    })
+    .catch((e) => {
+      functions.logger.log(e.toString());
+    });
+}
 
-  exports.notifyReceiverForChat = functions.firestore
+async function AudioChatsNotiSingle(
+  token_o,
+  msg,
+  url,
+  senderName,
+  recName,
+  chatRoomId) {
+  functions.logger.log("Single Token function is executed");
+  functions.logger.log("ChatRoomID is ");
+  functions.logger.log(chatRoomId);
+
+  await admin
+    .messaging()
+    .send({
+      token: token_o,
+      notification: {
+        title: `You received an Audio message from  ${recName}`,
+        body: {},
+        //Below line has use in terminated or background state of app
+        imageUrl: url,
+      },
+      data: {
+        imageUrl: url,
+        chatRoomId: chatRoomId,
+        screenName: "chatScreen",
+      },
+    })
+    .then((value) => {
+      functions.logger.log("Notifications sent to the Receiver");
+    })
+    .catch((e) => {
+      functions.logger.log(e.toString());
+    });
+}
+
+//When chat is of type image,  profile image and general image will be sent
+// in the payload
+async function ImageChatsNotiSingle(token_o, msg, profileImageUrl, generalImageUrl, senderName, recName, chatRoomId) {
+  functions.logger.log("Single Token function is executed");
+  functions.logger.log("ChatRoomID is ");
+  functions.logger.log(chatRoomId);
+
+  await admin
+    .messaging()
+    .send({
+      token: token_o,
+      notification: {
+        title: `You received an Image from  ${recName}`,
+        body: {},
+        //Below line has use in terminated or background state of app
+        imageUrl: generalImageUrl,
+      },
+      data: {
+        imageUrl: profileImageUrl,
+        generalImageUrl: generalImageUrl,
+        chatRoomId: chatRoomId,
+        screenName: "chatScreen",
+      },
+    })
+    .then((value) => {
+      functions.logger.log("Notifications sent to the Receiver");
+    })
+    .catch((e) => {
+      functions.logger.log(e.toString());
+    });
+}
+
+exports.notifyReceiverForChat = functions.firestore
   .document("/ChatRoom/{documentId}/chats/{chatDocumentId}")
   .onCreate(async (snap, context) => {
     var recId = snap.data().receivedById;
@@ -153,7 +144,7 @@ async function TextChatsNotiSingle(
         .doc(recId)
         .get()
         .then((snapshot) => {
-          imageUrl = snapshot.data().primaryImageUrl;
+          imageUrl = snapshot.data().profileImageUrl;
           myRetToken = snapshot.data().fcmToken;
         })
         .catch((e) => {
@@ -178,7 +169,7 @@ async function TextChatsNotiSingle(
         .doc(recId)
         .get()
         .then((snapshot) => {
-          imageUrl = snapshot.data().primaryImageUrl;
+          imageUrl = snapshot.data().profileImageUrl;
           myRetToken = snapshot.data().fcmToken;
         })
         .catch((e) => {
@@ -202,7 +193,7 @@ async function TextChatsNotiSingle(
         .doc(recId)
         .get()
         .then((snapshot) => {
-          imageUrl = snapshot.data().primaryImageUrl;
+          imageUrl = snapshot.data().profileImageUrl;
           myRetToken = snapshot.data().fcmToken;
         })
         .catch((e) => {
@@ -226,7 +217,7 @@ async function TextChatsNotiSingle(
         .doc(recId)
         .get()
         .then((snapshot) => {
-          imageUrl = snapshot.data().primaryImageUrl;
+          imageUrl = snapshot.data().profileImageUrl;
           myRetToken = snapshot.data().fcmToken;
         })
         .catch((e) => {
