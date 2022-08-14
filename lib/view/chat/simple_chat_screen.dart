@@ -96,7 +96,7 @@ class _ChatScreenState extends State<ChatScreen> {
   RxInt time = 0.obs;
   bool isOpenedUp = true;
   final Rx<ChatRoomModel> crm = ChatRoomModel().obs;
-  final Rx<UserDetailsModel> anotherUserModel = UserDetailsModel().obs;
+  Rx<UserDetailsModel> anotherUserModel = UserDetailsModel().obs;
   final RxBool isMatchedOrNot = false.obs;
   final RxString privacySettings = "Everyone".obs;
   final String deleteFor = "Everyone";
@@ -283,8 +283,10 @@ class _ChatScreenState extends State<ChatScreen> {
     //   chatRoomID = '$anotherUserID - $userID';
     // }
     chatRoomID = chatController.getChatRoomId(userID, anotherUserID);
-    otherUserListener = await fs.collection("Users").doc(anotherUserID).snapshots().listen((event) {
+    otherUserListener = await fs.collection("Accounts").doc(anotherUserID).snapshots().listen((event) {
+      log("updating anotherUserModel");
       anotherUserModel.value = UserDetailsModel.fromJson(event.data() ?? {});
+      // log("updated anotherUserModel: ${anotherUserModel.value.toJson()}");
       // privacySettings.value = anotherUserModel.value.whoCanSendMeMessage;
     });
   }

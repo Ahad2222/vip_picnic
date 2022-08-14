@@ -42,6 +42,8 @@ dependencies:
   cached_network_image: ^3.2.0
   permission_handler: 9.2.0
   flutter_local_notifications: ^9.7.1
+  path_provider_android: ^2.0.19
+  path_provider_ios: ^2.0.11
 
 
 dev_dependencies:

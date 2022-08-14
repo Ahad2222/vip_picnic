@@ -10,6 +10,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path_provider_android/path_provider_android.dart';
+import 'package:path_provider_ios/path_provider_ios.dart';
 import 'package:provider/provider.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/config/theme/light_theme.dart';
@@ -36,8 +38,215 @@ AndroidNotificationChannel? channel;
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
+  // if (Platform.isAndroid) PathProviderAndroid.registerWith();
+  // if (Platform.isIOS) PathProviderIOS.registerWith();
+  //
+  // void selectNotification(String? payload) async {
+  //   if (payload != null) {
+  //     if (payload.isNotEmpty) {
+  //       // var payloadData2 = PayloadData.fromJson(jsonDecode(payload));
+  //       var payloadDecoded = jsonDecode(payload);
+  //       var screenName = payloadDecoded["screenName"];
+  //       if (screenName != null) {
+  //         if (screenName.isNotEmpty) {
+  //           print("Screen name is: $screenName");
+  //           if (screenName == 'chatScreen') {
+  //             print("Screen is Chat");
+  //             String type = 'Nothing';
+  //             String chatRoomId = 'Nothing';
+  //             if (payloadDecoded['type'] != null) {
+  //               type = payloadDecoded['type'];
+  //               if (type == 'profileMatched') {
+  //                 String likerId = payloadDecoded['likerId'];
+  //                 String likedId = payloadDecoded['likedId'];
+  //                 chatRoomId = chatController.getChatRoomId(likerId, likedId);
+  //               } else {
+  //                 print("Type is missed");
+  //               }
+  //             } else {
+  //               chatRoomId = payloadDecoded["chatRoomId"];
+  //             }
+  //
+  //             print("ChatRoom Id is: ${chatRoomId}");
+  //             //We have chatRoomId here and we need to navigate to the ChatRoomScreen having same Id
+  //             await fs.collection("ChatRoom").doc(chatRoomId).get().then((value) {
+  //               Get.to(() => ChatScreen(docs: value.data(), isArchived: false));
+  //             });
+  //           } else if (screenName == 'profileScreen') {
+  //             print("Screen is Profile");
+  //             // print(payloadDecoded.toString());
+  //             //+could be used for follower notification
+  //             // fs.collection("MovingToProfile").doc().set({"Screen": screenName});
+  //             print("Screen is Profile");
+  //             // String followerId = payloadDecoded['id'];
+  //             // print("follower id is " + followerId);
+  //             //+ UserDetailsModel userLiker = await authController.getAUser(likerId);
+  //             //+ Get.to(() => Home(showAbleUserData: userLiker));
+  //           }
+  //         } else {
+  //           print("Screen name is null");
+  //         }
+  //       }
+  //     } else {
+  //       debugPrint("PayLoad is null");
+  //     }
+  //   }
+  // }
+  //
+  // void onDidReceiveLocalNotification(int? id, String? title, String? body, String? payload) async {
+  //   // display a diaprint with the notification details, tap ok to go to another page
+  //   // showDialog(
+  //   //   context: context,
+  //   //   builder: (BuildContext context) => CupertinoAlertDialog(
+  //   //     title: Text(title!),
+  //   //     content: Column(
+  //   //       children: [Text(body!), Text(payload.toString())],
+  //   //     ),
+  //   //     actions: [
+  //   //       CupertinoDialogAction(
+  //   //         isDefaultAction: true,
+  //   //         child: Text('See ChatRoom'),
+  //   //         onPressed: () async {
+  //   //           debugPrint("Please check the payload data first");
+  //   //         },
+  //   //       )
+  //   //     ],
+  //   //   ),
+  //   // );
+  // }
+  //
+  //
+  //
+  // Future<String> _downloadAndSaveFile(String url, String fileName) async {
+  //   final Directory directory = await getApplicationDocumentsDirectory();
+  //   final String filePath = '${directory.path}/$fileName';
+  //   final http.Response response = await http.get(Uri.parse(url));
+  //   final File file = File(filePath);
+  //   await file.writeAsBytes(response.bodyBytes);
+  //   return filePath;
+  // }
+  //
+  // print('Got a message whilst in the foreground!');
+  // print('Message data: ${message.data}');
+  //
+  // print("onMessage function was used..");
+  // bool imagePresent = false;
+  // bool generalImagePresent = false;
+  //
+  // String imgUrl = 'https://via.placeholder.com/400x800';
+  // String generalImageUrl = 'https://via.placeholder.com/400x800';
+  // String screenName = 'No screen';
+  // String type = 'type';
+  // bool screenEnabled = false;
+  // screenEnabled = message.data.containsKey('screenName');
+  //
+  // if (message != null) {
+  //   if (message.data.isNotEmpty) {
+  //     print("Is onMessage datapayload received");
+  //     print("Message Data is" + message.data.toString());
+  //     if (message.data.containsKey("type")) {
+  //       type = message.data["type"];
+  //       print("type: $type");
+  //     }
+  //     if (screenEnabled) {
+  //       //Move to the screen which is needed to
+  //       print("Screen is Enabled");
+  //       screenName = message.data['screenName'];
+  //       print("Screen name is: $screenName");
+  //       //+ I/flutter (31547): Screen is Enabled
+  //       log("message.notification: ${message.notification}");
+  //       log("message.notification.data: ${message.notification != null ? message.notification?.title : "notification was null"}");
+  //       log("message.notification.data: ${message.notification != null ? message.notification?.body : "notification was null"}");
+  //       log("message.notification.data: ${message.notification != null ? message.notification?.android : "notification was null"}");
+  //       if (message.notification != null && message.notification != {}) {
+  //         String? longData = message.notification != null ? message.notification?.body : "";
+  //         if (screenName == 'chatScreen' || screenName == 'profileScreen') {
+  //           //Handling forground notification on chat notification
+  //           imagePresent = message.data.containsKey('imageUrl');
+  //           generalImagePresent = message.data.containsKey('generalImageUrl');
+  //           if (imagePresent) {
+  //             imgUrl = message.data['imageUrl'];
+  //           }
+  //           if (generalImagePresent) {
+  //             generalImageUrl = message.data['generalImageUrl'];
+  //           }
+  //           //PictureConfig
+  //           final largeIconPath = await _downloadAndSaveFile('${imgUrl}', 'largeIcon');
+  //           final String bigPicturePath = await _downloadAndSaveFile('${generalImageUrl}', 'bigPicture');
+  //
+  //           final BigPictureStyleInformation bigPictureStyleInformation = BigPictureStyleInformation(
+  //               FilePathAndroidBitmap(bigPicturePath),
+  //               hideExpandedLargeIcon: true,
+  //               contentTitle: '<b>${message.notification?.title}</b>',
+  //               htmlFormatContentTitle: true,
+  //               summaryText: '${message.notification?.body}',
+  //               htmlFormatSummaryText: true);
+  //
+  //           final bigTextStyleInformation = BigTextStyleInformation(longData!);
+  //
+  //           print("Things take time");
+  //
+  //           final AndroidNotificationDetails androidPlatformChannelSpecifics =
+  //           AndroidNotificationDetails('vipPicnic', 'vip',
+  //               channelDescription: 'Vibrate and show notification',
+  //               importance: Importance.max,
+  //               priority: Priority.high,
+  //               icon: '@mipmap/launcher_icon',
+  //               // largeIcon: FilePathAndroidBitmap(largeIconPath),
+  //               styleInformation: bigTextStyleInformation,
+  //               // vibrationPattern: vibrationPattern,
+  //               enableLights: true,
+  //               color: const Color.fromARGB(255, 255, 0, 0),
+  //               ledColor: const Color.fromARGB(255, 255, 0, 0),
+  //               ledOnMs: 1000,
+  //               ledOffMs: 500);
+  //
+  //           const AndroidInitializationSettings initializationSettingsAndroid =
+  //           AndroidInitializationSettings('launcher_icon');
+  //           final IOSInitializationSettings initializationSettingsIOS =
+  //           IOSInitializationSettings(onDidReceiveLocalNotification: onDidReceiveLocalNotification);
+  //
+  //           final InitializationSettings initializationSettings =
+  //           InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+  //           await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+  //               onSelectNotification: selectNotification);
+  //
+  //           //We need to configure for the ios as well
+  //           final NotificationDetails platformChannelSpecifics =
+  //           NotificationDetails(android: androidPlatformChannelSpecifics);
+  //           print("message.notification?.title  + ${message.notification?.title}");
+  //           print("message.notification?.body ${message.notification?.body}");
+  //           print("messageId: ${message.messageId}");
+  //
+  //           flutterLocalNotificationsPlugin.show(
+  //             DateTime.now().millisecond,
+  //             message.notification?.title,
+  //             message.notification?.body,
+  //             platformChannelSpecifics,
+  //             payload: json.encode(message.data),
+  //           );
+  //         } else {
+  //           print("Screen is in Else");
+  //         }
+  //       } else {
+  //         print("Screen is in Else");
+  //       }
+  //     }
+  //   } else {
+  //     debugPrint("Notification Pay load data is Empty");
+  //   }
+  // } else {
+  //   print("message was null in OnMessage");
+  // }
+  //
+  // if (message.notification != null) {
+  //   print('Message also contained a notification: ${message.notification}');
+  // }
+  //
   print("Handling a background message: ${message.messageId}");
 }
 
