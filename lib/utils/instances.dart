@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:vip_picnic/controller/auth_controller/email_auth_controller.dart';
 import 'package:vip_picnic/controller/auth_controller/forgot_password_controller.dart';
@@ -16,6 +17,7 @@ import 'package:vip_picnic/view/choose_language/choose_language.dart';
 FirebaseAuth fa = FirebaseAuth.instance;
 FirebaseFirestore fs = FirebaseFirestore.instance;
 FirebaseStorage fsg = FirebaseStorage.instance;
+FirebaseMessaging fcm = FirebaseMessaging.instance;
 
 
 FirebaseAuth auth = FirebaseAuth.instance;

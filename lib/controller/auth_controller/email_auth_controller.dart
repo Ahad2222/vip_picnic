@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:vip_picnic/get_storage_data/get_storage_data.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/collections.dart';
 import 'package:vip_picnic/utils/instances.dart';
@@ -43,11 +44,34 @@ class EmailAuthController extends GetxController {
           (value) async {
             await accounts.doc(fa.currentUser!.uid).get().then(
               (value) async {
-                userDetailsModel = UserDetailsModel.fromJson(
-                  value.data() as Map<String, dynamic>,
-                );
+                userDetailsModel = UserDetailsModel.fromJson(value.data() as Map<String, dynamic>);
               },
             );
+            await UserSimplePreference.setUserData(userDetailsModel);
+
+            if(auth.currentUser != null){
+              String? token = await fcm.getToken() ?? userDetailsModel.fcmToken;
+              try {
+                fs.collection("Accounts").doc(auth.currentUser?.uid).update({
+                  "fcmToken": token,
+                  "fcmCreatedAt": DateTime.now().toIso8601String(),
+                });
+              } catch (e) {
+                print(e);
+                log("error in updating fcmToken in my own collection $e");
+              }
+              fcm.onTokenRefresh.listen((streamedToken) {
+                try {
+                  fs.collection("Accounts").doc(auth.currentUser?.uid).update({
+                    "fcmToken": streamedToken,
+                    "fcmCreatedAt": DateTime.now().toIso8601String(),
+                  });
+                } catch (e) {
+                  print(e);
+                  log("error in updating fcmToken in my own collection on change $e");
+                }
+              });
+            }
             emailCon.clear();
             passCon.clear();
             Get.offAll(() => BottomNavBar());

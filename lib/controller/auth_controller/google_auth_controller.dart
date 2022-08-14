@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -54,6 +56,29 @@ class GoogleAuthController extends GetxController {
                   userDetailsModel.toJson(),
                 );
             await UserSimplePreference.setUserData(userDetailsModel);
+            if(auth.currentUser != null){
+              String? token = await fcm.getToken() ?? userDetailsModel.fcmToken;
+              try {
+                fs.collection("Accounts").doc(auth.currentUser?.uid).update({
+                  "fcmToken": token,
+                  "fcmCreatedAt": DateTime.now().toIso8601String(),
+                });
+              } catch (e) {
+                print(e);
+                log("error in updating fcmToken in my own collection $e");
+              }
+              fcm.onTokenRefresh.listen((streamedToken) {
+                try {
+                  fs.collection("Accounts").doc(auth.currentUser?.uid).update({
+                    "fcmToken": streamedToken,
+                    "fcmCreatedAt": DateTime.now().toIso8601String(),
+                  });
+                } catch (e) {
+                  print(e);
+                  log("error in updating fcmToken in my own collection on change $e");
+                }
+              });
+            }
             Get.offAll(
               () => BottomNavBar(),
             );
@@ -64,9 +89,32 @@ class GoogleAuthController extends GetxController {
                 userDetailsModel = UserDetailsModel.fromJson(
                   value.data() as Map<String, dynamic>,
                 );
-                await UserSimplePreference.setUserData(userDetailsModel);
               },
             );
+            await UserSimplePreference.setUserData(userDetailsModel);
+            if(auth.currentUser != null){
+              String? token = await fcm.getToken() ?? userDetailsModel.fcmToken;
+              try {
+                fs.collection("Accounts").doc(auth.currentUser?.uid).update({
+                  "fcmToken": token,
+                  "fcmCreatedAt": DateTime.now().toIso8601String(),
+                });
+              } catch (e) {
+                print(e);
+                log("error in updating fcmToken in my own collection $e");
+              }
+              fcm.onTokenRefresh.listen((streamedToken) {
+                try {
+                  fs.collection("Accounts").doc(auth.currentUser?.uid).update({
+                    "fcmToken": streamedToken,
+                    "fcmCreatedAt": DateTime.now().toIso8601String(),
+                  });
+                } catch (e) {
+                  print(e);
+                  log("error in updating fcmToken in my own collection on change $e");
+                }
+              });
+            }
             Get.offAll(
               () => BottomNavBar(),
             );

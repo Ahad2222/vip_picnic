@@ -60,9 +60,7 @@ class SignupController extends GetxController {
   }
 
   Future uploadPhoto() async {
-    Reference ref = await FirebaseStorage.instance
-        .ref()
-        .child('Images/Profile Images/${DateTime.now().toString()}');
+    Reference ref = await FirebaseStorage.instance.ref().child('Images/Profile Images/${DateTime.now().toString()}');
     await ref.putFile(pickedImage!);
     ref.getDownloadURL().then((value) {
       log('Profile Image URL $value');
@@ -118,29 +116,24 @@ class SignupController extends GetxController {
             accountType: accountType,
             createdAt: DateFormat.yMEd().add_jms().format(createdAt).toString(),
           );
-          await accounts
-              .doc(
-                fa.currentUser!.uid,
-              )
-              .set(
-                userDetailsModel.toJson(),
-              );
+          await accounts.doc(fa.currentUser!.uid).set(userDetailsModel.toJson());
         }).then(
           (value) async {
-            await UserSimplePreference.setProfileImageUrl(profileImage!);
-            await UserSimplePreference.setFullName(fullNameCon.text.trim());
-            await UserSimplePreference.setEmail(emailCon.text.trim());
-            await UserSimplePreference.setUID(fa.currentUser!.uid);
-            await UserSimplePreference.setPassword(passCon.text.trim());
-            await UserSimplePreference.setPhoneNumber(phoneCon.text.trim());
-            await UserSimplePreference.setCity(cityCon.text.trim());
-            await UserSimplePreference.setState(stateCon.text.trim());
-            await UserSimplePreference.setZip(zipCon.text.trim());
-            await UserSimplePreference.setAddress(addressCon.text.trim());
-            await UserSimplePreference.setAccountType(accountType!);
-            await UserSimplePreference.setCreatedAt(
-              DateFormat.yMEd().add_jms().format(createdAt).toString(),
-            );
+            await UserSimplePreference.setUserData(userDetailsModel);
+            // await UserSimplePreference.setProfileImageUrl(profileImage!);
+            // await UserSimplePreference.setFullName(fullNameCon.text.trim());
+            // await UserSimplePreference.setEmail(emailCon.text.trim());
+            // await UserSimplePreference.setUID(fa.currentUser!.uid);
+            // await UserSimplePreference.setPassword(passCon.text.trim());
+            // await UserSimplePreference.setPhoneNumber(phoneCon.text.trim());
+            // await UserSimplePreference.setCity(cityCon.text.trim());
+            // await UserSimplePreference.setState(stateCon.text.trim());
+            // await UserSimplePreference.setZip(zipCon.text.trim());
+            // await UserSimplePreference.setAddress(addressCon.text.trim());
+            // await UserSimplePreference.setAccountType(accountType!);
+            // await UserSimplePreference.setCreatedAt(
+            //   DateFormat.yMEd().add_jms().format(createdAt).toString(),
+            // );
             profileImage = '';
             fullNameCon.clear();
             phoneCon.clear();

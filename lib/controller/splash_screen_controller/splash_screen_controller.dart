@@ -21,9 +21,6 @@ class SplashScreenController extends GetxController {
   checkUser() async {
     if (_user != null) {
       try {
-        // UserDetailsModel _userDetailsModel =
-        //     await UserSimplePreference.getUserModelData();
-        // log('SPLASH SCREEN userDetailsModel ${_userDetailsModel.toJson()}');
         Map<String,dynamic> data = await UserSimplePreference.getUserData();
         log('SPLASH SCREEN getUserData $data');
         userDetailsModel = UserDetailsModel.fromJson(data);
@@ -31,6 +28,30 @@ class SplashScreenController extends GetxController {
       } catch (e) {
         log('SPLASH EXCEPTION $e');
       }
+      if(auth.currentUser != null){
+        String? token = await fcm.getToken() ?? userDetailsModel.fcmToken;
+        try {
+          fs.collection("Accounts").doc(auth.currentUser?.uid).update({
+            "fcmToken": token,
+            "fcmCreatedAt": DateTime.now().toIso8601String(),
+          });
+        } catch (e) {
+          print(e);
+          log("error in updating fcmToken in my own collection $e");
+        }
+        fcm.onTokenRefresh.listen((streamedToken) {
+          try {
+            fs.collection("Accounts").doc(auth.currentUser?.uid).update({
+              "fcmToken": streamedToken,
+              "fcmCreatedAt": DateTime.now().toIso8601String(),
+            });
+          } catch (e) {
+            print(e);
+            log("error in updating fcmToken in my own collection on change $e");
+          }
+        });
+      }
+
       Timer(
         const Duration(
           seconds: 1,

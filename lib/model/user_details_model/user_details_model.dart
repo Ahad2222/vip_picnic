@@ -16,6 +16,8 @@ class UserDetailsModel {
   List<String>? userSearchParameters;
   List<String>? TheyFollowed;
   List<String>? iFollowed;
+  String? fcmToken;
+  DateTime? fcmCreatedAt;
 
   UserDetailsModel({
     this.profileImageUrl = '',
@@ -33,10 +35,11 @@ class UserDetailsModel {
     this.userSearchParameters,
     this.TheyFollowed,
     this.iFollowed,
+    this.fcmToken = '',
+    this.fcmCreatedAt,
   });
 
-  factory UserDetailsModel.fromJson(Map<String, dynamic> json) =>
-      UserDetailsModel(
+  factory UserDetailsModel.fromJson(Map<String, dynamic> json) => UserDetailsModel(
         profileImageUrl: json['profileImageUrl'],
         fullName: json['fullName'],
         email: json['email'],
@@ -49,9 +52,12 @@ class UserDetailsModel {
         zip: json['zip'],
         accountType: json['accountType'],
         createdAt: json['createdAt'],
-        userSearchParameters: json['userSearchParameters'] != null ? List<String>.from(json['userSearchParameters'].map((x) => x)) : [],
+        userSearchParameters:
+            json['userSearchParameters'] != null ? List<String>.from(json['userSearchParameters'].map((x) => x)) : [],
         TheyFollowed: json['TheyFollowed'] != null ? List<String>.from(json['TheyFollowed'].map((x) => x)) : [],
         iFollowed: json['iFollowed'] != null ? List<String>.from(json['iFollowed'].map((x) => x)) : [],
+        fcmToken: json["fcmToken"] ?? "",
+        fcmCreatedAt: json["fcmCreatedAt"] != null ? DateTime.parse(json["fcmCreatedAt"]) : DateTime.now(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -67,8 +73,11 @@ class UserDetailsModel {
         'zip': zip,
         'accountType': accountType,
         'createdAt': createdAt,
-        'userSearchParameters': userSearchParameters != null ? List<String>.from(userSearchParameters!.map((x) => x)) : [],
+        'userSearchParameters':
+            userSearchParameters != null ? List<String>.from(userSearchParameters!.map((x) => x)) : [],
         'TheyFollowed': TheyFollowed != null ? List<String>.from(TheyFollowed!.map((x) => x)) : [],
         'iFollowed': iFollowed != null ? List<String>.from(iFollowed!.map((x) => x)) : [],
+        "fcmToken": fcmToken ?? "",
+        "fcmCreatedAt": fcmCreatedAt?.toIso8601String() ?? DateTime.now().toIso8601String(),
       };
 }
