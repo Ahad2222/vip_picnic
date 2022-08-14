@@ -434,7 +434,7 @@ class PostWidget extends StatelessWidget {
                     MyText(
                       //+ 8/4/2022
                       text:
-                          '  •  ${postedTime!.split(' ')[1].split("/")[0]} ${monthList[int.parse(postedTime!.split(' ')[1].split("/")[0]) - 1]}',
+                          '  •  ${postedTime!.split(' ')[1].split("/")[1]} ${monthList[int.parse(postedTime!.split(' ')[1].split("/")[0]) - 1]}',
                       size: 15,
                       weight: FontWeight.w600,
                       color: kSecondaryColor.withOpacity(0.40),
