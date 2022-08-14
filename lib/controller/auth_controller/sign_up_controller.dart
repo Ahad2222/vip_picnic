@@ -120,20 +120,6 @@ class SignupController extends GetxController {
         }).then(
           (value) async {
             await UserSimplePreference.setUserData(userDetailsModel);
-            // await UserSimplePreference.setProfileImageUrl(profileImage!);
-            // await UserSimplePreference.setFullName(fullNameCon.text.trim());
-            // await UserSimplePreference.setEmail(emailCon.text.trim());
-            // await UserSimplePreference.setUID(fa.currentUser!.uid);
-            // await UserSimplePreference.setPassword(passCon.text.trim());
-            // await UserSimplePreference.setPhoneNumber(phoneCon.text.trim());
-            // await UserSimplePreference.setCity(cityCon.text.trim());
-            // await UserSimplePreference.setState(stateCon.text.trim());
-            // await UserSimplePreference.setZip(zipCon.text.trim());
-            // await UserSimplePreference.setAddress(addressCon.text.trim());
-            // await UserSimplePreference.setAccountType(accountType!);
-            // await UserSimplePreference.setCreatedAt(
-            //   DateFormat.yMEd().add_jms().format(createdAt).toString(),
-            // );
             profileImage = '';
             fullNameCon.clear();
             phoneCon.clear();
