@@ -27,7 +27,6 @@ import 'package:vip_picnic/view/choose_language/choose_language.dart';
 import 'package:vip_picnic/view/profile/other_user_profile.dart';
 import 'package:http/http.dart' as http;
 
-
 AndroidNotificationChannel? channel;
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -306,7 +305,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-
   void selectNotification(String? payload) async {
     if (payload != null) {
       if (payload.isNotEmpty) {
@@ -338,22 +336,24 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               await fs.collection("ChatRoom").doc(chatRoomId).get().then((value) {
                 Get.to(() => ChatScreen(docs: value.data(), isArchived: false));
               });
-            }
-            else if (screenName == 'profileScreen') {
+            } else if (screenName == 'profileScreen') {
               print("Screen is Profile");
               // print(payloadDecoded.toString());
               //+could be used for follower notification
               // fs.collection("MovingToProfile").doc().set({"Screen": screenName});
               String type = "Nothing";
               print("Screen is Profile");
-              if (payloadDecoded['type'] != null){
+              print("type is ${payloadDecoded['type']}");
+              if (payloadDecoded['type'] != null) {
+                type = payloadDecoded['type'];
                 if (type == 'followerFollowed') {
                   UserDetailsModel? umdl;
-                  await fs.collection("Accounts").doc(payloadDecoded['id']).get()
-                      .then((value) {
-                    umdl =  UserDetailsModel.fromJson(value.data() ?? {});
+                  await fs.collection("Accounts").doc(payloadDecoded['id']).get().then((value) {
+                    umdl = UserDetailsModel.fromJson(value.data() ?? {});
                   });
-                  Get.to(() => OtherUserProfile(otherUserModel: umdl,));
+                  Get.to(() => OtherUserProfile(
+                        otherUserModel: umdl,
+                      ));
                 } else {
                   print("Type is missed");
                 }
@@ -395,7 +395,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     );
   }
 
-
   Future<String> _downloadAndSaveFile(String url, String fileName) async {
     final Directory directory = await getApplicationDocumentsDirectory();
     final String filePath = '${directory.path}/$fileName';
@@ -433,10 +432,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     String likerId = message.data['likerId'];
                     String likedId = message.data['likedId'];
                     chatRoomId = chatController.getChatRoomId(likerId, likedId);
-                  }else if(type == "groupChat") {
+                  } else if (type == "groupChat") {
                     //+handle group chat chatRoomId
-                  }
-                  else {
+                  } else {
                     print("Type is missed");
                   }
                 } else {
@@ -459,30 +457,28 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         Get.to(() => ChatScreen(docs: value.data()));
                       }
                     } catch (e) {
-                      await fs
-                          .collection("Error in InitialMessage")
-                          .doc()
-                          .set({'Error': e.toString()});
+                      await fs.collection("Error in InitialMessage").doc().set({'Error': e.toString()});
                     }
                     // }
                   } else {
                     print("no doc exist for chat");
                   }
                 });
-              }
-              else if (screenName == 'profileScreen') {
+              } else if (screenName == 'profileScreen') {
                 //+could be used for follower notification
                 // fs.collection("MovingToProfile").doc().set({"Screen": screenName});
                 print("Screen is Profile");
-                String type= "Nothing";
-                if (message.data['type'] != null){
+                String type = "Nothing";
+                if (message.data['type'] != null) {
+                  type = message.data['type'];
                   if (type == 'followerFollowed') {
                     UserDetailsModel? umdl;
-                    await fs.collection("Accounts").doc(message.data['id']).get()
-                        .then((value) {
-                      umdl =  UserDetailsModel.fromJson(value.data() ?? {});
+                    await fs.collection("Accounts").doc(message.data['id']).get().then((value) {
+                      umdl = UserDetailsModel.fromJson(value.data() ?? {});
                     });
-                    Get.to(() => OtherUserProfile(otherUserModel: umdl,));
+                    Get.to(() => OtherUserProfile(
+                          otherUserModel: umdl,
+                        ));
                   } else {
                     print("Type is missed");
                   }
@@ -490,8 +486,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
                 //+ UserDetailsModel userLiker = await authController.getAUser(likerId);
                 //+ Get.to(() => Home(showAbleUserData: userLiker));
-              }
-              else {
+              } else {
                 print("Screen is in Else method of getInitialMessage");
               }
             } else {
@@ -509,13 +504,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     });
   }
 
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     WidgetsBinding.instance?.addObserver(this);
-
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       print('Got a message whilst in the foreground!');
@@ -579,33 +572,33 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 print("Things take time");
 
                 final AndroidNotificationDetails androidPlatformChannelSpecifics =
-                AndroidNotificationDetails('vipPicnic', 'vip',
-                    channelDescription: 'Vibrate and show notification',
-                    importance: Importance.max,
-                    priority: Priority.high,
-                    icon: '@mipmap/launcher_icon',
-                    largeIcon: FilePathAndroidBitmap(largeIconPath),
-                    styleInformation: bigTextStyleInformation,
-                    // vibrationPattern: vibrationPattern,
-                    enableLights: true,
-                    color: const Color.fromARGB(255, 255, 0, 0),
-                    ledColor: const Color.fromARGB(255, 255, 0, 0),
-                    ledOnMs: 1000,
-                    ledOffMs: 500);
+                    AndroidNotificationDetails('vipPicnic', 'vip',
+                        channelDescription: 'Vibrate and show notification',
+                        importance: Importance.max,
+                        priority: Priority.high,
+                        icon: '@mipmap/launcher_icon',
+                        largeIcon: FilePathAndroidBitmap(largeIconPath),
+                        styleInformation: bigTextStyleInformation,
+                        // vibrationPattern: vibrationPattern,
+                        enableLights: true,
+                        color: const Color.fromARGB(255, 255, 0, 0),
+                        ledColor: const Color.fromARGB(255, 255, 0, 0),
+                        ledOnMs: 1000,
+                        ledOffMs: 500);
 
                 const AndroidInitializationSettings initializationSettingsAndroid =
-                AndroidInitializationSettings('launcher_icon');
+                    AndroidInitializationSettings('launcher_icon');
                 final IOSInitializationSettings initializationSettingsIOS =
-                IOSInitializationSettings(onDidReceiveLocalNotification: onDidReceiveLocalNotification);
+                    IOSInitializationSettings(onDidReceiveLocalNotification: onDidReceiveLocalNotification);
 
                 final InitializationSettings initializationSettings =
-                InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+                    InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
                 await flutterLocalNotificationsPlugin.initialize(initializationSettings,
                     onSelectNotification: selectNotification);
 
                 //We need to configure for the ios as well
                 final NotificationDetails platformChannelSpecifics =
-                NotificationDetails(android: androidPlatformChannelSpecifics);
+                    NotificationDetails(android: androidPlatformChannelSpecifics);
                 print("message.notification?.title  + ${message.notification?.title}");
                 print("message.notification?.body ${message.notification?.body}");
                 print("messageId: ${message.messageId}");
@@ -659,10 +652,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   String likerId = message.data['likerId'];
                   String likedId = message.data['likedId'];
                   chatRoomId = chatController.getChatRoomId(likerId, likedId);
-                }else if(type == "groupChat") {
+                } else if (type == "groupChat") {
                   //+handle group chat chatRoomId
-                }
-                else {
+                } else {
                   print("Type is missed");
                 }
               } else {
@@ -687,15 +679,17 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               //+could be used for follower notification
               // fs.collection("MovingToProfile").doc().set({"Screen": screenName});
               print("Screen is Profile");
-              String type= "Nothing";
-              if (message.data['type'] != null){
+              String type = "Nothing";
+              if (message.data['type'] != null) {
+                type = message.data['type'];
                 if (type == 'followerFollowed') {
                   UserDetailsModel? umdl;
-                  await fs.collection("Accounts").doc(message.data['id']).get()
-                      .then((value) {
-                    umdl =  UserDetailsModel.fromJson(value.data() ?? {});
+                  await fs.collection("Accounts").doc(message.data['id']).get().then((value) {
+                    umdl = UserDetailsModel.fromJson(value.data() ?? {});
                   });
-                  Get.to(() => OtherUserProfile(otherUserModel: umdl,));
+                  Get.to(() => OtherUserProfile(
+                        otherUserModel: umdl,
+                      ));
                 } else {
                   print("Type is missed");
                 }
@@ -703,7 +697,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
               //+ UserDetailsModel userLiker = await authController.getAUser(likerId);
               //+ Get.to(() => Home(showAbleUserData: userLiker));
-            }else {
+            } else {
               print("Screen is in Else");
             }
           }

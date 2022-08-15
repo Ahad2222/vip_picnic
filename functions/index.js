@@ -286,7 +286,7 @@ exports.notifyReceiverForChat = functions.firestore
     
     await admin
       .firestore()
-      .collection("Users")
+      .collection("Accounts")
       .doc(followerId)
       .get()
       .then((snapshot) => {
@@ -329,9 +329,9 @@ exports.notifyReceiverForChat = functions.firestore
           data: {
             id: followerId,
             name: followerName,
-            imageUrl: likerImageUrl,
+            imageUrl: followerImageUrl,
             screenName: "profileScreen",
-            type: "FollowerFollowed",
+            type: "followerFollowed",
           },
         })
         .then((value) => {
