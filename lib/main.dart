@@ -495,8 +495,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 //+could be used for follower notification
                 // fs.collection("MovingToProfile").doc().set({"Screen": screenName});
                 print("Screen is Profile");
-                // String followerId = message.data['id'];
-                // print("follower id is " + followerId);
+                String type= "Nothing";
+                if (message.data['type'] != null){
+                  if (type == 'followerFollowed') {
+                    UserDetailsModel? umdl;
+                    await fs.collection("Accounts").doc(message.data['id']).get()
+                        .then((value) {
+                      umdl =  UserDetailsModel.fromJson(value.data() ?? {});
+                    });
+                    Get.to(() => OtherUserProfile(otherUserModel: umdl,));
+                  } else {
+                    print("Type is missed");
+                  }
+                }
+
                 //+ UserDetailsModel userLiker = await authController.getAUser(likerId);
                 //+ Get.to(() => Home(showAbleUserData: userLiker));
               }
@@ -696,8 +708,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               //+could be used for follower notification
               // fs.collection("MovingToProfile").doc().set({"Screen": screenName});
               print("Screen is Profile");
-              String followerId = message.data['id'];
-              print("follower id is " + followerId);
+              String type= "Nothing";
+              if (message.data['type'] != null){
+                if (type == 'followerFollowed') {
+                  UserDetailsModel? umdl;
+                  await fs.collection("Accounts").doc(message.data['id']).get()
+                      .then((value) {
+                    umdl =  UserDetailsModel.fromJson(value.data() ?? {});
+                  });
+                  Get.to(() => OtherUserProfile(otherUserModel: umdl,));
+                } else {
+                  print("Type is missed");
+                }
+              }
+
               //+ UserDetailsModel userLiker = await authController.getAUser(likerId);
               //+ Get.to(() => Home(showAbleUserData: userLiker));
             }else {

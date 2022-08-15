@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,9 +13,27 @@ import 'package:vip_picnic/view/home/my_posts.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 
-class OtherUserProfile extends StatelessWidget {
+class OtherUserProfile extends StatefulWidget {
   final UserDetailsModel? otherUserModel;
+
   OtherUserProfile({this.otherUserModel});
+
+  @override
+  State<OtherUserProfile> createState() => _OtherUserProfileState();
+}
+
+class _OtherUserProfileState extends State<OtherUserProfile> {
+
+  Rx<UserDetailsModel> userDetailsModel = UserDetailsModel().obs;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fs.collection("Accounts").doc(auth.currentUser!.uid).snapshots().listen((event) {
+      userDetailsModel.value = UserDetailsModel.fromJson(event.data() ?? {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +72,7 @@ class OtherUserProfile extends StatelessWidget {
                     ),
                     profileImage(context),
                     MyText(
-                      text: otherUserModel!.fullName,
+                      text: widget.otherUserModel!.fullName,
                       size: 20,
                       weight: FontWeight.w600,
                       color: kSecondaryColor,
@@ -101,43 +121,79 @@ class OtherUserProfile extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        profileButtons(
-                          buttonText: 'follow'.tr,
-                          onTap: () async {
-                            await fs.collection("Accounts").doc(auth.currentUser!.uid).update({
-                              "iFollowed": FieldValue.arrayUnion([otherUserModel!.uID]),
-                            });
-                            await fs.collection("Accounts").doc(otherUserModel!.uID).update({
-                              "TheyFollowed": FieldValue.arrayUnion([auth.currentUser!.uid]),
-                            });
-                            IFollowedModel iFollowedProfile = IFollowedModel(
-                              followedId: otherUserModel!.uID,
-                              followedName: otherUserModel!.fullName,
-                              followedImage: otherUserModel!.profileImageUrl,
-                              followedAt: DateTime.now().millisecondsSinceEpoch,
-                            );
+                        Obx(() {
+                          return profileButtons(
+                            buttonText: !userDetailsModel.value.iFollowed!.asMap().containsValue(widget.otherUserModel!.uID)
+                                ? 'follow'.tr
+                                : 'un-follow'.tr
+                            ,
+                            onTap: !userDetailsModel.value.iFollowed!.asMap().containsValue(widget.otherUserModel!.uID)
+                                ? () async {
+                              await fs.collection("Accounts").doc(auth.currentUser!.uid).update({
+                                "iFollowed": FieldValue.arrayUnion([widget.otherUserModel!.uID]),
+                              });
+                              await fs.collection("Accounts").doc(widget.otherUserModel!.uID).update({
+                                "TheyFollowed": FieldValue.arrayUnion([auth.currentUser!.uid]),
+                              });
+                              IFollowedModel iFollowedProfile = IFollowedModel(
+                                followedId: widget.otherUserModel!.uID,
+                                followedName: widget.otherUserModel!.fullName,
+                                followedImage: widget.otherUserModel!.profileImageUrl,
+                                followedAt: DateTime
+                                    .now()
+                                    .millisecondsSinceEpoch,
+                              );
 
-                            await fs
-                                .collection("Accounts")
-                                .doc(auth.currentUser!.uid)
-                                .collection("iFollowed")
-                                .doc(otherUserModel!.uID)
-                                .set(iFollowedProfile.toJson());
-
-                          },
-                        ),
+                              await fs
+                                  .collection("Accounts")
+                                  .doc(auth.currentUser!.uid)
+                                  .collection("iFollowed")
+                                  .doc(widget.otherUserModel!.uID)
+                                  .set(iFollowedProfile.toJson());
+                            } : () async {
+                              //+unfollow code goes here
+                              await fs.collection("Accounts").doc(auth.currentUser!.uid).update({
+                                "iFollowed": FieldValue.arrayRemove([widget.otherUserModel!.uID]),
+                              });
+                              await fs.collection("Accounts").doc(widget.otherUserModel!.uID).update({
+                                "TheyFollowed": FieldValue.arrayRemove([auth.currentUser!.uid]),
+                              });
+                              await fs
+                                  .collection("Accounts")
+                                  .doc(auth.currentUser!.uid)
+                                  .collection("iFollowed")
+                                  .doc(widget.otherUserModel!.uID)
+                                  .delete();
+                              await fs
+                                  .collection("Accounts")
+                                  .doc(widget.otherUserModel!.uID)
+                                  .collection("TheyFollowed")
+                                  .doc(userDetailsModel.value.uID)
+                                  .delete();
+                            },
+                          );
+                        }),
                         SizedBox(
                           width: 20,
                         ),
                         profileButtons(
                           buttonText: 'message'.tr,
-                          onTap: () {},
+                          onTap: () async {
+                            UserDetailsModel umdl = UserDetailsModel();
+                            await fs.collection("Accounts").doc(widget.otherUserModel!.uID).get().then((value) {
+                              umdl = UserDetailsModel.fromJson(value.data() ?? {});
+                            });
+                            await chatController.createChatRoomAndStartConversation(
+                              user1Model: userDetailsModel.value,
+                              user2Model: umdl,
+                            );
+                          },
                         ),
                       ],
                     ),
                     bioBox(
                       bio:
-                          'Musician since 2018, available to new events. Love plant and planet 🌱',
+                      'Musician since 2018, available to new events. Love plant and planet 🌱',
                     ),
                   ],
                 ),
@@ -146,28 +202,103 @@ class OtherUserProfile extends StatelessWidget {
             ),
           ];
         },
-        body: GridView.builder(
-          shrinkWrap: true,
-          physics: BouncingScrollPhysics(),
-          padding: EdgeInsets.symmetric(
-            vertical: 10,
-          ),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 7,
-            mainAxisSpacing: 7,
-            mainAxisExtent: 124,
-          ),
-          itemCount: 6,
-          itemBuilder: (context, index) {
-            return Image.asset(
-              Assets.imagesDummyImg,
-              height: height(context, 1.0),
-              width: width(context, 1.0),
-              fit: BoxFit.cover,
-            );
+        body:  StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: fs
+              .collection("Posts")
+              .where("uID", isEqualTo: widget.otherUserModel!.uID)
+              .snapshots(),
+          builder: (
+              BuildContext context,
+              AsyncSnapshot<QuerySnapshot> snapshot,
+              ) {
+            log("inside stream-builder");
+            if (snapshot.connectionState ==
+                ConnectionState.waiting) {
+              log("inside stream-builder in waiting state");
+              return noPostYet();
+            } else if (snapshot.connectionState ==
+                ConnectionState.active ||
+                snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.hasError) {
+                return const Text('Some unknown error occurred');
+              } else if (snapshot.hasData) {
+                // log("inside hasData and ${snapshot.data!.docs}");
+                if (snapshot.data!.docs.length > 0) {
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    physics: BouncingScrollPhysics(),
+                    padding: EdgeInsets.symmetric(
+                      vertical: 10,
+                    ),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 7,
+                      mainAxisSpacing: 7,
+                      mainAxisExtent: 124,
+                    ),
+                    itemCount:snapshot.data?.docs.length,
+                    itemBuilder: (context, index) {
+                      return Image.asset(
+                        (snapshot.data!.docs[index] as Map<String, dynamic>)["postImages"][0],
+                        height: height(context, 1.0),
+                        width: width(context, 1.0),
+                        fit: BoxFit.cover,
+                      );
+                    },
+                  );
+                  //   ListView.builder(
+                  //   shrinkWrap: true,
+                  //   physics: BouncingScrollPhysics(),
+                  //   padding: EdgeInsets.symmetric(
+                  //     vertical: 30,
+                  //   ),
+                  //   itemCount: snapshot.data!.docs.length,
+                  //   itemBuilder: (context, index) {
+                  //     AddPostModel addPostModel =
+                  //     AddPostModel.fromJson(
+                  //         snapshot.data!.docs[index].data()
+                  //         as Map<String, dynamic>);
+                  //     return PostWidget(
+                  //       postDocModel: addPostModel,
+                  //       postID: addPostModel.postID,
+                  //       isLikeByMe: addPostModel.likeIDs!
+                  //           .asMap()
+                  //           .containsValue(auth.currentUser!.uid),
+                  //       profileImage: addPostModel.profileImage,
+                  //       name: addPostModel.postBy,
+                  //       postedTime: addPostModel.createdAt,
+                  //       title: addPostModel.postTitle,
+                  //       likeCount: addPostModel.likeIDs!.length,
+                  //       isMyPost: false,
+                  //       postImage: addPostModel.postImages!,
+                  //     );
+                  //   },
+                  // );
+                } else {
+                  return noPostYet();
+                }
+              } else {
+                log("in else of hasData done and: ${snapshot.connectionState} and"
+                    " snapshot.hasData: ${snapshot.hasData}");
+                return noPostYet();
+              }
+            } else {
+              log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+              return noPostYet();
+            }
           },
         ),
+      ),
+    );
+  }
+
+  Widget noPostYet() {
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: 50,
+      ),
+      child: Center(
+        child: Image.asset(Assets.imagesNoPostYet),
       ),
     );
   }
@@ -261,9 +392,7 @@ class OtherUserProfile extends StatelessWidget {
     );
   }
 
-  Widget profileImage(
-    BuildContext context,
-  ) {
+  Widget profileImage(BuildContext context,) {
     return Center(
       child: Container(
         height: 128,
@@ -284,7 +413,7 @@ class OtherUserProfile extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(100),
             child: Image.network(
-              userDetailsModel.profileImageUrl!,
+              widget.otherUserModel!.profileImageUrl!,
               height: height(context, 1.0),
               width: width(context, 1.0),
               fit: BoxFit.cover,
