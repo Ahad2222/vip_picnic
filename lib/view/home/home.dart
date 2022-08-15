@@ -540,6 +540,9 @@ class PostWidget extends StatelessWidget {
                           // });
                         },
                         child: Image.asset(
+                          //+this is giving us a small glitch because everytime for the first time app opens up,
+                          //+ the red heart image is not loaded yet. which gives a small glitch on that first like
+                          //+ but this hapens only when either no post is liked before or all post have been liked before
                           isLikeByMe! ? Assets.imagesHeartFull : Assets.imagesHeartEmpty,
                           height: 24.0,
                           color: isLikeByMe! ? Color(0xffe31b23) : kDarkBlueColor.withOpacity(0.60),
