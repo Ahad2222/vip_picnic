@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
+import 'package:vip_picnic/model/i_followed_model/i_followed_model.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
@@ -69,11 +70,14 @@ class _SearchFriendsState extends State<SearchFriends> {
         ),
       ),
       body: Obx(() {
-        if(searchText.value != ""){
+        if (searchText.value != "") {
           return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-            stream: fs.collection("Accounts").where("userSearchParameters", arrayContains: searchText.value).snapshots(),
-            builder: (BuildContext context,
-                AsyncSnapshot<QuerySnapshot> snapshot,) {
+            stream:
+                fs.collection("Accounts").where("userSearchParameters", arrayContains: searchText.value).snapshots(),
+            builder: (
+              BuildContext context,
+              AsyncSnapshot<QuerySnapshot> snapshot,
+            ) {
               log("inside stream-builder");
               if (snapshot.connectionState == ConnectionState.waiting) {
                 log("inside stream-builder in waiting state");
@@ -93,19 +97,19 @@ class _SearchFriendsState extends State<SearchFriends> {
                       itemCount: snapshot.data!.docs.length,
                       itemBuilder: (context, index) {
                         UserDetailsModel umdl =
-                        UserDetailsModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
-                        if(umdl.uID != auth.currentUser!.uid){
+                            UserDetailsModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                        if (umdl.uID != auth.currentUser!.uid) {
                           return SearchTiles(
                             umdl: umdl,
                             profileImage: umdl.profileImageUrl,
                             name: umdl.fullName,
                             isFollowed: userDetailsModel.iFollowed != null
                                 ? userDetailsModel.iFollowed!.asMap().containsValue(umdl.uID)
-                                ? true
-                                : false
+                                    ? true
+                                    : false
                                 : false,
                           );
-                        }else{
+                        } else {
                           return SizedBox();
                         }
                       },
@@ -189,17 +193,18 @@ class _SearchFriendsState extends State<SearchFriends> {
               }
             },
           );
-        }else{
+        } else {
           return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
             stream: fs.collection("Accounts").where("uID", isNotEqualTo: auth.currentUser!.uid).snapshots(),
-            builder: (BuildContext context,
-                AsyncSnapshot<QuerySnapshot> snapshot,) {
+            builder: (
+              BuildContext context,
+              AsyncSnapshot<QuerySnapshot> snapshot,
+            ) {
               log("inside stream-builder");
               if (snapshot.connectionState == ConnectionState.waiting) {
                 log("inside stream-builder in waiting state");
                 return Center(child: CircularProgressIndicator());
-              }
-              else if (snapshot.connectionState == ConnectionState.active ||
+              } else if (snapshot.connectionState == ConnectionState.active ||
                   snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasError) {
                   return const Text('Some unknown error occurred');
@@ -215,15 +220,15 @@ class _SearchFriendsState extends State<SearchFriends> {
                       itemCount: snapshot.data!.docs.length,
                       itemBuilder: (context, index) {
                         UserDetailsModel umdl =
-                        UserDetailsModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                            UserDetailsModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
                         return SearchTiles(
                           umdl: umdl,
                           profileImage: umdl.profileImageUrl,
                           name: umdl.fullName,
                           isFollowed: userDetailsModel.iFollowed != null
                               ? userDetailsModel.iFollowed!.asMap().containsValue(umdl.uID)
-                              ? true
-                              : false
+                                  ? true
+                                  : false
                               : false,
                         );
                       },
@@ -322,46 +327,61 @@ class SearchTiles extends StatelessWidget {
                       child: InkWell(
                         onTap: !isFollowed!
                             ? () async {
-                          await fs.collection("Accounts").doc(auth.currentUser!.uid).update({
-                            "iFollowed": FieldValue.arrayUnion([umdl!.uID]),
-                          });
-                          await fs.collection("Accounts").doc(umdl!.uID).update({
-                            "TheyFollowed": FieldValue.arrayUnion([auth.currentUser!.uid]),
-                          });
-                          await fs
-                              .collection("Accounts")
-                              .doc(auth.currentUser!.uid)
-                              .collection("iFollowed")
-                              .doc(umdl!.uID)
-                              .set(umdl!.toJson());
-                          await fs
-                              .collection("Accounts")
-                              .doc(umdl!.uID)
-                              .collection("TheyFollowed")
-                              .doc(userDetailsModel.uID)
-                              .set(userDetailsModel.toJson());
-                        }
+                                await fs.collection("Accounts").doc(auth.currentUser!.uid).update({
+                                  "iFollowed": FieldValue.arrayUnion([umdl!.uID]),
+                                });
+                                await fs.collection("Accounts").doc(umdl!.uID).update({
+                                  "TheyFollowed": FieldValue.arrayUnion([auth.currentUser!.uid]),
+                                });
+                                IFollowedModel iFollowedProfile = IFollowedModel(
+                                  followedId: umdl!.uID,
+                                  followedName: umdl!.fullName,
+                                  followedImage: umdl!.profileImageUrl,
+                                  followedAt: DateTime.now().millisecondsSinceEpoch,
+                                );
+
+                                //+ cannot do this because for the TheyFollowed,
+                                //+ I need follower info and not followed info
+                                // IFollowedModel myProfileForFollowed = IFollowedModel(
+                                //   followedId: userDetailsModel.uID,
+                                //   followedName: userDetailsModel.fullName,
+                                //   followedImage: userDetailsModel.profileImageUrl,
+                                //   followedAt: DateTime.now().millisecondsSinceEpoch,
+                                // );
+                                await fs
+                                    .collection("Accounts")
+                                    .doc(auth.currentUser!.uid)
+                                    .collection("iFollowed")
+                                    .doc(umdl!.uID)
+                                    .set(iFollowedProfile.toJson());
+                                // await fs
+                                //     .collection("Accounts")
+                                //     .doc(umdl!.uID)
+                                //     .collection("TheyFollowed")
+                                //     .doc(userDetailsModel.uID)
+                                //     .set(myProfileForFollowed.toJson());
+                              }
                             : () async {
-                          //+unfollow code goes here
-                          await fs.collection("Accounts").doc(auth.currentUser!.uid).update({
-                            "iFollowed": FieldValue.arrayRemove([umdl!.uID]),
-                          });
-                          await fs.collection("Accounts").doc(umdl!.uID).update({
-                            "TheyFollowed": FieldValue.arrayRemove([auth.currentUser!.uid]),
-                          });
-                          await fs
-                              .collection("Accounts")
-                              .doc(auth.currentUser!.uid)
-                              .collection("iFollowed")
-                              .doc(umdl!.uID)
-                              .delete();
-                          await fs
-                              .collection("Accounts")
-                              .doc(umdl!.uID)
-                              .collection("TheyFollowed")
-                              .doc(userDetailsModel.uID)
-                              .delete();
-                        },
+                                //+unfollow code goes here
+                                await fs.collection("Accounts").doc(auth.currentUser!.uid).update({
+                                  "iFollowed": FieldValue.arrayRemove([umdl!.uID]),
+                                });
+                                await fs.collection("Accounts").doc(umdl!.uID).update({
+                                  "TheyFollowed": FieldValue.arrayRemove([auth.currentUser!.uid]),
+                                });
+                                await fs
+                                    .collection("Accounts")
+                                    .doc(auth.currentUser!.uid)
+                                    .collection("iFollowed")
+                                    .doc(umdl!.uID)
+                                    .delete();
+                                await fs
+                                    .collection("Accounts")
+                                    .doc(umdl!.uID)
+                                    .collection("TheyFollowed")
+                                    .doc(userDetailsModel.uID)
+                                    .delete();
+                              },
                         borderRadius: BorderRadius.circular(4),
                         splashColor: kSecondaryColor.withOpacity(0.05),
                         highlightColor: kSecondaryColor.withOpacity(0.05),

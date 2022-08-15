@@ -30,6 +30,8 @@ import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/utils/localization.dart';
 import 'package:vip_picnic/view/chat/simple_chat_screen.dart';
 import 'package:vip_picnic/view/choose_language/choose_language.dart';
+import 'package:vip_picnic/view/profile/other_user_profile.dart';
+import 'package:vip_picnic/view/profile/profile.dart';
 import 'provider/chat_provider/chat_head_provider.dart';
 import 'package:http/http.dart' as http;
 
@@ -357,12 +359,26 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               await fs.collection("ChatRoom").doc(chatRoomId).get().then((value) {
                 Get.to(() => ChatScreen(docs: value.data(), isArchived: false));
               });
-            } else if (screenName == 'profileScreen') {
+            }
+            else if (screenName == 'profileScreen') {
               print("Screen is Profile");
               // print(payloadDecoded.toString());
               //+could be used for follower notification
               // fs.collection("MovingToProfile").doc().set({"Screen": screenName});
+              String type = "Nothing";
               print("Screen is Profile");
+              if (payloadDecoded['type'] != null){
+                if (type == 'followerFollowed') {
+                  UserDetailsModel? umdl;
+                  await fs.collection("Accounts").doc(payloadDecoded['id']).get()
+                      .then((value) {
+                    umdl =  UserDetailsModel.fromJson(value.data() ?? {});
+                  });
+                  Get.to(() => OtherUserProfile(otherUserModel: umdl,));
+                } else {
+                  print("Type is missed");
+                }
+              }
               // String followerId = payloadDecoded['id'];
               // print("follower id is " + followerId);
               //+ UserDetailsModel userLiker = await authController.getAUser(likerId);

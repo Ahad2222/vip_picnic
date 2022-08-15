@@ -185,7 +185,8 @@ exports.notifyReceiverForChat = functions.firestore
         recName,
         chatRoomId
       );
-    } else if (snap.data().type == "audio") {
+    }
+    else if (snap.data().type == "audio") {
       functions.logger.info("In Chat function: type is audio");
       //getting image and token of receiver from the firestore through admin sdk
       await admin
@@ -209,7 +210,8 @@ exports.notifyReceiverForChat = functions.firestore
         recName,
         chatRoomId
       );
-    } else {
+    }
+    else {
       functions.logger.info("In Chat function: type is Else block");
       //getting image and token of receiver from the firestore through admin sdk
       await admin
@@ -234,4 +236,110 @@ exports.notifyReceiverForChat = functions.firestore
         chatRoomId
       );
     }
+  });
+
+
+  exports.liking = functions.firestore
+  .document("/Accounts/{documentId}/iFollowed/{iFollowedDoc}")
+  .onCreate(async (snap, context) => {
+  
+    //IFollowedModel myProfileForFollowed = IFollowedModel(
+      //followedId: userDetailsModel.uID,
+      //followedName: userDetailsModel.fullName,
+      //followedImage: userDetailsModel.profileImageUrl,
+      //followedAt: DateTime.now().millisecondsSinceEpoch,
+    // );
+    //Getting Followed Profile Details
+    var followedId = snap.data().followedId;
+    var followedName = snap.data().followedName;
+    var followedImageUrl = snap.data().followedImage;
+    var followedAt = snap.data().followedAt;
+    var followedFcmToken;
+    // var time = snap.data().time;
+
+    functions.logger.log(
+      `LikerID Profile Details: ${followedId}, ${followedName}, ${followedImageUrl},`
+    );
+
+    //Getting Liker Profile Details
+    var followerId = context.params.documentId;
+    var followerName;
+    var followerImageUrl;
+    var followerFcmToken;
+
+    functions.logger.log(
+      `LikerID Profile Details: ${followerId}, ${followerName}, ${followerImageUrl}, ${followerFcmToken},`
+    );
+
+    await admin
+      .firestore()
+      .collection("Accounts")
+      .doc(followedId)
+      .get()
+      .then(async (snapshot) => {
+        followedFcmToken = snapshot.data().fcmToken;
+      })
+      .catch((e) => {
+        functions.logger.log(e.toString());
+      });
+
+    
+    await admin
+      .firestore()
+      .collection("Users")
+      .doc(followerId)
+      .get()
+      .then((snapshot) => {
+        followerName = snapshot.data().fullName;
+        followerImageUrl = snapshot.data().profileImageUrl;
+        followerFcmToken = snapshot.data().fcmToken;
+      })
+      .catch((e) => {
+        functions.logger.log(e.toString());
+      });
+    functions.logger.log("FollowerID is: ");
+    functions.logger.log(followerId);
+
+
+    await admin
+        .firestore()
+        .collection("Accounts")
+        .doc(followedId)
+        .collection("TheyFollowed")
+        .doc(followerId)
+        .set({
+          followerId: followerId,
+          followerName: followerName,
+          followerImageUrl: followerImageUrl,
+          followedAt: followedAt,
+        });
+
+
+      //Sending notification to Followed One
+
+      await admin
+        .messaging()
+        .send({
+          token: followedFcmToken,
+          notification: {
+            title: `Followed by ${followerName}`,
+            body: `Lets check their  profile.`,
+            imageUrl: followerImageUrl,
+          },
+          data: {
+            id: followerId,
+            name: followerName,
+            imageUrl: likerImageUrl,
+            screenName: "profileScreen",
+            type: "FollowerFollowed",
+          },
+        })
+        .then((value) => {
+          functions.logger.log(
+            "Notification for Liking from liker is sent to the LikedOne"
+          );
+        })
+        .catch((e) => {
+          functions.logger.log(e.toString());
+        });
   });

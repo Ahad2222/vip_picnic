@@ -1,14 +1,20 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
+import 'package:vip_picnic/model/i_followed_model/i_followed_model.dart';
+import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/home/my_posts.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 
 class OtherUserProfile extends StatelessWidget {
+  final UserDetailsModel? otherUserModel;
+  OtherUserProfile({this.otherUserModel});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,7 +52,7 @@ class OtherUserProfile extends StatelessWidget {
                     ),
                     profileImage(context),
                     MyText(
-                      text: userDetailsModel.fullName,
+                      text: otherUserModel!.fullName,
                       size: 20,
                       weight: FontWeight.w600,
                       color: kSecondaryColor,
@@ -97,7 +103,28 @@ class OtherUserProfile extends StatelessWidget {
                       children: [
                         profileButtons(
                           buttonText: 'follow'.tr,
-                          onTap: () {},
+                          onTap: () async {
+                            await fs.collection("Accounts").doc(auth.currentUser!.uid).update({
+                              "iFollowed": FieldValue.arrayUnion([otherUserModel!.uID]),
+                            });
+                            await fs.collection("Accounts").doc(otherUserModel!.uID).update({
+                              "TheyFollowed": FieldValue.arrayUnion([auth.currentUser!.uid]),
+                            });
+                            IFollowedModel iFollowedProfile = IFollowedModel(
+                              followedId: otherUserModel!.uID,
+                              followedName: otherUserModel!.fullName,
+                              followedImage: otherUserModel!.profileImageUrl,
+                              followedAt: DateTime.now().millisecondsSinceEpoch,
+                            );
+
+                            await fs
+                                .collection("Accounts")
+                                .doc(auth.currentUser!.uid)
+                                .collection("iFollowed")
+                                .doc(otherUserModel!.uID)
+                                .set(iFollowedProfile.toJson());
+
+                          },
                         ),
                         SizedBox(
                           width: 20,
