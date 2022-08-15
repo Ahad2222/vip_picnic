@@ -64,6 +64,20 @@ class Home extends StatelessWidget {
                       height: height(context, 1.0),
                       width: width(context, 1.0),
                       fit: BoxFit.cover,
+                      errorBuilder: (
+                        BuildContext context,
+                        Object exception,
+                        StackTrace? stackTrace,
+                      ) {
+                        return const Text(' ');
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) {
+                          return child;
+                        } else {
+                          return loading();
+                        }
+                      },
                     ),
                   ),
                 ),
@@ -112,23 +126,23 @@ class Home extends StatelessWidget {
               physics: const BouncingScrollPhysics(),
               children: [
                 addStoryButton(context),
-                ListView.builder(
-                  shrinkWrap: true,
-                  scrollDirection: Axis.horizontal,
-                  itemCount: 6,
-                  padding: const EdgeInsets.only(
-                    right: 8,
-                  ),
-                  physics: const BouncingScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    return stories(
-                      context,
-                      'assets/images/baby_shower.png',
-                      index.isOdd ? 'Khan' : 'Stephan',
-                      index,
-                    );
-                  },
-                ),
+                // ListView.builder(
+                //   shrinkWrap: true,
+                //   scrollDirection: Axis.horizontal,
+                //   itemCount: 6,
+                //   padding: const EdgeInsets.only(
+                //     right: 8,
+                //   ),
+                //   physics: const BouncingScrollPhysics(),
+                //   itemBuilder: (context, index) {
+                //     return stories(
+                //       context,
+                //       'assets/images/baby_shower.png',
+                //       index.isOdd ? 'Khan' : 'Stephan',
+                //       index,
+                //     );
+                //   },
+                // ),
               ],
             ),
           ),
@@ -266,8 +280,25 @@ class Home extends StatelessWidget {
       padding: const EdgeInsets.only(
         top: 50,
       ),
-      child: Center(
-        child: Image.asset(Assets.imagesNoPostYet),
+      child: Column(
+        children: [
+          Center(
+            child: Image.asset(
+              Assets.imagesNoDataFound,
+              height: 180,
+            ),
+          ),
+          MyText(
+            text: 'No Post Yet',
+            size: 18,
+            weight: FontWeight.w700,
+          ),
+          MyText(
+            text: 'All posts will appear here when you follow someone.',
+            size: 10,
+            weight: FontWeight.w500,
+          ),
+        ],
       ),
     );
   }
@@ -447,6 +478,21 @@ class _PostWidgetState extends State<PostWidget> {
                                 height: height(context, 1.0),
                                 width: width(context, 1.0),
                                 fit: BoxFit.cover,
+                                errorBuilder: (
+                                  BuildContext context,
+                                  Object exception,
+                                  StackTrace? stackTrace,
+                                ) {
+                                  return const Text(' ');
+                                },
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    return child;
+                                  } else {
+                                    return loading();
+                                  }
+                                },
                               ),
                             )
                           : ClipRRect(
@@ -456,6 +502,21 @@ class _PostWidgetState extends State<PostWidget> {
                                 height: height(context, 1.0),
                                 width: width(context, 1.0),
                                 fit: BoxFit.cover,
+                                errorBuilder: (
+                                  BuildContext context,
+                                  Object exception,
+                                  StackTrace? stackTrace,
+                                ) {
+                                  return const Text(' ');
+                                },
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    return child;
+                                  } else {
+                                    return loading();
+                                  }
+                                },
                               ),
                             ),
                     ),
@@ -560,6 +621,13 @@ class _PostWidgetState extends State<PostWidget> {
                                   widget.postImage![index],
                                   height: Get.height,
                                   fit: BoxFit.cover,
+                                  errorBuilder: (
+                                    BuildContext context,
+                                    Object exception,
+                                    StackTrace? stackTrace,
+                                  ) {
+                                    return const Text(' ');
+                                  },
                                   loadingBuilder:
                                       (context, child, loadingProgress) {
                                     if (loadingProgress == null) {
@@ -624,14 +692,17 @@ class _PostWidgetState extends State<PostWidget> {
                           await fs
                               .collection("Posts")
                               .doc(widget.postID)
-                              .update({
-                            "likeCount": FieldValue.increment(
-                                widget.isLikeByMe! ? -1 : 1),
-                            "likeIDs": !widget.isLikeByMe!
-                                ? FieldValue.arrayUnion([auth.currentUser!.uid])
-                                : FieldValue.arrayRemove(
-                                    [auth.currentUser!.uid]),
-                          });
+                              .update(
+                            {
+                              "likeCount": FieldValue.increment(
+                                  widget.isLikeByMe! ? -1 : 1),
+                              "likeIDs": !widget.isLikeByMe!
+                                  ? FieldValue.arrayUnion(
+                                      [auth.currentUser!.uid])
+                                  : FieldValue.arrayRemove(
+                                      [auth.currentUser!.uid]),
+                            },
+                          );
                           // await fs.collection("Posts").doc(postID).collection("likes")
                           //     .doc(auth.currentUser!.uid).set({
                           //   "likerId": auth.currentUser!.uid,

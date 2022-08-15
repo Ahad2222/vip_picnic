@@ -11,6 +11,7 @@ import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/home/my_posts.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
+import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 
 class OtherUserProfile extends StatefulWidget {
@@ -23,14 +24,17 @@ class OtherUserProfile extends StatefulWidget {
 }
 
 class _OtherUserProfileState extends State<OtherUserProfile> {
-
   Rx<UserDetailsModel> userDetailsModel = UserDetailsModel().obs;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    fs.collection("Accounts").doc(auth.currentUser!.uid).snapshots().listen((event) {
+    fs
+        .collection("Accounts")
+        .doc(auth.currentUser!.uid)
+        .snapshots()
+        .listen((event) {
       userDetailsModel.value = UserDetailsModel.fromJson(event.data() ?? {});
     });
   }
@@ -123,54 +127,76 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                       children: [
                         Obx(() {
                           return profileButtons(
-                            buttonText: !userDetailsModel.value.iFollowed!.asMap().containsValue(widget.otherUserModel!.uID)
+                            buttonText: !userDetailsModel.value.iFollowed!
+                                    .asMap()
+                                    .containsValue(widget.otherUserModel!.uID)
                                 ? 'follow'.tr
-                                : 'un-follow'.tr
-                            ,
-                            onTap: !userDetailsModel.value.iFollowed!.asMap().containsValue(widget.otherUserModel!.uID)
+                                : 'un-follow'.tr,
+                            onTap: !userDetailsModel.value.iFollowed!
+                                    .asMap()
+                                    .containsValue(widget.otherUserModel!.uID)
                                 ? () async {
-                              await fs.collection("Accounts").doc(auth.currentUser!.uid).update({
-                                "iFollowed": FieldValue.arrayUnion([widget.otherUserModel!.uID]),
-                              });
-                              await fs.collection("Accounts").doc(widget.otherUserModel!.uID).update({
-                                "TheyFollowed": FieldValue.arrayUnion([auth.currentUser!.uid]),
-                              });
-                              IFollowedModel iFollowedProfile = IFollowedModel(
-                                followedId: widget.otherUserModel!.uID,
-                                followedName: widget.otherUserModel!.fullName,
-                                followedImage: widget.otherUserModel!.profileImageUrl,
-                                followedAt: DateTime
-                                    .now()
-                                    .millisecondsSinceEpoch,
-                              );
+                                    await fs
+                                        .collection("Accounts")
+                                        .doc(auth.currentUser!.uid)
+                                        .update({
+                                      "iFollowed": FieldValue.arrayUnion(
+                                          [widget.otherUserModel!.uID]),
+                                    });
+                                    await fs
+                                        .collection("Accounts")
+                                        .doc(widget.otherUserModel!.uID)
+                                        .update({
+                                      "TheyFollowed": FieldValue.arrayUnion(
+                                          [auth.currentUser!.uid]),
+                                    });
+                                    IFollowedModel iFollowedProfile =
+                                        IFollowedModel(
+                                      followedId: widget.otherUserModel!.uID,
+                                      followedName:
+                                          widget.otherUserModel!.fullName,
+                                      followedImage: widget
+                                          .otherUserModel!.profileImageUrl,
+                                      followedAt:
+                                          DateTime.now().millisecondsSinceEpoch,
+                                    );
 
-                              await fs
-                                  .collection("Accounts")
-                                  .doc(auth.currentUser!.uid)
-                                  .collection("iFollowed")
-                                  .doc(widget.otherUserModel!.uID)
-                                  .set(iFollowedProfile.toJson());
-                            } : () async {
-                              //+unfollow code goes here
-                              await fs.collection("Accounts").doc(auth.currentUser!.uid).update({
-                                "iFollowed": FieldValue.arrayRemove([widget.otherUserModel!.uID]),
-                              });
-                              await fs.collection("Accounts").doc(widget.otherUserModel!.uID).update({
-                                "TheyFollowed": FieldValue.arrayRemove([auth.currentUser!.uid]),
-                              });
-                              await fs
-                                  .collection("Accounts")
-                                  .doc(auth.currentUser!.uid)
-                                  .collection("iFollowed")
-                                  .doc(widget.otherUserModel!.uID)
-                                  .delete();
-                              await fs
-                                  .collection("Accounts")
-                                  .doc(widget.otherUserModel!.uID)
-                                  .collection("TheyFollowed")
-                                  .doc(userDetailsModel.value.uID)
-                                  .delete();
-                            },
+                                    await fs
+                                        .collection("Accounts")
+                                        .doc(auth.currentUser!.uid)
+                                        .collection("iFollowed")
+                                        .doc(widget.otherUserModel!.uID)
+                                        .set(iFollowedProfile.toJson());
+                                  }
+                                : () async {
+                                    //+unfollow code goes here
+                                    await fs
+                                        .collection("Accounts")
+                                        .doc(auth.currentUser!.uid)
+                                        .update({
+                                      "iFollowed": FieldValue.arrayRemove(
+                                          [widget.otherUserModel!.uID]),
+                                    });
+                                    await fs
+                                        .collection("Accounts")
+                                        .doc(widget.otherUserModel!.uID)
+                                        .update({
+                                      "TheyFollowed": FieldValue.arrayRemove(
+                                          [auth.currentUser!.uid]),
+                                    });
+                                    await fs
+                                        .collection("Accounts")
+                                        .doc(auth.currentUser!.uid)
+                                        .collection("iFollowed")
+                                        .doc(widget.otherUserModel!.uID)
+                                        .delete();
+                                    await fs
+                                        .collection("Accounts")
+                                        .doc(widget.otherUserModel!.uID)
+                                        .collection("TheyFollowed")
+                                        .doc(userDetailsModel.value.uID)
+                                        .delete();
+                                  },
                           );
                         }),
                         SizedBox(
@@ -180,10 +206,16 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                           buttonText: 'message'.tr,
                           onTap: () async {
                             UserDetailsModel umdl = UserDetailsModel();
-                            await fs.collection("Accounts").doc(widget.otherUserModel!.uID).get().then((value) {
-                              umdl = UserDetailsModel.fromJson(value.data() ?? {});
+                            await fs
+                                .collection("Accounts")
+                                .doc(widget.otherUserModel!.uID)
+                                .get()
+                                .then((value) {
+                              umdl =
+                                  UserDetailsModel.fromJson(value.data() ?? {});
                             });
-                            await chatController.createChatRoomAndStartConversation(
+                            await chatController
+                                .createChatRoomAndStartConversation(
                               user1Model: userDetailsModel.value,
                               user2Model: umdl,
                             );
@@ -193,7 +225,7 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                     ),
                     bioBox(
                       bio:
-                      'Musician since 2018, available to new events. Love plant and planet 🌱',
+                          'Musician since 2018, available to new events. Love plant and planet 🌱',
                     ),
                   ],
                 ),
@@ -202,22 +234,20 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
             ),
           ];
         },
-        body:  StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
           stream: fs
               .collection("Posts")
               .where("uID", isEqualTo: widget.otherUserModel!.uID)
               .snapshots(),
           builder: (
-              BuildContext context,
-              AsyncSnapshot<QuerySnapshot> snapshot,
-              ) {
+            BuildContext context,
+            AsyncSnapshot<QuerySnapshot> snapshot,
+          ) {
             log("inside stream-builder");
-            if (snapshot.connectionState ==
-                ConnectionState.waiting) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
               log("inside stream-builder in waiting state");
               return noPostYet();
-            } else if (snapshot.connectionState ==
-                ConnectionState.active ||
+            } else if (snapshot.connectionState == ConnectionState.active ||
                 snapshot.connectionState == ConnectionState.done) {
               if (snapshot.hasError) {
                 return const Text('Some unknown error occurred');
@@ -236,13 +266,28 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                       mainAxisSpacing: 7,
                       mainAxisExtent: 124,
                     ),
-                    itemCount:snapshot.data?.docs.length,
+                    itemCount: snapshot.data?.docs.length,
                     itemBuilder: (context, index) {
-                      return Image.asset(
-                        (snapshot.data!.docs[index] as Map<String, dynamic>)["postImages"][0],
+                      return Image.network(
+                        (snapshot.data!.docs[index].data()
+                            as Map<String, dynamic>)["postImages"][0],
                         height: height(context, 1.0),
                         width: width(context, 1.0),
                         fit: BoxFit.cover,
+                        errorBuilder: (
+                          BuildContext context,
+                          Object exception,
+                          StackTrace? stackTrace,
+                        ) {
+                          return const Text(' ');
+                        },
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) {
+                            return child;
+                          } else {
+                            return loading();
+                          }
+                        },
                       );
                     },
                   );
@@ -392,7 +437,9 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
     );
   }
 
-  Widget profileImage(BuildContext context,) {
+  Widget profileImage(
+    BuildContext context,
+  ) {
     return Center(
       child: Container(
         height: 128,
@@ -417,12 +464,20 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
               height: height(context, 1.0),
               width: width(context, 1.0),
               fit: BoxFit.cover,
-              // errorBuilder: (context, exception, stackTrace) {
-              //   return Image.asset(
-              //     "assets/images/add_story.png",
-              //     height: 25,
-              //   );
-              // },
+              errorBuilder: (
+                BuildContext context,
+                Object exception,
+                StackTrace? stackTrace,
+              ) {
+                return const Text(' ');
+              },
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) {
+                  return child;
+                } else {
+                  return loading();
+                }
+              },
             ),
           ),
         ),
