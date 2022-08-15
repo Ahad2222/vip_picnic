@@ -3,10 +3,9 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nikah_match/constants/controllers.dart';
-import 'package:nikah_match/helpers/showLoading.dart';
-import 'package:nikah_match/view/constant/constant.dart';
 import 'package:uuid/uuid.dart';
+import 'package:vip_picnic/constant/color.dart';
+import 'package:vip_picnic/view/widget/my_appbar.dart';
 
 class PreviewImageScreen extends StatefulWidget {
   final String? imagePath;
@@ -16,7 +15,12 @@ class PreviewImageScreen extends StatefulWidget {
   final String? chatRoomId;
 
   const PreviewImageScreen(
-      {Key? key, this.imagePath, this.anotherUserId, this.anotherUserName, this.userId, this.chatRoomId})
+      {Key? key,
+      this.imagePath,
+      this.anotherUserId,
+      this.anotherUserName,
+      this.userId,
+      this.chatRoomId})
       : super(key: key);
 
   @override
@@ -31,33 +35,10 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
   Widget build(BuildContext context) {
     log('in preview');
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        leading: IconButton(
-          onPressed: () {
-            Get.back();
-          },
-          icon: Image.asset(
-            'assets/new_images/back_icon_new.png',
-            height: 16,
-            color: kBlackColor,
-          ),
-        ),
-        title: Image.asset(
-          'assets/new_images/navbar_app_logo 1.png',
-          height: 21,
-        ),
-        /* actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Image.asset(
-              'assets/new_images/filter_icon_new.png',
-              height: 15,
-            ),
-          ),
-        ],*/
+      appBar: myAppBar(
+        onTap: () => Get.back(),
+        title: '',
       ),
-
       body: Container(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -69,18 +50,6 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                 File(widget.imagePath),
               ),
             ),
-            /*  Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: 30,
-                    right: 15,
-                  ),
-                  child:
-                ),
-              ],
-            ),*/
           ],
         ),
       ),
@@ -101,7 +70,10 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
 
   uploadImage() {
     String fileName = Uuid().v1();
-    var ref = FirebaseStorage.instance.ref().child(widget.chatRoomId).child("$fileName.jpg");
+    var ref = FirebaseStorage.instance
+        .ref()
+        .child(widget.chatRoomId)
+        .child("$fileName.jpg");
     try {
       final uploadTask = ref.putFile(File(widget.imagePath));
       Get.defaultDialog(
@@ -121,8 +93,8 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
       uploadTask.snapshotEvents.listen((TaskSnapshot taskSnapshot) async {
         switch (taskSnapshot.state) {
           case TaskState.running:
-            uploadPercentageValue.value =
-                100.0 * (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes);
+            uploadPercentageValue.value = 100.0 *
+                (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes);
             print("Upload is $uploadPercentageValue% complete.");
             break;
           case TaskState.paused:
@@ -136,7 +108,8 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
             log("Upload resulted in error.");
             showErrorDialog(
                 title: "Storage Error!",
-                description: "Some unknown error occurred. Please connect to a reliable "
+                description:
+                    "Some unknown error occurred. Please connect to a reliable "
                     "internet connection and try again. ");
             log("error in uploading image to storage on preview screen is: "
                 "${TaskState.error.toString()}");
@@ -144,7 +117,8 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
           case TaskState.success:
             // Handle successful uploads on complete
             imageUrl = await taskSnapshot.ref.getDownloadURL();
-            if (File(widget.imagePath) != null && (imageUrl != null || imageUrl != "")) {
+            if (File(widget.imagePath) != null &&
+                (imageUrl != null || imageUrl != "")) {
               var time = DateTime.now().millisecondsSinceEpoch;
               Map<String, dynamic> messageMap = {
                 "sendById": authController.userModel.value.id,
@@ -173,7 +147,8 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
       //+ https://firebase.google.com/docs/storage/flutter/handle-errors
       showErrorDialog(
           title: "Storage Error!",
-          description: "Some unknown error occurred. Please connect to a reliable "
+          description:
+              "Some unknown error occurred. Please connect to a reliable "
               "internet connection and try again. ");
       log("error in uploading image to storage on preview screen is: ${e.code} and ${e.message}");
     }

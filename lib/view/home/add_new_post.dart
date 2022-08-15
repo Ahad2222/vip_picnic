@@ -1,15 +1,17 @@
+import 'dart:developer';
 import 'dart:io';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/constant/color.dart';
-import 'package:vip_picnic/controller/home_controller/home_controller.dart';
 import 'package:vip_picnic/generated/assets.dart';
+import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/utils/validators.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/my_appbar.dart';
 import 'package:vip_picnic/view/widget/my_button.dart';
+import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:vip_picnic/view/widget/my_textfields.dart';
 
 // ignore: must_be_immutable
@@ -187,38 +189,120 @@ class AddNewPost extends StatelessWidget {
                     ],
                   );
                 }),
+                SizedBox(
+                  height: 20,
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 15,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SizedBox(
-                        height: 20,
-                      ),
-                      SimpleTextField(
-                        controller: homeController.descriptionCon,
-                        validator: (value) => emptyFieldValidator(value!),
-                        hintText: 'Description...',
-                        initialValue: title,
-                        maxLines: 6,
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      SimpleTextField(
-                        controller: homeController.tagCon,
-                        hintText: 'Tag people...',
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      SimpleTextField(
-                        controller: homeController.locationCon,
-                        hintText: 'Location (optional)...',
-                      ),
-                    ],
+                  child: SimpleTextField(
+                    controller: homeController.descriptionCon,
+                    validator: (value) => emptyFieldValidator(value!),
+                    hintText: 'Description...',
+                    initialValue: title,
+                    maxLines: 6,
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 15,
+                  ),
+                  child: SimpleTextField(
+                    controller: homeController.tagCon,
+                    hintText: 'Tag people...',
+                    haveSuffix: true,
+                    suffix: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 130,
+                          height: 38,
+                          child: tagPeopleBox(
+                            radius: 14.0,
+                            onTap: () {},
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  stream: fs
+                      .collection("Accounts")
+                      .doc(userDetailsModel.uID)
+                      .collection('iFollowed')
+                      .snapshots(),
+                  builder: (
+                    BuildContext context,
+                    AsyncSnapshot<QuerySnapshot> snapshot,
+                  ) {
+                    log("inside stream-builder");
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      log("inside stream-builder in waiting state");
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.connectionState ==
+                            ConnectionState.active ||
+                        snapshot.connectionState == ConnectionState.done) {
+                      if (snapshot.hasError) {
+                        return const Text('Some unknown error occurred');
+                      } else if (snapshot.hasData) {
+                        // log("inside hasData and ${snapshot.data!.docs}");
+                        if (snapshot.data!.docs.length > 0) {
+                          return SizedBox(
+                            height: 45,
+                            child: ListView.builder(
+                              physics: BouncingScrollPhysics(),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 7,
+                              ),
+                              scrollDirection: Axis.horizontal,
+                              itemCount: snapshot.data!.docs.length,
+                              itemBuilder: (context, index) {
+                                UserDetailsModel obj =
+                                    UserDetailsModel.fromJson(
+                                  snapshot.data!.docs[index].data()
+                                      as Map<String, dynamic>,
+                                );
+                                return tagPeopleBox(
+                                  personName: obj.fullName,
+                                  id: obj.uID,
+                                );
+                              },
+                            ),
+                          );
+                        } else {
+                          return Center(child: const Text('No Users Found'));
+                        }
+                      } else {
+                        log("in else of hasData done and: ${snapshot.connectionState} and"
+                            " snapshot.hasData: ${snapshot.hasData}");
+                        return Center(child: const Text('No Users Found'));
+                      }
+                    } else {
+                      log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+                      return Center(
+                          child: Text(
+                              'Some Error occurred while fetching the posts'));
+                    }
+                  },
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 15,
+                  ),
+                  child: SimpleTextField(
+                    controller: homeController.locationCon,
+                    hintText: 'Location (optional)...',
                   ),
                 ),
               ],
@@ -235,6 +319,55 @@ class AddNewPost extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget tagPeopleBox({
+    String? id,
+    String? personName,
+    bool? isSelected = false,
+    double? radius = 50.0,
+    int? index,
+    VoidCallback? onTap,
+  }) {
+    return Container(
+      margin: EdgeInsets.symmetric(
+        horizontal: 7,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius!),
+        color: isSelected! ? kTertiaryColor : kGreyColor.withOpacity(0.1),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(radius),
+          splashColor: kPrimaryColor.withOpacity(0.1),
+          highlightColor: kPrimaryColor.withOpacity(0.1),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: 8,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                MyText(
+                  paddingLeft: 10,
+                  paddingRight: 5,
+                  text: personName,
+                  size: 16,
+                  color: isSelected ? kPrimaryColor : kBlackColor,
+                ),
+                Icon(
+                  isSelected ? Icons.close : Icons.check,
+                  color: isSelected ? kPrimaryColor : kBlackColor,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

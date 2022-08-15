@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
@@ -11,6 +12,7 @@ import 'package:vip_picnic/model/chat_models/chat_head_model.dart';
 import 'package:vip_picnic/provider/chat_provider/chat_head_provider.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
+import 'package:vip_picnic/view/chat/create_new_chat.dart';
 import 'package:vip_picnic/view/chat/group_chat/g_chat_screen.dart';
 import 'package:vip_picnic/view/chat/simple_chat_screen.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
@@ -121,9 +123,10 @@ class ChatHead extends StatelessWidget {
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: ChatHeadProvider.currentTab == 0
-                ? () {}
-                : () => Navigator.pushNamed(
-                      context,
+                ? () => Get.to(
+                      () => CreateNewChat(),
+                    )
+                : () => Get.toNamed(
                       AppLinks.createNewGroup,
                     ),
             elevation: 1,
@@ -145,14 +148,16 @@ class SimpleChatHeads extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: fs.collection(chatRoomCollection)
+      stream: fs
+          .collection(chatRoomCollection)
           // .where("users", arrayContains: userDetailsModel.uID)
           .where("notDeletedFor", arrayContains: userDetailsModel.uID)
-          .orderBy('lastMessageAt').snapshots(),
+          .orderBy('lastMessageAt',descending: true)
+          .snapshots(),
       builder: (
-          BuildContext context,
-          AsyncSnapshot<QuerySnapshot> snapshot,
-          ) {
+        BuildContext context,
+        AsyncSnapshot<QuerySnapshot> snapshot,
+      ) {
         log("inside stream-builder");
         if (snapshot.connectionState == ConnectionState.waiting) {
           log("inside stream-builder in waiting state");
@@ -173,10 +178,11 @@ class SimpleChatHeads extends StatelessWidget {
                 itemCount: snapshot.data!.docs.length,
                 itemBuilder: (context, index) {
                   ChatHeadModel data = ChatHeadModel();
-                  data = ChatHeadModel.fromDocumentSnapshot(snapshot.data!.docs[index]);
+                  data = ChatHeadModel.fromDocumentSnapshot(
+                      snapshot.data!.docs[index]);
                   return chatHeadTiles(
                     context,
-                    profileImage:  data.user1Id != userDetailsModel.uID
+                    profileImage: data.user1Id != userDetailsModel.uID
                         ? data.user1Model!.profileImageUrl
                         : data.user2Model!.profileImageUrl,
                     name: data.user1Id != userDetailsModel.uID
@@ -184,7 +190,8 @@ class SimpleChatHeads extends StatelessWidget {
                         : data.user2Model!.fullName,
                     msg: data.lastMessage,
                     time: data.lastMessageAt,
-                    docs: snapshot.data!.docs[index].data() as Map<String, dynamic>,
+                    docs: snapshot.data!.docs[index].data()
+                        as Map<String, dynamic>,
                   );
                 },
               );
@@ -230,7 +237,6 @@ class SimpleChatHeads extends StatelessWidget {
                 receiveImage: profileImage,
                 receiveName: name,
                 docs: docs,
-
               ),
             ),
           ),
@@ -284,7 +290,8 @@ class SimpleChatHeads extends StatelessWidget {
             children: [
               MyText(
                 paddingTop: 5,
-                text: "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[0]}"
+                text:
+                    "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[0]}"
                     ":"
                     "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[1]}",
                 weight: FontWeight.w300,

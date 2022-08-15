@@ -133,7 +133,10 @@ class Home extends StatelessWidget {
           ),
           /**/ //+ starting stream builder
           StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-            stream: fs.collection("Accounts").doc(auth.currentUser!.uid).snapshots(),
+            stream: fs
+                .collection("Accounts")
+                .doc(auth.currentUser!.uid)
+                .snapshots(),
             builder: (
               BuildContext context,
               AsyncSnapshot<DocumentSnapshot> snapshot,
@@ -150,64 +153,76 @@ class Home extends StatelessWidget {
                 } else if (snapshot.hasData) {
                   // log("inside hasData and ${snapshot.data!.docs}");
                   if (snapshot.data!.exists) {
-                    userDetailsModel = UserDetailsModel.fromJson(snapshot.data!.data() as Map<String, dynamic>);
+                    userDetailsModel = UserDetailsModel.fromJson(
+                        snapshot.data!.data() as Map<String, dynamic>);
                     var followedListToBeChecked =
-                        userDetailsModel.iFollowed!.length > 0 ? userDetailsModel.iFollowed : ["something"];
-                      return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                        stream: fs.collection("Posts").where("uID", whereIn: followedListToBeChecked).snapshots(),
-                        builder: (
-                            BuildContext context,
-                            AsyncSnapshot<QuerySnapshot> snapshot,
-                            ) {
-                          log("inside stream-builder");
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            log("inside stream-builder in waiting state");
-                            return noPostYet();
-                          } else if (snapshot.connectionState == ConnectionState.active ||
-                              snapshot.connectionState == ConnectionState.done) {
-                            if (snapshot.hasError) {
-                              return const Text('Some unknown error occurred');
-                            } else if (snapshot.hasData) {
-                              // log("inside hasData and ${snapshot.data!.docs}");
-                              if (snapshot.data!.docs.length > 0) {
-                                return ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: BouncingScrollPhysics(),
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: 30,
-                                  ),
-                                  itemCount: snapshot.data!.docs.length,
-                                  itemBuilder: (context, index) {
-                                    AddPostModel addPostModel =
-                                    AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
-                                    return PostWidget(
-                                      postDocModel: addPostModel,
-                                      postID: addPostModel.postID,
-                                      isLikeByMe: addPostModel.likeIDs!.asMap().containsValue(auth.currentUser!.uid),
-                                      profileImage: addPostModel.profileImage,
-                                      name: addPostModel.postBy,
-                                      postedTime: addPostModel.createdAt,
-                                      title: addPostModel.postTitle,
-                                      likeCount: addPostModel.likeIDs!.length,
-                                      isMyPost: false,
-                                      postImage: addPostModel.postImages![0],
-                                    );
-                                  },
-                                );
-                              } else {
-                                return noPostYet();
-                              }
+                        userDetailsModel.iFollowed!.length > 0
+                            ? userDetailsModel.iFollowed
+                            : ["something"];
+                    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                      stream: fs
+                          .collection("Posts")
+                          .where("uID", whereIn: followedListToBeChecked)
+                          .snapshots(),
+                      builder: (
+                        BuildContext context,
+                        AsyncSnapshot<QuerySnapshot> snapshot,
+                      ) {
+                        log("inside stream-builder");
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          log("inside stream-builder in waiting state");
+                          return noPostYet();
+                        } else if (snapshot.connectionState ==
+                                ConnectionState.active ||
+                            snapshot.connectionState == ConnectionState.done) {
+                          if (snapshot.hasError) {
+                            return const Text('Some unknown error occurred');
+                          } else if (snapshot.hasData) {
+                            // log("inside hasData and ${snapshot.data!.docs}");
+                            if (snapshot.data!.docs.length > 0) {
+                              return ListView.builder(
+                                shrinkWrap: true,
+                                physics: BouncingScrollPhysics(),
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 30,
+                                ),
+                                itemCount: snapshot.data!.docs.length,
+                                itemBuilder: (context, index) {
+                                  AddPostModel addPostModel =
+                                      AddPostModel.fromJson(
+                                          snapshot.data!.docs[index].data()
+                                              as Map<String, dynamic>);
+                                  return PostWidget(
+                                    postDocModel: addPostModel,
+                                    postID: addPostModel.postID,
+                                    isLikeByMe: addPostModel.likeIDs!
+                                        .asMap()
+                                        .containsValue(auth.currentUser!.uid),
+                                    profileImage: addPostModel.profileImage,
+                                    name: addPostModel.postBy,
+                                    postedTime: addPostModel.createdAt,
+                                    title: addPostModel.postTitle,
+                                    likeCount: addPostModel.likeIDs!.length,
+                                    isMyPost: false,
+                                    postImage: addPostModel.postImages![0],
+                                  );
+                                },
+                              );
                             } else {
-                              log("in else of hasData done and: ${snapshot.connectionState} and"
-                                  " snapshot.hasData: ${snapshot.hasData}");
                               return noPostYet();
                             }
                           } else {
-                            log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+                            log("in else of hasData done and: ${snapshot.connectionState} and"
+                                " snapshot.hasData: ${snapshot.hasData}");
                             return noPostYet();
                           }
-                        },
-                      );
+                        } else {
+                          log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+                          return noPostYet();
+                        }
+                      },
+                    );
                   } else {
                     return noPostYet();
                   }
@@ -218,7 +233,9 @@ class Home extends StatelessWidget {
                 }
               } else {
                 log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
-                return Center(child: Text('Some Error occurred while fetching the posts'));
+                return Center(
+                    child:
+                        Text('Some Error occurred while fetching the posts'));
               }
             },
           ),
@@ -361,7 +378,20 @@ class PostWidget extends StatelessWidget {
 
   bool? isMyPost, isLikeByMe;
 
-  List<String> monthList = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  List<String> monthList = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec"
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -524,10 +554,12 @@ class PostWidget extends StatelessWidget {
                       GestureDetector(
                         onTap: () async {
                           await fs.collection("Posts").doc(postID).update({
-                            "likeCount": FieldValue.increment(isLikeByMe! ? -1 : 1),
+                            "likeCount":
+                                FieldValue.increment(isLikeByMe! ? -1 : 1),
                             "likeIDs": !isLikeByMe!
                                 ? FieldValue.arrayUnion([auth.currentUser!.uid])
-                                : FieldValue.arrayRemove([auth.currentUser!.uid]),
+                                : FieldValue.arrayRemove(
+                                    [auth.currentUser!.uid]),
                           });
                           // await fs.collection("Posts").doc(postID).collection("likes")
                           //     .doc(auth.currentUser!.uid).set({
@@ -543,9 +575,13 @@ class PostWidget extends StatelessWidget {
                           //+this is giving us a small glitch because everytime for the first time app opens up,
                           //+ the red heart image is not loaded yet. which gives a small glitch on that first like
                           //+ but this hapens only when either no post is liked before or all post have been liked before
-                          isLikeByMe! ? Assets.imagesHeartFull : Assets.imagesHeartEmpty,
+                          isLikeByMe!
+                              ? Assets.imagesHeartFull
+                              : Assets.imagesHeartEmpty,
                           height: 24.0,
-                          color: isLikeByMe! ? Color(0xffe31b23) : kDarkBlueColor.withOpacity(0.60),
+                          color: isLikeByMe!
+                              ? Color(0xffe31b23)
+                              : kDarkBlueColor.withOpacity(0.60),
                         ),
                       ),
                       MyText(
@@ -560,13 +596,12 @@ class PostWidget extends StatelessWidget {
                     spacing: 10.0,
                     children: [
                       GestureDetector(
-                        onTap: () async {
-                          UserDetailsModel umdl = UserDetailsModel();
-                          await fs.collection("Accounts").doc(postDocModel!.uID).get().then((value) {
-                            umdl = UserDetailsModel.fromJson(value.data() ?? {});
-                          });
-                          await chatController.createChatRoomAndStartConversation(user1Model: userDetailsModel, user2Model: umdl);
-                        },
+                        onTap: () => Get.to(
+                          () => PostDetails(
+                            isLikeByMe: isLikeByMe,
+                            postDocModel: postDocModel,
+                          ),
+                        ),
                         child: Image.asset(
                           Assets.imagesComment,
                           height: 23.76,
@@ -574,22 +609,31 @@ class PostWidget extends StatelessWidget {
                         ),
                       ),
                       StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                        stream: fs.collection("Posts").doc(postID).collection("comments").snapshots(),
+                        stream: fs
+                            .collection("Posts")
+                            .doc(postID)
+                            .collection("comments")
+                            .snapshots(),
                         builder: (
                           BuildContext context,
                           AsyncSnapshot<QuerySnapshot> snapshot,
                         ) {
-                          int previousCount = snapshot.data != null ? snapshot.data!.docs.length : 0;
+                          int previousCount = snapshot.data != null
+                              ? snapshot.data!.docs.length
+                              : 0;
                           log("inside stream-builder");
-                          if (snapshot.connectionState == ConnectionState.waiting) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
                             log("inside stream-builder in waiting state");
                             return MyText(
                               text: '$previousCount',
                               size: 18,
                               color: kDarkBlueColor.withOpacity(0.60),
                             );
-                          } else if (snapshot.connectionState == ConnectionState.active ||
-                              snapshot.connectionState == ConnectionState.done) {
+                          } else if (snapshot.connectionState ==
+                                  ConnectionState.active ||
+                              snapshot.connectionState ==
+                                  ConnectionState.done) {
                             if (snapshot.hasError) {
                               return MyText(
                                 text: "$previousCount",
@@ -700,8 +744,10 @@ class PostWidget extends StatelessWidget {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      String shareLink = await DynamicLinkHandler.buildDynamicLink(
-                        postImageUrl: postDocModel?.postImages![0] ?? "https://www.freeiconspng.com/uploads/no-image-icon-15.png",
+                      String shareLink =
+                          await DynamicLinkHandler.buildDynamicLink(
+                        postImageUrl: postDocModel?.postImages![0] ??
+                            "https://www.freeiconspng.com/uploads/no-image-icon-15.png",
                         postId: postDocModel!.postID ?? "",
                         postTitle: postDocModel!.postTitle ?? "No Title",
                         short: true,

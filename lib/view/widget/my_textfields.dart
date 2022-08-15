@@ -301,6 +301,8 @@ class SimpleTextField extends StatelessWidget {
     this.controller,
     this.onChanged,
     this.validator,
+    this.haveSuffix = false,
+    this.suffix,
     this.maxLines = 1,
   }) : super(key: key);
 
@@ -309,6 +311,8 @@ class SimpleTextField extends StatelessWidget {
   TextEditingController? controller;
   ValueChanged<String>? onChanged;
   FormFieldValidator<String>? validator;
+  bool? haveSuffix;
+  Widget? suffix;
 
   @override
   Widget build(BuildContext context) {
@@ -325,6 +329,7 @@ class SimpleTextField extends StatelessWidget {
         color: kBlackColor.withOpacity(0.40),
       ),
       decoration: InputDecoration(
+        suffixIcon: suffix,
         contentPadding: EdgeInsets.symmetric(
           horizontal: 15,
           vertical: 10,
