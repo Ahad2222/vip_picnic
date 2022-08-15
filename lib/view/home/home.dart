@@ -451,9 +451,23 @@ class _PostWidgetState extends State<PostWidget> {
                       ? () => Get.to(
                             () => Profile(),
                           )
-                      : () => Get.to(
-                            () => OtherUserProfile(),
-                          ),
+                      : () {
+                          UserDetailsModel otherUser = UserDetailsModel();
+
+                          fs
+                              .collection('Accounts')
+                              .doc(widget.postDocModel!.uID)
+                              .get()
+                              .then(
+                            (value) {
+                              otherUser =
+                                  UserDetailsModel.fromJson(value.data()!);
+                            },
+                          );
+                          Get.to(
+                            () => OtherUserProfile(otherUserModel: otherUser),
+                          );
+                        },
                   child: Container(
                     height: 54,
                     width: 54,

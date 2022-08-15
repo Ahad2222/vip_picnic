@@ -538,7 +538,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 scrollController.animateTo(
                   scrollController.position.maxScrollExtent,
                   duration: Duration(seconds: 1),
-                  curve: Curves.easeInBack,
+                  curve: Curves.easeOut,
                 );
                 // scrollController.jumpTo(
                 //   scrollController.position.maxScrollExtent,

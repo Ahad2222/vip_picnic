@@ -131,7 +131,7 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                                     .asMap()
                                     .containsValue(widget.otherUserModel!.uID)
                                 ? 'follow'.tr
-                                : 'un-follow'.tr,
+                                : 'Unfollow'.tr,
                             onTap: !userDetailsModel.value.iFollowed!
                                     .asMap()
                                     .containsValue(widget.otherUserModel!.uID)
