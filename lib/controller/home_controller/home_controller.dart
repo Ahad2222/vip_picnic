@@ -78,6 +78,8 @@ class HomeController extends GetxController {
           taggedPeople: taggedPeople,
           location: locationCon.text.trim(),
           createdAt: DateFormat.yMEd().add_jms().format(createdAt).toString(),
+          createdAtMilliSeconds:  DateTime.now().millisecondsSinceEpoch,
+          likeIDs: [],
           likeCount: likeCount,
           commentCount: commentCount,
           shareCount: shareCount,
@@ -98,6 +100,7 @@ class HomeController extends GetxController {
             locationCon.clear();
             taggedPeople = [];
             log('CLEAR');
+            navigatorKey.currentState!.pop();
             navigatorKey.currentState!.pop();
             update();
           },

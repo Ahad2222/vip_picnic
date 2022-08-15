@@ -60,6 +60,7 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: "sendButton",
         backgroundColor: kSecondaryColor,
         onPressed: () {
           uploadImage();

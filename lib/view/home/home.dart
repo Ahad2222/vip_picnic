@@ -148,10 +148,7 @@ class Home extends StatelessWidget {
           ),
           /**/ //+ starting stream builder
           StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-            stream: fs
-                .collection("Accounts")
-                .doc(auth.currentUser!.uid)
-                .snapshots(),
+            stream: fs.collection("Accounts").doc(auth.currentUser!.uid).snapshots(),
             builder: (
               BuildContext context,
               AsyncSnapshot<DocumentSnapshot> snapshot,
@@ -168,28 +165,20 @@ class Home extends StatelessWidget {
                 } else if (snapshot.hasData) {
                   // log("inside hasData and ${snapshot.data!.docs}");
                   if (snapshot.data!.exists) {
-                    userDetailsModel = UserDetailsModel.fromJson(
-                        snapshot.data!.data() as Map<String, dynamic>);
+                    userDetailsModel = UserDetailsModel.fromJson(snapshot.data!.data() as Map<String, dynamic>);
                     var followedListToBeChecked =
-                        userDetailsModel.iFollowed!.length > 0
-                            ? userDetailsModel.iFollowed
-                            : ["something"];
+                        userDetailsModel.iFollowed!.length > 0 ? userDetailsModel.iFollowed : ["something"];
                     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                      stream: fs
-                          .collection("Posts")
-                          .where("uID", whereIn: followedListToBeChecked)
-                          .snapshots(),
+                      stream: fs.collection("Posts").where("uID", whereIn: followedListToBeChecked).orderBy("createdAtMilliSeconds", descending: true).snapshots(),
                       builder: (
                         BuildContext context,
                         AsyncSnapshot<QuerySnapshot> snapshot,
                       ) {
                         log("inside stream-builder");
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
                           log("inside stream-builder in waiting state");
                           return noPostYet();
-                        } else if (snapshot.connectionState ==
-                                ConnectionState.active ||
+                        } else if (snapshot.connectionState == ConnectionState.active ||
                             snapshot.connectionState == ConnectionState.done) {
                           if (snapshot.hasError) {
                             return const Text('Some unknown error occurred');
@@ -205,15 +194,11 @@ class Home extends StatelessWidget {
                                 itemCount: snapshot.data!.docs.length,
                                 itemBuilder: (context, index) {
                                   AddPostModel addPostModel =
-                                      AddPostModel.fromJson(
-                                          snapshot.data!.docs[index].data()
-                                              as Map<String, dynamic>);
+                                      AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
                                   return PostWidget(
                                     postDocModel: addPostModel,
                                     postID: addPostModel.postID,
-                                    isLikeByMe: addPostModel.likeIDs!
-                                        .asMap()
-                                        .containsValue(auth.currentUser!.uid),
+                                    isLikeByMe: addPostModel.likeIDs!.asMap().containsValue(auth.currentUser!.uid),
                                     profileImage: addPostModel.profileImage,
                                     name: addPostModel.postBy,
                                     postedTime: addPostModel.createdAt,
@@ -248,9 +233,7 @@ class Home extends StatelessWidget {
                 }
               } else {
                 log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
-                return Center(
-                    child:
-                        Text('Some Error occurred while fetching the posts'));
+                return Center(child: Text('Some Error occurred while fetching the posts'));
               }
             },
           ),
@@ -416,21 +399,8 @@ class PostWidget extends StatefulWidget {
 }
 
 class _PostWidgetState extends State<PostWidget> {
-  int currentPost = 0;
-  List<String> monthList = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec"
-  ];
+  RxInt currentPost = 0.obs;
+  List<String> monthList = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   @override
   Widget build(BuildContext context) {
@@ -454,14 +424,9 @@ class _PostWidgetState extends State<PostWidget> {
                       : () {
                           UserDetailsModel otherUser = UserDetailsModel();
 
-                          fs
-                              .collection('Accounts')
-                              .doc(widget.postDocModel!.uID)
-                              .get()
-                              .then(
+                          fs.collection('Accounts').doc(widget.postDocModel!.uID).get().then(
                             (value) {
-                              otherUser =
-                                  UserDetailsModel.fromJson(value.data()!);
+                              otherUser = UserDetailsModel.fromJson(value.data()!);
                             },
                           );
                           Get.to(
@@ -499,8 +464,7 @@ class _PostWidgetState extends State<PostWidget> {
                                 ) {
                                   return const Text(' ');
                                 },
-                                loadingBuilder:
-                                    (context, child, loadingProgress) {
+                                loadingBuilder: (context, child, loadingProgress) {
                                   if (loadingProgress == null) {
                                     return child;
                                   } else {
@@ -523,8 +487,7 @@ class _PostWidgetState extends State<PostWidget> {
                                 ) {
                                   return const Text(' ');
                                 },
-                                loadingBuilder:
-                                    (context, child, loadingProgress) {
+                                loadingBuilder: (context, child, loadingProgress) {
                                   if (loadingProgress == null) {
                                     return child;
                                   } else {
@@ -620,8 +583,10 @@ class _PostWidgetState extends State<PostWidget> {
                     child: Stack(
                       children: [
                         PageView.builder(
-                          onPageChanged: (index) =>
-                              homeController.getCurrentPostIndex(index),
+                          onPageChanged: (index) {
+                            currentPost.value = index;
+                            // homeController.getCurrentPostIndex(index);
+                          },
                           physics: BouncingScrollPhysics(),
                           itemCount: widget.postImage!.length,
                           itemBuilder: (context, index) {
@@ -642,8 +607,7 @@ class _PostWidgetState extends State<PostWidget> {
                                   ) {
                                     return const Text(' ');
                                   },
-                                  loadingBuilder:
-                                      (context, child, loadingProgress) {
+                                  loadingBuilder: (context, child, loadingProgress) {
                                     if (loadingProgress == null) {
                                       return child;
                                     } else {
@@ -670,8 +634,7 @@ class _PostWidgetState extends State<PostWidget> {
                                     ),
                                     child: Center(
                                       child: MyText(
-                                        text:
-                                            '${homeController.currentPost.value + 1}/${widget.postImage!.length}',
+                                        text: '${currentPost.value + 1}/${widget.postImage!.length}',
                                         size: 15,
                                         weight: FontWeight.w600,
                                         color: kPrimaryColor,
@@ -703,18 +666,12 @@ class _PostWidgetState extends State<PostWidget> {
                     children: [
                       GestureDetector(
                         onTap: () async {
-                          await fs
-                              .collection("Posts")
-                              .doc(widget.postID)
-                              .update(
+                          await fs.collection("Posts").doc(widget.postID).update(
                             {
-                              "likeCount": FieldValue.increment(
-                                  widget.isLikeByMe! ? -1 : 1),
+                              "likeCount": FieldValue.increment(widget.isLikeByMe! ? -1 : 1),
                               "likeIDs": !widget.isLikeByMe!
-                                  ? FieldValue.arrayUnion(
-                                      [auth.currentUser!.uid])
-                                  : FieldValue.arrayRemove(
-                                      [auth.currentUser!.uid]),
+                                  ? FieldValue.arrayUnion([auth.currentUser!.uid])
+                                  : FieldValue.arrayRemove([auth.currentUser!.uid]),
                             },
                           );
                           // await fs.collection("Posts").doc(postID).collection("likes")
@@ -731,13 +688,9 @@ class _PostWidgetState extends State<PostWidget> {
                           //+this is giving us a small glitch because everytime for the first time app opens up,
                           //+ the red heart image is not loaded yet. which gives a small glitch on that first like
                           //+ but this hapens only when either no post is liked before or all post have been liked before
-                          widget.isLikeByMe!
-                              ? Assets.imagesHeartFull
-                              : Assets.imagesHeartEmpty,
+                          widget.isLikeByMe! ? Assets.imagesHeartFull : Assets.imagesHeartEmpty,
                           height: 24.0,
-                          color: widget.isLikeByMe!
-                              ? Color(0xffe31b23)
-                              : kDarkBlueColor.withOpacity(0.60),
+                          color: widget.isLikeByMe! ? Color(0xffe31b23) : kDarkBlueColor.withOpacity(0.60),
                         ),
                       ),
                       MyText(
@@ -765,31 +718,22 @@ class _PostWidgetState extends State<PostWidget> {
                         ),
                       ),
                       StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                        stream: fs
-                            .collection("Posts")
-                            .doc(widget.postID)
-                            .collection("comments")
-                            .snapshots(),
+                        stream: fs.collection("Posts").doc(widget.postID).collection("comments").snapshots(),
                         builder: (
                           BuildContext context,
                           AsyncSnapshot<QuerySnapshot> snapshot,
                         ) {
-                          int previousCount = snapshot.data != null
-                              ? snapshot.data!.docs.length
-                              : 0;
+                          int previousCount = snapshot.data != null ? snapshot.data!.docs.length : 0;
                           log("inside stream-builder");
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
                             log("inside stream-builder in waiting state");
                             return MyText(
                               text: '$previousCount',
                               size: 18,
                               color: kDarkBlueColor.withOpacity(0.60),
                             );
-                          } else if (snapshot.connectionState ==
-                                  ConnectionState.active ||
-                              snapshot.connectionState ==
-                                  ConnectionState.done) {
+                          } else if (snapshot.connectionState == ConnectionState.active ||
+                              snapshot.connectionState == ConnectionState.done) {
                             if (snapshot.hasError) {
                               return MyText(
                                 text: "$previousCount",
@@ -835,8 +779,7 @@ class _PostWidgetState extends State<PostWidget> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      String shareLink =
-                          await DynamicLinkHandler.buildDynamicLink(
+                      String shareLink = await DynamicLinkHandler.buildDynamicLink(
                         postImageUrl: widget.postDocModel?.postImages![0] ??
                             "https://www.freeiconspng.com/uploads/no-image-icon-15.png",
                         postId: widget.postDocModel!.postID ?? "",

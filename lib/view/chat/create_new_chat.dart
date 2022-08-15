@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/constant/color.dart';
+import 'package:vip_picnic/model/i_followed_model/i_followed_model.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/widget/my_appbar.dart';
@@ -46,13 +47,13 @@ class CreateNewChat extends StatelessWidget {
                   ),
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
-                    UserDetailsModel umdl = UserDetailsModel.fromJson(
+                    IFollowedModel iFollowedModel = IFollowedModel.fromJson(
                         snapshot.data!.docs[index].data()
                             as Map<String, dynamic>);
                     return contactTiles(
-                      profileImage: umdl.profileImageUrl,
-                      name: umdl.fullName,
-                      id: umdl.uID,
+                      profileImage: iFollowedModel.followedImage,
+                      name: iFollowedModel.followedName,
+                      id: iFollowedModel.followedId,
                     );
                   },
                 );

@@ -687,9 +687,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   await fs.collection("Accounts").doc(message.data['id']).get().then((value) {
                     umdl = UserDetailsModel.fromJson(value.data() ?? {});
                   });
-                  Get.to(() => OtherUserProfile(
-                        otherUserModel: umdl,
-                      ));
+                  Get.to(() => OtherUserProfile(otherUserModel: umdl));
                 } else {
                   print("Type is missed");
                 }

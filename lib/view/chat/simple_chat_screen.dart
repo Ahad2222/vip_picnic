@@ -21,6 +21,7 @@ import 'package:vip_picnic/model/chat_models/chat_room_model.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/chat/preview_image.dart';
+import 'package:vip_picnic/view/profile/other_user_profile.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/message_bubbles.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
@@ -48,8 +49,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  Rx<TextEditingController> messageEditingController =
-      TextEditingController().obs;
+  Rx<TextEditingController> messageEditingController = TextEditingController().obs;
   TextEditingController _tec = TextEditingController();
   ScrollController scrollController = ScrollController();
 
@@ -131,11 +131,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
   uploadAudio({String? minutes, String? seconds}) {
     log("'audio-time in uploadAudio': '${minutes}:${seconds}'");
-    final firebaseStorageRef = FirebaseStorage.instance.ref().child(
-        '${chatRoomID}/audio${DateTime.now().millisecondsSinceEpoch.toString()}.mp3');
+    final firebaseStorageRef = FirebaseStorage.instance
+        .ref()
+        .child('${chatRoomID}/audio${DateTime.now().millisecondsSinceEpoch.toString()}.mp3');
 
-    UploadTask task =
-        firebaseStorageRef.putFile(File(chatController.recordFilePath ?? ""));
+    UploadTask task = firebaseStorageRef.putFile(File(chatController.recordFilePath ?? ""));
     task.then((value) async {
       print('##############done#########');
       // task.snapshotEvents.listen((event) {
@@ -174,16 +174,13 @@ class _ChatScreenState extends State<ChatScreen> {
           "isRead": false,
           "isReceived": false,
         };
-        bool isDeletedFor =
-            crm.value.notDeletedFor?.asMap().containsValue(anotherUserID) ??
-                false;
+        bool isDeletedFor = crm.value.notDeletedFor?.asMap().containsValue(anotherUserID) ?? false;
         if (!isDeletedFor) {
           fs.collection("ChatRoom").doc(chatRoomID).update({
             "notDeletedFor": FieldValue.arrayUnion([anotherUserID])
           });
         }
-        chatController.addConversationMessage(
-            chatRoomID, time, "audio", messageMap, audioMsg!);
+        chatController.addConversationMessage(chatRoomID, time, "audio", messageMap, audioMsg!);
         messageEditingController.value.text = "";
         chatController.messageControllerText.value = "";
       }).then((value) {
@@ -261,11 +258,7 @@ class _ChatScreenState extends State<ChatScreen> {
     log("anotherUserImage: $anotherUserImage");
 
     chatRoomID = chatController.getChatRoomId(userID, anotherUserID);
-    otherUserListener = await fs
-        .collection("Accounts")
-        .doc(anotherUserID)
-        .snapshots()
-        .listen((event) {
+    otherUserListener = await fs.collection("Accounts").doc(anotherUserID).snapshots().listen((event) {
       log("updating anotherUserModel");
       anotherUserModel.value = UserDetailsModel.fromJson(event.data() ?? {});
     });
@@ -273,11 +266,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   getUserDataFromChatRoomDB() async {
     log("CHanging the crm values from getUserDataFromChatRoomDB");
-    await fs
-        .collection("ChatRoom")
-        .doc(widget.docs!["chatRoomId"])
-        .get()
-        .then((value) {
+    await fs.collection("ChatRoom").doc(widget.docs!["chatRoomId"]).get().then((value) {
       crm.value = ChatRoomModel.fromDocumentSnapshot(value);
       log("CHanging the crm values in get from getUserDataFromChatRoomDB");
     });
@@ -382,15 +371,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   GestureDetector(
                     onTap: () async {
                       loading();
-                      var ref = FirebaseStorage.instance
-                          .ref()
-                          .child(chatRoomID)
-                          .child("$fileName.jpg");
-                      var uploadTask = await ref
-                          .putFile(imageFile!)
-                          .catchError((error) async {
-                        print(
-                            'in uploading error and eoor is: $error'); // await FirebaseFirestore.instance
+                      var ref = FirebaseStorage.instance.ref().child(chatRoomID).child("$fileName.jpg");
+                      var uploadTask = await ref.putFile(imageFile!).catchError((error) async {
+                        print('in uploading error and eoor is: $error'); // await FirebaseFirestore.instance
                         status = 0;
                       });
                       if (status == 1) {
@@ -407,9 +390,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       height: 50,
                       width: 50,
                       padding: EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                          color: Colors.green,
-                          borderRadius: BorderRadius.circular(50)),
+                      decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(50)),
                       child: Icon(
                         // FontAwesomeIcons.solidPaperPlane,
                         Icons.arrow_forward_rounded,
@@ -430,11 +411,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   getChatRoomStream() async {
     // crm.value = ChatRoomModel.fromDocumentSnapshot(event);
-    chatRoomListener = await fs
-        .collection("ChatRoom")
-        .doc(widget.docs!['chatRoomId'])
-        .snapshots()
-        .listen((event) {
+    chatRoomListener = await fs.collection("ChatRoom").doc(widget.docs!['chatRoomId']).snapshots().listen((event) {
       lastMessageAt.value = event['lastMessageAt'];
       lastMessage.value = event['lastMessage'];
       crm.value = ChatRoomModel.fromDocumentSnapshot(event);
@@ -463,16 +440,13 @@ class _ChatScreenState extends State<ChatScreen> {
         "isRead": false,
         "isReceived": false,
       };
-      bool isDeletedFor =
-          crm.value.notDeletedFor?.asMap().containsValue(anotherUserID) ??
-              false;
+      bool isDeletedFor = crm.value.notDeletedFor?.asMap().containsValue(anotherUserID) ?? false;
       if (!isDeletedFor) {
         fs.collection("ChatRoom").doc(chatRoomID).update({
           "notDeletedFor": FieldValue.arrayUnion([anotherUserID])
         });
       }
-      chatController.addConversationMessage(
-          chatRoomID, time, "text", messageMap, messageText);
+      chatController.addConversationMessage(chatRoomID, time, "text", messageMap, messageText);
       log("index is: ${lastIndex.value}");
     } else if (imageFile != null && (imageUrl != null || imageUrl != "")) {
       var time = DateTime.now().millisecondsSinceEpoch;
@@ -489,17 +463,14 @@ class _ChatScreenState extends State<ChatScreen> {
         "isRead": false,
         "isReceived": false,
       };
-      bool isDeletedFor =
-          crm.value.notDeletedFor?.asMap().containsValue(anotherUserID) ??
-              false;
+      bool isDeletedFor = crm.value.notDeletedFor?.asMap().containsValue(anotherUserID) ?? false;
 
       if (!isDeletedFor) {
         fs.collection("ChatRoom").doc(chatRoomID).update({
           "notDeletedFor": FieldValue.arrayUnion([anotherUserID])
         });
       }
-      chatController.addConversationMessage(
-          chatRoomID, time, "image", messageMap, imageUrl!);
+      chatController.addConversationMessage(chatRoomID, time, "image", messageMap, imageUrl!);
       // groupedItemScrollController.scrollTo(
       //   index: lastIndex.value,
       //   duration: Duration(microseconds: 300),
@@ -518,12 +489,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget chatMessageList() {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: fs
-          .collection(chatRoomCollection)
-          .doc(chatRoomID)
-          .collection(messagesCollection)
-          .orderBy('time')
-          .snapshots(),
+      stream:
+          fs.collection(chatRoomCollection).doc(chatRoomID).collection(messagesCollection).orderBy('time').snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.hasData) {
           // scrollController.animateTo(
@@ -564,15 +531,12 @@ class _ChatScreenState extends State<ChatScreen> {
             // shrinkWrap: true,
             itemCount: snapshot.data?.docs.length,
             itemBuilder: (context, index) {
-              Map<String, dynamic> data =
-                  snapshot.data?.docs[index].data() as Map<String, dynamic>;
-              print(
-                  "snapshot.data.docs[index].data()[type] is: ${data["type"]}");
+              Map<String, dynamic> data = snapshot.data?.docs[index].data() as Map<String, dynamic>;
+              print("snapshot.data.docs[index].data()[type] is: ${data["type"]}");
               //TODO: Beware, here the widgets to show data start.
               //TODO: Beware, here the widgets to show data start.
               String type = data["type"];
-              String message =
-                  data["message"] != null ? data["message"] : "what is this?";
+              String message = data["message"] != null ? data["message"] : "what is this?";
               bool sendByMe = userDetailsModel.uID == data["sendById"];
               String time = data["time"].toString();
 
@@ -660,33 +624,41 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           title: chatController.showSearch.value
               ? SearchBar()
-              : Row(
-                  // crossAxisAlignment: WrapCrossAlignment.center,
-                  // spacing: 10.0,
-                  children: [
-                    Obx(() {
-                      return profileImage(
-                        context,
-                        size: 34.0,
-                        profileImage:
-                            anotherUserModel.value.profileImageUrl != null
-                                ? anotherUserModel.value.profileImageUrl
-                                : anotherUserImage,
-                      );
-                    }),
-                    Obx(() {
-                      return Expanded(
-                        child: MyText(
-                          paddingLeft: 15,
-                          text: anotherUserModel.value.fullName != null
-                              ? anotherUserModel.value.fullName
-                              : anotherUserName,
-                          size: 19,
-                          color: kSecondaryColor,
-                        ),
-                      );
-                    }),
-                  ],
+              : GestureDetector(
+                  onTap: () async {
+                    UserDetailsModel? umdl;
+                    await fs.collection("Accounts").doc(anotherUserID).get().then((value) {
+                      umdl = UserDetailsModel.fromJson(value.data() ?? {});
+                    });
+                    Get.to(() => OtherUserProfile(otherUserModel: umdl));
+                  },
+                  child: Row(
+                    // crossAxisAlignment: WrapCrossAlignment.center,
+                    // spacing: 10.0,
+                    children: [
+                      Obx(() {
+                        return profileImage(
+                          context,
+                          size: 34.0,
+                          profileImage: anotherUserModel.value.profileImageUrl != null
+                              ? anotherUserModel.value.profileImageUrl
+                              : anotherUserImage,
+                        );
+                      }),
+                      Obx(() {
+                        return Expanded(
+                          child: MyText(
+                            paddingLeft: 15,
+                            text: anotherUserModel.value.fullName != null
+                                ? anotherUserModel.value.fullName
+                                : anotherUserName,
+                            size: 19,
+                            color: kSecondaryColor,
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
                 ),
           actions: [
             Padding(
