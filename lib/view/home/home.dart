@@ -15,6 +15,7 @@ import 'package:vip_picnic/utils/dynamic_link_handler.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/home/add_new_post.dart';
 import 'package:vip_picnic/view/home/post_details.dart';
+import 'package:vip_picnic/view/profile/other_user_profile.dart';
 import 'package:vip_picnic/view/profile/profile.dart';
 import 'package:vip_picnic/view/search_friends/search_friends.dart';
 import 'package:vip_picnic/view/story/post_new_story.dart';
@@ -205,7 +206,7 @@ class Home extends StatelessWidget {
                                     title: addPostModel.postTitle,
                                     likeCount: addPostModel.likeIDs!.length,
                                     isMyPost: false,
-                                    postImage: addPostModel.postImages![0],
+                                    postImage: addPostModel.postImages!,
                                   );
                                 },
                               );
@@ -357,7 +358,7 @@ class Home extends StatelessWidget {
 }
 
 // ignore: must_be_immutable
-class PostWidget extends StatelessWidget {
+class PostWidget extends StatefulWidget {
   PostWidget({
     Key? key,
     this.postID,
@@ -372,12 +373,19 @@ class PostWidget extends StatelessWidget {
     this.isLikeByMe = false,
   }) : super(key: key);
 
-  String? postID, profileImage, name, postedTime, title, postImage;
+  String? postID, profileImage, name, postedTime, title;
+  List<String>? postImage;
   int? likeCount;
   AddPostModel? postDocModel;
 
   bool? isMyPost, isLikeByMe;
 
+  @override
+  State<PostWidget> createState() => _PostWidgetState();
+}
+
+class _PostWidgetState extends State<PostWidget> {
+  int currentPost = 0;
   List<String> monthList = [
     "Jan",
     "Feb",
@@ -398,21 +406,23 @@ class PostWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 15,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              ListTile(
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 15,
+              ),
+              child: ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: GestureDetector(
-                  onTap: () => Get.to(
-                    () => Profile(
-                      isMyProfile: isMyPost! ? true : false,
-                    ),
-                  ),
+                  onTap: widget.isMyPost!
+                      ? () => Get.to(
+                            () => Profile(),
+                          )
+                      : () => Get.to(
+                            () => OtherUserProfile(),
+                          ),
                   child: Container(
                     height: 54,
                     width: 54,
@@ -429,7 +439,7 @@ class PostWidget extends StatelessWidget {
                       ],
                     ),
                     child: Center(
-                      child: isMyPost!
+                      child: widget.isMyPost!
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(100),
                               child: Image.network(
@@ -442,7 +452,7 @@ class PostWidget extends StatelessWidget {
                           : ClipRRect(
                               borderRadius: BorderRadius.circular(100),
                               child: Image.network(
-                                profileImage!,
+                                widget.profileImage!,
                                 height: height(context, 1.0),
                                 width: width(context, 1.0),
                                 fit: BoxFit.cover,
@@ -455,7 +465,7 @@ class PostWidget extends StatelessWidget {
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     MyText(
-                      text: isMyPost! ? 'yourPost'.tr : '$name',
+                      text: widget.isMyPost! ? 'yourPost'.tr : '${widget.name}',
                       size: 17,
                       weight: FontWeight.w600,
                       color: kSecondaryColor,
@@ -464,14 +474,14 @@ class PostWidget extends StatelessWidget {
                     MyText(
                       //+ 8/4/2022
                       text:
-                          '  •  ${postedTime!.split(' ')[1].split("/")[1]} ${monthList[int.parse(postedTime!.split(' ')[1].split("/")[0]) - 1]}',
+                          '  •  ${widget.postedTime!.split(' ')[1].split("/")[1]} ${monthList[int.parse(widget.postedTime!.split(' ')[1].split("/")[0]) - 1]}',
                       size: 15,
                       weight: FontWeight.w600,
                       color: kSecondaryColor.withOpacity(0.40),
                     ),
                   ],
                 ),
-                trailing: isMyPost!
+                trailing: widget.isMyPost!
                     ? PopupMenuButton(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6),
@@ -483,8 +493,8 @@ class PostWidget extends StatelessWidget {
                                 onTap: () => Get.to(
                                   () => AddNewPost(
                                     editPost: true,
-                                    postImage: postImage,
-                                    title: title,
+                                    postImage: widget.postImage![0],
+                                    title: widget.title,
                                   ),
                                 ),
                                 text: 'editPost'.tr,
@@ -509,41 +519,99 @@ class PostWidget extends StatelessWidget {
                       )
                     : SizedBox(),
               ),
-              GestureDetector(
-                onTap: () => Get.to(
-                  () => PostDetails(
-                    isLikeByMe: isLikeByMe,
-                    postDocModel: postDocModel,
+            ),
+            GestureDetector(
+              onTap: () => Get.to(
+                () => PostDetails(
+                  isLikeByMe: widget.isLikeByMe,
+                  postDocModel: widget.postDocModel,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  MyText(
+                    paddingTop: 13,
+                    paddingLeft: 20,
+                    paddingBottom: 5,
+                    text: '${widget.title}',
+                    size: 18,
+                    maxLines: 3,
+                    overFlow: TextOverflow.ellipsis,
+                    color: kSecondaryColor,
                   ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    MyText(
-                      paddingTop: 13,
-                      paddingLeft: 5,
-                      paddingBottom: 5,
-                      text: '$title',
-                      size: 18,
-                      maxLines: 3,
-                      overFlow: TextOverflow.ellipsis,
-                      color: kSecondaryColor,
+                  SizedBox(
+                    height: 220,
+                    child: Stack(
+                      children: [
+                        PageView.builder(
+                          onPageChanged: (index) =>
+                              homeController.getCurrentPostIndex(index),
+                          physics: BouncingScrollPhysics(),
+                          itemCount: widget.postImage!.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 15,
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: Image.network(
+                                  widget.postImage![index],
+                                  height: Get.height,
+                                  fit: BoxFit.cover,
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
+                                    if (loadingProgress == null) {
+                                      return child;
+                                    } else {
+                                      return loading();
+                                    }
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        widget.postImage!.length == 1
+                            ? SizedBox()
+                            : Obx(() {
+                                return Positioned(
+                                  top: 10,
+                                  right: 30,
+                                  child: Container(
+                                    height: 35,
+                                    width: 46,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(50),
+                                      color: kSecondaryColor.withOpacity(0.5),
+                                    ),
+                                    child: Center(
+                                      child: MyText(
+                                        text:
+                                            '${homeController.currentPost.value + 1}/${widget.postImage!.length}',
+                                        size: 15,
+                                        weight: FontWeight.w600,
+                                        color: kPrimaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }),
+                      ],
                     ),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.network(
-                        postImage!,
-                        height: 220,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              SizedBox(
-                height: 15,
+            ),
+            SizedBox(
+              height: 15,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 15,
               ),
-              Wrap(
+              child: Wrap(
                 alignment: WrapAlignment.spaceEvenly,
                 spacing: 20.0,
                 children: [
@@ -553,10 +621,13 @@ class PostWidget extends StatelessWidget {
                     children: [
                       GestureDetector(
                         onTap: () async {
-                          await fs.collection("Posts").doc(postID).update({
-                            "likeCount":
-                                FieldValue.increment(isLikeByMe! ? -1 : 1),
-                            "likeIDs": !isLikeByMe!
+                          await fs
+                              .collection("Posts")
+                              .doc(widget.postID)
+                              .update({
+                            "likeCount": FieldValue.increment(
+                                widget.isLikeByMe! ? -1 : 1),
+                            "likeIDs": !widget.isLikeByMe!
                                 ? FieldValue.arrayUnion([auth.currentUser!.uid])
                                 : FieldValue.arrayRemove(
                                     [auth.currentUser!.uid]),
@@ -575,17 +646,17 @@ class PostWidget extends StatelessWidget {
                           //+this is giving us a small glitch because everytime for the first time app opens up,
                           //+ the red heart image is not loaded yet. which gives a small glitch on that first like
                           //+ but this hapens only when either no post is liked before or all post have been liked before
-                          isLikeByMe!
+                          widget.isLikeByMe!
                               ? Assets.imagesHeartFull
                               : Assets.imagesHeartEmpty,
                           height: 24.0,
-                          color: isLikeByMe!
+                          color: widget.isLikeByMe!
                               ? Color(0xffe31b23)
                               : kDarkBlueColor.withOpacity(0.60),
                         ),
                       ),
                       MyText(
-                        text: likeCount!,
+                        text: widget.likeCount!,
                         size: 18,
                         color: kDarkBlueColor.withOpacity(0.60),
                       ),
@@ -598,8 +669,8 @@ class PostWidget extends StatelessWidget {
                       GestureDetector(
                         onTap: () => Get.to(
                           () => PostDetails(
-                            isLikeByMe: isLikeByMe,
-                            postDocModel: postDocModel,
+                            isLikeByMe: widget.isLikeByMe,
+                            postDocModel: widget.postDocModel,
                           ),
                         ),
                         child: Image.asset(
@@ -611,7 +682,7 @@ class PostWidget extends StatelessWidget {
                       StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                         stream: fs
                             .collection("Posts")
-                            .doc(postID)
+                            .doc(widget.postID)
                             .collection("comments")
                             .snapshots(),
                         builder: (
@@ -649,71 +720,6 @@ class PostWidget extends StatelessWidget {
                                   size: 18,
                                   color: kDarkBlueColor.withOpacity(0.60),
                                 );
-                                // return ListView.builder(
-                                //   // shrinkWrap: true,
-                                //   physics: BouncingScrollPhysics(),
-                                //   itemCount: snapshot.data!.docs.length,
-                                //   itemBuilder: (BuildContext context, int index) {
-                                //     AddPostModel addPostModel = AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
-                                //     log("addPostModel = ${addPostModel.toJson()}");
-                                //     return ListView(
-                                //       shrinkWrap: true,
-                                //       physics: BouncingScrollPhysics(),
-                                //       padding: EdgeInsets.symmetric(
-                                //         vertical: 20,
-                                //       ),
-                                //       children: [
-                                //         SizedBox(
-                                //           height: 80,
-                                //           child: ListView(
-                                //             shrinkWrap: true,
-                                //             scrollDirection: Axis.horizontal,
-                                //             physics: const BouncingScrollPhysics(),
-                                //             children: [
-                                //               addStoryButton(context),
-                                //               ListView.builder(
-                                //                 shrinkWrap: true,
-                                //                 scrollDirection: Axis.horizontal,
-                                //                 itemCount: 6,
-                                //                 padding: const EdgeInsets.only(
-                                //                   right: 8,
-                                //                 ),
-                                //                 physics: const BouncingScrollPhysics(),
-                                //                 itemBuilder: (context, index) {
-                                //                   return stories(
-                                //                     context,
-                                //                     'assets/images/baby_shower.png',
-                                //                     index.isOdd ? 'Khan' : 'Stephan',
-                                //                     index,
-                                //                   );
-                                //                 },
-                                //               ),
-                                //             ],
-                                //           ),
-                                //         ),
-                                //         ListView.builder(
-                                //           shrinkWrap: true,
-                                //           physics: BouncingScrollPhysics(),
-                                //           padding: EdgeInsets.symmetric(
-                                //             vertical: 30,
-                                //           ),
-                                //           itemCount: 4,
-                                //           itemBuilder: (context, index) {
-                                //             return PostWidget(
-                                //               profileImage: Assets.imagesDummyProfileImage,
-                                //               name: 'Username',
-                                //               postedTime: '11 feb',
-                                //               title: 'It was a great event 😀',
-                                //               isMyPost: index.isOdd ? true : false,
-                                //               postImage: Assets.imagesPicnicKids,
-                                //             );
-                                //           },
-                                //         ),
-                                //       ],
-                                //     );
-                                //   },
-                                //
-                                // );
                               } else {
                                 return MyText(
                                   text: "$previousCount",
@@ -746,10 +752,10 @@ class PostWidget extends StatelessWidget {
                     onTap: () async {
                       String shareLink =
                           await DynamicLinkHandler.buildDynamicLink(
-                        postImageUrl: postDocModel?.postImages![0] ??
+                        postImageUrl: widget.postDocModel?.postImages![0] ??
                             "https://www.freeiconspng.com/uploads/no-image-icon-15.png",
-                        postId: postDocModel!.postID ?? "",
-                        postTitle: postDocModel!.postTitle ?? "No Title",
+                        postId: widget.postDocModel!.postID ?? "",
+                        postTitle: widget.postDocModel!.postTitle ?? "No Title",
                         short: true,
                       );
                       log("fetched shareLink: $shareLink");
@@ -777,11 +783,11 @@ class PostWidget extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(
-                height: 20,
-              ),
-            ],
-          ),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+          ],
         ),
         Container(
           height: 1,

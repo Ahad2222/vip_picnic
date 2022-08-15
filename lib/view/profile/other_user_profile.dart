@@ -8,8 +8,7 @@ import 'package:vip_picnic/view/home/my_posts.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 
-// ignore: must_be_immutable
-class Profile extends StatelessWidget {
+class OtherUserProfile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,19 +96,15 @@ class Profile extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         profileButtons(
-                          buttonText: 'editAccount'.tr,
-                          onTap: () => Get.toNamed(
-                            AppLinks.editProfile,
-                          ),
+                          buttonText: 'follow'.tr,
+                          onTap: () {},
                         ),
                         SizedBox(
                           width: 20,
                         ),
                         profileButtons(
-                          buttonText: 'yourPost'.tr,
-                          onTap: () => Get.to(
-                            () => MyPosts(),
-                          ),
+                          buttonText: 'message'.tr,
+                          onTap: () {},
                         ),
                       ],
                     ),

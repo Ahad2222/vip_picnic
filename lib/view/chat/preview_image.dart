@@ -3,9 +3,14 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
 import 'package:vip_picnic/constant/color.dart';
+import 'package:vip_picnic/main.dart';
+import 'package:vip_picnic/utils/instances.dart';
+import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/my_appbar.dart';
+import 'package:vip_picnic/view/widget/snack_bar.dart';
 
 class PreviewImageScreen extends StatefulWidget {
   final String? imagePath;
@@ -33,25 +38,26 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    log('in preview');
+    log('${widget.imagePath} in preview');
     return Scaffold(
       appBar: myAppBar(
         onTap: () => Get.back(),
         title: '',
       ),
-      body: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          //+added after first testing to make sure the image is centered horizontally but needs to be tested yet
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Expanded(
-              child: Image.file(
-                File(widget.imagePath),
-              ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: Image.file(
+              File(widget.imagePath!),
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
             ),
-          ],
-        ),
+          ),
+          SizedBox(
+            height: 90,
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: kSecondaryColor,
@@ -72,23 +78,15 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
     String fileName = Uuid().v1();
     var ref = FirebaseStorage.instance
         .ref()
-        .child(widget.chatRoomId)
+        .child(widget.chatRoomId!)
         .child("$fileName.jpg");
     try {
-      final uploadTask = ref.putFile(File(widget.imagePath));
-      Get.defaultDialog(
-        title: "Uploading",
-        content: Obx(() {
-          return Text(
-            "${(uploadPercentageValue.value).toInt()} %",
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          );
-        }),
-        barrierDismissible: false,
+      final uploadTask = ref.putFile(File(widget.imagePath!));
+      showDialog(
+        context: context,
+        builder: (context) {
+          return loading();
+        },
       );
       uploadTask.snapshotEvents.listen((TaskSnapshot taskSnapshot) async {
         switch (taskSnapshot.state) {
@@ -106,23 +104,21 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
           case TaskState.error:
             // Handle unsuccessful uploads
             log("Upload resulted in error.");
-            showErrorDialog(
-                title: "Storage Error!",
-                description:
-                    "Some unknown error occurred. Please connect to a reliable "
-                    "internet connection and try again. ");
-            log("error in uploading image to storage on preview screen is: "
-                "${TaskState.error.toString()}");
+            showMsg(
+              msg: 'Storage Error!',
+              context: context,
+              bgColor: Colors.red,
+            );
             break;
           case TaskState.success:
             // Handle successful uploads on complete
             imageUrl = await taskSnapshot.ref.getDownloadURL();
-            if (File(widget.imagePath) != null &&
+            if (File(widget.imagePath!) != null &&
                 (imageUrl != null || imageUrl != "")) {
               var time = DateTime.now().millisecondsSinceEpoch;
               Map<String, dynamic> messageMap = {
-                "sendById": authController.userModel.value.id,
-                "sendByName": authController.userModel.value.name,
+                "sendById": userDetailsModel.uID,
+                "sendByName": userDetailsModel.fullName,
                 "receivedById": widget.anotherUserId,
                 "receivedByName": widget.anotherUserName,
                 "message": imageUrl,
@@ -133,11 +129,9 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
                 "isReceived": false,
               };
               chatController.addConversationMessage(
-                  widget.chatRoomId, time, "image", messageMap, imageUrl);
+                  widget.chatRoomId!, time, "image", messageMap, imageUrl);
               imageUrl = "";
-              Get.back();
-              Get.back();
-              // Get.snackbar("Success", "Image was uploaded successfully");
+              navigatorKey.currentState!.popUntil((route) => route.isCurrent);
             }
             break;
         }
@@ -145,12 +139,17 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
     } on FirebaseException catch (e) {
       //+ Handle the storage relevant codes here in free time from:
       //+ https://firebase.google.com/docs/storage/flutter/handle-errors
-      showErrorDialog(
-          title: "Storage Error!",
-          description:
-              "Some unknown error occurred. Please connect to a reliable "
-              "internet connection and try again. ");
-      log("error in uploading image to storage on preview screen is: ${e.code} and ${e.message}");
+      showMsg(
+        msg: 'Storage Error!',
+        context: context,
+        bgColor: Colors.red,
+      );
+      // showErrorDialog(
+      //     title: "Storage Error!",
+      //     description:
+      //         "Some unknown error occurred. Please connect to a reliable "
+      //         "internet connection and try again. ");
+      // log("error in uploading image to storage on preview screen is: ${e.code} and ${e.message}");
     }
 
     log('this is status 1');

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 // import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -268,7 +269,6 @@ class _ChatScreenState extends State<ChatScreen> {
         .listen((event) {
       log("updating anotherUserModel");
       anotherUserModel.value = UserDetailsModel.fromJson(event.data() ?? {});
-
     });
   }
 
@@ -288,7 +288,6 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-
   String? path;
 
   Future getImageFromCamera() async {
@@ -299,7 +298,7 @@ class _ChatScreenState extends State<ChatScreen> {
         path = xFile.path;
         // showLoading();
         Get.to(
-              () => PreviewImageScreen(
+          () => PreviewImageScreen(
             imagePath: path,
             anotherUserId: anotherUserID,
             anotherUserName: anotherUserName,
@@ -320,7 +319,7 @@ class _ChatScreenState extends State<ChatScreen> {
         path = xFile.path;
         // showLoading();
         Get.to(
-              () => PreviewImageScreen(
+          () => PreviewImageScreen(
             imagePath: path,
             anotherUserId: anotherUserID,
             anotherUserName: anotherUserName,
@@ -429,7 +428,6 @@ class _ChatScreenState extends State<ChatScreen> {
     );
     /**/
   }
-
 
   getChatRoomStream() async {
     // crm.value = ChatRoomModel.fromDocumentSnapshot(event);
@@ -551,9 +549,10 @@ class _ChatScreenState extends State<ChatScreen> {
           // * */
           return ListView.builder(
             physics: BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(
-              vertical: 30,
-              horizontal: 15,
+            padding: const EdgeInsets.only(
+              bottom: 80,
+              left: 15,
+              right: 15,
             ),
             controller: scrollController,
             // reverse: true,
@@ -600,73 +599,15 @@ class _ChatScreenState extends State<ChatScreen> {
               } else {
                 ampm = 'am';
               }
-              switch (type) {
-                case 'text':
-                  return MessageBubbles(
-                    receiveImage: anotherUserImage,
-                    msg: message,
-                    time: "${hour.toString()}:"
-                        "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
-                        "${ampm}",
-                    senderType: !sendByMe ? 'receiver' : 'sender',
-                  );
-                  // return sendByMe
-                  //     ? RightBubble(
-                  //         type: 'text',
-                  //         time: "${hour.toString()}:"
-                  //             "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
-                  //             "${ampm}",
-                  //         msg: message,
-                  //       )
-                  //     : LeftBubble(
-                  //         personImage: anotherUserImage,
-                  //         type: 'text',
-                  //         time: "${hour.toString()}:"
-                  //             "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
-                  //             "${ampm}",
-                  //         msg: message,
-                  //       );
-                  break;
-                // case 'image':
-                //   return MessageBubbles(
-                //     receiveImage: widget.receiveImage,
-                //     msg: index.isEven
-                //         ? 'Lorem Ipsum is simply dummy text of the printing and industry. '
-                //         : 'Thanks, i\'ll be there.',
-                //     time: '11:21 AM',
-                //     senderType: !sendByMe ? 'receiver' : 'sender',
-                //   );
-                //   /**/
-                //   // return sendByMe
-                //   //     ? RightBubble(
-                //   //         type: 'image',
-                //   //         msg: message,
-                //   //         time: "${hour.toString()}:"
-                //   //             "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
-                //   //             "${ampm}",
-                //   //       )
-                //   //     : LeftBubble(
-                //   //         personImage: anotherUserImage,
-                //   //         type: 'image',
-                //   //         msg: message,
-                //   //         time: "${hour.toString()}:"
-                //   //             "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
-                //   //             "${ampm}",
-                //   //       );
-                //   /**/
-                //   break;
-                default:
-                  return Container();
-              }
-              // return MessageTile(
-              //   type: snapshot.data.docs[index].data()["type"],
-              //   message: messageSnap.data != null
-              //       ? messageSnap.data
-              //       : "what is this?",
-              //   sendByMe: authController.userModel.value.id ==
-              //       snapshot.data.docs[index].data()["sendById"],
-              //   time: snapshot.data.docs[index].data()["time"].toString(),
-              // );
+              return MessageBubbles(
+                receiveImage: anotherUserImage,
+                msg: message,
+                time: "${hour.toString()}:"
+                    "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
+                    "${ampm}",
+                senderType: !sendByMe ? 'receiver' : 'sender',
+                mediaType: type,
+              );
             },
           );
         } else {
@@ -759,22 +700,6 @@ class _ChatScreenState extends State<ChatScreen> {
         body: Stack(
           children: [
             chatMessageList(),
-            // ListView.builder(
-            //   shrinkWrap: true,
-            //   padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-            //   physics: const BouncingScrollPhysics(),
-            //   itemCount: 4,
-            //   itemBuilder: (context, index) {
-            //     return MessageBubbles(
-            //       receiveImage: widget.receiveImage,
-            //       msg: index.isEven
-            //           ? 'Lorem Ipsum is simply dummy text of the printing and industry. '
-            //           : 'Thanks, i\'ll be there.',
-            //       time: '11:21 AM',
-            //       senderType: index.isEven ? 'receiver' : 'sender',
-            //     );
-            //   },
-            // ),
             sendField(context),
           ],
         ),
@@ -829,63 +754,6 @@ class _ChatScreenState extends State<ChatScreen> {
                       fillColor: kLightBlueColor,
                       filled: true,
                       prefixIcon: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // SizedBox(
-                          //   width: 50,
-                          //   child: EmojiPicker(
-                          //     onEmojiSelected: (category, emoji) {
-                          //       // Do something when emoji is tapped (optional)
-                          //     },
-                          //     onBackspacePressed: () {
-                          //       // Do something when the user taps the backspace button (optional)
-                          //     },
-                          //     textEditingController:
-                          //         messageEditingController.value,
-                          //     // pass here the same [TextEditingController] that is connected to your input field, usually a [TextFormField]
-                          //     config: Config(
-                          //       columns: 7,
-                          //       emojiSizeMax: 32 * (Platform.isIOS ? 1.30 : 1.0),
-                          //       // Issue: https://github.com/flutter/flutter/issues/28894
-                          //       verticalSpacing: 0,
-                          //       horizontalSpacing: 0,
-                          //       gridPadding: EdgeInsets.zero,
-                          //       initCategory: Category.RECENT,
-                          //       bgColor: Color(0xFFF2F2F2),
-                          //       indicatorColor: Colors.blue,
-                          //       iconColor: Colors.grey,
-                          //       iconColorSelected: Colors.blue,
-                          //       progressIndicatorColor: Colors.blue,
-                          //       backspaceColor: Colors.blue,
-                          //       skinToneDialogBgColor: Colors.white,
-                          //       skinToneIndicatorColor: Colors.grey,
-                          //       enableSkinTones: true,
-                          //       showRecentsTab: true,
-                          //       recentsLimit: 28,
-                          //       noRecents: const Text(
-                          //         'No Recent',
-                          //         style: TextStyle(
-                          //           fontSize: 20,
-                          //           color: Colors.black26,
-                          //         ),
-                          //         textAlign: TextAlign.center,
-                          //       ),
-                          //       tabIndicatorAnimDuration: kTabScrollDuration,
-                          //       categoryIcons: const CategoryIcons(),
-                          //       buttonMode: ButtonMode.MATERIAL,
-                          //     ),
-                          //   ),
-                          // ),
-                          GestureDetector(
-                            onTap: () {},
-                            child: Image.asset(
-                              Assets.imagesEmoji,
-                              height: 19.31,
-                            ),
-                          ),
-                        ],
-                      ),
-                      suffixIcon: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           GestureDetector(

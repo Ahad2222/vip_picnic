@@ -26,8 +26,14 @@ class HomeController extends GetxController {
   int? commentCount;
   int? likeCount;
   int? shareCount;
-
   RxList selectedImages = [].obs;
+  final pageController = PageController();
+  RxInt currentPost = 0.obs;
+
+  void getCurrentPostIndex(int index){
+    currentPost.value = index;
+    update();
+  }
 
   Future pickImages(
     BuildContext context,

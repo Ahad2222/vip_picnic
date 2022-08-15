@@ -12,6 +12,13 @@ SliverToBoxAdapter curvedHeader({
       ),
       decoration: BoxDecoration(
         color: kPrimaryColor,
+        boxShadow: [
+          BoxShadow(
+            color: kBlackColor.withOpacity(0.16),
+            blurRadius: 6,
+            offset: Offset(-0, -6),
+          ),
+        ],
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(28),
           topRight: Radius.circular(28),

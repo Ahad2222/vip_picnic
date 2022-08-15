@@ -12,6 +12,7 @@ import 'package:vip_picnic/model/home_model/add_post_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/widget/curved_header.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
+import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 
 // ignore: must_be_immutable
@@ -48,6 +49,7 @@ class _PostDetailsState extends State<PostDetails> {
 
   @override
   Widget build(BuildContext context) {
+    log(widget.postDocModel!.postImages!.toString());
     return Scaffold(
       body: NestedScrollView(
         physics: BouncingScrollPhysics(),
@@ -68,25 +70,66 @@ class _PostDetailsState extends State<PostDetails> {
                       icon: Image.asset(
                         Assets.imagesArrowBack,
                         height: 22.04,
-                        color: kPrimaryColor,
+                        color: kTertiaryColor,
                       ),
                     ),
                   ),
                   flexibleSpace: FlexibleSpaceBar(
                     background: Stack(
                       children: [
-                        Image.network(
-                          widget.postDocModel!.postImages![0],
-                          height: height(context, 1.0),
-                          width: width(context, 1.0),
-                          fit: BoxFit.cover,
+                        PageView.builder(
+                          onPageChanged: (index) =>
+                              homeController.getCurrentPostIndex(index),
+                          itemCount: widget.postDocModel!.postImages!.length,
+                          physics: BouncingScrollPhysics(),
+                          itemBuilder: (context, index) {
+                            return Image.network(
+                              widget.postDocModel!.postImages![index],
+                              height: height(context, 1.0),
+                              width: width(context, 1.0),
+                              fit: BoxFit.cover,
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                if (loadingProgress == null) {
+                                  return child;
+                                } else {
+                                  return loading();
+                                }
+                              },
+                            );
+                          },
                         ),
-                        Image.asset(
-                          Assets.imagesGradientEffectTwo,
-                          height: height(context, 1.0),
-                          width: width(context, 1.0),
-                          fit: BoxFit.cover,
-                        ),
+                        widget.postDocModel!.postImages!.length == 1
+                            ? SizedBox()
+                            : Obx(() {
+                                return Positioned(
+                                  top: 50,
+                                  right: 10,
+                                  child: Container(
+                                    height: 35,
+                                    width: 46,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(50),
+                                      color: kSecondaryColor.withOpacity(0.5),
+                                    ),
+                                    child: Center(
+                                      child: MyText(
+                                        text:
+                                            '${homeController.currentPost.value + 1}/${widget.postDocModel!.postImages!.length}',
+                                        size: 15,
+                                        weight: FontWeight.w600,
+                                        color: kPrimaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }),
+                        // Image.asset(
+                        //   Assets.imagesGradientEffectTwo,
+                        //   height: height(context, 1.0),
+                        //   width: width(context, 1.0),
+                        //   fit: BoxFit.cover,
+                        // ),
                       ],
                     ),
                   ),

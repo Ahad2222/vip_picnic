@@ -26,7 +26,9 @@ class MyPosts extends StatelessWidget {
             postedTime: '11 feb',
             title: 'It was a great event 😀',
             isMyPost: true,
-            postImage: Assets.imagesPicnicKids,
+            postImage: [
+              Assets.imagesPicnicKids,
+            ],
           );
         },
       ),
