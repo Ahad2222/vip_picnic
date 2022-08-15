@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,9 +9,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:path_provider_android/path_provider_android.dart';
-import 'package:path_provider_ios/path_provider_ios.dart';
-import 'package:provider/provider.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/config/theme/light_theme.dart';
 import 'package:vip_picnic/controller/auth_controller/email_auth_controller.dart';
@@ -24,15 +20,11 @@ import 'package:vip_picnic/controller/home_controller/home_controller.dart';
 import 'package:vip_picnic/controller/splash_screen_controller/splash_screen_controller.dart';
 import 'package:vip_picnic/firebase_options.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
-import 'package:vip_picnic/provider/chat_provider/chat_provider.dart';
-import 'package:vip_picnic/provider/story_provider/story_provider.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/utils/localization.dart';
 import 'package:vip_picnic/view/chat/simple_chat_screen.dart';
 import 'package:vip_picnic/view/choose_language/choose_language.dart';
 import 'package:vip_picnic/view/profile/other_user_profile.dart';
-import 'package:vip_picnic/view/profile/profile.dart';
-import 'provider/chat_provider/chat_head_provider.dart';
 import 'package:http/http.dart' as http;
 
 
@@ -302,20 +294,7 @@ Future<void> main() async {
   Get.put(ChooseLanguageController());
   Get.put(ChatController());
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (_) => ChatHeadProvider(),
-        ),
-        // ChangeNotifierProvider(
-        //   create: (_) => ChatProvider(),
-        // ),
-        ChangeNotifierProvider(
-          create: (_) => StoryProvider(),
-        ),
-      ],
-      child: MyApp(),
-    ),
+    MyApp(),
   );
 }
 

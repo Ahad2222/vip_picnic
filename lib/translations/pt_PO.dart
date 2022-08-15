@@ -8,6 +8,8 @@ const Map<String, String> portuguese = {
   'login': 'Conecte-se',
   'with': 'com',
   'email': 'O Email',
+  'messages': 'Mensagens',
+  'group': 'Grupos',
   'byTapping': 'Ao tocar em Entrar, você concorda com nossos\n',
   'termsOfServices': 'Termos de serviços',
   'and': ' e ',

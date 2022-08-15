@@ -28,7 +28,6 @@ class AddNewPost extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       appBar: myAppBar(
         title: editPost! ? 'Edit Post' : 'New Post',
         onTap: () => Navigator.pop(context),
@@ -204,95 +203,95 @@ class AddNewPost extends StatelessWidget {
                     maxLines: 6,
                   ),
                 ),
-                SizedBox(
-                  height: 20,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 15,
-                  ),
-                  child: SimpleTextField(
-                    controller: homeController.tagCon,
-                    hintText: 'Tag people...',
-                    haveSuffix: true,
-                    suffix: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 130,
-                          height: 38,
-                          child: tagPeopleBox(
-                            radius: 14.0,
-                            onTap: () {},
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                  stream: fs
-                      .collection("Accounts")
-                      .doc(userDetailsModel.uID)
-                      .collection('iFollowed')
-                      .snapshots(),
-                  builder: (
-                    BuildContext context,
-                    AsyncSnapshot<QuerySnapshot> snapshot,
-                  ) {
-                    log("inside stream-builder");
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      log("inside stream-builder in waiting state");
-                      return Center(child: CircularProgressIndicator());
-                    } else if (snapshot.connectionState ==
-                            ConnectionState.active ||
-                        snapshot.connectionState == ConnectionState.done) {
-                      if (snapshot.hasError) {
-                        return const Text('Some unknown error occurred');
-                      } else if (snapshot.hasData) {
-                        // log("inside hasData and ${snapshot.data!.docs}");
-                        if (snapshot.data!.docs.length > 0) {
-                          return SizedBox(
-                            height: 45,
-                            child: ListView.builder(
-                              physics: BouncingScrollPhysics(),
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 7,
-                              ),
-                              scrollDirection: Axis.horizontal,
-                              itemCount: snapshot.data!.docs.length,
-                              itemBuilder: (context, index) {
-                                UserDetailsModel obj =
-                                    UserDetailsModel.fromJson(
-                                  snapshot.data!.docs[index].data()
-                                      as Map<String, dynamic>,
-                                );
-                                return tagPeopleBox(
-                                  personName: obj.fullName,
-                                  id: obj.uID,
-                                );
-                              },
-                            ),
-                          );
-                        } else {
-                          return Center(child: const Text('No Users Found'));
-                        }
-                      } else {
-                        log("in else of hasData done and: ${snapshot.connectionState} and"
-                            " snapshot.hasData: ${snapshot.hasData}");
-                        return Center(child: const Text('No Users Found'));
-                      }
-                    } else {
-                      log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
-                      return Center(
-                          child: Text(
-                              'Some Error occurred while fetching the posts'));
-                    }
-                  },
-                ),
+                // SizedBox(
+                //   height: 20,
+                // ),
+                // Padding(
+                //   padding: const EdgeInsets.symmetric(
+                //     horizontal: 15,
+                //   ),
+                //   child: SimpleTextField(
+                //     controller: homeController.tagCon,
+                //     hintText: 'Tag people...',
+                //     haveSuffix: true,
+                //     suffix: Column(
+                //       mainAxisAlignment: MainAxisAlignment.center,
+                //       children: [
+                //         Container(
+                //           width: 130,
+                //           height: 38,
+                //           child: tagPeopleBox(
+                //             radius: 14.0,
+                //             onTap: () {},
+                //           ),
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                // ),
+                // SizedBox(
+                //   height: 20,
+                // ),
+                // StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                //   stream: fs
+                //       .collection("Accounts")
+                //       .doc(userDetailsModel.uID)
+                //       .collection('iFollowed')
+                //       .snapshots(),
+                //   builder: (
+                //     BuildContext context,
+                //     AsyncSnapshot<QuerySnapshot> snapshot,
+                //   ) {
+                //     log("inside stream-builder");
+                //     if (snapshot.connectionState == ConnectionState.waiting) {
+                //       log("inside stream-builder in waiting state");
+                //       return Center(child: CircularProgressIndicator());
+                //     } else if (snapshot.connectionState ==
+                //             ConnectionState.active ||
+                //         snapshot.connectionState == ConnectionState.done) {
+                //       if (snapshot.hasError) {
+                //         return const Text('Some unknown error occurred');
+                //       } else if (snapshot.hasData) {
+                //         // log("inside hasData and ${snapshot.data!.docs}");
+                //         if (snapshot.data!.docs.length > 0) {
+                //           return SizedBox(
+                //             height: 45,
+                //             child: ListView.builder(
+                //               physics: BouncingScrollPhysics(),
+                //               padding: EdgeInsets.symmetric(
+                //                 horizontal: 7,
+                //               ),
+                //               scrollDirection: Axis.horizontal,
+                //               itemCount: snapshot.data!.docs.length,
+                //               itemBuilder: (context, index) {
+                //                 UserDetailsModel obj =
+                //                     UserDetailsModel.fromJson(
+                //                   snapshot.data!.docs[index].data()
+                //                       as Map<String, dynamic>,
+                //                 );
+                //                 return tagPeopleBox(
+                //                   personName: obj.fullName,
+                //                   id: obj.uID,
+                //                 );
+                //               },
+                //             ),
+                //           );
+                //         } else {
+                //           return Center(child: const Text('No Users Found'));
+                //         }
+                //       } else {
+                //         log("in else of hasData done and: ${snapshot.connectionState} and"
+                //             " snapshot.hasData: ${snapshot.hasData}");
+                //         return Center(child: const Text('No Users Found'));
+                //       }
+                //     } else {
+                //       log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+                //       return Center(
+                //           child: Text(
+                //               'Some Error occurred while fetching the posts'));
+                //     }
+                //   },
+                // ),
                 SizedBox(
                   height: 20,
                 ),

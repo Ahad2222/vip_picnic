@@ -7,6 +7,8 @@ const Map<String, String> spanish = {
   'login': 'Acceso',
   'with': 'con',
   'email': 'Email',
+  'messages': 'Mensajes',
+  'group': 'Grupos',
   'byTapping': 'Al tocar Iniciar sesión, está de acuerdo con nuestro\n',
   'termsOfServices': 'Términos de servicios',
   'and': ' y ',

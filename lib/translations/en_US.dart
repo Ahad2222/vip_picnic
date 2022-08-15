@@ -8,6 +8,8 @@ const Map<String, String> english = {
   'login': 'Login',
   'with': 'with',
   'email': 'Email',
+  'messages': 'Messages',
+  'group': 'Groups',
   'byTapping': 'By tapping Log In, you agree with our\n',
   'termsOfServices': 'Terms of Services',
   'and': ' and ',
@@ -28,7 +30,8 @@ const Map<String, String> english = {
   'business': 'Business',
   'continue': 'Continue',
   'forgotPassword': 'Forgot Password',
-  'passwordResetIns': 'Enter your email and we will send you instructions on how to reset your password',
+  'passwordResetIns':
+      'Enter your email and we will send you instructions on how to reset your password',
   'resetPassword': 'Reset password',
   'addStory': 'Add story',
   'myPosts': 'My Posts',

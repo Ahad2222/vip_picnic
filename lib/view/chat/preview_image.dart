@@ -131,7 +131,8 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
               chatController.addConversationMessage(
                   widget.chatRoomId!, time, "image", messageMap, imageUrl);
               imageUrl = "";
-              navigatorKey.currentState!.popUntil((route) => route.isCurrent);
+              navigatorKey.currentState!.pop();
+              Get.back();
             }
             break;
         }

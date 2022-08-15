@@ -28,6 +28,7 @@ class MyTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      textInputAction: TextInputAction.next,
       autovalidateMode: autoValidateMode,
       controller: controller,
       onChanged: onChanged,
@@ -115,6 +116,7 @@ class ETextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      textInputAction: TextInputAction.next,
       autovalidateMode: autoValidateMode,
       initialValue: initialValue,
       readOnly: isReadOnly!,
@@ -225,6 +227,7 @@ class SearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      textInputAction: TextInputAction.next,
       readOnly: isReadOnly!,
       onTap: onTap,
       controller: controller,
@@ -317,6 +320,7 @@ class SimpleTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      textInputAction: TextInputAction.next,
       initialValue: initialValue,
       maxLines: maxLines,
       controller: controller,

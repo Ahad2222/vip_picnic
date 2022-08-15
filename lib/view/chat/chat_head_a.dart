@@ -1,15 +1,12 @@
 import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:provider/provider.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/model/chat_models/chat_head_model.dart';
-import 'package:vip_picnic/provider/chat_provider/chat_head_provider.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:vip_picnic/view/chat/create_new_chat.dart';
@@ -17,129 +14,139 @@ import 'package:vip_picnic/view/chat/group_chat/g_chat_screen.dart';
 import 'package:vip_picnic/view/chat/simple_chat_screen.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
-import 'package:vip_picnic/view/widget/my_textfields.dart';
 
-class ChatHead extends StatelessWidget {
+class ChatHead extends StatefulWidget {
+  @override
+  State<ChatHead> createState() => _ChatHeadState();
+}
+
+class _ChatHeadState extends State<ChatHead> {
+  bool showSearch = false;
+  int currentTab = 0;
+
+  void selectedTab(int index) {
+    setState(() {
+      currentTab = index;
+    });
+  }
+
+  void showSearchBar() {
+    setState(() {
+      showSearch = !showSearch;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Consumer<ChatHeadProvider>(
-      builder: (context, ChatHeadProvider, child) {
-        return Scaffold(
-          appBar: AppBar(
-            centerTitle: true,
-            toolbarHeight: 75,
-            leading: Padding(
-              padding: const EdgeInsets.only(
-                left: 5,
-              ),
-              child: IconButton(
-                onPressed: () => Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BottomNavBar(
-                      currentIndex: 0,
-                    ),
-                  ),
-                  (route) => route.isCurrent,
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        toolbarHeight: 75,
+        leading: Padding(
+          padding: const EdgeInsets.only(
+            left: 5,
+          ),
+          child: IconButton(
+            onPressed: () => Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => BottomNavBar(
+                  currentIndex: 0,
                 ),
-                icon: Image.asset(
-                  Assets.imagesArrowBack,
-                  height: 22.04,
+              ),
+              (route) => route.isCurrent,
+            ),
+            icon: Image.asset(
+              Assets.imagesArrowBack,
+              height: 22.04,
+            ),
+          ),
+        ),
+        title: MyText(
+          text: 'messages'.tr,
+          size: 20,
+          color: kSecondaryColor,
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(
+              right: 15,
+            ),
+            child: Center(
+              child: GestureDetector(
+                onTap: () {},
+                child: Image.asset(
+                  Assets.imagesSearchWithBg,
+                  height: 35,
                 ),
               ),
             ),
-            title: ChatHeadProvider.showSearch
-                ? SearchBar()
-                : MyText(
-                    text: 'Messages',
-                    size: 20,
-                    color: kSecondaryColor,
-                  ),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(
-                  right: 15,
-                ),
-                child: Center(
-                  child: GestureDetector(
-                    onTap: () => ChatHeadProvider.showSearchBar(),
-                    child: Image.asset(
-                      Assets.imagesSearchWithBg,
-                      height: 35,
-                    ),
-                  ),
-                ),
-              ),
-            ],
           ),
-          body: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 15,
-                  vertical: 15,
-                ),
-                child: Row(
-                  children: List.generate(
-                    ChatHeadProvider.tabs.length,
-                    (index) {
-                      return Container(
-                        height: 44,
-                        margin: EdgeInsets.only(
-                          right: 10,
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 15,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(50),
-                          color: ChatHeadProvider.currentTab == index
-                              ? kSecondaryColor
-                              : kPrimaryColor,
-                        ),
-                        child: InkWell(
-                          onTap: () => ChatHeadProvider.selectedTab(index),
-                          child: Center(
-                            child: MyText(
-                              text: ChatHeadProvider.tabs[index],
-                              size: 16,
-                              color: ChatHeadProvider.currentTab == index
-                                  ? kPrimaryColor
-                                  : kSecondaryColor,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              Expanded(
-                child: ChatHeadProvider.currentTab == 0
-                    ? SimpleChatHeads()
-                    : GroupChatHeads(),
-              ),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: ChatHeadProvider.currentTab == 0
-                ? () => Get.to(
-                      () => CreateNewChat(),
-                    )
-                : () => Get.toNamed(
-                      AppLinks.createNewGroup,
+        ],
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 15,
+              vertical: 15,
+            ),
+            child: Row(
+              children: List.generate(
+                2,
+                (index) {
+                  return Container(
+                    height: 44,
+                    margin: EdgeInsets.only(
+                      right: 10,
                     ),
-            elevation: 1,
-            highlightElevation: 1,
-            splashColor: kPrimaryColor.withOpacity(0.1),
-            backgroundColor: kGreenColor,
-            child: Image.asset(
-              Assets.imagesPlusIcon,
-              height: 22.68,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 15,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(50),
+                      color:
+                          currentTab == index ? kSecondaryColor : kPrimaryColor,
+                    ),
+                    child: InkWell(
+                      onTap: () => selectedTab(index),
+                      child: Center(
+                        child: MyText(
+                          text: index == 0 ? 'chat'.tr : 'group'.tr,
+                          size: 16,
+                          color: currentTab == index
+                              ? kPrimaryColor
+                              : kSecondaryColor,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
-        );
-      },
+          Expanded(
+            child: currentTab == 0 ? SimpleChatHeads() : GroupChatHeads(),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: currentTab == 0
+            ? () => Get.to(
+                  () => CreateNewChat(),
+                )
+            : () => Get.toNamed(
+                  AppLinks.createNewGroup,
+                ),
+        elevation: 1,
+        highlightElevation: 1,
+        splashColor: kPrimaryColor.withOpacity(0.1),
+        backgroundColor: kGreenColor,
+        child: Image.asset(
+          Assets.imagesPlusIcon,
+          height: 22.68,
+        ),
+      ),
     );
   }
 }
@@ -152,7 +159,7 @@ class SimpleChatHeads extends StatelessWidget {
           .collection(chatRoomCollection)
           // .where("users", arrayContains: userDetailsModel.uID)
           .where("notDeletedFor", arrayContains: userDetailsModel.uID)
-          .orderBy('lastMessageAt',descending: true)
+          .orderBy('lastMessageAt', descending: true)
           .snapshots(),
       builder: (
         BuildContext context,

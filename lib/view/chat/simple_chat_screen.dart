@@ -19,7 +19,6 @@ import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/model/chat_models/chat_room_model.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
-import 'package:vip_picnic/provider/chat_provider/chat_provider.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/chat/preview_image.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
@@ -536,10 +535,15 @@ class _ChatScreenState extends State<ChatScreen> {
           WidgetsBinding.instance?.addPostFrameCallback(
             (_) {
               if (scrollController.hasClients) {
-                scrollController.jumpTo(
+                scrollController.animateTo(
                   scrollController.position.maxScrollExtent,
-                  // curve: Curves.easeIn, duration: Duration(milliseconds: 1000)
+                  duration: Duration(seconds: 1),
+                  curve: Curves.easeInBack,
                 );
+                // scrollController.jumpTo(
+                //   scrollController.position.maxScrollExtent,
+                // curve: Curves.easeIn, duration: Duration(milliseconds: 1000)
+                // );
               }
               // else {
               //    // setState(() => null);
@@ -550,6 +554,7 @@ class _ChatScreenState extends State<ChatScreen> {
           return ListView.builder(
             physics: BouncingScrollPhysics(),
             padding: const EdgeInsets.only(
+              top: 20,
               bottom: 80,
               left: 15,
               right: 15,
@@ -655,9 +660,9 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           title: chatController.showSearch.value
               ? SearchBar()
-              : Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 10.0,
+              : Row(
+                  // crossAxisAlignment: WrapCrossAlignment.center,
+                  // spacing: 10.0,
                   children: [
                     Obx(() {
                       return profileImage(
@@ -670,12 +675,15 @@ class _ChatScreenState extends State<ChatScreen> {
                       );
                     }),
                     Obx(() {
-                      return MyText(
-                        text: anotherUserModel.value.fullName != null
-                            ? anotherUserModel.value.fullName
-                            : anotherUserName,
-                        size: 19,
-                        color: kSecondaryColor,
+                      return Expanded(
+                        child: MyText(
+                          paddingLeft: 15,
+                          text: anotherUserModel.value.fullName != null
+                              ? anotherUserModel.value.fullName
+                              : anotherUserName,
+                          size: 19,
+                          color: kSecondaryColor,
+                        ),
                       );
                     }),
                   ],
