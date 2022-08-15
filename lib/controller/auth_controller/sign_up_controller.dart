@@ -62,7 +62,7 @@ class SignupController extends GetxController {
   Future uploadPhoto() async {
     Reference ref = await FirebaseStorage.instance.ref().child('Images/Profile Images/${DateTime.now().toString()}');
     await ref.putFile(pickedImage!);
-    ref.getDownloadURL().then((value) {
+    await ref.getDownloadURL().then((value) {
       log('Profile Image URL $value');
       profileImage = value;
       update();
@@ -120,6 +120,29 @@ class SignupController extends GetxController {
         }).then(
           (value) async {
             await UserSimplePreference.setUserData(userDetailsModel);
+            if(auth.currentUser != null){
+              String? token = await fcm.getToken() ?? userDetailsModel.fcmToken;
+              try {
+                fs.collection("Accounts").doc(auth.currentUser?.uid).update({
+                  "fcmToken": token,
+                  "fcmCreatedAt": DateTime.now().toIso8601String(),
+                });
+              } catch (e) {
+                print(e);
+                log("error in updating fcmToken in my own collection $e");
+              }
+              fcm.onTokenRefresh.listen((streamedToken) {
+                try {
+                  fs.collection("Accounts").doc(auth.currentUser?.uid).update({
+                    "fcmToken": streamedToken,
+                    "fcmCreatedAt": DateTime.now().toIso8601String(),
+                  });
+                } catch (e) {
+                  print(e);
+                  log("error in updating fcmToken in my own collection on change $e");
+                }
+              });
+            }
             profileImage = '';
             fullNameCon.clear();
             phoneCon.clear();
