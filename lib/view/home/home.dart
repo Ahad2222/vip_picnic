@@ -858,11 +858,11 @@ class _PostWidgetState extends State<PostWidget> {
                           height: 25.23,
                           color: kDarkBlueColor.withOpacity(0.60),
                         ),
-                        MyText(
-                          text: '04',
-                          size: 18,
-                          color: kDarkBlueColor.withOpacity(0.60),
-                        ),
+                        // MyText(
+                        //   text: '04',
+                        //   size: 18,
+                        //   color: kDarkBlueColor.withOpacity(0.60),
+                        // ),
                       ],
                     ),
                   ),
