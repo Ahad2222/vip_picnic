@@ -19,7 +19,7 @@ class CreateNewChat extends StatelessWidget {
         title: 'Select contact',
       ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: fs
+        stream: ffstore
             .collection("Accounts")
             .doc(userDetailsModel.uID)
             .collection('iFollowed')
@@ -93,7 +93,7 @@ class CreateNewChat extends StatelessWidget {
         child: ListTile(
           onTap: () async {
             UserDetailsModel umdl = UserDetailsModel();
-            await fs.collection("Accounts").doc(id).get().then((value) {
+            await ffstore.collection("Accounts").doc(id).get().then((value) {
               umdl = UserDetailsModel.fromJson(value.data() ?? {});
             });
             await chatController.createChatRoomAndStartConversation(

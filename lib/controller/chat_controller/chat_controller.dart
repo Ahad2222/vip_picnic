@@ -1,18 +1,13 @@
 import 'dart:async';
 import 'dart:developer';
-import 'dart:io';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/model/chat_models/chat_head_model.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
-import 'package:vip_picnic/view/chat/chat_screen.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
-import 'package:http/http.dart';
 
 import '../../view/chat/simple_chat_screen.dart';
 
@@ -30,7 +25,7 @@ class ChatController extends GetxController {
 
   RxBool isPlayingMsg = false.obs;
   RxString selectedVoiceId = ''.obs;
-  RxBool isAudioBeingSent = false.obs;
+  // RxBool isAudioBeingSent = false.obs;
 
   RxList<ChatHeadModel> chatHeads = RxList<ChatHeadModel>([]);
 
@@ -39,103 +34,105 @@ class ChatController extends GetxController {
   RxBool isKeyboardOpen = false.obs;
   RxBool isBlocked = false.obs;
   RxString blockedById = "".obs;
-  RxString selectedChatOption = "Active Chats".obs;
-  RxBool isRecordingAudio = false.obs;
-
-  RxString minutes = '00'.obs;
-  RxString seconds = '00'.obs;
-  RxInt activeChatCount = 0.obs;
-  RxInt inActiveChatCount = 0.obs;
+  // RxString selectedChatOption = "Active Chats".obs;
+  // RxBool isRecordingAudio = false.obs;
+  //
+  // RxString minutes = '00'.obs;
+  // RxString seconds = '00'.obs;
+  // RxInt activeChatCount = 0.obs;
+  // RxInt inActiveChatCount = 0.obs;
   RxDouble uploadProgress = 0.0.obs;
 
-  Duration duration = Duration();
-  Timer? timer;
+  //+ audio related code is commented out
+/**/
+  // Duration duration = Duration();
+  // Timer? timer;
 
-  String? recordFilePath;
-  AudioPlayer? audioPlayer = AudioPlayer();
+  // String? recordFilePath;
+  // AudioPlayer? audioPlayer = AudioPlayer();
 
-  void selectedChatFiler(String value) {
-    selectedChatOption.value = value;
-    log('$selectedChatOption');
-    update();
-  }
-
-  void addTime() {
-    final addSeconds = 1;
-    final seconds = duration.inSeconds + addSeconds;
-    duration = Duration(seconds: seconds);
-    buildTime();
-  }
-
-  void resetTimer() {
-    duration = Duration();
-    minutes.value = '00';
-    seconds.value = '00';
-  }
-
-  void startTimer() {
-    timer = Timer.periodic(Duration(seconds: 1), (_) => addTime());
-  }
-
-  buildTime() {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    minutes.value = twoDigits(duration.inMinutes.remainder(60));
-    seconds.value = twoDigits(duration.inSeconds.remainder(60));
-    log('time is: ${minutes.value}:${seconds.value}');
-  }
-
-  void recordingMode() {
-    isRecordingAudio.value = !isRecordingAudio.value;
-    if (isRecordingAudio.value) {
-      log("inside if(isRecordingAudio.value)");
-      startTimer();
-      // buildTime();
-    } else {
-      log("the time is:: ${minutes.value}:${seconds.value}");
-      timer!.cancel();
-    }
-    update();
-  }
-
-  void isPlayingMode(String id) {
-    selectedVoiceId.value = id;
-    update();
-    print('This is voice id $selectedVoiceId');
-    // log("isPlayingMode called and now the isPlayingMsg.value is: ${isPlayingMsg}");
-  }
-
-  Future loadFile(String url) async {
-    final bytes = await readBytes(Uri.parse(url));
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File('${dir.path}/audio.mp3');
-
-    await file.writeAsBytes(bytes);
-    if (await file.exists()) {
-      log("${DateTime.now()}  before getting the file.");
-      recordFilePath = file.path;
-      chatController.isPlayingMode(url);
-      log("${DateTime.now()} before play");
-      await play().then((value) {
-        log("${DateTime.now()} play completed");
-        // chatController.isPlayingMode("fhjdk");
-        //+ this is not working because we need to wait for as much time as is needed by the audio
-      });
-      chatController.isPlayingMode(url);
-    }
-  }
-
-  stopAudio() async {
-    await audioPlayer!.stop();
-  }
-
-  Future<void> play() async {
-    if (recordFilePath != null && File(recordFilePath!).existsSync()) {
-      await audioPlayer!.play(
-        recordFilePath!,
-        isLocal: true,
-      );
-    }
-  }
+  // void selectedChatFiler(String value) {
+  //   selectedChatOption.value = value;
+  //   log('$selectedChatOption');
+  //   update();
+  // }
+  //
+  // void addTime() {
+  //   final addSeconds = 1;
+  //   final seconds = duration.inSeconds + addSeconds;
+  //   duration = Duration(seconds: seconds);
+  //   buildTime();
+  // }
+  //
+  // void resetTimer() {
+  //   duration = Duration();
+  //   minutes.value = '00';
+  //   seconds.value = '00';
+  // }
+  //
+  // void startTimer() {
+  //   timer = Timer.periodic(Duration(seconds: 1), (_) => addTime());
+  // }
+  //
+  // buildTime() {
+  //   String twoDigits(int n) => n.toString().padLeft(2, '0');
+  //   minutes.value = twoDigits(duration.inMinutes.remainder(60));
+  //   seconds.value = twoDigits(duration.inSeconds.remainder(60));
+  //   log('time is: ${minutes.value}:${seconds.value}');
+  // }
+  //
+  // void recordingMode() {
+  //   isRecordingAudio.value = !isRecordingAudio.value;
+  //   if (isRecordingAudio.value) {
+  //     log("inside if(isRecordingAudio.value)");
+  //     startTimer();
+  //     // buildTime();
+  //   } else {
+  //     log("the time is:: ${minutes.value}:${seconds.value}");
+  //     timer!.cancel();
+  //   }
+  //   update();
+  // }
+  //
+  // void isPlayingMode(String id) {
+  //   selectedVoiceId.value = id;
+  //   update();
+  //   print('This is voice id $selectedVoiceId');
+  //   // log("isPlayingMode called and now the isPlayingMsg.value is: ${isPlayingMsg}");
+  // }
+  //
+  // Future loadFile(String url) async {
+  //   final bytes = await readBytes(Uri.parse(url));
+  //   final dir = await getApplicationDocumentsDirectory();
+  //   final file = File('${dir.path}/audio.mp3');
+  //
+  //   await file.writeAsBytes(bytes);
+  //   if (await file.exists()) {
+  //     log("${DateTime.now()}  before getting the file.");
+  //     recordFilePath = file.path;
+  //     chatController.isPlayingMode(url);
+  //     log("${DateTime.now()} before play");
+  //     await play().then((value) {
+  //       log("${DateTime.now()} play completed");
+  //       // chatController.isPlayingMode("fhjdk");
+  //       //+ this is not working because we need to wait for as much time as is needed by the audio
+  //     });
+  //     chatController.isPlayingMode(url);
+  //   }
+  // }
+  //
+  // stopAudio() async {
+  //   await audioPlayer!.stop();
+  // }
+  //
+  // Future<void> play() async {
+  //   if (recordFilePath != null && File(recordFilePath!).existsSync()) {
+  //     await audioPlayer!.play(
+  //       recordFilePath!,
+  //       isLocal: true,
+  //     );
+  //   }
+  // }
 
   void showSearchBar() {
     showSearch.value = !showSearch.value;
@@ -146,14 +143,14 @@ class ChatController extends GetxController {
     var myid = myId;
 
     if (myid != null && myid != '') {
-      return fs.collection('ChatRoom').where('users', arrayContains: myId).snapshots().map((QuerySnapshot querySnap) {
+      return ffstore.collection('ChatRoom').where('users', arrayContains: myId).snapshots().map((QuerySnapshot querySnap) {
         List<ChatHeadModel> myChats = [];
         // log('stream inside the myChatHeadsList Snapshot and querySnap.docs.length = ${querySnap.docs.length} and chatHeads.length = ${chatHeads.value.length}:');
         querySnap.docs.forEach((doc) {
           // log("querySnap.docs.length = ${querySnap.docs.length} and doc: $doc");
           if (doc["notDeletedFor"].asMap().containsValue(myId)) {
             // log("activeChatCount changed");
-            fs
+            ffstore
                 .collection("ChatRoom")
                 .doc(doc['chatRoomId'])
                 .collection("chats")
@@ -234,7 +231,7 @@ class ChatController extends GetxController {
       //     .where("passengerId", isEqualTo: userDetailsModel.currentUserId)
       //     .where("searchParameters", arrayContains: "varToSearch").snapshots();
 
-      await fs.collection(chatRoomCollection).doc(chatRoomId).get().then((value) async {
+      await ffstore.collection(chatRoomCollection).doc(chatRoomId).get().then((value) async {
         if (value.exists) {
           //+means chat head is already created
           Get.back();
@@ -265,7 +262,7 @@ class ChatController extends GetxController {
             'lastMessageAt': DateTime.now().millisecondsSinceEpoch,
             'lastMessage': '',
           };
-          await fs
+          await ffstore
               .collection(chatRoomCollection)
               .doc(chatRoomId)
               .set(chatRoomMap)
@@ -306,10 +303,10 @@ class ChatController extends GetxController {
     log("inside chatRoom delete and chatRoom Id: $chatRoomId");
     try {
       log("inside chatRoom delete and chatRoom Id: $chatRoomId");
-      await fs.collection("ChatRoom").doc(chatRoomId).update({
+      await ffstore.collection("ChatRoom").doc(chatRoomId).update({
         "notDeletedFor": FieldValue.arrayRemove([auth.currentUser!.uid])
       }).then((value) async {
-        await fs.collection("ChatRoom").doc(chatRoomId).collection("chats").get().then((value) {
+        await ffstore.collection("ChatRoom").doc(chatRoomId).collection("chats").get().then((value) {
           value.docs.forEach((element) {
             element.reference.update({
               "isDeletedFor": FieldValue.arrayUnion([auth.currentUser!.uid])
@@ -329,6 +326,6 @@ class ChatController extends GetxController {
   }
 
   getConversationMessage(String chatRoomId) async {
-    return fs.collection(chatRoomCollection).doc(chatRoomId).collection(messagesCollection).orderBy('time').snapshots();
+    return ffstore.collection(chatRoomCollection).doc(chatRoomId).collection(messagesCollection).orderBy('time').snapshots();
   }
 }

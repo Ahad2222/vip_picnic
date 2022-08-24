@@ -27,7 +27,7 @@ class SignupController extends GetxController {
   late final TextEditingController zipCon;
   late final TextEditingController addressCon;
   String? profileImage = '';
-  String? accountType = '';
+  String? accountType = 'Private';
   RxInt? selectedAccountTypeIndex = 0.obs;
   DateTime createdAt = DateTime.now();
   DateFormat? format;
@@ -96,7 +96,7 @@ class SignupController extends GetxController {
       );
       try {
         await uploadPhoto();
-        await fa
+        await auth
             .createUserWithEmailAndPassword(
           email: emailCon.text.trim(),
           password: passCon.text.trim(),
@@ -106,7 +106,7 @@ class SignupController extends GetxController {
             profileImageUrl: profileImage,
             fullName: fullNameCon.text.trim(),
             email: emailCon.text.trim(),
-            uID: fa.currentUser!.uid,
+            uID: auth.currentUser!.uid,
             password: passCon.text.trim(),
             phone: phoneCon.text.trim(),
             city: cityCon.text.trim(),
@@ -116,14 +116,14 @@ class SignupController extends GetxController {
             accountType: accountType,
             createdAt: DateFormat.yMEd().add_jms().format(createdAt).toString(),
           );
-          await accounts.doc(fa.currentUser!.uid).set(userDetailsModel.toJson());
+          await accounts.doc(auth.currentUser!.uid).set(userDetailsModel.toJson());
         }).then(
           (value) async {
             await UserSimplePreference.setUserData(userDetailsModel);
             if(auth.currentUser != null){
               String? token = await fcm.getToken() ?? userDetailsModel.fcmToken;
               try {
-                fs.collection("Accounts").doc(auth.currentUser?.uid).update({
+                ffstore.collection("Accounts").doc(auth.currentUser?.uid).update({
                   "fcmToken": token,
                   "fcmCreatedAt": DateTime.now().toIso8601String(),
                 });
@@ -133,7 +133,7 @@ class SignupController extends GetxController {
               }
               fcm.onTokenRefresh.listen((streamedToken) {
                 try {
-                  fs.collection("Accounts").doc(auth.currentUser?.uid).update({
+                  ffstore.collection("Accounts").doc(auth.currentUser?.uid).update({
                     "fcmToken": streamedToken,
                     "fcmCreatedAt": DateTime.now().toIso8601String(),
                   });

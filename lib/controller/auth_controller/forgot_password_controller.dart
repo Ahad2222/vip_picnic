@@ -28,7 +28,7 @@ class ForgotPasswordController extends GetxController {
       );
       try {
         formKey.currentState!.save();
-        await fa
+        await auth
             .sendPasswordResetEmail(
           email: emailCon.text.trim(),
         )

@@ -35,14 +35,14 @@ class EmailAuthController extends GetxController {
       );
 
       try {
-        await fa
+        await auth
             .signInWithEmailAndPassword(
           email: emailCon.text.trim(),
           password: passCon.text.trim(),
         )
             .then(
           (value) async {
-            await accounts.doc(fa.currentUser!.uid).get().then(
+            await accounts.doc(auth.currentUser!.uid).get().then(
               (value) async {
                 userDetailsModel = UserDetailsModel.fromJson(value.data() as Map<String, dynamic>);
               },
@@ -52,7 +52,7 @@ class EmailAuthController extends GetxController {
             if(auth.currentUser != null){
               String? token = await fcm.getToken() ?? userDetailsModel.fcmToken;
               try {
-                fs.collection("Accounts").doc(auth.currentUser?.uid).update({
+                ffstore.collection("Accounts").doc(auth.currentUser?.uid).update({
                   "fcmToken": token,
                   "fcmCreatedAt": DateTime.now().toIso8601String(),
                 });
@@ -62,7 +62,7 @@ class EmailAuthController extends GetxController {
               }
               fcm.onTokenRefresh.listen((streamedToken) {
                 try {
-                  fs.collection("Accounts").doc(auth.currentUser?.uid).update({
+                  ffstore.collection("Accounts").doc(auth.currentUser?.uid).update({
                     "fcmToken": streamedToken,
                     "fcmCreatedAt": DateTime.now().toIso8601String(),
                   });

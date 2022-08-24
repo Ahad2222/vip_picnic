@@ -129,7 +129,7 @@ class Profile extends StatelessWidget {
           ];
         },
         body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-          stream: fs
+          stream: ffstore
               .collection("Posts")
               .where("uID", isEqualTo: auth.currentUser!.uid)
               .snapshots(),

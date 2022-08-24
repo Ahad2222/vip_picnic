@@ -36,7 +36,7 @@ class _PostDetailsState extends State<PostDetails> {
   void initState() {
     // TODO: implement initState
     addPostModel.value = widget.postDocModel!;
-    fs
+    ffstore
         .collection("Posts")
         .doc(widget.postDocModel!.postID)
         .snapshots()
@@ -282,7 +282,7 @@ class _PostDetailsState extends State<PostDetails> {
                     children: [
                       GestureDetector(
                         onTap: () async {
-                          await fs
+                          await ffstore
                               .collection("Posts")
                               .doc(widget.postDocModel!.postID)
                               .update({
@@ -331,7 +331,7 @@ class _PostDetailsState extends State<PostDetails> {
                         color: kDarkBlueColor.withOpacity(0.60),
                       ),
                       StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                        stream: fs
+                        stream: ffstore
                             .collection("Posts")
                             .doc(widget.postDocModel!.postID)
                             .collection("comments")
@@ -417,7 +417,7 @@ class _PostDetailsState extends State<PostDetails> {
             ),
             Expanded(
               child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                stream: fs
+                stream: ffstore
                     .collection("Posts")
                     .doc(widget.postDocModel!.postID)
                     .collection("comments")
@@ -572,7 +572,7 @@ class _PostDetailsState extends State<PostDetails> {
                 likeIDs: [],
                 postID: addPostModel.value.postID,
               );
-              await fs
+              await ffstore
                   .collection("Posts")
                   .doc(widget.postDocModel!.postID)
                   .collection("comments")

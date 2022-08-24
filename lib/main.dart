@@ -16,6 +16,7 @@ import 'package:vip_picnic/controller/auth_controller/forgot_password_controller
 import 'package:vip_picnic/controller/auth_controller/google_auth_controller.dart';
 import 'package:vip_picnic/controller/auth_controller/sign_up_controller.dart';
 import 'package:vip_picnic/controller/chat_controller/chat_controller.dart';
+import 'package:vip_picnic/controller/group_chat_controller/group_chat_controller.dart';
 import 'package:vip_picnic/controller/home_controller/home_controller.dart';
 import 'package:vip_picnic/controller/splash_screen_controller/splash_screen_controller.dart';
 import 'package:vip_picnic/firebase_options.dart';
@@ -292,9 +293,8 @@ Future<void> main() async {
   Get.put(HomeController());
   Get.put(ChooseLanguageController());
   Get.put(ChatController());
-  runApp(
-    MyApp(),
-  );
+  Get.put(GroupChatController());
+  runApp(MyApp());
 }
 
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -333,7 +333,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
               print("ChatRoom Id is: ${chatRoomId}");
               //We have chatRoomId here and we need to navigate to the ChatRoomScreen having same Id
-              await fs.collection("ChatRoom").doc(chatRoomId).get().then((value) {
+              await ffstore.collection("ChatRoom").doc(chatRoomId).get().then((value) {
                 Get.to(() => ChatScreen(docs: value.data(), isArchived: false));
               });
             } else if (screenName == 'profileScreen') {
@@ -348,7 +348,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 type = payloadDecoded['type'];
                 if (type == 'followerFollowed') {
                   UserDetailsModel? umdl;
-                  await fs.collection("Accounts").doc(payloadDecoded['id']).get().then((value) {
+                  await ffstore.collection("Accounts").doc(payloadDecoded['id']).get().then((value) {
                     umdl = UserDetailsModel.fromJson(value.data() ?? {});
                   });
                   Get.to(() => OtherUserProfile(
@@ -441,14 +441,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   chatRoomId = message.data['chatRoomId'];
                 }
                 //We have chatRoomId here and we need to navigate to the ChatRoomScreen having same Id
-                await fs.collection("ChatRoom").doc(chatRoomId).get().then((value) async {
+                await ffstore.collection("ChatRoom").doc(chatRoomId).get().then((value) async {
                   if (value.exists) {
                     print("ChatRoom Doc " + value.toString());
                     print("Navigating from onMessagePop to the ChatRoom 2");
                     print("Last Message was : ${value.data()!['lastMessage']}");
                     //+commented because I removed the generate route property feom get
                     try {
-                      fs.collection("MovingToChat").doc().set({
+                      ffstore.collection("MovingToChat").doc().set({
                         "Screen": screenName,
                       });
                       if (Platform.isIOS) {
@@ -457,7 +457,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         Get.to(() => ChatScreen(docs: value.data()));
                       }
                     } catch (e) {
-                      await fs.collection("Error in InitialMessage").doc().set({'Error': e.toString()});
+                      await ffstore.collection("Error in InitialMessage").doc().set({'Error': e.toString()});
                     }
                     // }
                   } else {
@@ -473,7 +473,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   type = message.data['type'];
                   if (type == 'followerFollowed') {
                     UserDetailsModel? umdl;
-                    await fs.collection("Accounts").doc(message.data['id']).get().then((value) {
+                    await ffstore.collection("Accounts").doc(message.data['id']).get().then((value) {
                       umdl = UserDetailsModel.fromJson(value.data() ?? {});
                     });
                     Get.to(() => OtherUserProfile(
@@ -664,7 +664,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               print("ChatRoom Id is: ${chatRoomId}");
               print("Navigating from onMessagePop to the ChatRoom in onMessageOpenedApp");
               //We have chatRoomId here and we need to navigate to the ChatRoomScreen having same Id
-              await fs.collection("ChatRoom").doc(chatRoomId).get().then((value) async {
+              await ffstore.collection("ChatRoom").doc(chatRoomId).get().then((value) async {
                 if (value.exists) {
                   print("ChatRoom Doc " + value.toString());
                   print("Navigating from onMessagePop to the ChatRoom 2");
@@ -684,7 +684,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 type = message.data['type'];
                 if (type == 'followerFollowed') {
                   UserDetailsModel? umdl;
-                  await fs.collection("Accounts").doc(message.data['id']).get().then((value) {
+                  await ffstore.collection("Accounts").doc(message.data['id']).get().then((value) {
                     umdl = UserDetailsModel.fromJson(value.data() ?? {});
                   });
                   Get.to(() => OtherUserProfile(otherUserModel: umdl));

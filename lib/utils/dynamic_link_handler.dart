@@ -53,7 +53,7 @@ class DynamicLinkHandler {
 
         try {
           if (id != "") {
-            await fs.collection("Posts").doc(id).get().then((value) {
+            await ffstore.collection("Posts").doc(id).get().then((value) {
               Get.to(
                     () => PostDetails(
                   postDocModel: AddPostModel.fromJson(value.data() ?? {}),
@@ -86,7 +86,7 @@ class DynamicLinkHandler {
 
         try {
           if (id != "") {
-            await fs.collection("Posts").doc(id).get().then((value) {
+            await ffstore.collection("Posts").doc(id).get().then((value) {
               Get.to(
                 () => PostDetails(
                   postDocModel: AddPostModel.fromJson(value.data() ?? {}),

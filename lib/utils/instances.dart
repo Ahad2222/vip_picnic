@@ -7,20 +7,20 @@ import 'package:vip_picnic/controller/auth_controller/forgot_password_controller
 import 'package:vip_picnic/controller/auth_controller/google_auth_controller.dart';
 import 'package:vip_picnic/controller/auth_controller/sign_up_controller.dart';
 import 'package:vip_picnic/controller/chat_controller/chat_controller.dart';
+import 'package:vip_picnic/controller/group_chat_controller/group_chat_controller.dart';
 import 'package:vip_picnic/controller/home_controller/home_controller.dart';
 import 'package:vip_picnic/controller/splash_screen_controller/splash_screen_controller.dart';
+import 'package:vip_picnic/model/group_chat_models/group_chat_room_model.dart';
 import 'package:vip_picnic/model/home_model/add_post_model.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/view/choose_language/choose_language.dart';
 
 //FIREBASE INSTANCES
-FirebaseAuth fa = FirebaseAuth.instance;
-FirebaseFirestore fs = FirebaseFirestore.instance;
-FirebaseStorage fsg = FirebaseStorage.instance;
+FirebaseAuth auth = FirebaseAuth.instance;
+FirebaseFirestore ffstore = FirebaseFirestore.instance;
+FirebaseStorage fstorage = FirebaseStorage.instance;
 FirebaseMessaging fcm = FirebaseMessaging.instance;
 
-
-FirebaseAuth auth = FirebaseAuth.instance;
 //FIREBASE INSTANCES
 
 //GETX CONTROLLER INSTANCES
@@ -33,6 +33,7 @@ ForgotPasswordController forgotPasswordController =
 HomeController homeController = HomeController.instance;
 ChooseLanguageController languageController = ChooseLanguageController.instance;
 ChatController chatController = ChatController.instance;
+GroupChatController groupChatController = GroupChatController.instance;
 //GETX CONTROLLER INSTANCES
 
 //MODELS INSTANCES

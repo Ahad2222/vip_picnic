@@ -30,7 +30,7 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    fs
+    ffstore
         .collection("Accounts")
         .doc(auth.currentUser!.uid)
         .snapshots()
@@ -127,23 +127,24 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                       children: [
                         Obx(() {
                           return profileButtons(
-                            buttonText: !userDetailsModel.value.iFollowed!
+                            buttonText: userDetailsModel.value.iFollowed != null ? !userDetailsModel.value.iFollowed!
                                     .asMap()
                                     .containsValue(widget.otherUserModel!.uID)
                                 ? 'follow'.tr
-                                : 'Unfollow'.tr,
-                            onTap: !userDetailsModel.value.iFollowed!
+                                : 'Unfollow'.tr
+                                : "follow",
+                            onTap: userDetailsModel.value.iFollowed != null ? !userDetailsModel.value.iFollowed!
                                     .asMap()
                                     .containsValue(widget.otherUserModel!.uID)
                                 ? () async {
-                                    await fs
+                                    await ffstore
                                         .collection("Accounts")
                                         .doc(auth.currentUser!.uid)
                                         .update({
                                       "iFollowed": FieldValue.arrayUnion(
                                           [widget.otherUserModel!.uID]),
                                     });
-                                    await fs
+                                    await ffstore
                                         .collection("Accounts")
                                         .doc(widget.otherUserModel!.uID)
                                         .update({
@@ -161,7 +162,7 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                                           DateTime.now().millisecondsSinceEpoch,
                                     );
 
-                                    await fs
+                                    await ffstore
                                         .collection("Accounts")
                                         .doc(auth.currentUser!.uid)
                                         .collection("iFollowed")
@@ -170,33 +171,33 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                                   }
                                 : () async {
                                     //+unfollow code goes here
-                                    await fs
+                                    await ffstore
                                         .collection("Accounts")
                                         .doc(auth.currentUser!.uid)
                                         .update({
                                       "iFollowed": FieldValue.arrayRemove(
                                           [widget.otherUserModel!.uID]),
                                     });
-                                    await fs
+                                    await ffstore
                                         .collection("Accounts")
                                         .doc(widget.otherUserModel!.uID)
                                         .update({
                                       "TheyFollowed": FieldValue.arrayRemove(
                                           [auth.currentUser!.uid]),
                                     });
-                                    await fs
+                                    await ffstore
                                         .collection("Accounts")
                                         .doc(auth.currentUser!.uid)
                                         .collection("iFollowed")
                                         .doc(widget.otherUserModel!.uID)
                                         .delete();
-                                    await fs
+                                    await ffstore
                                         .collection("Accounts")
                                         .doc(widget.otherUserModel!.uID)
                                         .collection("TheyFollowed")
                                         .doc(userDetailsModel.value.uID)
                                         .delete();
-                                  },
+                                  } : null,
                           );
                         }),
                         SizedBox(
@@ -206,7 +207,7 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                           buttonText: 'message'.tr,
                           onTap: () async {
                             UserDetailsModel umdl = UserDetailsModel();
-                            await fs
+                            await ffstore
                                 .collection("Accounts")
                                 .doc(widget.otherUserModel!.uID)
                                 .get()
@@ -235,7 +236,7 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
           ];
         },
         body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-          stream: fs
+          stream: ffstore
               .collection("Posts")
               .where("uID", isEqualTo: widget.otherUserModel!.uID)
               .snapshots(),

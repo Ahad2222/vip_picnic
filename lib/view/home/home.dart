@@ -9,6 +9,7 @@ import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
+import 'package:vip_picnic/main.dart';
 import 'package:vip_picnic/model/home_model/add_post_model.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/dynamic_link_handler.dart';
@@ -148,7 +149,7 @@ class Home extends StatelessWidget {
           ),
           /**/ //+ starting stream builder
           StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-            stream: fs.collection("Accounts").doc(auth.currentUser!.uid).snapshots(),
+            stream: ffstore.collection("Accounts").doc(auth.currentUser!.uid).snapshots(),
             builder: (
               BuildContext context,
               AsyncSnapshot<DocumentSnapshot> snapshot,
@@ -169,7 +170,11 @@ class Home extends StatelessWidget {
                     var followedListToBeChecked =
                         userDetailsModel.iFollowed!.length > 0 ? userDetailsModel.iFollowed : ["something"];
                     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                      stream: fs.collection("Posts").where("uID", whereIn: followedListToBeChecked).orderBy("createdAtMilliSeconds", descending: true).snapshots(),
+                      stream: ffstore
+                          .collection("Posts")
+                          .where("uID", whereIn: followedListToBeChecked)
+                          .orderBy("createdAtMilliSeconds", descending: true)
+                          .snapshots(),
                       builder: (
                         BuildContext context,
                         AsyncSnapshot<QuerySnapshot> snapshot,
@@ -421,14 +426,20 @@ class _PostWidgetState extends State<PostWidget> {
                       ? () => Get.to(
                             () => Profile(),
                           )
-                      : () {
+                      : () async {
+                          log("inside the lower going to user method");
                           UserDetailsModel otherUser = UserDetailsModel();
-
-                          fs.collection('Accounts').doc(widget.postDocModel!.uID).get().then(
-                            (value) {
-                              otherUser = UserDetailsModel.fromJson(value.data()!);
-                            },
-                          );
+                          try {
+                            // loading();
+                            await ffstore.collection('Accounts').doc(widget.postDocModel!.uID).get().then(
+                              (value) {
+                                otherUser = UserDetailsModel.fromJson(value.data() ?? {});
+                              },
+                            );
+                          } catch (e) {
+                            print(e);
+                          }
+                          // navigatorKey.currentState!.pop();
                           Get.to(
                             () => OtherUserProfile(otherUserModel: otherUser),
                           );
@@ -502,12 +513,32 @@ class _PostWidgetState extends State<PostWidget> {
                 title: Wrap(
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    MyText(
-                      text: widget.isMyPost! ? 'yourPost'.tr : '${widget.name}',
-                      size: 17,
-                      weight: FontWeight.w600,
-                      color: kSecondaryColor,
-                      paddingBottom: 4,
+                    GestureDetector(
+                      onTap: () async {
+                        log("inside the lower going to user method");
+                        UserDetailsModel otherUser = UserDetailsModel();
+                        // loading();
+                        try {
+                          await ffstore.collection('Accounts').doc(widget.postDocModel!.uID).get().then(
+                                (value) {
+                              otherUser = UserDetailsModel.fromJson(value.data() ?? {});
+                            },
+                          );
+                        } catch (e) {
+                          print(e);
+                        }
+                        // navigatorKey.currentState!.pop();
+                        Get.to(
+                              () => OtherUserProfile(otherUserModel: otherUser),
+                        );
+                      },
+                      child: MyText(
+                        text: widget.isMyPost! ? 'yourPost'.tr : '${widget.name}',
+                        size: 17,
+                        weight: FontWeight.w600,
+                        color: kSecondaryColor,
+                        paddingBottom: 4,
+                      ),
                     ),
                     MyText(
                       //+ 8/4/2022
@@ -666,7 +697,7 @@ class _PostWidgetState extends State<PostWidget> {
                     children: [
                       GestureDetector(
                         onTap: () async {
-                          await fs.collection("Posts").doc(widget.postID).update(
+                          await ffstore.collection("Posts").doc(widget.postID).update(
                             {
                               "likeCount": FieldValue.increment(widget.isLikeByMe! ? -1 : 1),
                               "likeIDs": !widget.isLikeByMe!
@@ -718,7 +749,7 @@ class _PostWidgetState extends State<PostWidget> {
                         ),
                       ),
                       StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                        stream: fs.collection("Posts").doc(widget.postID).collection("comments").snapshots(),
+                        stream: ffstore.collection("Posts").doc(widget.postID).collection("comments").snapshots(),
                         builder: (
                           BuildContext context,
                           AsyncSnapshot<QuerySnapshot> snapshot,

@@ -131,7 +131,7 @@ class HomeController extends GetxController {
   }
 
   Future uploadSingleImage(XFile image) async {
-    Reference ref = await fsg.ref().child(
+    Reference ref = await fstorage.ref().child(
           'postImages/images/${DateTime.now().toString()}',
         );
     await ref.putFile(

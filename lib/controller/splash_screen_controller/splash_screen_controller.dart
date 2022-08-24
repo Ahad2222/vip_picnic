@@ -31,7 +31,7 @@ class SplashScreenController extends GetxController {
       if(auth.currentUser != null){
         String? token = await fcm.getToken() ?? userDetailsModel.fcmToken;
         try {
-          fs.collection("Accounts").doc(auth.currentUser?.uid).update({
+          ffstore.collection("Accounts").doc(auth.currentUser?.uid).update({
             "fcmToken": token,
             "fcmCreatedAt": DateTime.now().toIso8601String(),
           });
@@ -41,7 +41,7 @@ class SplashScreenController extends GetxController {
         }
         fcm.onTokenRefresh.listen((streamedToken) {
           try {
-            fs.collection("Accounts").doc(auth.currentUser?.uid).update({
+            ffstore.collection("Accounts").doc(auth.currentUser?.uid).update({
               "fcmToken": streamedToken,
               "fcmCreatedAt": DateTime.now().toIso8601String(),
             });

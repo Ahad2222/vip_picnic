@@ -12,11 +12,11 @@ import 'package:vip_picnic/view/widget/my_textfields.dart';
 class GroupChat extends StatelessWidget {
   GroupChat({
     Key? key,
-    this.groupName,
+    this.docs,
   }) : super(key: key);
 
   // ignore: prefer_typing_uninitialized_variables
-  var groupName;
+  Map<String, dynamic>? docs;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +39,8 @@ class GroupChat extends StatelessWidget {
         title: chatController.showSearch.value
             ? SearchBar()
             : MyText(
-          text: '$groupName',
+          //+docs!['groupName']
+          text: '${"groupName"}',
           size: 19,
           color: kSecondaryColor,
         ),

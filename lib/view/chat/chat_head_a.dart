@@ -7,6 +7,7 @@ import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/model/chat_models/chat_head_model.dart';
+import 'package:vip_picnic/model/group_chat_models/group_chat_head_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:vip_picnic/view/chat/create_new_chat.dart';
@@ -155,7 +156,7 @@ class SimpleChatHeads extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: fs
+      stream: ffstore
           .collection(chatRoomCollection)
           // .where("users", arrayContains: userDetailsModel.uID)
           .where("notDeletedFor", arrayContains: userDetailsModel.uID)
@@ -315,27 +316,81 @@ class SimpleChatHeads extends StatelessWidget {
 class GroupChatHeads extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      shrinkWrap: true,
-      padding: EdgeInsets.symmetric(
-        horizontal: 15,
-      ),
-      physics: BouncingScrollPhysics(),
-      itemCount: 6,
-      itemBuilder: (context, index) {
-        return groupChatHeadsTiles(
-          context,
-          groupPhoto: Assets.imagesDummyImg,
-          name: 'Event Name',
-          totalMembers: '8',
-          time: '11 March',
-        );
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: ffstore
+          .collection(groupChatCollection)
+      // .where("users", arrayContains: userDetailsModel.uID)
+          .where("notDeletedFor", arrayContains: userDetailsModel.uID)
+          .orderBy('lastMessageAt', descending: true)
+          .snapshots(),
+      builder: (
+          BuildContext context,
+          AsyncSnapshot<QuerySnapshot> snapshot,
+          ) {
+        log("inside stream-builder");
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          log("inside stream-builder in waiting state");
+          return SizedBox();
+        } else if (snapshot.connectionState == ConnectionState.active ||
+            snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasError) {
+            return const Text('Some unknown error occurred');
+          } else if (snapshot.hasData) {
+            // log("inside hasData and ${snapshot.data!.docs}");
+            if (snapshot.data!.docs.length > 0) {
+              return ListView.builder(
+                shrinkWrap: true,
+                padding: EdgeInsets.symmetric(
+                  horizontal: 15,
+                ),
+                physics: BouncingScrollPhysics(),
+                itemCount: snapshot.data!.docs.length,
+                itemBuilder: (context, index) {
+                  GroupChatHeadModel data = GroupChatHeadModel();
+                  data = GroupChatHeadModel.fromDocumentSnapshot(
+                      snapshot.data!.docs[index]);
+                  return groupChatHeadsTiles(
+                    context,
+                    groupId: data.groupId,
+                    groupPhoto: data.groupImage,
+                    name: data.groupName,
+                    totalMembers: data.users?.length,
+                    time: data.lastMessageAt,
+                  );
+                  // return chatHeadTiles(
+                  //   context,
+                  //   profileImage: data.user1Id != userDetailsModel.uID
+                  //       ? data.user1Model!.profileImageUrl
+                  //       : data.user2Model!.profileImageUrl,
+                  //   name: data.user1Id != userDetailsModel.uID
+                  //       ? data.user1Model!.fullName
+                  //       : data.user2Model!.fullName,
+                  //   msg: data.lastMessage,
+                  //   time: data.lastMessageAt,
+                  //   docs: snapshot.data!.docs[index].data()
+                  //   as Map<String, dynamic>,
+                  // );
+                },
+              );
+            } else {
+              return SizedBox();
+            }
+          } else {
+            log("in else of hasData done and: ${snapshot.connectionState} and"
+                " snapshot.hasData: ${snapshot.hasData}");
+            return SizedBox();
+          }
+        } else {
+          log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+          return SizedBox();
+        }
       },
     );
   }
 
   Widget groupChatHeadsTiles(
     BuildContext context, {
+    String? groupId,
     String? groupPhoto,
     name,
     totalMembers,
@@ -352,21 +407,28 @@ class GroupChatHeads extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: ListTile(
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => GroupChat(
-                groupName: name,
-              ),
-            ),
-          ),
+          onTap: () async {
+            try {
+              await groupChatController.getAGroupChatRoomInfo(groupId!).then((value) => GroupChat(docs: value.data(),));
+            } catch (e) {
+              log("error in getting the group chat info is: $e");
+              Get.snackbar("Error", "Please make sure you are connected to internet");
+            }
+            //     Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (_) => GroupChat(),
+            //   ),
+            // ),
+          },
+
           contentPadding: EdgeInsets.symmetric(
             horizontal: 15,
             vertical: 10,
           ),
           leading: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
+            child: Image.network(
               '$groupPhoto',
               height: 56,
               width: 56,
@@ -393,7 +455,10 @@ class GroupChatHeads extends StatelessWidget {
             children: [
               MyText(
                 paddingBottom: 5,
-                text: '$time',
+                text:
+                "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[0]}"
+                    ":"
+                    "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[1]}",
                 weight: FontWeight.w300,
                 color: kSecondaryColor,
               ),

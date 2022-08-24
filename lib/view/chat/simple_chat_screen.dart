@@ -11,8 +11,6 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
-import 'package:record_mp3/record_mp3.dart';
 import 'package:uuid/uuid.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/constant/constant_variables.dart';
@@ -129,100 +127,100 @@ class _ChatScreenState extends State<ChatScreen> {
     return sdPath + "/test_${i++}.mp3";
   }
 
-  uploadAudio({String? minutes, String? seconds}) {
-    log("'audio-time in uploadAudio': '${minutes}:${seconds}'");
-    final firebaseStorageRef = FirebaseStorage.instance
-        .ref()
-        .child('${chatRoomID}/audio${DateTime.now().millisecondsSinceEpoch.toString()}.mp3');
+  // uploadAudio({String? minutes, String? seconds}) {
+  //   log("'audio-time in uploadAudio': '${minutes}:${seconds}'");
+  //   final firebaseStorageRef = FirebaseStorage.instance
+  //       .ref()
+  //       .child('${chatRoomID}/audio${DateTime.now().millisecondsSinceEpoch.toString()}.mp3');
+  //
+  //   UploadTask task = firebaseStorageRef.putFile(File(chatController.recordFilePath ?? ""));
+  //   task.then((value) async {
+  //     print('##############done#########');
+  //     // task.snapshotEvents.listen((event) {
+  //     //   chatController.uploadProgress.value = event.bytesTransferred.toDouble() / event.totalBytes.toDouble();
+  //     //   log("progress iS: ${chatController.uploadProgress.value}");
+  //     // });
+  //     var audioURL = await value.ref.getDownloadURL();
+  //
+  //     // chatController.uploadProgress.value =(value.totalBytes / value.bytesTransferred) * 100;
+  //     // log("progress iS: ${chatController.uploadProgress.value}");
+  //     String strVal = audioURL.toString();
+  //     await sendAudioMsg(audioMsg: strVal, minutes: minutes, seconds: seconds);
+  //     chatController.isAudioBeingSent.value = false;
+  //   }).catchError((e) {
+  //     print(e);
+  //   });
+  // }
+  //
+  // sendAudioMsg({String? audioMsg, String? minutes, String? seconds}) async {
+  //   log("'audio-time in sendAudioMsg': '${minutes}:${seconds}'");
+  //   bool isAudioMsgEmpty = audioMsg?.isNotEmpty ?? false;
+  //   if (isAudioMsgEmpty) {
+  //     await FirebaseFirestore.instance.runTransaction((transaction) async {
+  //       var time = DateTime.now().millisecondsSinceEpoch;
+  //
+  //       Map<String, dynamic> messageMap = {
+  //         "sendById": userDetailsModel.uID,
+  //         "sendByName": userDetailsModel.fullName,
+  //         "receivedById": anotherUserID,
+  //         "receivedByName": anotherUserName,
+  //         "message": audioMsg,
+  //         'audio-time': '${minutes}:${seconds}',
+  //         "type": "audio",
+  //         'time': time,
+  //         'isDeletedFor': [],
+  //         "isRead": false,
+  //         "isReceived": false,
+  //       };
+  //       bool isDeletedFor = crm.value.notDeletedFor?.asMap().containsValue(anotherUserID) ?? false;
+  //       if (!isDeletedFor) {
+  //         fs.collection("ChatRoom").doc(chatRoomID).update({
+  //           "notDeletedFor": FieldValue.arrayUnion([anotherUserID])
+  //         });
+  //       }
+  //       chatController.addConversationMessage(chatRoomID, time, "audio", messageMap, audioMsg!);
+  //       messageEditingController.value.text = "";
+  //       chatController.messageControllerText.value = "";
+  //     }).then((value) {
+  //       isSending.value = false;
+  //     });
+  //   } else {
+  //     print("Hello");
+  //   }
+  // }
 
-    UploadTask task = firebaseStorageRef.putFile(File(chatController.recordFilePath ?? ""));
-    task.then((value) async {
-      print('##############done#########');
-      // task.snapshotEvents.listen((event) {
-      //   chatController.uploadProgress.value = event.bytesTransferred.toDouble() / event.totalBytes.toDouble();
-      //   log("progress iS: ${chatController.uploadProgress.value}");
-      // });
-      var audioURL = await value.ref.getDownloadURL();
-
-      // chatController.uploadProgress.value =(value.totalBytes / value.bytesTransferred) * 100;
-      // log("progress iS: ${chatController.uploadProgress.value}");
-      String strVal = audioURL.toString();
-      await sendAudioMsg(audioMsg: strVal, minutes: minutes, seconds: seconds);
-      chatController.isAudioBeingSent.value = false;
-    }).catchError((e) {
-      print(e);
-    });
-  }
-
-  sendAudioMsg({String? audioMsg, String? minutes, String? seconds}) async {
-    log("'audio-time in sendAudioMsg': '${minutes}:${seconds}'");
-    bool isAudioMsgEmpty = audioMsg?.isNotEmpty ?? false;
-    if (isAudioMsgEmpty) {
-      await FirebaseFirestore.instance.runTransaction((transaction) async {
-        var time = DateTime.now().millisecondsSinceEpoch;
-
-        Map<String, dynamic> messageMap = {
-          "sendById": userDetailsModel.uID,
-          "sendByName": userDetailsModel.fullName,
-          "receivedById": anotherUserID,
-          "receivedByName": anotherUserName,
-          "message": audioMsg,
-          'audio-time': '${minutes}:${seconds}',
-          "type": "audio",
-          'time': time,
-          'isDeletedFor': [],
-          "isRead": false,
-          "isReceived": false,
-        };
-        bool isDeletedFor = crm.value.notDeletedFor?.asMap().containsValue(anotherUserID) ?? false;
-        if (!isDeletedFor) {
-          fs.collection("ChatRoom").doc(chatRoomID).update({
-            "notDeletedFor": FieldValue.arrayUnion([anotherUserID])
-          });
-        }
-        chatController.addConversationMessage(chatRoomID, time, "audio", messageMap, audioMsg!);
-        messageEditingController.value.text = "";
-        chatController.messageControllerText.value = "";
-      }).then((value) {
-        isSending.value = false;
-      });
-    } else {
-      print("Hello");
-    }
-  }
-
-  void startRecord() async {
-    bool hasPermission = await checkPermission();
-    if (hasPermission) {
-      chatController.recordFilePath = await getFilePath();
-
-      RecordMp3.instance.start(chatController.recordFilePath ?? "", (type) {});
-    } else {
-      await checkPermission();
-      startRecord();
-    }
-  }
+  // void startRecord() async {
+  //   bool hasPermission = await checkPermission();
+  //   if (hasPermission) {
+  //     chatController.recordFilePath = await getFilePath();
+  //
+  //     RecordMp3.instance.start(chatController.recordFilePath ?? "", (type) {});
+  //   } else {
+  //     await checkPermission();
+  //     startRecord();
+  //   }
+  // }
 
   //+stopAudio moved to chatcontroller
 
-  void stopRecord({String? minutes, String? seconds}) async {
-    bool s = RecordMp3.instance.stop();
-    if (s) {
-      isSending.value = true;
-      log("'audio-time in stopRecord': '${minutes}:${seconds}'");
-      await uploadAudio(minutes: minutes, seconds: seconds);
-      // isPlayingMsg.value = false;
-    }
-  }
+  // void stopRecord({String? minutes, String? seconds}) async {
+  //   bool s = RecordMp3.instance.stop();
+  //   if (s) {
+  //     isSending.value = true;
+  //     log("'audio-time in stopRecord': '${minutes}:${seconds}'");
+  //     await uploadAudio(minutes: minutes, seconds: seconds);
+  //     // isPlayingMsg.value = false;
+  //   }
+  // }
 
-  void stopRecordWithoutUpload() async {
-    bool s = RecordMp3.instance.stop();
-    // if (s) {
-    //   // isSending.value = true;
-    //   // await uploadAudio();
-    //   // isPlayingMsg.value = false;
-    // }
-  }
+  // void stopRecordWithoutUpload() async {
+  //   bool s = RecordMp3.instance.stop();
+  //   // if (s) {
+  //   //   // isSending.value = true;
+  //   //   // await uploadAudio();
+  //   //   // isPlayingMsg.value = false;
+  //   // }
+  // }
 
   @override
   void initState() {
@@ -258,7 +256,7 @@ class _ChatScreenState extends State<ChatScreen> {
     log("anotherUserImage: $anotherUserImage");
 
     chatRoomID = chatController.getChatRoomId(userID, anotherUserID);
-    otherUserListener = await fs.collection("Accounts").doc(anotherUserID).snapshots().listen((event) {
+    otherUserListener = await ffstore.collection("Accounts").doc(anotherUserID).snapshots().listen((event) {
       log("updating anotherUserModel");
       anotherUserModel.value = UserDetailsModel.fromJson(event.data() ?? {});
     });
@@ -266,11 +264,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
   getUserDataFromChatRoomDB() async {
     log("CHanging the crm values from getUserDataFromChatRoomDB");
-    await fs.collection("ChatRoom").doc(widget.docs!["chatRoomId"]).get().then((value) {
+    await ffstore.collection("ChatRoom").doc(widget.docs!["chatRoomId"]).get().then((value) {
       crm.value = ChatRoomModel.fromDocumentSnapshot(value);
       log("CHanging the crm values in get from getUserDataFromChatRoomDB");
     });
-    await fs.collection("ChatRoom").doc(chatRoomID).snapshots().listen((event) {
+    await ffstore.collection("ChatRoom").doc(chatRoomID).snapshots().listen((event) {
       log("CHanging the crm values in snapshot from getUserDataFromChatRoomDB");
       crm.value = ChatRoomModel.fromDocumentSnapshot(event);
     });
@@ -411,7 +409,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   getChatRoomStream() async {
     // crm.value = ChatRoomModel.fromDocumentSnapshot(event);
-    chatRoomListener = await fs.collection("ChatRoom").doc(widget.docs!['chatRoomId']).snapshots().listen((event) {
+    chatRoomListener = await ffstore.collection("ChatRoom").doc(widget.docs!['chatRoomId']).snapshots().listen((event) {
       lastMessageAt.value = event['lastMessageAt'];
       lastMessage.value = event['lastMessage'];
       crm.value = ChatRoomModel.fromDocumentSnapshot(event);
@@ -442,7 +440,7 @@ class _ChatScreenState extends State<ChatScreen> {
       };
       bool isDeletedFor = crm.value.notDeletedFor?.asMap().containsValue(anotherUserID) ?? false;
       if (!isDeletedFor) {
-        fs.collection("ChatRoom").doc(chatRoomID).update({
+        ffstore.collection("ChatRoom").doc(chatRoomID).update({
           "notDeletedFor": FieldValue.arrayUnion([anotherUserID])
         });
       }
@@ -466,7 +464,7 @@ class _ChatScreenState extends State<ChatScreen> {
       bool isDeletedFor = crm.value.notDeletedFor?.asMap().containsValue(anotherUserID) ?? false;
 
       if (!isDeletedFor) {
-        fs.collection("ChatRoom").doc(chatRoomID).update({
+        ffstore.collection("ChatRoom").doc(chatRoomID).update({
           "notDeletedFor": FieldValue.arrayUnion([anotherUserID])
         });
       }
@@ -490,7 +488,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget chatMessageList() {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream:
-          fs.collection(chatRoomCollection).doc(chatRoomID).collection(messagesCollection).orderBy('time').snapshots(),
+          ffstore.collection(chatRoomCollection).doc(chatRoomID).collection(messagesCollection).orderBy('time').snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.hasData) {
           // scrollController.animateTo(
@@ -627,7 +625,7 @@ class _ChatScreenState extends State<ChatScreen> {
               : GestureDetector(
                   onTap: () async {
                     UserDetailsModel? umdl;
-                    await fs.collection("Accounts").doc(anotherUserID).get().then((value) {
+                    await ffstore.collection("Accounts").doc(anotherUserID).get().then((value) {
                       umdl = UserDetailsModel.fromJson(value.data() ?? {});
                     });
                     Get.to(() => OtherUserProfile(otherUserModel: umdl));
