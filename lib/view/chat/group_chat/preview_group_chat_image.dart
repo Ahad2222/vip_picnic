@@ -12,27 +12,27 @@ import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/my_appbar.dart';
 import 'package:vip_picnic/view/widget/snack_bar.dart';
 
-class PreviewImageScreen extends StatefulWidget {
+class PreviewGroupChatImageScreen extends StatefulWidget {
   final String? imagePath;
   final String? userId;
-  final String? anotherUserId;
-  final String? anotherUserName;
+  // final String? anotherUserId;
+  // final String? anotherUserName;
   final String? chatRoomId;
 
-  const PreviewImageScreen(
+  const PreviewGroupChatImageScreen(
       {Key? key,
-      this.imagePath,
-      this.anotherUserId,
-      this.anotherUserName,
-      this.userId,
-      this.chatRoomId})
+        this.imagePath,
+        // this.anotherUserId,
+        // this.anotherUserName,
+        this.userId,
+        this.chatRoomId})
       : super(key: key);
 
   @override
-  _PreviewImageScreenState createState() => _PreviewImageScreenState();
+  _PreviewGroupChatImageScreenState createState() => _PreviewGroupChatImageScreenState();
 }
 
-class _PreviewImageScreenState extends State<PreviewImageScreen> {
+class _PreviewGroupChatImageScreenState extends State<PreviewGroupChatImageScreen> {
   String imageUrl = '';
   RxDouble uploadPercentageValue = 0.0.obs;
 
@@ -103,7 +103,7 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
             log("Upload was canceled");
             break;
           case TaskState.error:
-            // Handle unsuccessful uploads
+          // Handle unsuccessful uploads
             log("Upload resulted in error.");
             showMsg(
               msg: 'Storage Error!',
@@ -112,7 +112,7 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
             );
             break;
           case TaskState.success:
-            // Handle successful uploads on complete
+          // Handle successful uploads on complete
             imageUrl = await taskSnapshot.ref.getDownloadURL();
             if (File(widget.imagePath!) != null &&
                 (imageUrl != null || imageUrl != "")) {
@@ -120,13 +120,15 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
               Map<String, dynamic> messageMap = {
                 "sendById": userDetailsModel.uID,
                 "sendByName": userDetailsModel.fullName,
-                "receivedById": widget.anotherUserId,
-                "receivedByName": widget.anotherUserName,
+                "sendByImage": userDetailsModel.profileImageUrl,
+                // "receivedById": widget.anotherUserId,
+                // "receivedByName": widget.anotherUserName,
                 "message": imageUrl,
                 "type": "image",
                 'time': time,
                 'isDeletedFor': [],
                 'isRead': false,
+                'isReadBy': [],
                 "isReceived": false,
               };
               chatController.addConversationMessage(
@@ -141,8 +143,8 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
     } on FirebaseException catch (e) {
       //+ Handle the storage relevant codes here in free time from:
       //+ https://firebase.google.com/docs/storage/flutter/handle-errors
-      log("error in sending image is: $e");
 
+      log("error in sending image is: ${e.message}");
       showMsg(
         msg: 'Storage Error!',
         context: context,

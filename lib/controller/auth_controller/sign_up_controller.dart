@@ -30,6 +30,7 @@ class SignupController extends GetxController {
   String? accountType = 'Private';
   RxInt? selectedAccountTypeIndex = 0.obs;
   DateTime createdAt = DateTime.now();
+  List<String> userSearchParameters = [];
   DateFormat? format;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
@@ -102,6 +103,7 @@ class SignupController extends GetxController {
           password: passCon.text.trim(),
         )
             .then((value) async {
+          String? token = await fcm.getToken();
           userDetailsModel = UserDetailsModel(
             profileImageUrl: profileImage,
             fullName: fullNameCon.text.trim(),
@@ -114,13 +116,18 @@ class SignupController extends GetxController {
             zip: zipCon.text.trim(),
             address: addressCon.text.trim(),
             accountType: accountType,
+            fcmCreatedAt: DateTime.now(),
+            fcmToken: token,
+            iFollowed: [],
+            TheyFollowed: [],
+            userSearchParameters: userSearchParameters,
             createdAt: DateFormat.yMEd().add_jms().format(createdAt).toString(),
           );
           await accounts.doc(auth.currentUser!.uid).set(userDetailsModel.toJson());
         }).then(
           (value) async {
             await UserSimplePreference.setUserData(userDetailsModel);
-            if(auth.currentUser != null){
+            if (auth.currentUser != null) {
               String? token = await fcm.getToken() ?? userDetailsModel.fcmToken;
               try {
                 ffstore.collection("Accounts").doc(auth.currentUser?.uid).update({

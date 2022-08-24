@@ -15,6 +15,7 @@ import 'package:vip_picnic/view/chat/group_chat/g_chat_screen.dart';
 import 'package:vip_picnic/view/chat/simple_chat_screen.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
+import 'package:vip_picnic/view/widget/snack_bar.dart';
 
 class ChatHead extends StatefulWidget {
   @override
@@ -408,11 +409,12 @@ class GroupChatHeads extends StatelessWidget {
         color: Colors.transparent,
         child: ListTile(
           onTap: () async {
+            log("clicked on group chat head");
             try {
-              await groupChatController.getAGroupChatRoomInfo(groupId!).then((value) => GroupChat(docs: value.data(),));
+              await groupChatController.getAGroupChatRoomInfo(groupId!).then((value) => Get.to(() =>  GroupChat(docs: value.data(),)));
             } catch (e) {
               log("error in getting the group chat info is: $e");
-              Get.snackbar("Error", "Please make sure you are connected to internet");
+              showMsg(context: context, msg: "Please make sure you are connected to internet");
             }
             //     Navigator.push(
             //   context,

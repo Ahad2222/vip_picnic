@@ -9,6 +9,7 @@ class GroupChatRoomModel {
     this.users,
     this.groupAdmins,
     this.notDeletedFor,
+    this.searchParameters,
     this.createdAt = 0,
     this.createdById = "",
     this.createdByName = "",
@@ -46,7 +47,7 @@ class GroupChatRoomModel {
   List<String>? users;
   List<String>? groupAdmins;
   List<String>? notDeletedFor;
-
+  List<String>? searchParameters;
 
 
 
@@ -66,6 +67,7 @@ class GroupChatRoomModel {
     users = List<String>.from(doc["users"]);
     notDeletedFor = List<String>.from(doc["notDeletedFor"]);
     groupAdmins = List<String>.from(doc["groupAdmins"]);
+    searchParameters = List<String>.from(doc["searchParameters"]);
   }
 
   factory GroupChatRoomModel.fromJson(Map<String, dynamic> doc) => GroupChatRoomModel(
@@ -84,6 +86,7 @@ class GroupChatRoomModel {
     users: List<String>.from(doc["users"]),
     notDeletedFor: List<String>.from(doc["notDeletedFor"]),
     groupAdmins: List<String>.from(doc["groupAdmins"]),
+    searchParameters: List<String>.from(doc["searchParameters"]),
   );
 
   Map<String, dynamic> toJson() => {
@@ -102,6 +105,7 @@ class GroupChatRoomModel {
   "users": users != null ? List<String>.from(users!.map((x) => x)) : [],
   "notDeletedFor": notDeletedFor != null ? List<String>.from(notDeletedFor!.map((x) => x)) : [],
   "groupAdmins": groupAdmins != null ? List<String>.from(groupAdmins!.map((x) => x)) : [],
+  "searchParameters": groupAdmins != null ? List<String>.from(searchParameters!.map((x) => x)) : [],
   };
 
 // ChatHeadModel.fromJson(Map<String, dynamic> chatHeadMap) {

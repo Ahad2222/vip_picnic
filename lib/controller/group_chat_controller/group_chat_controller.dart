@@ -40,62 +40,61 @@ class GroupChatController extends GetxController {
     String groupId = Uuid().v1();
 
     if (!userIds.asMap().containsValue(auth.currentUser?.uid)) {
-    //+code for searching the chat heads
-    //+to be put in the search streamBuilder
-    // ffstore.collection(chatRoomCollection)
-    //     .where("passengerId", isEqualTo: userDetailsModel.currentUserId)
-    //     .where("searchParameters", arrayContains: "varToSearch").snapshots();
+      //+code for searching the chat heads
+      //+to be put in the search streamBuilder
+      // ffstore.collection(chatRoomCollection)
+      //     .where("passengerId", isEqualTo: userDetailsModel.currentUserId)
+      //     .where("searchParameters", arrayContains: "varToSearch").snapshots();
 
-
-
-    await ffstore
-        .collection(groupChatCollection)
-        .where("createdById", isEqualTo: creatorId)
-        .where("groupName", isEqualTo: groupName)
-        .get()
-        .then((value) async {
-      if (value.docs.length > 0) {
-        //+means a group created by me with same name is already there
-        Get.back();
-        // if (!value["notDeletedFor"].asMap().containsValue(auth.currentUser!.uid)) {
-        //   await FirebaseFirestore.instance.collection('ChatRoom').doc(groupId).update({
-        //     "notDeletedFor": FieldValue.arrayUnion([auth.currentUser!.uid])
-        //   });
-        //   Get.to(()> ChatScreen(docs: value.data()));
-        // } else {
-        //   Get.to(() => ChatScreen(docs: value.data()));
-        // }
-        // Get.to(() => ChatScreen(docs: value.data()));
-      } else {
-        List<String> notDeletedFor = userIds;
-        notDeletedFor.add(creatorId);
-        GroupChatRoomModel groupChatRoomModel = GroupChatRoomModel(
-          createdAt: DateTime.now().millisecondsSinceEpoch,
-          groupId: groupId,
-          groupName: groupName,
-          groupImage: groupImage,
-          groupDescription: groupDescription,
-          createdById: creatorId,
-          createdByName: creatorName,
-          lastMessage: "",
-          lastMessageAt: DateTime.now().millisecondsSinceEpoch,
-          lastMessageById: "",
-          lastMessageByName: "",
-          lastMessageType: "",
-          users: userIds,
-          groupAdmins: [creatorId],
-          notDeletedFor: notDeletedFor,
-        );
-
-        try {
-          await ffstore.collection(groupChatCollection).doc(groupId).set(groupChatRoomModel.toJson());
+      await ffstore
+          .collection(groupChatCollection)
+          .where("createdById", isEqualTo: creatorId)
+          .where("groupName", isEqualTo: groupName)
+          .get()
+          .then((value) async {
+        if (value.docs.length > 0) {
+          //+means a group created by me with same name is already there
           Get.back();
-          Get.to(() => GroupChat(docs: groupChatRoomModel.toJson()));
-        } catch (e) {
-          print(e);
+          // if (!value["notDeletedFor"].asMap().containsValue(auth.currentUser!.uid)) {
+          //   await FirebaseFirestore.instance.collection('ChatRoom').doc(groupId).update({
+          //     "notDeletedFor": FieldValue.arrayUnion([auth.currentUser!.uid])
+          //   });
+          //   Get.to(()> ChatScreen(docs: value.data()));
+          // } else {
+          //   Get.to(() => ChatScreen(docs: value.data()));
+          // }
+          // Get.to(() => ChatScreen(docs: value.data()));
+        } else {
+          List<String> notDeletedFor = userIds;
+          notDeletedFor.add(creatorId);
+          GroupChatRoomModel groupChatRoomModel = GroupChatRoomModel(
+            createdAt: DateTime.now().millisecondsSinceEpoch,
+            groupId: groupId,
+            groupName: groupName,
+            groupImage: groupImage,
+            groupDescription: groupDescription,
+            createdById: creatorId,
+            createdByName: creatorName,
+            lastMessage: "",
+            lastMessageAt: DateTime.now().millisecondsSinceEpoch,
+            lastMessageById: "",
+            lastMessageByName: "",
+            lastMessageType: "",
+            users: userIds,
+            groupAdmins: [creatorId],
+            notDeletedFor: notDeletedFor,
+            searchParameters: searchParameters,
+          );
+
+          try {
+            await ffstore.collection(groupChatCollection).doc(groupId).set(groupChatRoomModel.toJson());
+            Get.back();
+            Get.to(() => GroupChat(docs: groupChatRoomModel.toJson()));
+          } catch (e) {
+            print(e);
+          }
         }
-      }
-    });
+      });
     } else {
       Get.back();
       Get.defaultDialog(title: 'Error', middleText: "You cannot add yourself to a group.");
@@ -104,6 +103,6 @@ class GroupChatController extends GetxController {
   }
 
   Future<DocumentSnapshot<Map<String, dynamic>>> getAGroupChatRoomInfo(String groupId) async {
-    return FirebaseFirestore.instance.collection(chatRoomCollection).doc(groupId).get();
+    return FirebaseFirestore.instance.collection(groupChatCollection).doc(groupId).get();
   }
 }

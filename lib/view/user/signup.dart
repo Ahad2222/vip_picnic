@@ -19,7 +19,6 @@ import 'package:vip_picnic/view/widget/my_textfields.dart';
 class Signup extends StatelessWidget {
   DateTime currentTime = DateTime.now();
   DateFormat? format;
-  List<String> userSearchParameters = [];
 
   @override
   Widget build(BuildContext context) {
@@ -51,26 +50,7 @@ class Signup extends StatelessWidget {
                     controller: signupController.fullNameCon,
                     validator: (value) => emptyFieldValidator(value!),
                     labelText: 'fullName'.tr + ':',
-                    onChanged: (value) {
-                      if (value.contains(" ")) {
-                        var valueList = value.split(" ");
-                        log("valueList is: ${valueList} and ");
-                        final spaceCounter = valueList.length - 1;
-                        log("spaceCounter is: ${spaceCounter} and ");
-                        log("adding ${valueList[spaceCounter]} in if value.contains(' ')");
-                        userSearchParameters.addIf(
-                            !userSearchParameters.asMap().containsValue(valueList[spaceCounter].toLowerCase()),
-                            valueList[spaceCounter].toLowerCase());
-                        userSearchParameters.addIf(
-                            !userSearchParameters.asMap().containsValue(value.toLowerCase()), value.toLowerCase());
-                        log("searchTerms in if value.contains(' ') is: ${userSearchParameters}");
-                      } else {
-                        log("in else of onChange means there's no space.");
-                        userSearchParameters.addIf(
-                            !userSearchParameters.asMap().containsValue(value.toLowerCase()), value.toLowerCase());
-                      }
-                      log("added $value to array: ${userSearchParameters}");
-                    },
+                    // onChanged: (value) {},
                   ),
                   SizedBox(
                     height: 15,
@@ -79,6 +59,26 @@ class Signup extends StatelessWidget {
                     controller: signupController.emailCon,
                     validator: (value) => emailValidator(value!),
                     labelText: 'email'.tr + ':',
+                    onChanged: (value) {
+                      if (value.contains(" ")) {
+                        var valueList = value.split(" ");
+                        log("valueList is: ${valueList} and ");
+                        final spaceCounter = valueList.length - 1;
+                        log("spaceCounter is: ${spaceCounter} and ");
+                        log("adding ${valueList[spaceCounter]} in if value.contains(' ')");
+                        signupController.userSearchParameters.addIf(
+                            !signupController.userSearchParameters.asMap().containsValue(valueList[spaceCounter].toLowerCase()),
+                            valueList[spaceCounter].toLowerCase());
+                        signupController.userSearchParameters.addIf(
+                            !signupController.userSearchParameters.asMap().containsValue(value.toLowerCase()), value.toLowerCase());
+                        log("searchTerms in if value.contains(' ') is: ${signupController.userSearchParameters}");
+                      } else {
+                        log("in else of onChange means there's no space.");
+                        signupController.userSearchParameters.addIf(
+                            !signupController.userSearchParameters.asMap().containsValue(value.toLowerCase()), value.toLowerCase());
+                      }
+                      log("added $value to array: ${signupController.userSearchParameters}");
+                    },
                   ),
                   SizedBox(
                     height: 15,

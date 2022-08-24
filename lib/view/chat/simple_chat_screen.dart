@@ -48,7 +48,6 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   Rx<TextEditingController> messageEditingController = TextEditingController().obs;
-  TextEditingController _tec = TextEditingController();
   ScrollController scrollController = ScrollController();
 
   // RxBool isDeleting = false;

@@ -17,6 +17,8 @@ import 'package:vip_picnic/view/widget/snack_bar.dart';
 class GoogleAuthController extends GetxController {
   static GoogleAuthController instance = Get.find<GoogleAuthController>();
 
+  List<String> userSearchParameters = [];
+
   DateTime createdAt = DateTime.now();
   DateFormat? format;
 
@@ -43,12 +45,34 @@ class GoogleAuthController extends GetxController {
 
         if (userCredential.user != null) {
           if (userCredential.additionalUserInfo!.isNewUser) {
+            int emailLength = userCredential.user?.email?.length ?? 0;
+            String email = userCredential.user?.email ?? "";
+            for (int i = 0; i < emailLength; i++) {
+              if (email[i] != " ") {
+                userSearchParameters.add(email[i]);
+                var wordUntil = email.substring(0, i+1);
+                log("wordUntil: $wordUntil");
+                userSearchParameters.add(wordUntil);
+              }
+            }
+            String? token = await fcm.getToken();
             userDetailsModel = UserDetailsModel(
               uID: userCredential.user!.uid,
               profileImageUrl: userCredential.user!.photoURL,
               fullName: userCredential.user!.displayName,
               email: userCredential.user!.email,
               accountType: 'Private',
+              iFollowed: [],
+              TheyFollowed: [],
+              userSearchParameters: userSearchParameters,
+              fcmToken: token,
+              fcmCreatedAt: DateTime.now(),
+              address: "",
+              city: "",
+              password: "",
+              phone: "",
+              state: "",
+              zip: "",
               createdAt:
                   DateFormat.yMEd().add_jms().format(createdAt).toString(),
             );
