@@ -343,3 +343,74 @@ exports.notifyReceiverForChat = functions.firestore
           functions.logger.log(e.toString());
         });
   });
+
+  exports.notifyInvitedAboutGroupInvite = functions.firestore
+    .document("/GroupChatInvitations/{documentId}")
+    .onCreate(async (snap, context) => {
+
+    //+"groupId": groupChatModel.groupId ?? "",
+    //"groupName": groupChatModel.groupName ?? "",
+    //"groupImage": groupChatModel.groupImage ?? "",
+    //+"invitedId": selectedId.value,
+    //"invitedName": userNameController.text.trim(),
+//  "invitedById": userDetailsModel.uID,
+//  "invitedByName": userDetailsModel.fullName,
+//  "invitedAt": DateTime.now().millisecondsSinceEpoch,
+      var groupId = snap.data().groupId;
+      var groupName = snap.data().groupName;
+      var groupImage = snap.data().groupImage;
+      var invitedById = snap.data().invitedById;
+      var invitedId = snap.data().invitedId;
+
+      var invitedName = snap.data().invitedName;
+      var invitedByName = snap.data().invitedByName;
+
+//      var message = snap.data().message;
+//      var chatRoomId = context.params.documentId;
+
+      var imageUrl = groupImage;
+      var generalImage = "";
+      var myRetToken = "Not Retrieved Yet from Accounts Collection";
+      functions.logger.info(invitedId.toString());
+//      functions.logger.info("Message By the Sender is:");
+//      functions.logger.info(message.toString());
+
+       {
+        functions.logger.info("In Chat function: type is Else block");
+        //getting image and token of receiver from the firestore through admin sdk
+        await admin
+          .firestore()
+          .collection("Accounts")
+          .doc(invitedId)
+          .get()
+          .then((snapshot) => {
+            myRetToken = snapshot.data().fcmToken;
+          })
+          .catch((e) => {
+            functions.logger.log(e.toString());
+          });
+        //Now sending the notification using SingleToken function
+        await admin
+            .messaging()
+            .send({
+              token: myRetToken,
+              notification: {
+                title: `Group Invite`,
+                body: ` ${invitedByName} invited you to join ${groupName}`,
+                //Below line has use in terminated or background state of app
+                imageUrl: groupImage,
+              },
+              data: {
+                imageUrl: groupImage,
+                groupId: groupId,
+                screenName: "groupChatScreen",
+              },
+            })
+            .then((value) => {
+              functions.logger.log("Notifications sent to the invited person for group invite");
+            })
+            .catch((e) => {
+              functions.logger.log(e.toString());
+            });
+      }
+    });

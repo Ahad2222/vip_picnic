@@ -8,10 +8,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
+import 'package:vip_picnic/model/group_chat_models/group_chat_room_model.dart';
+import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
+import 'package:vip_picnic/utils/dynamic_link_handler.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/chat/group_chat/preview_group_chat_image.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
@@ -20,6 +24,7 @@ import 'package:vip_picnic/view/widget/message_bubbles.dart';
 import 'package:vip_picnic/view/widget/my_button.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:vip_picnic/view/widget/my_textfields.dart';
+import 'package:vip_picnic/view/widget/snack_bar.dart';
 
 // ignore: must_be_immutable
 class GroupChat extends StatefulWidget {
@@ -36,7 +41,6 @@ class GroupChat extends StatefulWidget {
 }
 
 class _GroupChatState extends State<GroupChat> {
-
   Rx<TextEditingController> messageEditingController = TextEditingController().obs;
   ScrollController scrollController = ScrollController();
 
@@ -45,6 +49,11 @@ class _GroupChatState extends State<GroupChat> {
   int i = 0;
   String imageUrl = '';
   bool isOpenedUp = true;
+  TextEditingController userNameController = TextEditingController();
+  TextEditingController messageController = TextEditingController();
+  RxString userNameObsString = "".obs;
+  String finalizedNameString = "";
+  RxString selectedId = "".obs;
 
   // RxInt time = 0.obs;
   // Stream? chatMessageStream;
@@ -57,7 +66,6 @@ class _GroupChatState extends State<GroupChat> {
   // RxBool isRecording = false.obs;
   // RxBool isSending = false.obs;
   // RxInt lastIndex = 0.obs;
-
 
   // Map<String, String> _paths = {};
   // String key = "";
@@ -91,9 +99,8 @@ class _GroupChatState extends State<GroupChat> {
   // final String deleteFor = "Everyone";
   // RxBool isArchivedRoom = false.obs;
   // RxBool isPrivacyAllowed = true.obs;
-
-  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? otherUserListener;
-  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? chatRoomListener;
+  // StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? otherUserListener;
+  // StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? chatRoomListener;
 
   Future<String> getFilePath() async {
     Directory storageDirectory = await getApplicationDocumentsDirectory();
@@ -170,7 +177,7 @@ class _GroupChatState extends State<GroupChat> {
         path = xFile.path;
         // showLoading();
         Get.to(
-              () => PreviewGroupChatImageScreen(
+          () => PreviewGroupChatImageScreen(
             imagePath: path,
             chatRoomId: widget.docs!["groupId"],
             userId: userDetailsModel.uID!,
@@ -189,7 +196,7 @@ class _GroupChatState extends State<GroupChat> {
         path = xFile.path;
         // showLoading();
         Get.to(
-              () => PreviewGroupChatImageScreen(
+          () => PreviewGroupChatImageScreen(
             imagePath: path,
             chatRoomId: widget.docs!["groupId"],
             userId: userDetailsModel.uID!,
@@ -328,7 +335,7 @@ class _GroupChatState extends State<GroupChat> {
       //     "notDeletedFor": FieldValue.arrayUnion([anotherUserID])
       //   });
       // }
-      chatController.addConversationMessage(chatRoomID, time, "text", messageMap, messageText);
+      groupChatController.addConversationMessage(chatRoomID, time, "text", messageMap, messageText);
       // log("index is: ${lastIndex.value}");
     } else if (imageFile != null && (imageUrl != null || imageUrl != "")) {
       var time = DateTime.now().millisecondsSinceEpoch;
@@ -353,18 +360,22 @@ class _GroupChatState extends State<GroupChat> {
       //     "notDeletedFor": FieldValue.arrayUnion([anotherUserID])
       //   });
       // }
-      chatController.addConversationMessage(chatRoomID, time, "image", messageMap, imageUrl!);
+      groupChatController.addConversationMessage(chatRoomID, time, "image", messageMap, imageUrl!);
       messageEditingController.value.text = "";
 
       imageUrl = "";
     }
-    chatController.messageControllerText.value = "";
+    groupChatController.messageControllerText.value = "";
   }
 
   Widget chatMessageList() {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream:
-      ffstore.collection(groupChatCollection).doc(chatRoomID).collection(messagesCollection).orderBy('time').snapshots(),
+      stream: ffstore
+          .collection(groupChatCollection)
+          .doc(chatRoomID)
+          .collection(messagesCollection)
+          .orderBy('time')
+          .snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.hasData) {
           // scrollController.animateTo(
@@ -374,7 +385,7 @@ class _GroupChatState extends State<GroupChat> {
           // );
           // /*
           WidgetsBinding.instance?.addPostFrameCallback(
-                (_) {
+            (_) {
               if (scrollController.hasClients) {
                 scrollController.animateTo(
                   scrollController.position.maxScrollExtent,
@@ -486,11 +497,11 @@ class _GroupChatState extends State<GroupChat> {
         title: chatController.showSearch.value
             ? SearchBar()
             : MyText(
-          //+docs!['groupName']
-          text: '${widget.docs!['groupName'] ?? ""}',
-          size: 19,
-          color: kSecondaryColor,
-        ),
+                //+docs!['groupName']
+                text: '${widget.docs!['groupName'] ?? ""}',
+                size: 19,
+                color: kSecondaryColor,
+              ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(
@@ -500,6 +511,8 @@ class _GroupChatState extends State<GroupChat> {
             child: Center(
               child: GestureDetector(
                 onTap: () => chatController.showSearchBar(),
+                //+ we can implement the search by putting an onChange on the send message field
+                //+ but we might have to be very careful with the length of the search array being saved into it.
                 child: Image.asset(
                   Assets.imagesSearchWithBg,
                   height: 35,
@@ -520,7 +533,7 @@ class _GroupChatState extends State<GroupChat> {
                     context: context,
                     builder: (context) {
                       return Container(
-                        height: 387,
+                        height: 400,
                         padding: EdgeInsets.symmetric(
                           horizontal: 30,
                         ),
@@ -531,40 +544,167 @@ class _GroupChatState extends State<GroupChat> {
                             topRight: Radius.circular(28),
                           ),
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Row(
-                              mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(),
-                                MyText(
-                                  text: 'Send invitation',
-                                  size: 19,
-                                  color: kSecondaryColor,
-                                ),
-                                GestureDetector(
-                                  onTap: () => Navigator.pop(context),
-                                  child: Image.asset(
-                                    Assets.imagesRoundedClose,
-                                    height: 22.44,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              SizedBox(height: 10,),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(),
+                                  MyText(
+                                    text: 'Send invitation',
+                                    size: 19,
+                                    color: kSecondaryColor,
                                   ),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Image.asset(
+                                      Assets.imagesRoundedClose,
+                                      height: 22.44,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 30,),
+                              SimpleTextField(
+                                hintText: 'Type username,  email...',
+                                controller: userNameController,
+                                onChanged: (value) {
+                                  userNameObsString.value = value;
+                                },
+                              ),
+                              SizedBox(height: 10,),
+                              Obx(() {
+                                if (userNameObsString.value != "") {
+                                  // List<String> tempList = selectedUsers.length > 0 ? List<String>.from(selectedUsers.keys.toList()) : ["check"];
+                                  return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                                    stream: ffstore
+                                        .collection("Accounts")
+                                        .where("userSearchParameters", arrayContains: userNameObsString.value.trim()).limit(3)
+                                        // .where("uID", whereNotIn: tempList)
+                                        .snapshots(),
+                                    builder: (
+                                      BuildContext context,
+                                      AsyncSnapshot<QuerySnapshot> snapshot,
+                                    ) {
+                                      log("inside stream-builder");
+                                      if (snapshot.connectionState == ConnectionState.waiting) {
+                                        log("inside stream-builder in waiting state");
+                                        return Center(child: CircularProgressIndicator());
+                                      } else if (snapshot.connectionState == ConnectionState.active ||
+                                          snapshot.connectionState == ConnectionState.done) {
+                                        if (snapshot.hasError) {
+                                          return const Text('Some unknown error occurred');
+                                        } else if (snapshot.hasData) {
+                                          // log("inside hasData and ${snapshot.data!.docs}");
+                                          if (snapshot.data!.docs.length > 0) {
+                                            return ListView.builder(
+                                              shrinkWrap: true,
+                                              physics: BouncingScrollPhysics(),
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 15,
+                                              ),
+                                              itemCount: snapshot.data!.docs.length,
+                                              itemBuilder: (context, index) {
+                                                UserDetailsModel umdl = UserDetailsModel.fromJson(
+                                                    snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                                                return Obx(() {
+                                                  if (selectedId.value == umdl.uID || umdl.uID == auth.currentUser?.uid) {
+                                                    return SizedBox();
+                                                  }
+                                                  return contactTiles(
+                                                    profileImage: umdl.profileImageUrl,
+                                                    name: umdl.fullName,
+                                                    id: umdl.uID,
+                                                    email: umdl.email,
+                                                  );
+                                                });
+                                              },
+                                            );
+                                          } else {
+                                            if(finalizedNameString == ""){
+                                              return Center(child: const Text('No Users Found'));
+                                            }
+                                            return SizedBox();
+
+                                          }
+                                        } else {
+                                          log("in else of hasData done and: ${snapshot.connectionState} and"
+                                              " snapshot.hasData: ${snapshot.hasData}");
+                                          if(finalizedNameString == ""){
+                                            return Center(child: const Text('No Users Found'));
+                                          }
+                                          return SizedBox();
+                                        }
+                                      } else {
+                                        log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+                                        return Center(child: Text('Some Error occurred while fetching the posts'));
+                                      }
+                                    },
+                                  );
+                                }
+                                return SizedBox();
+                              }),
+                              SizedBox(height: 10,),
+                              Padding(
+                                padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+                                child: SimpleTextField(
+                                  maxLines: 5,
+                                  hintText: 'Message...',
+                                  controller: messageController,
                                 ),
-                              ],
-                            ),
-                            SimpleTextField(
-                              hintText: 'Type username,  email...',
-                            ),
-                            SimpleTextField(
-                              maxLines: 5,
-                              hintText: 'Message...',
-                            ),
-                            MyButton(
-                              onTap: () {},
-                              buttonText: 'Invite to the group',
-                            ),
-                          ],
+                              ),
+                              SizedBox(height: 20,),
+
+                              MyButton(
+                                onTap: () async {
+                                  //+ put the code to present the option or just by default do both.
+                                  //+ sending a notification and also open sharing sheet to share via
+                                  //+ social media or something.
+                                  if (finalizedNameString != "" && messageController.text.trim() != "") {
+                                    loading();
+                                    GroupChatRoomModel groupChatModel = GroupChatRoomModel.fromJson(widget.docs ?? {});
+                                    log("groupChatModel: ${groupChatModel.toJson()}");
+                                    String shareLink = await DynamicLinkHandler.buildDynamicLinkGroupInvite(
+                                      groupId: groupChatModel.groupId ?? "",
+                                      groupName: groupChatModel.groupName ?? "",
+                                      groupImage: groupChatModel.groupImage ?? "",
+                                      groupInviteMessage:
+                                          "${userDetailsModel.fullName} invited you to ${groupChatModel.groupName} "
+                                              "group chat: ${messageController.text.trim()}.",
+                                      short: true,
+                                    );
+                                    log("fetched shareLink: $shareLink");
+                                    ShareResult sr = await Share.shareWithResult(shareLink);
+                                    Get.back();
+                                    await ffstore.collection(groupChatInvitationCollection)
+                                        .add({
+                                      "groupId": groupChatModel.groupId ?? "",
+                                      "groupName": groupChatModel.groupName ?? "",
+                                      "groupImage": groupChatModel.groupImage ?? "",
+                                      "invitedId": selectedId.value,
+                                      "invitedName": userNameController.text.trim(),
+                                      "invitedById": userDetailsModel.uID,
+                                      "invitedByName": userDetailsModel.fullName,
+                                      "invitedAt": DateTime.now().millisecondsSinceEpoch,
+                                    });
+                                    log("ShareResult is: ${sr.status} sr.status == ShareResultStatus.success: ${sr.status == ShareResultStatus.success}");
+                                    log("ShareResult is: ${sr.status} sr.status == ShareResultStatus.dismissed: ${sr.status == ShareResultStatus.dismissed}");
+                                    log("ShareResult.raw is: ${sr.raw}");
+                                  } else {
+                                    showMsg(
+                                        context: context,
+                                        msg: "Please fill out both fields properly to send the invite.");
+                                  }
+                                },
+                                buttonText: 'Invite to the group',
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -583,37 +723,87 @@ class _GroupChatState extends State<GroupChat> {
       body: Stack(
         children: [
           chatMessageList(),
-          // ListView.builder(
-          //   shrinkWrap: true,
-          //   padding:
-          //   const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-          //   physics: const BouncingScrollPhysics(),
-          //   itemCount: 4,
-          //   itemBuilder: (context, index) {
-          //     return MessageBubbles(
-          //       receiveImage: Assets.imagesDummyProfileImage,
-          //       msg: index == 0
-          //           ? 'Lorem Ipsum is simply dummy text of the printing and industry. '
-          //           : index == 1
-          //           ? 'Lorem Ipsum is simply dummy text of the printing and industry. '
-          //           : index == 2
-          //           ? 'Lorem Ipsum is simply dummy text of the printing and industry. '
-          //           : 'Thanks, i\'ll be there.',
-          //       time: '11:21 AM',
-          //       senderType: index == 0 ? 'sender' : 'receiver',
-          //     );
-          //   },
-          // ),
           sendField(context),
         ],
       ),
     );
   }
 
+  Widget contactTiles({
+    String? id,
+    profileImage,
+    name,
+    email,
+  }) {
+    return Container(
+      margin: EdgeInsets.only(
+        bottom: 10,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Color(0xffF5F5F6),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: ListTile(
+          onTap: () async {
+            //+add it to the lists
+            selectedId.value = id!;
+            userNameController.text = name;
+            finalizedNameString = name;
+            userNameObsString.value = "";
+          },
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 15,
+            vertical: 10,
+          ),
+          leading: Container(
+            height: 56.4,
+            width: 56.4,
+            padding: EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              color: kPrimaryColor,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: kBlackColor.withOpacity(0.16),
+                  blurRadius: 6,
+                  offset: Offset(0, 0),
+                ),
+              ],
+            ),
+            child: Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(100),
+                child: Image.network(
+                  profileImage,
+                  height: Get.height,
+                  width: Get.width,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
+          title: MyText(
+            text: name,
+            size: 14,
+            weight: FontWeight.w600,
+            color: kSecondaryColor,
+          ),
+          subtitle: MyText(
+            text: email,
+            size: 11,
+            weight: FontWeight.w600,
+            color: kSecondaryColor,
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget sendField(
-      BuildContext context,
-      ) {
+    BuildContext context,
+  ) {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Container(

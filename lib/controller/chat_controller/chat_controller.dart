@@ -278,15 +278,15 @@ class ChatController extends GetxController {
     }
   }
 
-  addConversationMessage(String groupId, var time, String type, messageMap, String msg) async {
+  addConversationMessage(String chatRoomId, var time, String type, messageMap, String msg) async {
     log('called addConversationMessage');
     await FirebaseFirestore.instance
-        .collection(groupChatCollection)
-        .doc(groupId)
+        .collection(chatRoomCollection)
+        .doc(chatRoomId)
         .collection(messagesCollection)
         .add(messageMap)
         .then((value) async {
-      await FirebaseFirestore.instance.collection(groupChatCollection).doc(groupId).update({
+      await FirebaseFirestore.instance.collection(chatRoomCollection).doc(chatRoomId).update({
         'lastMessageAt': time,
         'lastMessage': msg,
         'lastMessageType': type,

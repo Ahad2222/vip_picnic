@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,6 +12,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/config/theme/light_theme.dart';
+import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/controller/auth_controller/email_auth_controller.dart';
 import 'package:vip_picnic/controller/auth_controller/forgot_password_controller.dart';
 import 'package:vip_picnic/controller/auth_controller/google_auth_controller.dart';
@@ -23,10 +25,12 @@ import 'package:vip_picnic/firebase_options.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/utils/localization.dart';
+import 'package:vip_picnic/view/chat/group_chat/g_chat_screen.dart';
 import 'package:vip_picnic/view/chat/simple_chat_screen.dart';
 import 'package:vip_picnic/view/choose_language/choose_language.dart';
 import 'package:vip_picnic/view/profile/other_user_profile.dart';
 import 'package:http/http.dart' as http;
+import 'package:vip_picnic/view/widget/loading.dart';
 
 AndroidNotificationChannel? channel;
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -362,6 +366,21 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               // print("follower id is " + followerId);
               //+ UserDetailsModel userLiker = await authController.getAUser(likerId);
               //+ Get.to(() => Home(showAbleUserData: userLiker));
+            } else if (screenName == 'groupChatScreen') {
+              print("Screen is Group Chat");
+              String groupId = 'Nothing';
+              groupId = payloadDecoded["groupId"];
+              print("ChatRoom Id is: ${groupId}");
+              //We have chatRoomId here and we need to navigate to the ChatRoomScreen having same Id
+              loading();
+              await ffstore.collection(groupChatCollection).doc(groupId).update({
+                "notDeletedFor": FieldValue.arrayUnion([auth.currentUser?.uid]),
+                "users": FieldValue.arrayUnion([auth.currentUser?.uid]),
+              });
+              await groupChatController.getAGroupChatRoomInfo(groupId).then((value) {
+                Get.back();
+                Get.to(() => GroupChat(docs: value.data()));
+              });
             }
           } else {
             print("Screen name is null");
@@ -486,7 +505,22 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
                 //+ UserDetailsModel userLiker = await authController.getAUser(likerId);
                 //+ Get.to(() => Home(showAbleUserData: userLiker));
-              } else {
+              } else if (screenName == 'groupChatScreen') {
+                print("Screen is Group Chat");
+                String groupId = 'Nothing';
+                groupId = message.data["groupId"];
+                print("ChatRoom Id is: ${groupId}");
+                //We have chatRoomId here and we need to navigate to the ChatRoomScreen having same Id
+                loading();
+                await ffstore.collection(groupChatCollection).doc(groupId).update({
+                  "notDeletedFor": FieldValue.arrayUnion([auth.currentUser?.uid]),
+                  "users": FieldValue.arrayUnion([auth.currentUser?.uid]),
+                });
+                await groupChatController.getAGroupChatRoomInfo(groupId).then((value) {
+                  Get.back();
+                  Get.to(() => GroupChat(docs: value.data()));
+                });
+              }else {
                 print("Screen is in Else method of getInitialMessage");
               }
             } else {
@@ -545,7 +579,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             log("message.notification.data: ${message.notification != null ? message.notification?.android : "notification was null"}");
             if (message.notification != null && message.notification != {}) {
               String? longData = message.notification != null ? message.notification?.body : "";
-              if (screenName == 'chatScreen' || screenName == 'profileScreen') {
+              if (screenName == 'chatScreen' || screenName == 'profileScreen' || screenName == 'groupChatScreen') {
                 //Handling forground notification on chat notification
                 imagePresent = message.data.containsKey('imageUrl');
                 generalImagePresent = message.data.containsKey('generalImageUrl');

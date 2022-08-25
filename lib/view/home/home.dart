@@ -179,9 +179,9 @@ class Home extends StatelessWidget {
                         BuildContext context,
                         AsyncSnapshot<QuerySnapshot> snapshot,
                       ) {
-                        log("inside stream-builder");
+                        // log("inside stream-builder");
                         if (snapshot.connectionState == ConnectionState.waiting) {
-                          log("inside stream-builder in waiting state");
+                          // log("inside stream-builder in waiting state");
                           return noPostYet();
                         } else if (snapshot.connectionState == ConnectionState.active ||
                             snapshot.connectionState == ConnectionState.done) {
@@ -218,12 +218,12 @@ class Home extends StatelessWidget {
                               return noPostYet();
                             }
                           } else {
-                            log("in else of hasData done and: ${snapshot.connectionState} and"
-                                " snapshot.hasData: ${snapshot.hasData}");
+                            // log("in else of hasData done and: ${snapshot.connectionState} and"
+                            //     " snapshot.hasData: ${snapshot.hasData}");
                             return noPostYet();
                           }
                         } else {
-                          log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+                          // log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
                           return noPostYet();
                         }
                       },
@@ -232,8 +232,8 @@ class Home extends StatelessWidget {
                     return noPostYet();
                   }
                 } else {
-                  log("in else of hasData done and: ${snapshot.connectionState} and"
-                      " snapshot.hasData: ${snapshot.hasData}");
+                  // log("in else of hasData done and: ${snapshot.connectionState} and"
+                  //     " snapshot.hasData: ${snapshot.hasData}");
                   return noPostYet();
                 }
               } else {
@@ -810,7 +810,7 @@ class _PostWidgetState extends State<PostWidget> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      String shareLink = await DynamicLinkHandler.buildDynamicLink(
+                      String shareLink = await DynamicLinkHandler.buildDynamicLinkForPost(
                         postImageUrl: widget.postDocModel?.postImages![0] ??
                             "https://www.freeiconspng.com/uploads/no-image-icon-15.png",
                         postId: widget.postDocModel!.postID ?? "",

@@ -15,6 +15,8 @@ class GroupChatController extends GetxController {
   static GroupChatController instance = Get.find();
 
   RxString userSearchText = "".obs;
+  RxString messageControllerText = "".obs;
+
 
   createGroupChatRoomAndStartConversation({
     required String groupName,
@@ -101,6 +103,29 @@ class GroupChatController extends GetxController {
       print('You cannot add yourself to a group.');
     }
   }
+
+  addConversationMessage(String groupId, var time, String type, messageMap, String msg) async {
+    log('called addConversationMessage');
+    await FirebaseFirestore.instance
+        .collection(groupChatCollection)
+        .doc(groupId)
+        .collection(messagesCollection)
+        .add(messageMap)
+        .then((value) async {
+      await FirebaseFirestore.instance.collection(groupChatCollection).doc(groupId).update({
+        'lastMessageAt': time,
+        'lastMessage': msg,
+        'lastMessageById': userDetailsModel.uID,
+        'lastMessageByName': userDetailsModel.fullName,
+        'lastMessageType': type,
+      }).catchError((e) {
+        log('\n\n\n\n error in updating last message and last message time ${e.toString()}');
+      });
+    }).catchError((e) {
+      log('\n\n\n\n error in adding message ${e.toString()}');
+    });
+  }
+
 
   Future<DocumentSnapshot<Map<String, dynamic>>> getAGroupChatRoomInfo(String groupId) async {
     return FirebaseFirestore.instance.collection(groupChatCollection).doc(groupId).get();
