@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:vip_picnic/constant/color.dart';
-import 'package:vip_picnic/generated/assets.dart';
 
 class ImagePreview extends StatelessWidget {
   ImagePreview({

@@ -1,21 +1,24 @@
-import 'dart:io';
+import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:vip_picnic/constant/color.dart';
+import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
+import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/about_us/about_us.dart';
 import 'package:vip_picnic/view/about_us/support.dart';
 import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:vip_picnic/view/choose_language/choose_language.dart';
-import 'package:vip_picnic/view/launch/get_started.dart';
 import 'package:vip_picnic/view/profile/profile.dart';
 import 'package:vip_picnic/view/report_problem/report_problem.dart';
 import 'package:vip_picnic/view/user/social_login.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:get/get.dart';
+import 'package:vip_picnic/view/widget/snack_bar.dart';
 
 class Settings extends StatelessWidget {
   @override
@@ -88,14 +91,69 @@ class Settings extends StatelessWidget {
             icon: Assets.imagesMail,
             iconSize: 26.83,
             title: 'invite'.tr,
-            onTap: () {},
+            onTap: () async {
+              String url = "https://vippicnicapp.page.link";
+              final DynamicLinkParameters parameters = DynamicLinkParameters(
+                uriPrefix: url,
+                link: Uri.parse('$url/something?id='),
+                androidParameters: AndroidParameters(
+                  packageName: "com.example.vip_picnic",
+                  minimumVersion: 0,
+                ),
+                iosParameters: IOSParameters(
+                  bundleId: "com.example.vipPicnic",
+                  minimumVersion: '0',
+                ),
+                socialMetaTagParameters: SocialMetaTagParameters(
+                    description: "Install VIP Picnic to get the best events related services you'll ever get",
+                    title: "VIP Picnic"),
+              );
+              final ShortDynamicLink dynamicUrl = await FirebaseDynamicLinks.instance.buildShortLink(parameters);
+              String finalUrl = dynamicUrl.shortUrl.toString();
+              log("generated short-url is: $finalUrl");
+              ShareResult sr = await Share.shareWithResult(finalUrl);
+              log("ShareResult is: ${sr.status} sr.status == ShareResultStatus.success: ${sr.status == ShareResultStatus.success}");
+              log("ShareResult is: ${sr.status} sr.status == ShareResultStatus.dismissed: ${sr.status == ShareResultStatus.dismissed}");
+              log("ShareResult.raw is: ${sr.raw}");
+            },
           ),
           settingsTiles(
             context,
             icon: Assets.imagesDisable,
             iconSize: 26.83,
             title: 'deactivateAccount'.tr,
-            onTap: () {},
+            onTap: () async {
+              Get.defaultDialog(
+                  title: "Are you sure?",
+                  content: Text(
+                      "Are you sure you want to De-activate your account? You will be signed out and you can't activate it again yourself. "
+                      "You would have to contact customer support to get it activated again."),
+                  textConfirm: "Yes",
+                  confirmTextColor: Colors.red,
+                  textCancel: "No",
+                  cancelTextColor: Colors.black,
+                  onConfirm: () async {
+                    try {
+                      await ffstore.collection(deactivatedCollection).doc(auth.currentUser?.uid).set({
+                        "uID": auth.currentUser?.uid,
+                        "deactivatedAt": DateTime.now().toIso8601String(),
+                        "deactivatedAtMilliSecondsSinceEpoch": DateTime.now().millisecondsSinceEpoch,
+                      }).then((value) async {
+                        try {
+                          await auth.signOut();
+                          await GoogleSignIn().signOut();
+                        } catch (e) {
+                          log("error in signing out after de-activation $e");
+                        }
+                        Get.offAll(() => SocialLogin());
+                      });
+                    } catch (e) {
+                      print(e);
+                      showMsg(context: context, msg: "Something went wrong during de-activation. Please try again.");
+                      log("error in account de-activation $e");
+                    }
+                  });
+            },
           ),
           settingsTiles(
             context,

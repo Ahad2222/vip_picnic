@@ -1,11 +1,8 @@
-import 'dart:developer';
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
-import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/utils/validators.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
@@ -234,7 +231,7 @@ class AddNewPost extends StatelessWidget {
                 // ),
                 // StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 //   stream: fs
-                //       .collection("Accounts")
+                //       .collection(accountsCollection)
                 //       .doc(userDetailsModel.uID)
                 //       .collection('iFollowed')
                 //       .snapshots(),

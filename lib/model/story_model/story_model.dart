@@ -1,42 +1,38 @@
 class StoryModel {
-  String? storyPersonName,
-      storyPersonImage,
-      storyPersonUID,
-      storyTitle,
-      mediaType,
-      createdAt;
-  List<String>? images;
+  String? storyPersonName, storyPersonImage, storyPersonId, storyText, mediaType, storyImage;
+  int? createdAt;
+  // List<String>? images;
 
   StoryModel({
     this.storyPersonName,
     this.storyPersonImage,
-    this.storyPersonUID,
-    this.storyTitle,
+    this.storyPersonId,
+    this.storyText,
+    this.storyImage,
     this.mediaType,
     this.createdAt,
-    this.images,
+    // this.images,
   });
 
   factory StoryModel.fromJson(Map<String, dynamic> json) => StoryModel(
         storyPersonName: json['storyPersonName'] ?? "",
         storyPersonImage: json['storyPersonImage'] ?? "",
-        storyPersonUID: json['storyPersonUID'] ?? "",
-        storyTitle: json['storyTitle'] ?? "",
+        storyPersonId: json['storyPersonId'] ?? "",
+        storyText: json['storyText'] ?? "",
+        storyImage: json['storyImage'] ?? "",
         mediaType: json['mediaType'] ?? "",
         createdAt: json['createdAt'] ?? "",
-        images: json['images'] != null
-            ? List<String>.from(json['images'].map((x) => x))
-            : [],
+        // images: json['images'] != null ? List<String>.from(json['images'].map((x) => x)) : [],
       );
 
   Map<String, dynamic> toJson() => {
         'storyPersonName': storyPersonName,
         'storyPersonImage': storyPersonImage,
-        'storyPersonUID': storyPersonUID,
-        'storyTitle': storyTitle,
+        'storyPersonId': storyPersonId,
+        'storyText': storyText,
+        'storyImage': storyImage,
         'mediaType': mediaType,
         'createdAt': createdAt,
-        'images':
-            images != null ? List<String>.from(images!.map((x) => x)) : [],
+        // 'images': images != null ? List<String>.from(images!.map((x) => x)) : [],
       };
 }

@@ -8,8 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:vip_picnic/constant/color.dart';
+import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
-import 'package:vip_picnic/model/i_followed_model/i_followed_model.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/widget/my_appbar.dart';
@@ -51,7 +51,7 @@ class CreateNewGroup extends StatelessWidget {
   }
 
   Future uploadPhoto() async {
-    Reference ref = await FirebaseStorage.instance.ref().child('Images/Profile Images/${DateTime.now().toString()}');
+    Reference ref = await FirebaseStorage.instance.ref().child('Images/GroupChat Images/${DateTime.now().toString()}');
     await ref.putFile(pickedImage!);
     await ref.getDownloadURL().then((value) {
       log('Profile Image URL $value');
@@ -102,11 +102,10 @@ class CreateNewGroup extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: [
                                     ListTile(
-                                      onTap: () =>
-                                          pickImage(
-                                            context,
-                                            ImageSource.camera,
-                                          ),
+                                      onTap: () => pickImage(
+                                        context,
+                                        ImageSource.camera,
+                                      ),
                                       leading: Image.asset(
                                         Assets.imagesCamera,
                                         color: kGreyColor,
@@ -118,11 +117,10 @@ class CreateNewGroup extends StatelessWidget {
                                       ),
                                     ),
                                     ListTile(
-                                      onTap: () =>
-                                          pickImage(
-                                            context,
-                                            ImageSource.gallery,
-                                          ),
+                                      onTap: () => pickImage(
+                                        context,
+                                        ImageSource.gallery,
+                                      ),
                                       leading: Image.asset(
                                         Assets.imagesGallery,
                                         height: 35,
@@ -143,18 +141,17 @@ class CreateNewGroup extends StatelessWidget {
                         borderRadius: BorderRadius.circular(16),
                         child: pickedImagePath.value == ""
                             ? Image.asset(
-                          Assets.imagesUploadPicture,
-                          height: 108.9,
-                        )
+                                Assets.imagesUploadPicture,
+                                height: 108.9,
+                              )
                             : ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Image.file(
-                          pickedImage!,
-                          width: Get.width,
-                          fit: BoxFit.cover,
-                        ),
-                            ),
-
+                                borderRadius: BorderRadius.circular(16),
+                                child: Image.file(
+                                  pickedImage!,
+                                  width: Get.width,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                       );
                     }),
                   ),
@@ -189,12 +186,14 @@ class CreateNewGroup extends StatelessWidget {
                     // List<String> tempList = selectedUsers.length > 0 ? List<String>.from(selectedUsers.keys.toList()) : ["check"];
                     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                       stream: ffstore
-                          .collection("Accounts")
+                          .collection(accountsCollection)
                           .where("userSearchParameters", arrayContains: groupChatController.userSearchText.value.trim())
-                      // .where("uID", whereNotIn: tempList)
+                          // .where("uID", whereNotIn: tempList)
                           .snapshots(),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<QuerySnapshot> snapshot,) {
+                      builder: (
+                        BuildContext context,
+                        AsyncSnapshot<QuerySnapshot> snapshot,
+                      ) {
                         log("inside stream-builder");
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           log("inside stream-builder in waiting state");
@@ -244,7 +243,7 @@ class CreateNewGroup extends StatelessWidget {
                       },
                     );
                     // return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                    //   stream: ffstore.collection("Accounts").snapshots(),
+                    //   stream: ffstore.collection(accountsCollection).snapshots(),
                     //   builder: (
                     //     BuildContext context,
                     //     AsyncSnapshot<QuerySnapshot> snapshot,
@@ -301,16 +300,32 @@ class CreateNewGroup extends StatelessWidget {
                 Obx(() {
                   List userList = selectedUsers.values.toList();
                   log("userList: $userList");
-                  return Wrap(
+                  return Wrap(runSpacing: 2,
                     children: List.generate(selectedUsers.length, (index) {
                       return Container(
                         decoration: BoxDecoration(
                           color: Colors.grey,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        margin: EdgeInsets.only(right: 5),
+                        margin: EdgeInsets.only(right: 2),
                         padding: EdgeInsets.all(10),
-                        child: Text("${userList[index]['name']}"),
+                        width: (userList[index]['name'].length  * 12).toDouble(),
+                        height: 45,
+                        child: Row(
+                          children: [
+                            Expanded(child: Text("${userList[index]['name']}", maxLines: 1, overflow: TextOverflow.ellipsis,)),
+                            GestureDetector(
+                              onTap: () {
+                                userIds.remove(userList[index]['id']);
+                                selectedUsers.remove(userList[index]['id']);
+                              },
+                              child: Icon(
+                                Icons.clear,
+                                color: Colors.black,
+                              ),
+                            )
+                          ],
+                        ),
                       );
                     }),
                   );

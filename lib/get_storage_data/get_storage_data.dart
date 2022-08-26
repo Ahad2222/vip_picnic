@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:get_storage/get_storage.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';

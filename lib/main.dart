@@ -352,7 +352,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 type = payloadDecoded['type'];
                 if (type == 'followerFollowed') {
                   UserDetailsModel? umdl;
-                  await ffstore.collection("Accounts").doc(payloadDecoded['id']).get().then((value) {
+                  await ffstore.collection(accountsCollection).doc(payloadDecoded['id']).get().then((value) {
                     umdl = UserDetailsModel.fromJson(value.data() ?? {});
                   });
                   Get.to(() => OtherUserProfile(
@@ -492,7 +492,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   type = message.data['type'];
                   if (type == 'followerFollowed') {
                     UserDetailsModel? umdl;
-                    await ffstore.collection("Accounts").doc(message.data['id']).get().then((value) {
+                    await ffstore.collection(accountsCollection).doc(message.data['id']).get().then((value) {
                       umdl = UserDetailsModel.fromJson(value.data() ?? {});
                     });
                     Get.to(() => OtherUserProfile(
@@ -718,7 +718,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 type = message.data['type'];
                 if (type == 'followerFollowed') {
                   UserDetailsModel? umdl;
-                  await ffstore.collection("Accounts").doc(message.data['id']).get().then((value) {
+                  await ffstore.collection(accountsCollection).doc(message.data['id']).get().then((value) {
                     umdl = UserDetailsModel.fromJson(value.data() ?? {});
                   });
                   Get.to(() => OtherUserProfile(otherUserModel: umdl));

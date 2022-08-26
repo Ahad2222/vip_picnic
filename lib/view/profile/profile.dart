@@ -5,9 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
+import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
+import 'package:vip_picnic/model/home_model/add_post_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/home/my_posts.dart';
+import 'package:vip_picnic/view/home/post_details.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
@@ -80,7 +83,7 @@ class Profile extends StatelessWidget {
                           color: kSecondaryColor,
                         ),
                         eventFollowingFollower(
-                          count: 563,
+                          count: userDetailsModel.iFollowed?.length ?? 0,
                           title: 'following'.tr,
                         ),
                         Container(
@@ -89,7 +92,7 @@ class Profile extends StatelessWidget {
                           color: kSecondaryColor,
                         ),
                         eventFollowingFollower(
-                          count: 15,
+                          count: userDetailsModel.TheyFollowed?.length ?? 0,
                           title: 'followers'.tr,
                         ),
                       ],
@@ -118,8 +121,7 @@ class Profile extends StatelessWidget {
                       ],
                     ),
                     bioBox(
-                      bio:
-                          'Musician since 2018, available to new events. Love plant and planet 🌱',
+                      bio: 'Musician since 2018, available to new events. Love plant and planet 🌱',
                     ),
                   ],
                 ),
@@ -129,21 +131,16 @@ class Profile extends StatelessWidget {
           ];
         },
         body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-          stream: ffstore
-              .collection("Posts")
-              .where("uID", isEqualTo: auth.currentUser!.uid)
-              .snapshots(),
+          stream: ffstore.collection(postsCollection).where("uID", isEqualTo: auth.currentUser!.uid).snapshots(),
           builder: (
-              BuildContext context,
-              AsyncSnapshot<QuerySnapshot> snapshot,
-              ) {
+            BuildContext context,
+            AsyncSnapshot<QuerySnapshot> snapshot,
+          ) {
             log("inside stream-builder");
-            if (snapshot.connectionState ==
-                ConnectionState.waiting) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
               log("inside stream-builder in waiting state");
               return noPostYet();
-            } else if (snapshot.connectionState ==
-                ConnectionState.active ||
+            } else if (snapshot.connectionState == ConnectionState.active ||
                 snapshot.connectionState == ConnectionState.done) {
               if (snapshot.hasError) {
                 return const Text('Some unknown error occurred');
@@ -162,27 +159,34 @@ class Profile extends StatelessWidget {
                       mainAxisSpacing: 7,
                       mainAxisExtent: 124,
                     ),
-                    itemCount:snapshot.data?.docs.length,
+                    itemCount: snapshot.data?.docs.length,
                     itemBuilder: (context, index) {
-                      return Image.network(
-                        (snapshot.data!.docs[index].data() as Map<String, dynamic>)["postImages"][0],
-                        height: height(context, 1.0),
-                        width: width(context, 1.0),
-                        fit: BoxFit.cover,
-                        errorBuilder: (
+                      AddPostModel postModel =
+                          AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                      return GestureDetector(
+                        onTap: () {
+                          Get.to(() => PostDetails(isLikeByMe: false, postDocModel: postModel));
+                        },
+                        child: Image.network(
+                          postModel.postImages![0],
+                          height: height(context, 1.0),
+                          width: width(context, 1.0),
+                          fit: BoxFit.cover,
+                          errorBuilder: (
                             BuildContext context,
                             Object exception,
                             StackTrace? stackTrace,
-                            ) {
-                          return const Text(' ');
-                        },
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) {
-                            return child;
-                          } else {
-                            return loading();
-                          }
-                        },
+                          ) {
+                            return const Text(' ');
+                          },
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) {
+                              return child;
+                            } else {
+                              return loading();
+                            }
+                          },
+                        ),
                       );
                     },
                   );
@@ -360,10 +364,10 @@ class Profile extends StatelessWidget {
               width: width(context, 1.0),
               fit: BoxFit.cover,
               errorBuilder: (
-                  BuildContext context,
-                  Object exception,
-                  StackTrace? stackTrace,
-                  ) {
+                BuildContext context,
+                Object exception,
+                StackTrace? stackTrace,
+              ) {
                 return const Text(' ');
               },
               loadingBuilder: (context, child, loadingProgress) {

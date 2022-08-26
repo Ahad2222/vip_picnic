@@ -5,10 +5,8 @@ import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/model/group_chat_models/group_chat_room_model.dart';
-import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/chat/group_chat/g_chat_screen.dart';
-import 'package:vip_picnic/view/chat/simple_chat_screen.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
 
 class GroupChatController extends GetxController {

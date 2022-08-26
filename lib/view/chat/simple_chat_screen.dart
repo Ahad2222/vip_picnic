@@ -9,7 +9,6 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
 import 'package:vip_picnic/constant/color.dart';
@@ -50,58 +49,60 @@ class _ChatScreenState extends State<ChatScreen> {
   Rx<TextEditingController> messageEditingController = TextEditingController().obs;
   ScrollController scrollController = ScrollController();
 
-  // RxBool isDeleting = false;
-  // String recordFilePath;
   String chatRoomID = "";
   String userID = "";
   String userName = "";
   String anotherUserID = "";
   String anotherUserName = "";
   String anotherUserImage = "";
-  bool attachFiles = false;
-  bool emojiShowing = false;
-  RxBool isRecording = false.obs;
-  RxBool isSending = false.obs;
-  RxInt lastIndex = 0.obs;
-  int i = 0;
 
-  Map<String, String> _paths = {};
 
-  String key = "";
-  String salt = "";
   File? imageFile;
-  bool isWaiting = false;
-  bool isAssigned = false;
+
   String imageUrl = '';
   String imgPlaceholder =
       'https://thumbs.dreamstime.com/z/placeholder-icon-vector-isolated-white-background-your-web-mobile-app-design-placeholder-logo-concept-placeholder-icon-134071364.jpg';
-  List<String> monthsList = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
-  ];
 
-  Stream? chatMessageStream;
+  // RxBool isDeleting = false;
+  // String recordFilePath;
+  // bool attachFiles = false;
+  // bool emojiShowing = false;
+  // RxBool isRecording = false.obs;
+  // RxBool isSending = false.obs;
+  // RxInt lastIndex = 0.obs;
+  // int i = 0;
+  // Map<String, String> _paths = {};
+  // String key = "";
+  // String salt = "";
+  // bool isWaiting = false;
+  // bool isAssigned = false;
+  // List<String> monthsList = [
+  //   'January',
+  //   'February',
+  //   'March',
+  //   'April',
+  //   'May',
+  //   'June',
+  //   'July',
+  //   'August',
+  //   'September',
+  //   'October',
+  //   'November',
+  //   'December'
+  // ];
+
+  // Stream? chatMessageStream;
   RxInt lastMessageAt = 0.obs;
   RxString lastMessage = "".obs;
-  RxInt time = 0.obs;
+  // RxInt time = 0.obs;
   bool isOpenedUp = true;
   final Rx<ChatRoomModel> crm = ChatRoomModel().obs;
   Rx<UserDetailsModel> anotherUserModel = UserDetailsModel().obs;
   final RxBool isMatchedOrNot = false.obs;
   final RxString privacySettings = "Everyone".obs;
   final String deleteFor = "Everyone";
-  RxBool isArchivedRoom = false.obs;
-  RxBool isPrivacAllowed = true.obs;
+  // RxBool isArchivedRoom = false.obs;
+  // RxBool isPrivacAllowed = true.obs;
 
   StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? otherUserListener;
   StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? chatRoomListener;
@@ -116,15 +117,15 @@ class _ChatScreenState extends State<ChatScreen> {
     return true;
   }
 
-  Future<String> getFilePath() async {
-    Directory storageDirectory = await getApplicationDocumentsDirectory();
-    String sdPath = storageDirectory.path + "/record";
-    var d = Directory(sdPath);
-    if (!d.existsSync()) {
-      d.createSync(recursive: true);
-    }
-    return sdPath + "/test_${i++}.mp3";
-  }
+  // Future<String> getFilePath() async {
+  //   Directory storageDirectory = await getApplicationDocumentsDirectory();
+  //   String sdPath = storageDirectory.path + "/record";
+  //   var d = Directory(sdPath);
+  //   if (!d.existsSync()) {
+  //     d.createSync(recursive: true);
+  //   }
+  //   return sdPath + "/test_${i++}.mp3";
+  // }
 
   // uploadAudio({String? minutes, String? seconds}) {
   //   log("'audio-time in uploadAudio': '${minutes}:${seconds}'");
@@ -234,7 +235,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // KeyboardVisibilityController().onChange.listen((event) {
     //   chatController.isKeyboardOpen.value = event;
     // });
-    isArchivedRoom.value = widget.isArchived!;
+    // isArchivedRoom.value = widget.isArchived!;
   }
 
   getRoomId() async {
@@ -255,7 +256,7 @@ class _ChatScreenState extends State<ChatScreen> {
     log("anotherUserImage: $anotherUserImage");
 
     chatRoomID = chatController.getChatRoomId(userID, anotherUserID);
-    otherUserListener = await ffstore.collection("Accounts").doc(anotherUserID).snapshots().listen((event) {
+    otherUserListener = await ffstore.collection(accountsCollection).doc(anotherUserID).snapshots().listen((event) {
       log("updating anotherUserModel");
       anotherUserModel.value = UserDetailsModel.fromJson(event.data() ?? {});
     });
@@ -444,7 +445,7 @@ class _ChatScreenState extends State<ChatScreen> {
         });
       }
       chatController.addConversationMessage(chatRoomID, time, "text", messageMap, messageText);
-      log("index is: ${lastIndex.value}");
+      // log("index is: ${lastIndex.value}");
     } else if (imageFile != null && (imageUrl != null || imageUrl != "")) {
       var time = DateTime.now().millisecondsSinceEpoch;
 
@@ -624,7 +625,7 @@ class _ChatScreenState extends State<ChatScreen> {
               : GestureDetector(
                   onTap: () async {
                     UserDetailsModel? umdl;
-                    await ffstore.collection("Accounts").doc(anotherUserID).get().then((value) {
+                    await ffstore.collection(accountsCollection).doc(anotherUserID).get().then((value) {
                       umdl = UserDetailsModel.fromJson(value.data() ?? {});
                     });
                     Get.to(() => OtherUserProfile(otherUserModel: umdl));

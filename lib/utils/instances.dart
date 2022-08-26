@@ -10,7 +10,6 @@ import 'package:vip_picnic/controller/chat_controller/chat_controller.dart';
 import 'package:vip_picnic/controller/group_chat_controller/group_chat_controller.dart';
 import 'package:vip_picnic/controller/home_controller/home_controller.dart';
 import 'package:vip_picnic/controller/splash_screen_controller/splash_screen_controller.dart';
-import 'package:vip_picnic/model/group_chat_models/group_chat_room_model.dart';
 import 'package:vip_picnic/model/home_model/add_post_model.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/view/choose_language/choose_language.dart';
@@ -27,6 +26,7 @@ FirebaseMessaging fcm = FirebaseMessaging.instance;
 SplashScreenController splashScreenController = SplashScreenController.instance;
 EmailAuthController emailAuthController = EmailAuthController.instance;
 GoogleAuthController googleAuthController = GoogleAuthController.instance;
+FacebookAuthController facebookAuthController = FacebookAuthController.instance;
 SignupController signupController = SignupController.instance;
 ForgotPasswordController forgotPasswordController =
     ForgotPasswordController.instance;

@@ -5,10 +5,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/constant/color.dart';
+import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/model/i_followed_model/i_followed_model.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
+import 'package:vip_picnic/view/profile/other_user_profile.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:vip_picnic/view/widget/my_textfields.dart';
@@ -28,7 +30,7 @@ class _SearchFriendsState extends State<SearchFriends> {
   @override
   void initState() {
     // TODO: implement initState
-    userDetailsModelStream = ffstore.collection("Accounts").doc(auth.currentUser!.uid).snapshots().listen((event) {
+    userDetailsModelStream = ffstore.collection(accountsCollection).doc(auth.currentUser!.uid).snapshots().listen((event) {
       userDetailsModel = UserDetailsModel.fromJson(event.data() ?? {});
       // setState(() {});
     });
@@ -73,7 +75,7 @@ class _SearchFriendsState extends State<SearchFriends> {
         if (searchText.value != "") {
           return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
             stream:
-                ffstore.collection("Accounts").where("userSearchParameters", arrayContains: searchText.value).snapshots(),
+                ffstore.collection(accountsCollection).where("userSearchParameters", arrayContains: searchText.value).snapshots(),
             builder: (
               BuildContext context,
               AsyncSnapshot<QuerySnapshot> snapshot,
@@ -99,15 +101,20 @@ class _SearchFriendsState extends State<SearchFriends> {
                         UserDetailsModel umdl =
                             UserDetailsModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
                         if (umdl.uID != auth.currentUser!.uid) {
-                          return SearchTiles(
-                            umdl: umdl,
-                            profileImage: umdl.profileImageUrl,
-                            name: umdl.fullName,
-                            isFollowed: userDetailsModel.iFollowed != null
-                                ? userDetailsModel.iFollowed!.asMap().containsValue(umdl.uID)
-                                    ? true
-                                    : false
-                                : false,
+                          return GestureDetector(
+                            onTap: () async {
+                              Get.to(() => OtherUserProfile(otherUserModel: umdl));
+                            },
+                            child: SearchTiles(
+                              umdl: umdl,
+                              profileImage: umdl.profileImageUrl,
+                              name: umdl.fullName,
+                              isFollowed: userDetailsModel.iFollowed != null
+                                  ? userDetailsModel.iFollowed!.asMap().containsValue(umdl.uID)
+                                      ? true
+                                      : false
+                                  : false,
+                            ),
                           );
                         } else {
                           return SizedBox();
@@ -195,7 +202,7 @@ class _SearchFriendsState extends State<SearchFriends> {
           );
         } else {
           return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-            stream: ffstore.collection("Accounts").where("uID", isNotEqualTo: auth.currentUser!.uid).snapshots(),
+            stream: ffstore.collection(accountsCollection).where("uID", isNotEqualTo: auth.currentUser!.uid).snapshots(),
             builder: (
               BuildContext context,
               AsyncSnapshot<QuerySnapshot> snapshot,
@@ -221,15 +228,20 @@ class _SearchFriendsState extends State<SearchFriends> {
                       itemBuilder: (context, index) {
                         UserDetailsModel umdl =
                             UserDetailsModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
-                        return SearchTiles(
-                          umdl: umdl,
-                          profileImage: umdl.profileImageUrl,
-                          name: umdl.fullName,
-                          isFollowed: userDetailsModel.iFollowed != null
-                              ? userDetailsModel.iFollowed!.asMap().containsValue(umdl.uID)
-                                  ? true
-                                  : false
-                              : false,
+                        return GestureDetector(
+                          onTap: () async {
+                            Get.to(() => OtherUserProfile(otherUserModel: umdl));
+                          },
+                          child: SearchTiles(
+                            umdl: umdl,
+                            profileImage: umdl.profileImageUrl,
+                            name: umdl.fullName,
+                            isFollowed: userDetailsModel.iFollowed != null
+                                ? userDetailsModel.iFollowed!.asMap().containsValue(umdl.uID)
+                                    ? true
+                                    : false
+                                : false,
+                          ),
                         );
                       },
                     );
@@ -327,10 +339,10 @@ class SearchTiles extends StatelessWidget {
                       child: InkWell(
                         onTap: !isFollowed!
                             ? () async {
-                                await ffstore.collection("Accounts").doc(auth.currentUser!.uid).update({
+                                await ffstore.collection(accountsCollection).doc(auth.currentUser!.uid).update({
                                   "iFollowed": FieldValue.arrayUnion([umdl!.uID]),
                                 });
-                                await ffstore.collection("Accounts").doc(umdl!.uID).update({
+                                await ffstore.collection(accountsCollection).doc(umdl!.uID).update({
                                   "TheyFollowed": FieldValue.arrayUnion([auth.currentUser!.uid]),
                                 });
                                 IFollowedModel iFollowedProfile = IFollowedModel(
@@ -349,13 +361,13 @@ class SearchTiles extends StatelessWidget {
                                 //   followedAt: DateTime.now().millisecondsSinceEpoch,
                                 // );
                                 await ffstore
-                                    .collection("Accounts")
+                                    .collection(accountsCollection)
                                     .doc(auth.currentUser!.uid)
                                     .collection("iFollowed")
                                     .doc(umdl!.uID)
                                     .set(iFollowedProfile.toJson());
                                 // await fs
-                                //     .collection("Accounts")
+                                //     .collection(accountsCollection)
                                 //     .doc(umdl!.uID)
                                 //     .collection("TheyFollowed")
                                 //     .doc(userDetailsModel.uID)
@@ -363,20 +375,20 @@ class SearchTiles extends StatelessWidget {
                               }
                             : () async {
                                 //+unfollow code goes here
-                                await ffstore.collection("Accounts").doc(auth.currentUser!.uid).update({
+                                await ffstore.collection(accountsCollection).doc(auth.currentUser!.uid).update({
                                   "iFollowed": FieldValue.arrayRemove([umdl!.uID]),
                                 });
-                                await ffstore.collection("Accounts").doc(umdl!.uID).update({
+                                await ffstore.collection(accountsCollection).doc(umdl!.uID).update({
                                   "TheyFollowed": FieldValue.arrayRemove([auth.currentUser!.uid]),
                                 });
                                 await ffstore
-                                    .collection("Accounts")
+                                    .collection(accountsCollection)
                                     .doc(auth.currentUser!.uid)
                                     .collection("iFollowed")
                                     .doc(umdl!.uID)
                                     .delete();
                                 await ffstore
-                                    .collection("Accounts")
+                                    .collection(accountsCollection)
                                     .doc(umdl!.uID)
                                     .collection("TheyFollowed")
                                     .doc(userDetailsModel.uID)

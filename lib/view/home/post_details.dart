@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:vip_picnic/constant/color.dart';
+import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/model/comment_model/comment_model.dart';
 import 'package:vip_picnic/model/home_model/add_post_model.dart';
@@ -14,6 +15,7 @@ import 'package:vip_picnic/view/widget/curved_header.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
+import 'package:vip_picnic/view/widget/snack_bar.dart';
 
 // ignore: must_be_immutable
 class PostDetails extends StatefulWidget {
@@ -36,11 +38,7 @@ class _PostDetailsState extends State<PostDetails> {
   void initState() {
     // TODO: implement initState
     addPostModel.value = widget.postDocModel!;
-    ffstore
-        .collection("Posts")
-        .doc(widget.postDocModel!.postID)
-        .snapshots()
-        .listen((event) {
+    ffstore.collection(postsCollection).doc(widget.postDocModel!.postID).snapshots().listen((event) {
       addPostModel.value = AddPostModel.fromJson(event.data() ?? {});
       log("inside stream and addPostModel: ${addPostModel.toJson()}");
     });
@@ -78,8 +76,7 @@ class _PostDetailsState extends State<PostDetails> {
                     background: Stack(
                       children: [
                         PageView.builder(
-                          onPageChanged: (index) =>
-                              homeController.getCurrentPostIndex(index),
+                          onPageChanged: (index) => homeController.getCurrentPostIndex(index),
                           itemCount: widget.postDocModel!.postImages!.length,
                           physics: BouncingScrollPhysics(),
                           itemBuilder: (context, index) {
@@ -88,8 +85,7 @@ class _PostDetailsState extends State<PostDetails> {
                               height: height(context, 1.0),
                               width: width(context, 1.0),
                               fit: BoxFit.cover,
-                              loadingBuilder:
-                                  (context, child, loadingProgress) {
+                              loadingBuilder: (context, child, loadingProgress) {
                                 if (loadingProgress == null) {
                                   return child;
                                 } else {
@@ -153,7 +149,7 @@ class _PostDetailsState extends State<PostDetails> {
                 spacing: 30.0,
                 children: [
                   // StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-                  //   stream: fs.collection("Posts").doc(postDocModel!.postID).snapshots(),
+                  //   stream: fs.collection(postsCollection).doc(postDocModel!.postID).snapshots(),
                   //   builder: (
                   //       BuildContext context,
                   //       AsyncSnapshot<DocumentSnapshot> snapshot,
@@ -282,31 +278,20 @@ class _PostDetailsState extends State<PostDetails> {
                     children: [
                       GestureDetector(
                         onTap: () async {
-                          await ffstore
-                              .collection("Posts")
-                              .doc(widget.postDocModel!.postID)
-                              .update({
-                            "likeCount": FieldValue.increment(
-                                widget.isLikeByMe! ? -1 : 1),
-                            "likeIDs": !addPostModel.value.likeIDs!
-                                    .asMap()
-                                    .containsValue(auth.currentUser!.uid)
+                          await ffstore.collection(postsCollection).doc(widget.postDocModel!.postID).update({
+                            "likeCount": FieldValue.increment(widget.isLikeByMe! ? -1 : 1),
+                            "likeIDs": !addPostModel.value.likeIDs!.asMap().containsValue(auth.currentUser!.uid)
                                 ? FieldValue.arrayUnion([auth.currentUser!.uid])
-                                : FieldValue.arrayRemove(
-                                    [auth.currentUser!.uid]),
+                                : FieldValue.arrayRemove([auth.currentUser!.uid]),
                           });
                         },
                         child: Obx(() {
                           return Image.asset(
-                            addPostModel.value.likeIDs!
-                                    .asMap()
-                                    .containsValue(auth.currentUser!.uid)
+                            addPostModel.value.likeIDs!.asMap().containsValue(auth.currentUser!.uid)
                                 ? Assets.imagesHeartFull
                                 : Assets.imagesHeartEmpty,
                             height: 24.0,
-                            color: addPostModel.value.likeIDs!
-                                    .asMap()
-                                    .containsValue(auth.currentUser!.uid)
+                            color: addPostModel.value.likeIDs!.asMap().containsValue(auth.currentUser!.uid)
                                 ? Color(0xffe31b23)
                                 : kDarkBlueColor.withOpacity(0.60),
                           );
@@ -332,7 +317,7 @@ class _PostDetailsState extends State<PostDetails> {
                       ),
                       StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                         stream: ffstore
-                            .collection("Posts")
+                            .collection(postsCollection)
                             .doc(widget.postDocModel!.postID)
                             .collection("comments")
                             .snapshots(),
@@ -342,18 +327,15 @@ class _PostDetailsState extends State<PostDetails> {
                         ) {
                           int previousCount = 0;
                           log("inside stream-builder");
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
                             log("inside stream-builder in waiting state");
                             return MyText(
                               text: '$previousCount',
                               size: 18,
                               color: kDarkBlueColor.withOpacity(0.60),
                             );
-                          } else if (snapshot.connectionState ==
-                                  ConnectionState.active ||
-                              snapshot.connectionState ==
-                                  ConnectionState.done) {
+                          } else if (snapshot.connectionState == ConnectionState.active ||
+                              snapshot.connectionState == ConnectionState.done) {
                             if (snapshot.hasError) {
                               return MyText(
                                 text: '0',
@@ -418,7 +400,7 @@ class _PostDetailsState extends State<PostDetails> {
             Expanded(
               child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                 stream: ffstore
-                    .collection("Posts")
+                    .collection(postsCollection)
                     .doc(widget.postDocModel!.postID)
                     .collection("comments")
                     .snapshots(),
@@ -430,8 +412,7 @@ class _PostDetailsState extends State<PostDetails> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     log("inside stream-builder in waiting state");
                     return const Center(child: Text('Loading...'));
-                  } else if (snapshot.connectionState ==
-                          ConnectionState.active ||
+                  } else if (snapshot.connectionState == ConnectionState.active ||
                       snapshot.connectionState == ConnectionState.done) {
                     if (snapshot.hasError) {
                       return const Center(child: Text('No Comments Yet'));
@@ -446,9 +427,8 @@ class _PostDetailsState extends State<PostDetails> {
                           ),
                           itemCount: snapshot.data!.docs.length,
                           itemBuilder: (context, index) {
-                            CommentModel cmdl = CommentModel.fromJson(
-                                snapshot.data!.docs[index].data()
-                                    as Map<String, dynamic>);
+                            CommentModel cmdl =
+                                CommentModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
                             return CommentsTiles(
                               profileImage: cmdl.commenterImage,
                               name: cmdl.commenterName,
@@ -564,16 +544,13 @@ class _PostDetailsState extends State<PostDetails> {
                 commenterID: auth.currentUser!.uid,
                 commenterImage: userDetailsModel.profileImageUrl ?? "",
                 commenterName: userDetailsModel.fullName ?? "",
-                createdAt: DateFormat.yMEd()
-                    .add_jms()
-                    .format(DateTime.now())
-                    .toString(),
+                createdAt: DateFormat.yMEd().add_jms().format(DateTime.now()).toString(),
                 likeCount: 0,
                 likeIDs: [],
                 postID: addPostModel.value.postID,
               );
               await ffstore
-                  .collection("Posts")
+                  .collection(postsCollection)
                   .doc(widget.postDocModel!.postID)
                   .collection("comments")
                   .add(cmdl.toJson());

@@ -16,15 +16,15 @@ import 'package:vip_picnic/view/user/social_login.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/snack_bar.dart';
 
-class GoogleAuthController extends GetxController {
-  static GoogleAuthController instance = Get.find<GoogleAuthController>();
+class FacebookAuthController extends GetxController {
+  static FacebookAuthController instance = Get.find<FacebookAuthController>();
 
   List<String> userSearchParameters = [];
 
   DateTime createdAt = DateTime.now();
   DateFormat? format;
 
-  Future facebookSignIn(BuildContext context) async {
+  Future googleSignIn(BuildContext context) async {
     try {
       showDialog(
         context: context,
@@ -79,8 +79,8 @@ class GoogleAuthController extends GetxController {
                     createdAt: DateFormat.yMEd().add_jms().format(createdAt).toString(),
                   );
                   await accounts.doc(userCredential.user!.uid).set(
-                        userDetailsModel.toJson(),
-                      );
+                    userDetailsModel.toJson(),
+                  );
                   await UserSimplePreference.setUserData(userDetailsModel);
                   if (auth.currentUser != null) {
                     String? token = await fcm.getToken() ?? userDetailsModel.fcmToken;
@@ -106,12 +106,12 @@ class GoogleAuthController extends GetxController {
                     });
                   }
                   Get.offAll(
-                    () => BottomNavBar(),
+                        () => BottomNavBar(),
                   );
                   navigatorKey.currentState!.popUntil((route) => route.isCurrent);
                 } else {
                   await accounts.doc(userCredential.user!.uid).get().then(
-                    (value) async {
+                        (value) async {
                       userDetailsModel = UserDetailsModel.fromJson(
                         value.data() as Map<String, dynamic>,
                       );
@@ -142,7 +142,7 @@ class GoogleAuthController extends GetxController {
                     });
                   }
                   Get.offAll(
-                    () => BottomNavBar(),
+                        () => BottomNavBar(),
                   );
                 }
               } else {

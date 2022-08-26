@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/constant/color.dart';
+import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/model/i_followed_model/i_followed_model.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
@@ -20,7 +21,7 @@ class CreateNewChat extends StatelessWidget {
       ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: ffstore
-            .collection("Accounts")
+            .collection(accountsCollection)
             .doc(userDetailsModel.uID)
             .collection('iFollowed')
             .snapshots(),
@@ -93,7 +94,7 @@ class CreateNewChat extends StatelessWidget {
         child: ListTile(
           onTap: () async {
             UserDetailsModel umdl = UserDetailsModel();
-            await ffstore.collection("Accounts").doc(id).get().then((value) {
+            await ffstore.collection(accountsCollection).doc(id).get().then((value) {
               umdl = UserDetailsModel.fromJson(value.data() ?? {});
             });
             await chatController.createChatRoomAndStartConversation(

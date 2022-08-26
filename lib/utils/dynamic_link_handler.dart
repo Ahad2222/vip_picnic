@@ -96,7 +96,7 @@ class DynamicLinkHandler {
         log("id in isPost: $id");
         try {
           if (id != "") {
-            await ffstore.collection("Posts").doc(id).get().then((value) {
+            await ffstore.collection(postsCollection).doc(id).get().then((value) {
               Get.to(
                 () => PostDetails(
                   postDocModel: AddPostModel.fromJson(value.data() ?? {}),
@@ -152,7 +152,7 @@ class DynamicLinkHandler {
 
         try {
           if (id != "") {
-            await ffstore.collection("Posts").doc(id).get().then((value) {
+            await ffstore.collection(postsCollection).doc(id).get().then((value) {
               Get.to(
                 () => PostDetails(
                   postDocModel: AddPostModel.fromJson(value.data() ?? {}),

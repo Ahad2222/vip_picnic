@@ -3,13 +3,11 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:uuid/uuid.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
@@ -149,7 +147,7 @@ class _GroupChatState extends State<GroupChat> {
   //
   //   // chatRoomID = chatController.getChatRoomId(userID, anotherUserID);
   //   // chatRoomID = widget.docs!["groupId"];
-  //   // otherUserListener = await ffstore.collection("Accounts").doc(anotherUserID).snapshots().listen((event) {
+  //   // otherUserListener = await ffstore.collection(accountsCollection).doc(anotherUserID).snapshots().listen((event) {
   //   //   log("updating anotherUserModel");
   //   //   anotherUserModel.value = UserDetailsModel.fromJson(event.data() ?? {});
   //   // });
@@ -583,7 +581,7 @@ class _GroupChatState extends State<GroupChat> {
                                   // List<String> tempList = selectedUsers.length > 0 ? List<String>.from(selectedUsers.keys.toList()) : ["check"];
                                   return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                                     stream: ffstore
-                                        .collection("Accounts")
+                                        .collection(accountsCollection)
                                         .where("userSearchParameters", arrayContains: userNameObsString.value.trim()).limit(3)
                                         // .where("uID", whereNotIn: tempList)
                                         .snapshots(),

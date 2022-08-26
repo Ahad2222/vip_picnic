@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/get_storage_data/get_storage_data.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/collections.dart';
@@ -130,7 +131,7 @@ class SignupController extends GetxController {
             if (auth.currentUser != null) {
               String? token = await fcm.getToken() ?? userDetailsModel.fcmToken;
               try {
-                ffstore.collection("Accounts").doc(auth.currentUser?.uid).update({
+                ffstore.collection(accountsCollection).doc(auth.currentUser?.uid).update({
                   "fcmToken": token,
                   "fcmCreatedAt": DateTime.now().toIso8601String(),
                 });
@@ -140,7 +141,7 @@ class SignupController extends GetxController {
               }
               fcm.onTokenRefresh.listen((streamedToken) {
                 try {
-                  ffstore.collection("Accounts").doc(auth.currentUser?.uid).update({
+                  ffstore.collection(accountsCollection).doc(auth.currentUser?.uid).update({
                     "fcmToken": streamedToken,
                     "fcmCreatedAt": DateTime.now().toIso8601String(),
                   });
