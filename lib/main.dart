@@ -14,6 +14,7 @@ import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/config/theme/light_theme.dart';
 import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/controller/auth_controller/email_auth_controller.dart';
+import 'package:vip_picnic/controller/auth_controller/facebook_auth_controller.dart';
 import 'package:vip_picnic/controller/auth_controller/forgot_password_controller.dart';
 import 'package:vip_picnic/controller/auth_controller/google_auth_controller.dart';
 import 'package:vip_picnic/controller/auth_controller/sign_up_controller.dart';
@@ -22,12 +23,15 @@ import 'package:vip_picnic/controller/group_chat_controller/group_chat_controlle
 import 'package:vip_picnic/controller/home_controller/home_controller.dart';
 import 'package:vip_picnic/controller/splash_screen_controller/splash_screen_controller.dart';
 import 'package:vip_picnic/firebase_options.dart';
+import 'package:vip_picnic/model/home_model/add_post_model.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/utils/localization.dart';
 import 'package:vip_picnic/view/chat/group_chat/g_chat_screen.dart';
 import 'package:vip_picnic/view/chat/simple_chat_screen.dart';
 import 'package:vip_picnic/view/choose_language/choose_language.dart';
+import 'package:vip_picnic/view/home/add_new_post.dart';
+import 'package:vip_picnic/view/home/post_details.dart';
 import 'package:vip_picnic/view/profile/other_user_profile.dart';
 import 'package:http/http.dart' as http;
 import 'package:vip_picnic/view/widget/loading.dart';
@@ -298,6 +302,7 @@ Future<void> main() async {
   Get.put(ChooseLanguageController());
   Get.put(ChatController());
   Get.put(GroupChatController());
+  Get.put(FacebookAuthController());
   runApp(MyApp());
 }
 
@@ -380,6 +385,17 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               await groupChatController.getAGroupChatRoomInfo(groupId).then((value) {
                 Get.back();
                 Get.to(() => GroupChat(docs: value.data()));
+              });
+            } else if (screenName == "postScreen") {
+              print("Screen is postScreen");
+              String postId = 'Nothing';
+              postId = payloadDecoded["postId"];
+              await ffstore.collection(postsCollection).doc(postId).get().then((value) {
+                AddPostModel addPostModel = AddPostModel.fromJson(value.data() ?? {});
+                Get.to(() => PostDetails(
+                      isLikeByMe: false,
+                      postDocModel: addPostModel,
+                    ));
               });
             }
           } else {
@@ -495,9 +511,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     await ffstore.collection(accountsCollection).doc(message.data['id']).get().then((value) {
                       umdl = UserDetailsModel.fromJson(value.data() ?? {});
                     });
-                    Get.to(() => OtherUserProfile(
-                          otherUserModel: umdl,
-                        ));
+                    Get.to(() => OtherUserProfile(otherUserModel: umdl));
                   } else {
                     print("Type is missed");
                   }
@@ -520,7 +534,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   Get.back();
                   Get.to(() => GroupChat(docs: value.data()));
                 });
-              }else {
+              } else if (screenName == "postScreen") {
+                print("Screen is postScreen");
+                String postId = 'Nothing';
+                postId = message.data["postId"];
+                await ffstore.collection(postsCollection).doc(postId).get().then((value) {
+                  AddPostModel addPostModel = AddPostModel.fromJson(value.data() ?? {});
+                  Get.to(() => PostDetails(isLikeByMe: false, postDocModel: addPostModel));
+                });
+              } else {
                 print("Screen is in Else method of getInitialMessage");
               }
             } else {
@@ -579,7 +601,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             log("message.notification.data: ${message.notification != null ? message.notification?.android : "notification was null"}");
             if (message.notification != null && message.notification != {}) {
               String? longData = message.notification != null ? message.notification?.body : "";
-              if (screenName == 'chatScreen' || screenName == 'profileScreen' || screenName == 'groupChatScreen') {
+              if (screenName == 'chatScreen' ||
+                  screenName == 'profileScreen' ||
+                  screenName == 'groupChatScreen' ||
+                  screenName == "postScreen") {
                 //Handling forground notification on chat notification
                 imagePresent = message.data.containsKey('imageUrl');
                 generalImagePresent = message.data.containsKey('generalImageUrl');

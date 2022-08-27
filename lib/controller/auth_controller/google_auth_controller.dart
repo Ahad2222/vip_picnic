@@ -24,7 +24,7 @@ class GoogleAuthController extends GetxController {
   DateTime createdAt = DateTime.now();
   DateFormat? format;
 
-  Future facebookSignIn(BuildContext context) async {
+  Future googleSignIn(BuildContext context) async {
     try {
       showDialog(
         context: context,

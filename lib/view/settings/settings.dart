@@ -3,8 +3,10 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
@@ -73,9 +75,12 @@ class Settings extends StatelessWidget {
             context,
             icon: Assets.imagesCautionSign,
             title: 'reportProblem'.tr,
-            onTap: () => Get.to(
-              () => ReportProblem(),
-            ),
+            onTap: () {
+              launchUrl(
+                Uri.parse('mailto:info@vippicnic.com?subject=Problem &body=Hi, Write your message here'),
+              );
+              // Get.to(() => ReportProblem());
+            },
           ),
           settingsTiles(
             context,
@@ -125,9 +130,12 @@ class Settings extends StatelessWidget {
             onTap: () async {
               Get.defaultDialog(
                   title: "Are you sure?",
-                  content: Text(
-                      "Are you sure you want to De-activate your account? You will be signed out and you can't activate it again yourself. "
-                      "You would have to contact customer support to get it activated again."),
+                  content: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 0),
+                    child: Text(
+                        "Are you sure you want to De-activate your account? You will be signed out and you can't activate it again yourself. "
+                        "You would have to contact customer support to get it activated again."),
+                  ),
                   textConfirm: "Yes",
                   confirmTextColor: Colors.red,
                   textCancel: "No",
@@ -142,6 +150,7 @@ class Settings extends StatelessWidget {
                         try {
                           await auth.signOut();
                           await GoogleSignIn().signOut();
+                          await FacebookAuth.instance.logOut();
                         } catch (e) {
                           log("error in signing out after de-activation $e");
                         }
@@ -155,13 +164,13 @@ class Settings extends StatelessWidget {
                   });
             },
           ),
-          settingsTiles(
-            context,
-            icon: Assets.imagesTrash,
-            iconSize: 26.83,
-            title: 'deleteAccount'.tr,
-            onTap: () {},
-          ),
+          // settingsTiles(
+          //   context,
+          //   icon: Assets.imagesTrash,
+          //   iconSize: 26.83,
+          //   title: 'deleteAccount'.tr,
+          //   onTap: () {},
+          // ),
         ],
       ),
     );

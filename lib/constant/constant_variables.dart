@@ -9,6 +9,7 @@ String storyCollection = "Stories";
 String deactivatedCollection = "DeactivatedAccounts";
 String accountsCollection = "Accounts";
 String postsCollection = "Posts";
+String alertsCollection = "Notifications";
 
 //+ underlying collections or sub-collections
 String messagesCollection = "messages";

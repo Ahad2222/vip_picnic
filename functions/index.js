@@ -239,15 +239,15 @@ exports.notifyReceiverForChat = functions.firestore
   });
 
 
-  exports.liking = functions.firestore
+exports.liking = functions.firestore
   .document("/Accounts/{documentId}/iFollowed/{iFollowedDoc}")
   .onCreate(async (snap, context) => {
-  
+
     //IFollowedModel myProfileForFollowed = IFollowedModel(
-      //followedId: userDetailsModel.uID,
-      //followedName: userDetailsModel.fullName,
-      //followedImage: userDetailsModel.profileImageUrl,
-      //followedAt: DateTime.now().millisecondsSinceEpoch,
+    //followedId: userDetailsModel.uID,
+    //followedName: userDetailsModel.fullName,
+    //followedImage: userDetailsModel.profileImageUrl,
+    //followedAt: DateTime.now().millisecondsSinceEpoch,
     // );
     //Getting Followed Profile Details
     var followedId = snap.data().followedId;
@@ -283,7 +283,7 @@ exports.notifyReceiverForChat = functions.firestore
         functions.logger.log(e.toString());
       });
 
-    
+
     await admin
       .firestore()
       .collection("Accounts")
@@ -302,115 +302,353 @@ exports.notifyReceiverForChat = functions.firestore
 
 
     await admin
+      .firestore()
+      .collection("Accounts")
+      .doc(followedId)
+      .collection("TheyFollowed")
+      .doc(followerId)
+      .set({
+        followerId: followerId,
+        followerName: followerName,
+        followerImageUrl: followerImageUrl,
+        followedAt: followedAt,
+      });
+
+
+    //Sending notification to Followed One
+
+    await admin
+      .messaging()
+      .send({
+        token: followedFcmToken,
+        notification: {
+          title: `Followed by ${followerName}`,
+          body: `Lets check their  profile.`,
+          imageUrl: followerImageUrl,
+        },
+        data: {
+          id: followerId,
+          name: followerName,
+          imageUrl: followerImageUrl,
+          screenName: "profileScreen",
+          type: "followerFollowed",
+        },
+      })
+      .then((value) => {
+        functions.logger.log(
+          "Notification for Liking from liker is sent to the LikedOne"
+        );
+      })
+      .catch((e) => {
+        functions.logger.log(e.toString());
+      });
+
+    await admin
+      .firestore()
+      .collection("Notifications")
+      .add({
+        forId: followedId,
+        image: followerImageUrl,
+        message: `${followerName} followed you`,
+        type: "follow",
+        dataId: followerId,
+        createdAt: followedAt,
+      });
+    // Map<String, dynamic> toJson() => {
+    //   'forId': forId,
+    //   'image': image,
+    //   'message': message,
+    //   'dataId': dataId,
+    //   'type': type,
+    //   'createdAt': createdAt,
+    // };
+  });
+
+exports.postLikedNotification = functions.firestore
+  .document("/Posts/{documentId}")
+  .onUpdate(async (change, context) => {
+
+    const newData = change.after.data();
+    const oldData = change.before.data();
+
+    var likesList = newData.likeIDs;
+    var posterId = newData.uID;
+    var postId = newData.postID;
+
+
+    var posterFcmToken;
+    // var time = snap.data().time;
+
+    // functions.logger.log(
+      // `LikerID Profile Details: ${posterId}, ${followedName}, ${followedImageUrl},`
+    // );
+
+    //Getting Liker Profile Details
+    var likerId = likesList[likesList.length - 1];
+    var likerName;
+    var likerImageUrl;
+    var likerFcmToken;
+
+    // functions.logger.log(
+    // `LikerID Profile Details: ${likerId}, ${likerName}, ${likerImageUrl}, ${likerFcmToken},`
+    // );
+
+    if (oldData.likeCount < newData.likeCount) {
+      await admin
         .firestore()
         .collection("Accounts")
-        .doc(followedId)
-        .collection("TheyFollowed")
-        .doc(followerId)
-        .set({
-          followerId: followerId,
-          followerName: followerName,
-          followerImageUrl: followerImageUrl,
-          followedAt: followedAt,
+        .doc(posterId)
+        .get()
+        .then(async (snapshot) => {
+          posterFcmToken = snapshot.data().fcmToken;
+        })
+        .catch((e) => {
+          functions.logger.log(e.toString());
         });
 
 
-      //Sending notification to Followed One
+      await admin
+        .firestore()
+        .collection("Accounts")
+        .doc(likerId)
+        .get()
+        .then((snapshot) => {
+          likerName = snapshot.data().fullName;
+          likerImageUrl = snapshot.data().profileImageUrl;
+          likerFcmToken = snapshot.data().fcmToken;
+        })
+        .catch((e) => {
+          functions.logger.log(e.toString());
+        });
+      functions.logger.log("LikerID is: ");
+      functions.logger.log(likerId);
 
+      //Sending notification to Post Poster
       await admin
         .messaging()
         .send({
-          token: followedFcmToken,
+          token: posterFcmToken,
           notification: {
-            title: `Followed by ${followerName}`,
-            body: `Lets check their  profile.`,
-            imageUrl: followerImageUrl,
+            title: `Post Liked`,
+            body: `Your post was liked by ${likerName}`,
+            imageUrl: likerImageUrl,
           },
           data: {
-            id: followerId,
-            name: followerName,
-            imageUrl: followerImageUrl,
-            screenName: "profileScreen",
-            type: "followerFollowed",
+            id: likerId,
+            postId: postId,
+            name: likerName,
+            imageUrl: likerImageUrl,
+            screenName: "postScreen",
+            type: "postLiked",
           },
         })
         .then((value) => {
           functions.logger.log(
-            "Notification for Liking from liker is sent to the LikedOne"
+            "Notification for Liking from liker is sent to the Poster"
           );
         })
         .catch((e) => {
           functions.logger.log(e.toString());
         });
+
+      await admin
+        .firestore()
+        .collection("Notifications")
+        .add({
+          forId: posterId,
+          image: likerImageUrl,
+          message: `${likerName} liked your post`,
+          type: "postLiked",
+          dataId: postId,
+          createdAt: Date.now(),
+        });
+    }
   });
 
-  exports.notifyInvitedAboutGroupInvite = functions.firestore
-    .document("/GroupChatInvitations/{documentId}")
-    .onCreate(async (snap, context) => {
+exports.postCommentedNotification = functions.firestore
+  .document("/Posts/{documentId}/comments/{commentId}")
+  .onCreate(async (snap, context) => {
 
-    //+"groupId": groupChatModel.groupId ?? "",
+    var newData;
+    const commentData = snap.data();
+    var postId = commentData.postID;
+
+    await admin
+      .firestore()
+      .collection("Posts")
+      .doc(postId)
+      .get().then(async (snapshot) => {
+        newData = snapshot.data();
+      });
+
+    var posterId = newData.uID;
+    var posterFcmToken;
+    // var time = snap.data().time;
+
+    // functions.logger.log(
+      // `LikerID Profile Details: ${posterId}, ${followedName}, ${followedImageUrl},`
+    // );
+
+    //Getting Liker Profile Details
+    var commenterId = commentData.commenterID;
+    var commenterName;
+    var commenterImageUrl;
+    var commenterFcmToken;
+
+    // functions.logger.log(
+    // `LikerID Profile Details: ${commenterId}, ${commenterName}, ${commenterImageUrl}, ${commenterFcmToken},`
+    // );
+
+    await admin
+      .firestore()
+      .collection("Accounts")
+      .doc(posterId)
+      .get()
+      .then(async (snapshot) => {
+        posterFcmToken = snapshot.data().fcmToken;
+      })
+      .catch((e) => {
+        functions.logger.log(e.toString());
+      });
+
+
+    await admin
+      .firestore()
+      .collection("Accounts")
+      .doc(commenterId)
+      .get()
+      .then((snapshot) => {
+        commenterName = snapshot.data().fullName;
+        commenterImageUrl = snapshot.data().profileImageUrl;
+        commenterFcmToken = snapshot.data().fcmToken;
+      })
+      .catch((e) => {
+        functions.logger.log(e.toString());
+      });
+    functions.logger.log("LikerID is: ");
+    functions.logger.log(commenterId);
+
+    //Sending notification to Post Poster
+
+    await admin
+      .messaging()
+      .send({
+        token: posterFcmToken,
+        notification: {
+          title: `Post Commented`,
+          body: `${commenterName} commented on your post`,
+          imageUrl: commenterImageUrl,
+        },
+        data: {
+          id: commenterId,
+          postId: postId,
+          name: commenterName,
+          imageUrl: commenterImageUrl,
+          screenName: "postScreen",
+          type: "postCommented",
+        },
+      })
+      .then((value) => {
+        functions.logger.log(
+          "Notification for Liking from liker is sent to the Poster"
+        );
+      })
+      .catch((e) => {
+        functions.logger.log(e.toString());
+      });
+
+    await admin
+      .firestore()
+      .collection("Notifications")
+      .add({
+        forId: posterId,
+        image: commenterImageUrl,
+        message: `${commenterName} commented on your post`,
+        type: "postCommented",
+        dataId: postId,
+        createdAt: Date.now(),
+      });
+  });
+
+exports.notifyInvitedAboutGroupInvite = functions.firestore
+  .document("/GroupChatInvitations/{documentId}")
+  .onCreate(async (snap, context) => {
+
+    //"groupId": groupChatModel.groupId ?? "",
     //"groupName": groupChatModel.groupName ?? "",
     //"groupImage": groupChatModel.groupImage ?? "",
-    //+"invitedId": selectedId.value,
+    //"invitedId": selectedId.value,
     //"invitedName": userNameController.text.trim(),
-//  "invitedById": userDetailsModel.uID,
-//  "invitedByName": userDetailsModel.fullName,
-//  "invitedAt": DateTime.now().millisecondsSinceEpoch,
-      var groupId = snap.data().groupId;
-      var groupName = snap.data().groupName;
-      var groupImage = snap.data().groupImage;
-      var invitedById = snap.data().invitedById;
-      var invitedId = snap.data().invitedId;
+    //"invitedById": userDetailsModel.uID,
+    //"invitedByName": userDetailsModel.fullName,
+    //"invitedAt": DateTime.now().millisecondsSinceEpoch,
+    var groupId = snap.data().groupId;
+    var groupName = snap.data().groupName;
+    var groupImage = snap.data().groupImage;
+    var invitedById = snap.data().invitedById;
+    var invitedId = snap.data().invitedId;
+    var invitedAt = snap.data().invitedAt;
+    var invitedName = snap.data().invitedName;
+    var invitedByName = snap.data().invitedByName;
 
-      var invitedName = snap.data().invitedName;
-      var invitedByName = snap.data().invitedByName;
+    //      var message = snap.data().message;
+    //      var chatRoomId = context.params.documentId;
 
-//      var message = snap.data().message;
-//      var chatRoomId = context.params.documentId;
+    var imageUrl = groupImage;
+    var generalImage = "";
+    var myRetToken = "Not Retrieved Yet from Accounts Collection";
+    functions.logger.info(invitedId.toString());
+    //      functions.logger.info("Message By the Sender is:");
+    //      functions.logger.info(message.toString());
 
-      var imageUrl = groupImage;
-      var generalImage = "";
-      var myRetToken = "Not Retrieved Yet from Accounts Collection";
-      functions.logger.info(invitedId.toString());
-//      functions.logger.info("Message By the Sender is:");
-//      functions.logger.info(message.toString());
+    //  {
+    functions.logger.info("In Chat function: type is Else block");
+    //getting image and token of receiver from the firestore through admin sdk
+    await admin
+      .firestore()
+      .collection("Accounts")
+      .doc(invitedId)
+      .get()
+      .then((snapshot) => {
+        myRetToken = snapshot.data().fcmToken;
+      })
+      .catch((e) => {
+        functions.logger.log(e.toString());
+      });
+    //Now sending the notification using SingleToken function
+    await admin
+      .messaging()
+      .send({
+        token: myRetToken,
+        notification: {
+          title: `Group Invite`,
+          body: ` ${invitedByName} invited you to join ${groupName}`,
+          //Below line has use in terminated or background state of app
+          imageUrl: groupImage,
+        },
+        data: {
+          imageUrl: groupImage,
+          groupId: groupId,
+          screenName: "groupChatScreen",
+        },
+      })
+      .then((value) => {
+        functions.logger.log("Notifications sent to the invited person for group invite");
+      })
+      .catch((e) => {
+        functions.logger.log(e.toString());
+      });
 
-       {
-        functions.logger.info("In Chat function: type is Else block");
-        //getting image and token of receiver from the firestore through admin sdk
-        await admin
-          .firestore()
-          .collection("Accounts")
-          .doc(invitedId)
-          .get()
-          .then((snapshot) => {
-            myRetToken = snapshot.data().fcmToken;
-          })
-          .catch((e) => {
-            functions.logger.log(e.toString());
-          });
-        //Now sending the notification using SingleToken function
-        await admin
-            .messaging()
-            .send({
-              token: myRetToken,
-              notification: {
-                title: `Group Invite`,
-                body: ` ${invitedByName} invited you to join ${groupName}`,
-                //Below line has use in terminated or background state of app
-                imageUrl: groupImage,
-              },
-              data: {
-                imageUrl: groupImage,
-                groupId: groupId,
-                screenName: "groupChatScreen",
-              },
-            })
-            .then((value) => {
-              functions.logger.log("Notifications sent to the invited person for group invite");
-            })
-            .catch((e) => {
-              functions.logger.log(e.toString());
-            });
-      }
-    });
+    await admin
+      .firestore()
+      .collection("Notifications")
+      .add({
+        forId: invitedId,
+        image: groupImage,
+        message: `${invitedByName} invited you to ${groupName}`,
+        type: "groupInvite",
+        dataId: groupId,
+        createdAt: invitedAt,
+      });
+    // }
+  });

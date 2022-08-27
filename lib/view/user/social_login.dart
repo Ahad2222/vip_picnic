@@ -38,13 +38,15 @@ class SocialLogin extends StatelessWidget {
             socialLoginButton(
               Assets.imagesFacebook,
               'facebook',
-              () {},
+              () {
+                facebookAuthController.facebookSignIn(context);
+              },
             ),
-            socialLoginButton(
-              Assets.imagesApple,
-              'apple ID',
-              () {},
-            ),
+            // socialLoginButton(
+            //   Assets.imagesApple,
+            //   'apple ID',
+            //   () {},
+            // ),
             MyButton(
               buttonText: 'login'.tr.toUpperCase() +
                   ' with'.tr.toUpperCase() +

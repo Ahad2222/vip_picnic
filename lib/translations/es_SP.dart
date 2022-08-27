@@ -50,6 +50,8 @@ const Map<String, String> spanish = {
   'follower': 'Nuevo Seguidor',
   'inviteToEvent': 'Invitar a un Evento',
   'inviteToGroup': 'invitar a un Grupo',
+  'postLiked': 'Nuevo como en el post',
+  'postCommented': 'Nuevo comentario en la publicación',
   'settings': 'Ajustes',
   'profile': 'Perfil',
   'privacy': 'Privacidad',

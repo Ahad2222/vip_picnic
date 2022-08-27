@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Vip Picnic</string>
     <string name="facebook_app_id">464317302253959</string>
     <string name="fb_login_protocol_scheme">fb464317302253959</string>
     <string name="facebook_client_token">b14e35abec2e2556108d788bb1708f73</string>
