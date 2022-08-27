@@ -60,7 +60,7 @@ class Notifications extends StatelessWidget {
                   itemBuilder: (context, index) {
                     AlertModel amdl = AlertModel.fromJson(snapshot.data?.docs[index].data() as Map<String, dynamic>);
                     //+ type can be:
-                    //+ postLiked, postCommented, follow, groupInvite
+                    //+ postLiked, postCommented, follow, groupInvite, postTagged
                     return NotificationTiles(
                       profileImage: amdl.image,
                       dataId: amdl.dataId,
@@ -71,6 +71,7 @@ class Notifications extends StatelessWidget {
                       isGroupInvite: amdl.type == "groupInvite" ? true : false,
                       isPostLiked: amdl.type == "postLiked" ? true : false,
                       isPostCommented: amdl.type == "postCommented" ? true : false,
+                      isPostTagged: amdl.type == "postTagged" ? true : false,
                       time: amdl.createdAt,
                     );
                   },
@@ -136,10 +137,11 @@ class NotificationTiles extends StatelessWidget {
     this.isGroupInvite = false,
     this.isPostLiked = false,
     this.isPostCommented = false,
+    this.isPostTagged = false,
     this.isNewFollower = false,
   }) : super(key: key);
 
-  bool? isEventInvite, isGroupInvite, isNewFollower, isPostLiked, isPostCommented;
+  bool? isEventInvite, isGroupInvite, isNewFollower, isPostLiked, isPostCommented, isPostTagged;
   String? profileImage, docId, type, dataId;
   int? time;
 
@@ -177,10 +179,10 @@ class NotificationTiles extends StatelessWidget {
                   UserDetailsModel? umdl;
                   await ffstore.collection(accountsCollection).doc(dataId).get().then((value) {
                     Get.back();
-                    if(value.exists){
+                    if (value.exists) {
                       umdl = UserDetailsModel.fromJson(value.data() ?? {});
                       Get.to(() => OtherUserProfile(otherUserModel: umdl));
-                    }else{
+                    } else {
                       showMsg(context: context, msg: "Something went wrong. Please try again.");
                     }
                   });
@@ -191,19 +193,19 @@ class NotificationTiles extends StatelessWidget {
                   });
                   await groupChatController.getAGroupChatRoomInfo(dataId!).then((value) {
                     Get.back();
-                    if(value.exists){
+                    if (value.exists) {
                       Get.to(() => GroupChat(docs: value.data()));
-                    }else{
+                    } else {
                       showMsg(context: context, msg: "Something went wrong. Please try again.");
                     }
                   });
-                } else if ((isPostLiked ?? false) || (isPostCommented ?? false)) {
+                } else if ((isPostLiked ?? false) || (isPostCommented ?? false) || (isPostTagged ?? false)) {
                   await ffstore.collection(postsCollection).doc(dataId).get().then((value) {
                     Get.back();
-                    if(value.exists){
+                    if (value.exists) {
                       AddPostModel addPostModel = AddPostModel.fromJson(value.data() ?? {});
                       Get.to(() => PostDetails(isLikeByMe: false, postDocModel: addPostModel));
-                    }else{
+                    } else {
                       showMsg(context: context, msg: "Something went wrong. Please try again.");
                     }
                   });
@@ -259,7 +261,9 @@ class NotificationTiles extends StatelessWidget {
                                 ? 'postLiked'.tr
                                 : isPostCommented!
                                     ? 'postCommented'.tr
-                                    : '',
+                                    : isPostTagged!
+                                        ? 'postTagged'.tr
+                                        : '',
                 size: 18,
                 color: kSecondaryColor,
               ),

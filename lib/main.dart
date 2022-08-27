@@ -751,9 +751,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   print("Type is missed");
                 }
               }
-
-              //+ UserDetailsModel userLiker = await authController.getAUser(likerId);
-              //+ Get.to(() => Home(showAbleUserData: userLiker));
+            } else if (screenName == "postScreen") {
+              print("Screen is postScreen");
+              String postId = 'Nothing';
+              postId = message.data["postId"];
+              await ffstore.collection(postsCollection).doc(postId).get().then((value) {
+                AddPostModel addPostModel = AddPostModel.fromJson(value.data() ?? {});
+                Get.to(() => PostDetails(isLikeByMe: false, postDocModel: addPostModel));
+              });
             } else {
               print("Screen is in Else");
             }

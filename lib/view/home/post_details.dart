@@ -633,20 +633,20 @@ class CommentsTiles extends StatelessWidget {
                 spacing: 13,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  GestureDetector(
-                    onTap: () {},
-                    child: Image.asset(
-                      Assets.imagesComment,
-                      height: 20.86,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {},
-                    child: Image.asset(
-                      Assets.imagesHeart,
-                      height: 18.34,
-                    ),
-                  ),
+                  // GestureDetector(
+                  //   onTap: () {},
+                  //   child: Image.asset(
+                  //     Assets.imagesComment,
+                  //     height: 20.86,
+                  //   ),
+                  // ),
+                  // GestureDetector(
+                  //   onTap: () {},
+                  //   child: Image.asset(
+                  //     Assets.imagesHeart,
+                  //     height: 18.34,
+                  //   ),
+                  // ),
                 ],
               ),
             ),

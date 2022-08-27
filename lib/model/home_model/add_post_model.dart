@@ -11,6 +11,7 @@ class AddPostModel {
   int? createdAtMilliSeconds;
   List<String>? postImages;
   List<String>? taggedPeople;
+  List<String>? taggedPeopleToken;
   List<String>? likeIDs;
   int? commentCount;
   int? likeCount;
@@ -27,6 +28,7 @@ class AddPostModel {
     this.createdAtMilliSeconds,
     this.postImages,
     this.taggedPeople,
+    this.taggedPeopleToken,
     this.likeIDs,
     this.commentCount = 0,
     this.likeCount = 0,
@@ -45,6 +47,7 @@ class AddPostModel {
             ? DateTime.now().millisecondsSinceEpoch : json['createdAtMilliSeconds'],
         postImages: json['postImages'] != null ? List<String>.from(json['postImages'].map((x) => x)) : [],
         taggedPeople: json['taggedPeople'] != null ? List<String>.from(json['taggedPeople'].map((x) => x)) : [],
+    taggedPeopleToken: json['taggedPeopleToken'] != null ? List<String>.from(json['taggedPeopleToken'].map((x) => x)) : [],
         likeIDs: json['likeIDs'] != null ? List<String>.from(json['likeIDs'].map((x) => x)) : [],
         commentCount: json['commentCount'] ?? 0,
         likeCount: json['likeCount'] ?? 0,
@@ -62,6 +65,7 @@ class AddPostModel {
         'createdAtMilliSeconds': createdAtMilliSeconds ?? DateTime.now().millisecondsSinceEpoch,
         'postImages': postImages != null ? List<String>.from(postImages!.map((x) => x)) : [],
         'taggedPeople': taggedPeople != null ? List<String>.from(taggedPeople!.map((x) => x)) : [],
+        'taggedPeopleToken': taggedPeopleToken != null ? List<String>.from(taggedPeopleToken!.map((x) => x)) : [],
         'likeIDs': likeIDs != null ? List<String>.from(likeIDs!.map((x) => x)) : [],
         'commentCount': commentCount,
         'likeCount': likeCount,

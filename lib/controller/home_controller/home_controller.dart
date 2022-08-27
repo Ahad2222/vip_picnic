@@ -19,10 +19,12 @@ class HomeController extends GetxController {
   late final TextEditingController descriptionCon;
   late final TextEditingController tagCon;
   late final TextEditingController locationCon;
+
   List<String> imagesToUpload = [];
   DateTime createdAt = DateTime.now();
   DateFormat? format;
-  List<String>? taggedPeople;
+  List<String> taggedPeople = [];
+  List<String> taggedPeopleToken = [];
   int? commentCount;
   int? likeCount;
   int? shareCount;
@@ -30,7 +32,7 @@ class HomeController extends GetxController {
   final pageController = PageController();
   RxInt currentPost = 0.obs;
 
-  void getCurrentPostIndex(int index){
+  void getCurrentPostIndex(int index) {
     currentPost.value = index;
     update();
   }
@@ -76,21 +78,17 @@ class HomeController extends GetxController {
           postImages: imagesToUpload,
           postTitle: descriptionCon.text.trim(),
           taggedPeople: taggedPeople,
+          taggedPeopleToken: taggedPeopleToken,
           location: locationCon.text.trim(),
           createdAt: DateFormat.yMEd().add_jms().format(createdAt).toString(),
-          createdAtMilliSeconds:  DateTime.now().millisecondsSinceEpoch,
+          createdAtMilliSeconds: DateTime.now().millisecondsSinceEpoch,
           likeIDs: [],
           likeCount: likeCount,
           commentCount: commentCount,
           shareCount: shareCount,
         );
         log('Data assigned to POST MODEL CLASS!');
-        await posts
-            .doc(postID)
-            .set(
-              addPostModel.toJson(),
-            )
-            .then(
+        await posts.doc(postID).set(addPostModel.toJson()).then(
           (value) {
             log('Data set to FIREBASE!');
             selectedImages = [].obs;

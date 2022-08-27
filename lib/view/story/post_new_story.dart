@@ -179,7 +179,7 @@ class PostNewStory extends StatelessWidget {
             child: MyButton(
               onTap: () async {
                 //+ code to add the post to firestore goes here
-                loading(); //+ not showing up and at the end ther is no feedback
+                Get.dialog(loading(), barrierDismissible: false);
                 if (pickedImagePath.value != "" && pickedImage != null) {
                   await uploadPhoto();
                 }
@@ -204,7 +204,8 @@ class PostNewStory extends StatelessWidget {
                     storyText: descriptionController.text.trim(),
                   );
                   await ffstore.collection(storyCollection).add(storyModel.toJson());
-                  Navigator.pop(context);
+                  // Navigator.pop(context);
+                  Get.back();
                   Get.back();
                 }
               },

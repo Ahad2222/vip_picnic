@@ -379,19 +379,11 @@ exports.postLikedNotification = functions.firestore
     var posterFcmToken;
     // var time = snap.data().time;
 
-    // functions.logger.log(
-      // `LikerID Profile Details: ${posterId}, ${followedName}, ${followedImageUrl},`
-    // );
-
     //Getting Liker Profile Details
     var likerId = likesList[likesList.length - 1];
     var likerName;
     var likerImageUrl;
     var likerFcmToken;
-
-    // functions.logger.log(
-    // `LikerID Profile Details: ${likerId}, ${likerName}, ${likerImageUrl}, ${likerFcmToken},`
-    // );
 
     if (oldData.likeCount < newData.likeCount) {
       await admin
@@ -485,19 +477,11 @@ exports.postCommentedNotification = functions.firestore
     var posterFcmToken;
     // var time = snap.data().time;
 
-    // functions.logger.log(
-      // `LikerID Profile Details: ${posterId}, ${followedName}, ${followedImageUrl},`
-    // );
-
     //Getting Liker Profile Details
     var commenterId = commentData.commenterID;
     var commenterName;
     var commenterImageUrl;
     var commenterFcmToken;
-
-    // functions.logger.log(
-    // `LikerID Profile Details: ${commenterId}, ${commenterName}, ${commenterImageUrl}, ${commenterFcmToken},`
-    // );
 
     await admin
       .firestore()
@@ -651,4 +635,64 @@ exports.notifyInvitedAboutGroupInvite = functions.firestore
         createdAt: invitedAt,
       });
     // }
+  });
+
+
+//------------------------------------------------------Notification for Tag Posts ---------------------------------------
+exports.taggedPeopleNotification = functions.firestore
+  .document("/Posts/{documentId}")
+  .onCreate(async (snap, context) => {
+
+    const tagPeopleTokenList = snap.data().taggedPeopleToken;
+    const posterName = snap.data().postBy;
+    const postId = snap.data().postID;
+    const posterImage = snap.data().profileImage;
+    const posterId = snap.data().uID;
+    const taggedPeopleIds = snap.data().taggedPeople;
+
+
+    //Sending notification to Post Poster
+    await admin
+      .messaging()
+      .sendMulticast({
+        tokens: tagPeopleTokenList,
+        notification: {
+          title: `Tagged in a post`,
+          body: `${posterName} tagged you in their post`,
+          imageUrl: posterImage,
+        },
+        data: {
+          id: posterId,
+          postId: postId,
+          posterName: posterName,
+          imageUrl: posterImage,
+          screenName: "postScreen",
+          type: "postTagged",
+        },
+      })
+      .then((value) => {
+        functions.logger.log(
+          "Notification for tag post send to tag people "
+        );
+      })
+      .catch((e) => {
+        functions.logger.log(e.toString());
+      });
+
+      for (const index in taggedPeopleIds) {  
+        await admin
+      .firestore()
+      .collection("Notifications")
+      .add({
+        forId: taggedPeopleIds[index],
+        image: posterImage,
+        message: `${posterName} tagged you in their post`,
+        type: "postTagged",
+        dataId: postId,
+        createdAt: Date.now(),
+      });
+        console.log(`A JavaScript type is: ${type}`)
+      }
+    
+
   });

@@ -54,6 +54,7 @@ const Map<String, String> english = {
   'inviteToGroup': 'Invite to a Group',
   'postLiked': 'New like on post',
   'postCommented': 'New Comment on post',
+  'postTagged': 'Tagged on a post',
   'settings': 'Settings',
   'profile': 'Profile',
   'privacy': 'Privacy',

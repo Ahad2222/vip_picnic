@@ -47,13 +47,13 @@ class Settings extends StatelessWidget {
               () => Profile(),
             ),
           ),
-          settingsTiles(
-            context,
-            icon: Assets.imagesSimpleLock,
-            iconSize: 24.6,
-            title: 'privacy'.tr,
-            onTap: () {},
-          ),
+          // settingsTiles(
+          //   context,
+          //   icon: Assets.imagesSimpleLock,
+          //   iconSize: 24.6,
+          //   title: 'privacy'.tr,
+          //   onTap: () {},
+          // ),
           settingsTiles(
             context,
             icon: Assets.imagesLanguage,

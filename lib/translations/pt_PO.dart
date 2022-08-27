@@ -53,6 +53,7 @@ const Map<String, String> portuguese = {
   'inviteToGroup': 'Convidar para um Grupo',
   'postLiked': 'Novo like no post',
   'postCommented': 'Novo comentário na postagem',
+  'postTagged': 'Marcado em uma postagem',
   'settings': 'Definições',
   'profile': 'Perfil',
   'privacy': 'Privacidade',
