@@ -40,7 +40,7 @@ class _StoryState extends State<Story> {
 
     isLoading = true;
     int twentyFourHourDifferenceMillisecondsSinceEpoch =
-        DateTime.now().subtract(Duration(days: 1)).millisecondsSinceEpoch;
+        DateTime.now().subtract(Duration(hours: 24)).millisecondsSinceEpoch;
     ffstore
         .collection(storyCollection)
         .where("storyPersonId", isEqualTo: widget.storyPersonId)
@@ -48,7 +48,7 @@ class _StoryState extends State<Story> {
         .orderBy("createdAt", descending: true)
         .get()
         .then((value) {
-      log("before the loop");
+      log("before the loop ${value.docs.length}");
       value.docs.forEach((element) {
         log("inside the loop");
         storyModel = StoryModel.fromJson(element.data());

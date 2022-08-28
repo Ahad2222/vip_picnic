@@ -132,6 +132,7 @@ class Home extends StatelessWidget {
                 userDetailsModel = UserDetailsModel.fromJson(snapshot.data!.data() as Map<String, dynamic>);
                 var followedListToBeChecked =
                     userDetailsModel.iFollowed!.length > 0 ? userDetailsModel.iFollowed : ["something"];
+                followedListToBeChecked?.add(auth.currentUser?.uid ?? "");
                 return ListView(
                   shrinkWrap: true,
                   physics: BouncingScrollPhysics(),
@@ -151,6 +152,7 @@ class Home extends StatelessWidget {
                             stream: ffstore
                                 .collection("Stories")
                                 .where("storyPersonId", whereIn: followedListToBeChecked)
+                                .where("createdAt", isGreaterThan: DateTime.now().subtract(Duration(minutes: 1440)).millisecondsSinceEpoch)
                                 .orderBy("createdAt", descending: true)
                                 .snapshots(),
                             builder: (
@@ -193,6 +195,7 @@ class Home extends StatelessWidget {
                                             child: stories(
                                               context,
                                               storyModel.storyPersonImage ?? "",
+                                              storyModel.storyPersonId ?? "",
                                               storyModel.storyPersonName,
                                             ),
                                           );
@@ -368,6 +371,7 @@ class Home extends StatelessWidget {
   Widget stories(
     BuildContext context,
     String profileImage,
+    String userId,
     name,
   ) {
     return Padding(
@@ -397,7 +401,7 @@ class Home extends StatelessWidget {
             ],
           ),
           MyText(
-            text: name,
+            text: userId == auth.currentUser?.uid ? "My Story" : name,
             size: 12,
             weight: FontWeight.w600,
             color: kSecondaryColor,

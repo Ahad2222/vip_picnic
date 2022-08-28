@@ -35,6 +35,14 @@ class GoogleAuthController extends GetxController {
       );
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       final GoogleSignInAuthentication? gAuth = await googleUser?.authentication;
+      if(googleUser == null){
+        Get.back();
+        showMsg(
+          context: context,
+          msg: "Cancelled",
+          bgColor: Colors.red,
+        );
+      }
 
       if (gAuth!.accessToken != null || gAuth.idToken != null) {
         final credential = GoogleAuthProvider.credential(
@@ -162,8 +170,17 @@ class GoogleAuthController extends GetxController {
             });
           }
         }
+        else{
+          Get.back();
+          showMsg(
+            context: context,
+            msg: "Couldn't sign you in.",
+            bgColor: Colors.red,
+          );
+        }
       }
     } on FirebaseAuthException catch (e) {
+      Get.back();
       showMsg(
         context: context,
         msg: e.message,
