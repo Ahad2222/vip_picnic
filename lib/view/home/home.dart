@@ -132,7 +132,7 @@ class Home extends StatelessWidget {
                 userDetailsModel = UserDetailsModel.fromJson(snapshot.data!.data() as Map<String, dynamic>);
                 var followedListToBeChecked =
                     userDetailsModel.iFollowed!.length > 0 ? userDetailsModel.iFollowed : ["something"];
-                followedListToBeChecked?.add(auth.currentUser?.uid ?? "");
+                // followedListToBeChecked?.add(auth.currentUser?.uid ?? "");
                 return ListView(
                   shrinkWrap: true,
                   physics: BouncingScrollPhysics(),
@@ -148,6 +148,96 @@ class Home extends StatelessWidget {
                         physics: const BouncingScrollPhysics(),
                         children: [
                           addStoryButton(context),
+                          StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                            stream: ffstore
+                                .collection("Stories")
+                                .where("storyPersonId", isEqualTo: auth.currentUser?.uid)
+                                .where("createdAt", isGreaterThan: DateTime.now().subtract(Duration(minutes: 1440)).millisecondsSinceEpoch)
+                                .orderBy("createdAt", descending: true)
+                                .snapshots(),
+                            builder: (
+                                BuildContext context,
+                                AsyncSnapshot<QuerySnapshot> snapshot,
+                                ) {
+                              // List<String> storyUser = [];
+                              // log("inside stream-builder");
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                // log("inside stream-builder in waiting state");
+                                return const SizedBox();
+                              } else if (snapshot.connectionState == ConnectionState.active ||
+                                  snapshot.connectionState == ConnectionState.done) {
+                                if (snapshot.hasError) {
+                                  return const SizedBox();
+                                } else if (snapshot.hasData) {
+                                  // log("inside hasData and ${snapshot.data!.docs}");
+                                  if (snapshot.data!.docs.length > 0) {
+                                    return ListView.builder(
+                                      shrinkWrap: true,
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: snapshot.data!.docs.length,
+                                      padding: const EdgeInsets.only(
+                                        right: 8,
+                                      ),
+                                      physics: const BouncingScrollPhysics(),
+                                      itemBuilder: (context, index) {
+                                        StoryModel storyModel = StoryModel.fromJson(
+                                            snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                                          return GestureDetector(
+                                            onTap: () => Get.to(
+                                                  () => Story(
+                                                profileImage: storyModel.storyPersonImage,
+                                                name: storyModel.storyPersonName,
+                                                storyPersonId: storyModel.storyPersonId,
+                                              ),
+                                            ),
+                                            child: stories(
+                                              context,
+                                              storyModel.storyPersonImage ?? "",
+                                              storyModel.storyPersonId ?? "",
+                                              storyModel.storyPersonName,
+                                            ),
+                                          );
+                                      },
+                                    );
+                                    // ListView.builder(
+                                    //   shrinkWrap: true,
+                                    //   physics: BouncingScrollPhysics(),
+                                    //   padding: EdgeInsets.symmetric(
+                                    //     vertical: 30,
+                                    //   ),
+                                    //   itemCount: snapshot.data!.docs.length,
+                                    //   itemBuilder: (context, index) {
+                                    //     AddPostModel addPostModel =
+                                    //     AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                                    //     return PostWidget(
+                                    //       postDocModel: addPostModel,
+                                    //       postID: addPostModel.postID,
+                                    //       isLikeByMe: addPostModel.likeIDs!.asMap().containsValue(auth.currentUser!.uid),
+                                    //       profileImage: addPostModel.profileImage,
+                                    //       name: addPostModel.postBy,
+                                    //       postedTime: addPostModel.createdAt,
+                                    //       title: addPostModel.postTitle,
+                                    //       likeCount: addPostModel.likeIDs!.length,
+                                    //       isMyPost: false,
+                                    //       postImage: addPostModel.postImages!,
+                                    //     );
+                                    //   },
+                                    // );
+                                  } else {
+                                    return const SizedBox();
+                                  }
+                                } else {
+                                  // log("in else of hasData done and: ${snapshot.connectionState} and"
+                                  //     " snapshot.hasData: ${snapshot.hasData}");
+                                  return const SizedBox();
+                                }
+                              } else {
+                                // log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+                                return const SizedBox();
+                              }
+                            },
+                          ),
+                          Container(height: 20, width: 5, color: Colors.red),
                           StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                             stream: ffstore
                                 .collection("Stories")
