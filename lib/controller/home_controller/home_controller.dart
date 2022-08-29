@@ -83,9 +83,9 @@ class HomeController extends GetxController {
           createdAt: DateFormat.yMEd().add_jms().format(createdAt).toString(),
           createdAtMilliSeconds: DateTime.now().millisecondsSinceEpoch,
           likeIDs: [],
-          likeCount: likeCount,
-          commentCount: commentCount,
-          shareCount: shareCount,
+          likeCount: 0,
+          commentCount: 0,
+          shareCount: 0,
         );
         log('Data assigned to POST MODEL CLASS!');
         await posts.doc(postID).set(addPostModel.toJson()).then(

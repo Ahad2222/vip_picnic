@@ -1,6 +1,8 @@
 const functions = require("firebase-functions");
 // The Firebase Admin SDK to access Firestore.
 const admin = require('firebase-admin');
+const { getFirestore } = require('firebase-admin/firestore');
+// import { getFirestore } from 'firebase-admin/firestore'; 
 admin.initializeApp();
 admin.firestore().settings({ ignoreUndefinedProperties: true });
 
@@ -679,20 +681,90 @@ exports.taggedPeopleNotification = functions.firestore
         functions.logger.log(e.toString());
       });
 
-      for (const index in taggedPeopleIds) {  
-        await admin
-      .firestore()
-      .collection("Notifications")
-      .add({
-        forId: taggedPeopleIds[index],
-        image: posterImage,
-        message: `${posterName} tagged you in their post`,
-        type: "postTagged",
-        dataId: postId,
-        createdAt: Date.now(),
-      });
-        console.log(`A JavaScript type is: ${type}`)
-      }
-    
+    for (const index in taggedPeopleIds) {
+      await admin
+        .firestore()
+        .collection("Notifications")
+        .add({
+          forId: taggedPeopleIds[index],
+          image: posterImage,
+          message: `${posterName} tagged you in their post`,
+          type: "postTagged",
+          dataId: postId,
+          createdAt: Date.now(),
+        });
+      console.log(`A JavaScript type is: ${type}`)
+    }
 
+
+  });
+
+exports.taggedPeopleNotificationOnUpdate = functions.firestore
+  .document("/Posts/{documentId}")
+  .onUpdate(async (snap, context) => {
+
+    const tagPeopleTokenList = change.after.data().taggedPeopleToken;
+    const posterName = change.after.data().postBy;
+    const postId = change.after.data().postID;
+    const posterImage = change.after.data().profileImage;
+    const posterId = change.after.data().uID;
+    // const taggedPeopleIdsOlder = change.before.data().taggedPeople;
+    // const taggedPeopleIdsNewer = change.after.data().taggedPeople;
+
+    //Sending notification to Post Poster
+    await admin
+      .messaging()
+      .sendMulticast({
+        tokens: tagPeopleTokenList,
+        notification: {
+          title: `Tagged in a post`,
+          body: `${posterName} tagged you in their post`,
+          imageUrl: posterImage,
+        },
+        data: {
+          id: posterId,
+          postId: postId,
+          posterName: posterName,
+          imageUrl: posterImage,
+          screenName: "postScreen",
+          type: "postTagged",
+        },
+      })
+      .then((value) => {
+        functions.logger.log(
+          "Notification for tag post send to tag people on update"
+        );
+      })
+      .catch((e) => {
+        functions.logger.log(e.toString());
+      });
+
+    // for (let i = 0; i < cars.length; i++) {
+    //   await admin
+    // .firestore()
+    // .collection("Notifications")
+    // .add({
+    //   forId: taggedPeopleIds[index],
+    //   image: posterImage,
+    //   message: `${posterName} tagged you in their post`,
+    //   type: "postTagged",
+    //   dataId: postId,
+    //   createdAt: Date.now(),
+    // });
+    //   console.log(`A JavaScript type is: ${type}`)
+    // }
+
+
+  });
+
+exports.deletingCommentsOnPostDeletion = functions.firestore
+  .document("/Posts/{documentId}")
+  .onDelete(async (snap, context) => {
+    const postId = context.params.documentId;
+
+    functions.logger.log("Post deleted and also deleting comments: " + postId);
+    const fs = getFirestore();
+    await fs.recursiveDelete(admin.firestore().collection(`/Posts/${postId}/comments`)).catch((e) => {
+      functions.logger.log(e.toString());
+    });
   });

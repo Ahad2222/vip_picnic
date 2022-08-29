@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,7 +11,9 @@ import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/model/comment_model/comment_model.dart';
 import 'package:vip_picnic/model/home_model/add_post_model.dart';
+import 'package:vip_picnic/utils/collections.dart';
 import 'package:vip_picnic/utils/instances.dart';
+import 'package:vip_picnic/view/home/edit_post.dart';
 import 'package:vip_picnic/view/widget/curved_header.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
@@ -21,10 +24,12 @@ import 'package:vip_picnic/view/widget/snack_bar.dart';
 class PostDetails extends StatefulWidget {
   PostDetails({
     this.isLikeByMe = false,
+    this.isMyPost = false,
     this.postDocModel,
   });
 
   bool? isLikeByMe;
+  bool? isMyPost;
   AddPostModel? postDocModel;
 
   @override
@@ -33,16 +38,25 @@ class PostDetails extends StatefulWidget {
 
 class _PostDetailsState extends State<PostDetails> {
   Rx<AddPostModel> addPostModel = AddPostModel().obs;
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? postDataListener;
 
   @override
   void initState() {
     // TODO: implement initState
     addPostModel.value = widget.postDocModel!;
-    ffstore.collection(postsCollection).doc(widget.postDocModel!.postID).snapshots().listen((event) {
+    postDataListener = ffstore.collection(postsCollection).doc(widget.postDocModel!.postID).snapshots().listen((event) {
       addPostModel.value = AddPostModel.fromJson(event.data() ?? {});
       log("inside stream and addPostModel: ${addPostModel.toJson()}");
     });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    if (postDataListener != null) postDataListener?.cancel();
+    log("after disposing post details listener");
+    super.dispose();
   }
 
   @override
@@ -72,6 +86,75 @@ class _PostDetailsState extends State<PostDetails> {
                       ),
                     ),
                   ),
+                  actions: [
+                    widget.isMyPost!
+                        ? PopupMenuButton(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            itemBuilder: (context) {
+                              return [
+                                PopupMenuItem(
+                                  child: MyText(
+                                    onTap: () => Get.to(
+                                      () => EditPost(postModel: addPostModel.value),
+                                    ),
+                                    text: 'editPost'.tr,
+                                    size: 14,
+                                    color: kSecondaryColor,
+                                  ),
+                                ),
+                                PopupMenuItem(
+                                  child: MyText(
+                                    onTap: () {
+                                      Get.defaultDialog(
+                                          title: "Are you sure?",
+                                          content: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 0),
+                                            child: Text(
+                                                "This can't be undone. Are you sure you want to delete this post?"),
+                                          ),
+                                          textConfirm: "Yes",
+                                          confirmTextColor: Colors.red,
+                                          textCancel: "No",
+                                          cancelTextColor: Colors.black,
+                                          onConfirm: () async {
+                                            try {
+                                              List<String> imageUrlsList = widget.postDocModel?.postImages ?? [];
+                                              Get.back();
+                                              Get.back();
+                                              Get.back();
+                                              Get.dialog(loading());
+                                              await posts.doc(addPostModel.value.postID).delete();
+                                              Get.back();
+                                              // await posts.doc(addPostModel.value.postID).collection("comments").delete();
+                                              imageUrlsList.forEach((element) async {
+                                                await fstorage.refFromURL(element).delete();
+                                              });
+                                            } catch (e) {
+                                              print(e);
+                                              showMsg(
+                                                  context: context,
+                                                  msg: "Something went wrong during post deletion. Please try again.");
+                                              log("error in post deletion $e");
+                                            }
+                                          });
+                                    },
+                                    text: 'deletePost'.tr,
+                                    size: 14,
+                                    color: kSecondaryColor,
+                                  ),
+                                ),
+                              ];
+                            },
+                            child: Icon(
+                              Icons.more_vert,
+                              color: kDarkBlueColor.withOpacity(0.60),
+                              size: 30,
+                            ),
+                          )
+                        : SizedBox(),
+                  ],
                   flexibleSpace: FlexibleSpaceBar(
                     background: Stack(
                       children: [

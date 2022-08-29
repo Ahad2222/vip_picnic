@@ -42,7 +42,7 @@ const Map<String, String> english = {
   'following': 'Following',
   'followers': 'Followers',
   'editAccount': 'Edit Account',
-  'yourPost': 'Your Post',
+  'yourPost': 'Your Posts',
   'follow': 'Follow',
   'message': 'Message',
   'bio': 'Bio:',

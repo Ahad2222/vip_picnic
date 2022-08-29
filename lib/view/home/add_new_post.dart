@@ -383,7 +383,7 @@ class AddNewPost extends StatelessWidget {
                                   userIds.remove(userList[index]['id']);
                                   selectedUsers.remove(userList[index]['id']);
                                   homeController.taggedPeople.remove(userList[index]['id']);
-                                  homeController.taggedPeople.remove(userList[index]['token']);
+                                  homeController.taggedPeopleToken.remove(userList[index]['token']);
                                 },
                                 child: Icon(
                                   Icons.clear,

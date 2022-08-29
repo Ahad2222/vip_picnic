@@ -165,7 +165,7 @@ class Profile extends StatelessWidget {
                           AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
                       return GestureDetector(
                         onTap: () {
-                          Get.to(() => PostDetails(isLikeByMe: false, postDocModel: postModel));
+                          Get.to(() => PostDetails(isMyPost: true, isLikeByMe: false, postDocModel: postModel));
                         },
                         child: Image.network(
                           postModel.postImages![0],
@@ -190,34 +190,6 @@ class Profile extends StatelessWidget {
                       );
                     },
                   );
-                  //   ListView.builder(
-                  //   shrinkWrap: true,
-                  //   physics: BouncingScrollPhysics(),
-                  //   padding: EdgeInsets.symmetric(
-                  //     vertical: 30,
-                  //   ),
-                  //   itemCount: snapshot.data!.docs.length,
-                  //   itemBuilder: (context, index) {
-                  //     AddPostModel addPostModel =
-                  //     AddPostModel.fromJson(
-                  //         snapshot.data!.docs[index].data()
-                  //         as Map<String, dynamic>);
-                  //     return PostWidget(
-                  //       postDocModel: addPostModel,
-                  //       postID: addPostModel.postID,
-                  //       isLikeByMe: addPostModel.likeIDs!
-                  //           .asMap()
-                  //           .containsValue(auth.currentUser!.uid),
-                  //       profileImage: addPostModel.profileImage,
-                  //       name: addPostModel.postBy,
-                  //       postedTime: addPostModel.createdAt,
-                  //       title: addPostModel.postTitle,
-                  //       likeCount: addPostModel.likeIDs!.length,
-                  //       isMyPost: false,
-                  //       postImage: addPostModel.postImages!,
-                  //     );
-                  //   },
-                  // );
                 } else {
                   return noPostYet();
                 }

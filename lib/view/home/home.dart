@@ -26,6 +26,7 @@ import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:vip_picnic/view/widget/my_textfields.dart';
 
 class Home extends StatelessWidget {
+  bool hasMyStory = false;
   @override
   Widget build(BuildContext context) {
     log('${userDetailsModel.profileImageUrl!} Main BUILD');
@@ -152,13 +153,15 @@ class Home extends StatelessWidget {
                             stream: ffstore
                                 .collection("Stories")
                                 .where("storyPersonId", isEqualTo: auth.currentUser?.uid)
-                                .where("createdAt", isGreaterThan: DateTime.now().subtract(Duration(minutes: 1440)).millisecondsSinceEpoch)
+                                .where("createdAt",
+                                    isGreaterThan:
+                                        DateTime.now().subtract(Duration(minutes: 1440)).millisecondsSinceEpoch)
                                 .orderBy("createdAt", descending: true)
                                 .snapshots(),
                             builder: (
-                                BuildContext context,
-                                AsyncSnapshot<QuerySnapshot> snapshot,
-                                ) {
+                              BuildContext context,
+                              AsyncSnapshot<QuerySnapshot> snapshot,
+                            ) {
                               // List<String> storyUser = [];
                               // log("inside stream-builder");
                               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -171,6 +174,7 @@ class Home extends StatelessWidget {
                                 } else if (snapshot.hasData) {
                                   // log("inside hasData and ${snapshot.data!.docs}");
                                   if (snapshot.data!.docs.length > 0) {
+                                    hasMyStory = true;
                                     return ListView.builder(
                                       shrinkWrap: true,
                                       scrollDirection: Axis.horizontal,
@@ -182,21 +186,21 @@ class Home extends StatelessWidget {
                                       itemBuilder: (context, index) {
                                         StoryModel storyModel = StoryModel.fromJson(
                                             snapshot.data!.docs[index].data() as Map<String, dynamic>);
-                                          return GestureDetector(
-                                            onTap: () => Get.to(
-                                                  () => Story(
-                                                profileImage: storyModel.storyPersonImage,
-                                                name: storyModel.storyPersonName,
-                                                storyPersonId: storyModel.storyPersonId,
-                                              ),
+                                        return GestureDetector(
+                                          onTap: () => Get.to(
+                                            () => Story(
+                                              profileImage: storyModel.storyPersonImage,
+                                              name: storyModel.storyPersonName,
+                                              storyPersonId: storyModel.storyPersonId,
                                             ),
-                                            child: stories(
-                                              context,
-                                              storyModel.storyPersonImage ?? "",
-                                              storyModel.storyPersonId ?? "",
-                                              storyModel.storyPersonName,
-                                            ),
-                                          );
+                                          ),
+                                          child: stories(
+                                            context,
+                                            storyModel.storyPersonImage ?? "",
+                                            storyModel.storyPersonId ?? "",
+                                            storyModel.storyPersonName,
+                                          ),
+                                        );
                                       },
                                     );
                                     // ListView.builder(
@@ -237,12 +241,14 @@ class Home extends StatelessWidget {
                               }
                             },
                           ),
-                          Container(height: 20, width: 5, color: Colors.red),
+                          // if (hasMyStory) Container(height: 20, width: 5, color: Colors.red),
                           StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                             stream: ffstore
                                 .collection("Stories")
                                 .where("storyPersonId", whereIn: followedListToBeChecked)
-                                .where("createdAt", isGreaterThan: DateTime.now().subtract(Duration(minutes: 1440)).millisecondsSinceEpoch)
+                                .where("createdAt",
+                                    isGreaterThan:
+                                        DateTime.now().subtract(Duration(minutes: 1440)).millisecondsSinceEpoch)
                                 .orderBy("createdAt", descending: true)
                                 .snapshots(),
                             builder: (
@@ -908,7 +914,8 @@ class _PostWidgetState extends State<PostWidget> {
                         ),
                       ),
                       StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                        stream: ffstore.collection(postsCollection).doc(widget.postID).collection("comments").snapshots(),
+                        stream:
+                            ffstore.collection(postsCollection).doc(widget.postID).collection("comments").snapshots(),
                         builder: (
                           BuildContext context,
                           AsyncSnapshot<QuerySnapshot> snapshot,
