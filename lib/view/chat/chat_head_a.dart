@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
@@ -228,85 +229,116 @@ class SimpleChatHeads extends StatelessWidget {
     time,
     Map<String, dynamic>? docs,
   }) {
-    return Container(
-      margin: EdgeInsets.only(
+    return Padding(
+      padding: const EdgeInsets.only(
         bottom: 10,
       ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Color(0xffF5F5F6),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: ListTile(
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ChatScreen(
-                receiveImage: profileImage,
-                receiveName: name,
-                docs: docs,
+      child: Slidable(
+        endActionPane: ActionPane(
+          extentRatio: 0.3,
+          motion: const ScrollMotion(),
+          children: [
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    height: 51,
+                    width: 62,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.red.withOpacity(0.1),
+                    ),
+                    child: Center(
+                      child: Image.asset(
+                        Assets.imagesDeleteMsg,
+                        height: 24,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
+          ],
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: Color(0xffF5F5F6),
           ),
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 15,
-            vertical: 10,
-          ),
-          leading: Container(
-            height: 56.4,
-            width: 56.4,
-            padding: EdgeInsets.all(5),
-            decoration: BoxDecoration(
-              color: kPrimaryColor,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: kBlackColor.withOpacity(0.16),
-                  blurRadius: 6,
-                  offset: Offset(0, 0),
-                ),
-              ],
-            ),
-            child: Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(100),
-                child: Image.network(
-                  '$profileImage',
-                  height: height(context, 1.0),
-                  width: width(context, 1.0),
-                  fit: BoxFit.cover,
+          child: Material(
+            color: Colors.transparent,
+            child: ListTile(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ChatScreen(
+                    receiveImage: profileImage,
+                    receiveName: name,
+                    docs: docs,
+                  ),
                 ),
               ),
-            ),
-          ),
-          title: MyText(
-            text: '$name',
-            size: 14,
-            weight: FontWeight.w600,
-            color: kSecondaryColor,
-          ),
-          subtitle: MyText(
-            paddingTop: 8,
-            text: '$msg',
-            size: 14,
-            weight: FontWeight.w300,
-            color: kSecondaryColor,
-            maxLines: 1,
-            overFlow: TextOverflow.ellipsis,
-          ),
-          trailing: Column(
-            children: [
-              MyText(
-                paddingTop: 5,
-                text:
-                    "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[0]}"
-                    ":"
-                    "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[1]}",
-                weight: FontWeight.w300,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 15,
+                vertical: 10,
+              ),
+              leading: Container(
+                height: 56.4,
+                width: 56.4,
+                padding: EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: kPrimaryColor,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: kBlackColor.withOpacity(0.16),
+                      blurRadius: 6,
+                      offset: Offset(0, 0),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(100),
+                    child: Image.network(
+                      '$profileImage',
+                      height: height(context, 1.0),
+                      width: width(context, 1.0),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+              title: MyText(
+                text: '$name',
+                size: 14,
+                weight: FontWeight.w600,
                 color: kSecondaryColor,
               ),
-            ],
+              subtitle: MyText(
+                paddingTop: 8,
+                text: '$msg',
+                size: 14,
+                weight: FontWeight.w300,
+                color: kSecondaryColor,
+                maxLines: 1,
+                overFlow: TextOverflow.ellipsis,
+              ),
+              trailing: Column(
+                children: [
+                  MyText(
+                    paddingTop: 5,
+                    text:
+                        "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[0]}"
+                        ":"
+                        "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[1]}",
+                    weight: FontWeight.w300,
+                    color: kSecondaryColor,
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -320,14 +352,14 @@ class GroupChatHeads extends StatelessWidget {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: ffstore
           .collection(groupChatCollection)
-      // .where("users", arrayContains: userDetailsModel.uID)
+          // .where("users", arrayContains: userDetailsModel.uID)
           .where("notDeletedFor", arrayContains: userDetailsModel.uID)
           .orderBy('lastMessageAt', descending: true)
           .snapshots(),
       builder: (
-          BuildContext context,
-          AsyncSnapshot<QuerySnapshot> snapshot,
-          ) {
+        BuildContext context,
+        AsyncSnapshot<QuerySnapshot> snapshot,
+      ) {
         log("inside stream-builder");
         if (snapshot.connectionState == ConnectionState.waiting) {
           log("inside stream-builder in waiting state");
@@ -411,10 +443,16 @@ class GroupChatHeads extends StatelessWidget {
           onTap: () async {
             log("clicked on group chat head");
             try {
-              await groupChatController.getAGroupChatRoomInfo(groupId!).then((value) => Get.to(() =>  GroupChat(docs: value.data(),)));
+              await groupChatController
+                  .getAGroupChatRoomInfo(groupId!)
+                  .then((value) => Get.to(() => GroupChat(
+                        docs: value.data(),
+                      )));
             } catch (e) {
               log("error in getting the group chat info is: $e");
-              showMsg(context: context, msg: "Please make sure you are connected to internet");
+              showMsg(
+                  context: context,
+                  msg: "Please make sure you are connected to internet");
             }
             //     Navigator.push(
             //   context,
@@ -423,7 +461,6 @@ class GroupChatHeads extends StatelessWidget {
             //   ),
             // ),
           },
-
           contentPadding: EdgeInsets.symmetric(
             horizontal: 15,
             vertical: 10,
@@ -458,7 +495,7 @@ class GroupChatHeads extends StatelessWidget {
               MyText(
                 paddingBottom: 5,
                 text:
-                "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[0]}"
+                    "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[0]}"
                     ":"
                     "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[1]}",
                 weight: FontWeight.w300,

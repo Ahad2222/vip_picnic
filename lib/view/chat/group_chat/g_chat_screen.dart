@@ -39,7 +39,8 @@ class GroupChat extends StatefulWidget {
 }
 
 class _GroupChatState extends State<GroupChat> {
-  Rx<TextEditingController> messageEditingController = TextEditingController().obs;
+  Rx<TextEditingController> messageEditingController =
+      TextEditingController().obs;
   ScrollController scrollController = ScrollController();
 
   String chatRoomID = "";
@@ -333,7 +334,8 @@ class _GroupChatState extends State<GroupChat> {
       //     "notDeletedFor": FieldValue.arrayUnion([anotherUserID])
       //   });
       // }
-      groupChatController.addConversationMessage(chatRoomID, time, "text", messageMap, messageText);
+      groupChatController.addConversationMessage(
+          chatRoomID, time, "text", messageMap, messageText);
       // log("index is: ${lastIndex.value}");
     } else if (imageFile != null && (imageUrl != null || imageUrl != "")) {
       var time = DateTime.now().millisecondsSinceEpoch;
@@ -358,7 +360,8 @@ class _GroupChatState extends State<GroupChat> {
       //     "notDeletedFor": FieldValue.arrayUnion([anotherUserID])
       //   });
       // }
-      groupChatController.addConversationMessage(chatRoomID, time, "image", messageMap, imageUrl!);
+      groupChatController.addConversationMessage(
+          chatRoomID, time, "image", messageMap, imageUrl!);
       messageEditingController.value.text = "";
 
       imageUrl = "";
@@ -414,12 +417,15 @@ class _GroupChatState extends State<GroupChat> {
             // shrinkWrap: true,
             itemCount: snapshot.data?.docs.length,
             itemBuilder: (context, index) {
-              Map<String, dynamic> data = snapshot.data?.docs[index].data() as Map<String, dynamic>;
-              print("snapshot.data.docs[index].data()[type] is: ${data["type"]}");
+              Map<String, dynamic> data =
+                  snapshot.data?.docs[index].data() as Map<String, dynamic>;
+              print(
+                  "snapshot.data.docs[index].data()[type] is: ${data["type"]}");
               //TODO: Beware, here the widgets to show data start.
               //TODO: Beware, here the widgets to show data start.
               String type = data["type"];
-              String message = data["message"] != null ? data["message"] : "what is this?";
+              String message =
+                  data["message"] != null ? data["message"] : "what is this?";
               bool sendByMe = userDetailsModel.uID == data["sendById"];
               String time = data["time"].toString();
               String senderImage = data["sendByImage"];
@@ -452,15 +458,25 @@ class _GroupChatState extends State<GroupChat> {
               } else {
                 ampm = 'am';
               }
-              return MessageBubbles(
-                receiveImage: senderImage,
-                msg: message,
-                time: "${hour.toString()}:"
-                    "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
-                    "${ampm}",
-                senderType: !sendByMe ? 'receiver' : 'sender',
-                mediaType: type,
-              );
+              if (!sendByMe) {
+                return LeftMessageBubble(
+                  receiveImage: senderImage,
+                  msg: message,
+                  time: "${hour.toString()}:"
+                      "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
+                      "${ampm}",
+                  mediaType: type,
+                );
+              } else {
+                return RightMessageBubble(
+                  receiveImage: senderImage,
+                  msg: message,
+                  time: "${hour.toString()}:"
+                      "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
+                      "${ampm}",
+                  mediaType: type,
+                );
+              }
             },
           );
         } else {
@@ -546,9 +562,12 @@ class _GroupChatState extends State<GroupChat> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              SizedBox(height: 10,),
+                              SizedBox(
+                                height: 10,
+                              ),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Container(),
                                   MyText(
@@ -567,7 +586,9 @@ class _GroupChatState extends State<GroupChat> {
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 30,),
+                              SizedBox(
+                                height: 30,
+                              ),
                               SimpleTextField(
                                 hintText: 'Type username,  email...',
                                 controller: userNameController,
@@ -575,14 +596,20 @@ class _GroupChatState extends State<GroupChat> {
                                   userNameObsString.value = value;
                                 },
                               ),
-                              SizedBox(height: 10,),
+                              SizedBox(
+                                height: 10,
+                              ),
                               Obx(() {
                                 if (userNameObsString.value != "") {
                                   // List<String> tempList = selectedUsers.length > 0 ? List<String>.from(selectedUsers.keys.toList()) : ["check"];
-                                  return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                                  return StreamBuilder<
+                                      QuerySnapshot<Map<String, dynamic>>>(
                                     stream: ffstore
                                         .collection(accountsCollection)
-                                        .where("userSearchParameters", arrayContains: userNameObsString.value.trim()).limit(3)
+                                        .where("userSearchParameters",
+                                            arrayContains:
+                                                userNameObsString.value.trim())
+                                        .limit(3)
                                         // .where("uID", whereNotIn: tempList)
                                         .snapshots(),
                                     builder: (
@@ -590,13 +617,18 @@ class _GroupChatState extends State<GroupChat> {
                                       AsyncSnapshot<QuerySnapshot> snapshot,
                                     ) {
                                       log("inside stream-builder");
-                                      if (snapshot.connectionState == ConnectionState.waiting) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
                                         log("inside stream-builder in waiting state");
-                                        return Center(child: CircularProgressIndicator());
-                                      } else if (snapshot.connectionState == ConnectionState.active ||
-                                          snapshot.connectionState == ConnectionState.done) {
+                                        return Center(
+                                            child: CircularProgressIndicator());
+                                      } else if (snapshot.connectionState ==
+                                              ConnectionState.active ||
+                                          snapshot.connectionState ==
+                                              ConnectionState.done) {
                                         if (snapshot.hasError) {
-                                          return const Text('Some unknown error occurred');
+                                          return const Text(
+                                              'Some unknown error occurred');
                                         } else if (snapshot.hasData) {
                                           // log("inside hasData and ${snapshot.data!.docs}");
                                           if (snapshot.data!.docs.length > 0) {
@@ -606,16 +638,27 @@ class _GroupChatState extends State<GroupChat> {
                                               padding: EdgeInsets.symmetric(
                                                 horizontal: 15,
                                               ),
-                                              itemCount: snapshot.data!.docs.length,
+                                              itemCount:
+                                                  snapshot.data!.docs.length,
                                               itemBuilder: (context, index) {
-                                                UserDetailsModel umdl = UserDetailsModel.fromJson(
-                                                    snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                                                UserDetailsModel umdl =
+                                                    UserDetailsModel.fromJson(
+                                                        snapshot.data!
+                                                                .docs[index]
+                                                                .data()
+                                                            as Map<String,
+                                                                dynamic>);
                                                 return Obx(() {
-                                                  if (selectedId.value == umdl.uID || umdl.uID == auth.currentUser?.uid) {
+                                                  if (selectedId.value ==
+                                                          umdl.uID ||
+                                                      umdl.uID ==
+                                                          auth.currentUser
+                                                              ?.uid) {
                                                     return SizedBox();
                                                   }
                                                   return contactTiles(
-                                                    profileImage: umdl.profileImageUrl,
+                                                    profileImage:
+                                                        umdl.profileImageUrl,
                                                     name: umdl.fullName,
                                                     id: umdl.uID,
                                                     email: umdl.email,
@@ -624,71 +667,95 @@ class _GroupChatState extends State<GroupChat> {
                                               },
                                             );
                                           } else {
-                                            if(finalizedNameString == ""){
-                                              return Center(child: const Text('No Users Found'));
+                                            if (finalizedNameString == "") {
+                                              return Center(
+                                                  child: const Text(
+                                                      'No Users Found'));
                                             }
                                             return SizedBox();
-
                                           }
                                         } else {
                                           log("in else of hasData done and: ${snapshot.connectionState} and"
                                               " snapshot.hasData: ${snapshot.hasData}");
-                                          if(finalizedNameString == ""){
-                                            return Center(child: const Text('No Users Found'));
+                                          if (finalizedNameString == "") {
+                                            return Center(
+                                                child: const Text(
+                                                    'No Users Found'));
                                           }
                                           return SizedBox();
                                         }
                                       } else {
                                         log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
-                                        return Center(child: Text('Some Error occurred while fetching the posts'));
+                                        return Center(
+                                            child: Text(
+                                                'Some Error occurred while fetching the posts'));
                                       }
                                     },
                                   );
                                 }
                                 return SizedBox();
                               }),
-                              SizedBox(height: 10,),
+                              SizedBox(
+                                height: 10,
+                              ),
                               Padding(
-                                padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+                                padding: EdgeInsets.only(
+                                    bottom: MediaQuery.of(context)
+                                        .viewInsets
+                                        .bottom),
                                 child: SimpleTextField(
                                   maxLines: 5,
                                   hintText: 'Message...',
                                   controller: messageController,
                                 ),
                               ),
-                              SizedBox(height: 20,),
-
+                              SizedBox(
+                                height: 20,
+                              ),
                               MyButton(
                                 onTap: () async {
                                   //+ put the code to present the option or just by default do both.
                                   //+ sending a notification and also open sharing sheet to share via
                                   //+ social media or something.
-                                  if (finalizedNameString != "" && messageController.text.trim() != "") {
+                                  if (finalizedNameString != "" &&
+                                      messageController.text.trim() != "") {
                                     loading();
-                                    GroupChatRoomModel groupChatModel = GroupChatRoomModel.fromJson(widget.docs ?? {});
+                                    GroupChatRoomModel groupChatModel =
+                                        GroupChatRoomModel.fromJson(
+                                            widget.docs ?? {});
                                     log("groupChatModel: ${groupChatModel.toJson()}");
-                                    String shareLink = await DynamicLinkHandler.buildDynamicLinkGroupInvite(
+                                    String shareLink = await DynamicLinkHandler
+                                        .buildDynamicLinkGroupInvite(
                                       groupId: groupChatModel.groupId ?? "",
                                       groupName: groupChatModel.groupName ?? "",
-                                      groupImage: groupChatModel.groupImage ?? "",
+                                      groupImage:
+                                          groupChatModel.groupImage ?? "",
                                       groupInviteMessage:
                                           "${userDetailsModel.fullName} invited you to ${groupChatModel.groupName} "
-                                              "group chat: ${messageController.text.trim()}.",
+                                          "group chat: ${messageController.text.trim()}.",
                                       short: true,
                                     );
                                     log("fetched shareLink: $shareLink");
-                                    ShareResult sr = await Share.shareWithResult(shareLink);
+                                    ShareResult sr =
+                                        await Share.shareWithResult(shareLink);
                                     Get.back();
-                                    await ffstore.collection(groupChatInvitationCollection)
+                                    await ffstore
+                                        .collection(
+                                            groupChatInvitationCollection)
                                         .add({
                                       "groupId": groupChatModel.groupId ?? "",
-                                      "groupName": groupChatModel.groupName ?? "",
-                                      "groupImage": groupChatModel.groupImage ?? "",
+                                      "groupName":
+                                          groupChatModel.groupName ?? "",
+                                      "groupImage":
+                                          groupChatModel.groupImage ?? "",
                                       "invitedId": selectedId.value,
-                                      "invitedName": userNameController.text.trim(),
+                                      "invitedName":
+                                          userNameController.text.trim(),
                                       "invitedById": userDetailsModel.uID,
-                                      "invitedByName": userDetailsModel.fullName,
-                                      "invitedAt": DateTime.now().millisecondsSinceEpoch,
+                                      "invitedByName":
+                                          userDetailsModel.fullName,
+                                      "invitedAt":
+                                          DateTime.now().millisecondsSinceEpoch,
                                     });
                                     log("ShareResult is: ${sr.status} sr.status == ShareResultStatus.success: ${sr.status == ShareResultStatus.success}");
                                     log("ShareResult is: ${sr.status} sr.status == ShareResultStatus.dismissed: ${sr.status == ShareResultStatus.dismissed}");
@@ -696,7 +763,8 @@ class _GroupChatState extends State<GroupChat> {
                                   } else {
                                     showMsg(
                                         context: context,
-                                        msg: "Please fill out both fields properly to send the invite.");
+                                        msg:
+                                            "Please fill out both fields properly to send the invite.");
                                   }
                                 },
                                 buttonText: 'Invite to the group',
@@ -909,132 +977,132 @@ class _GroupChatState extends State<GroupChat> {
       ),
     );
   }
-  // Widget sendField(
-  //   BuildContext context,
-  // ) {
-  //   return Align(
-  //     alignment: Alignment.bottomCenter,
-  //     child: Container(
-  //       padding: const EdgeInsets.symmetric(
-  //         horizontal: 15,
-  //       ),
-  //       height: 80,
-  //       width: width(context, 1.0),
-  //       decoration: BoxDecoration(
-  //         color: kPrimaryColor,
-  //         boxShadow: [
-  //           BoxShadow(
-  //             color: kBlackColor.withOpacity(0.03),
-  //             offset: const Offset(0, -1),
-  //             blurRadius: 6,
-  //           ),
-  //         ],
-  //       ),
-  //       child: Column(
-  //         mainAxisAlignment: MainAxisAlignment.center,
-  //         children: [
-  //           Row(
-  //             children: [
-  //               Expanded(
-  //                 child: TextFormField(
-  //                   cursorColor: kSecondaryColor,
-  //                   cursorWidth: 1.0,
-  //                   style: TextStyle(
-  //                     fontSize: 15,
-  //                     color: kSecondaryColor,
-  //                   ),
-  //                   decoration: InputDecoration(
-  //                     hintStyle: TextStyle(
-  //                       fontSize: 15,
-  //                       color: kSecondaryColor,
-  //                     ),
-  //                     hintText: 'Write a message...',
-  //                     contentPadding: EdgeInsets.symmetric(
-  //                       horizontal: 15,
-  //                     ),
-  //                     fillColor: kLightBlueColor,
-  //                     filled: true,
-  //                     prefixIcon: Column(
-  //                       mainAxisAlignment: MainAxisAlignment.center,
-  //                       children: [
-  //                         GestureDetector(
-  //                           onTap: () {},
-  //                           child: Image.asset(
-  //                             Assets.imagesEmoji,
-  //                             height: 19.31,
-  //                           ),
-  //                         ),
-  //                       ],
-  //                     ),
-  //                     suffixIcon: Column(
-  //                       mainAxisAlignment: MainAxisAlignment.center,
-  //                       children: [
-  //                         Wrap(
-  //                           crossAxisAlignment: WrapCrossAlignment.center,
-  //                           spacing: 10.0,
-  //                           children: [
-  //                             GestureDetector(
-  //                               onTap: () {},
-  //                               child: Image.asset(
-  //                                 Assets.imagesAttachFiles,
-  //                                 height: 20.53,
-  //                               ),
-  //                             ),
-  //                             GestureDetector(
-  //                               onTap: () {},
-  //                               child: Image.asset(
-  //                                 Assets.imagesPhoto,
-  //                                 height: 16.52,
-  //                               ),
-  //                             ),
-  //                             SizedBox(),
-  //                           ],
-  //                         ),
-  //                       ],
-  //                     ),
-  //                     enabledBorder: OutlineInputBorder(
-  //                       borderRadius: BorderRadius.circular(50),
-  //                       borderSide: BorderSide(
-  //                         color: Colors.transparent,
-  //                         width: 1.0,
-  //                       ),
-  //                     ),
-  //                     focusedBorder: OutlineInputBorder(
-  //                       borderRadius: BorderRadius.circular(50),
-  //                       borderSide: BorderSide(
-  //                         color: Colors.transparent,
-  //                         width: 1.0,
-  //                       ),
-  //                     ),
-  //                     errorBorder: OutlineInputBorder(
-  //                       borderRadius: BorderRadius.circular(50),
-  //                       borderSide: BorderSide(
-  //                         color: Colors.red,
-  //                         width: 1.0,
-  //                       ),
-  //                     ),
-  //                     focusedErrorBorder: OutlineInputBorder(
-  //                       borderRadius: BorderRadius.circular(50),
-  //                       borderSide: BorderSide(
-  //                         color: Colors.red,
-  //                         width: 1.0,
-  //                       ),
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ),
-  //               SizedBox(
-  //                 width: 15,
-  //               ),
-  //               Image.asset(
-  //                 Assets.imagesSend,
-  //                 height: 45.16,
-  //               ),
-  //             ],
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
+// Widget sendField(
+//   BuildContext context,
+// ) {
+//   return Align(
+//     alignment: Alignment.bottomCenter,
+//     child: Container(
+//       padding: const EdgeInsets.symmetric(
+//         horizontal: 15,
+//       ),
+//       height: 80,
+//       width: width(context, 1.0),
+//       decoration: BoxDecoration(
+//         color: kPrimaryColor,
+//         boxShadow: [
+//           BoxShadow(
+//             color: kBlackColor.withOpacity(0.03),
+//             offset: const Offset(0, -1),
+//             blurRadius: 6,
+//           ),
+//         ],
+//       ),
+//       child: Column(
+//         mainAxisAlignment: MainAxisAlignment.center,
+//         children: [
+//           Row(
+//             children: [
+//               Expanded(
+//                 child: TextFormField(
+//                   cursorColor: kSecondaryColor,
+//                   cursorWidth: 1.0,
+//                   style: TextStyle(
+//                     fontSize: 15,
+//                     color: kSecondaryColor,
+//                   ),
+//                   decoration: InputDecoration(
+//                     hintStyle: TextStyle(
+//                       fontSize: 15,
+//                       color: kSecondaryColor,
+//                     ),
+//                     hintText: 'Write a message...',
+//                     contentPadding: EdgeInsets.symmetric(
+//                       horizontal: 15,
+//                     ),
+//                     fillColor: kLightBlueColor,
+//                     filled: true,
+//                     prefixIcon: Column(
+//                       mainAxisAlignment: MainAxisAlignment.center,
+//                       children: [
+//                         GestureDetector(
+//                           onTap: () {},
+//                           child: Image.asset(
+//                             Assets.imagesEmoji,
+//                             height: 19.31,
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                     suffixIcon: Column(
+//                       mainAxisAlignment: MainAxisAlignment.center,
+//                       children: [
+//                         Wrap(
+//                           crossAxisAlignment: WrapCrossAlignment.center,
+//                           spacing: 10.0,
+//                           children: [
+//                             GestureDetector(
+//                               onTap: () {},
+//                               child: Image.asset(
+//                                 Assets.imagesAttachFiles,
+//                                 height: 20.53,
+//                               ),
+//                             ),
+//                             GestureDetector(
+//                               onTap: () {},
+//                               child: Image.asset(
+//                                 Assets.imagesPhoto,
+//                                 height: 16.52,
+//                               ),
+//                             ),
+//                             SizedBox(),
+//                           ],
+//                         ),
+//                       ],
+//                     ),
+//                     enabledBorder: OutlineInputBorder(
+//                       borderRadius: BorderRadius.circular(50),
+//                       borderSide: BorderSide(
+//                         color: Colors.transparent,
+//                         width: 1.0,
+//                       ),
+//                     ),
+//                     focusedBorder: OutlineInputBorder(
+//                       borderRadius: BorderRadius.circular(50),
+//                       borderSide: BorderSide(
+//                         color: Colors.transparent,
+//                         width: 1.0,
+//                       ),
+//                     ),
+//                     errorBorder: OutlineInputBorder(
+//                       borderRadius: BorderRadius.circular(50),
+//                       borderSide: BorderSide(
+//                         color: Colors.red,
+//                         width: 1.0,
+//                       ),
+//                     ),
+//                     focusedErrorBorder: OutlineInputBorder(
+//                       borderRadius: BorderRadius.circular(50),
+//                       borderSide: BorderSide(
+//                         color: Colors.red,
+//                         width: 1.0,
+//                       ),
+//                     ),
+//                   ),
+//                 ),
+//               ),
+//               SizedBox(
+//                 width: 15,
+//               ),
+//               Image.asset(
+//                 Assets.imagesSend,
+//                 height: 45.16,
+//               ),
+//             ],
+//           ),
+//         ],
+//       ),
+//     ),
+//   );
+// }
 }

@@ -19,6 +19,7 @@ class Assets {
   static const String imagesClose = 'assets/images/close.png';
   static const String imagesComment = 'assets/images/comment.png';
   static const String imagesCustomize = 'assets/images/customize.png';
+  static const String imagesDeleteMsg = 'assets/images/delete_msg.png';
   static const String imagesDisable = 'assets/images/disable.png';
   static const String imagesDummyImage = 'assets/images/dummy_image.png';
   static const String imagesDummyImg = 'assets/images/dummy_img.png';
@@ -49,10 +50,12 @@ class Assets {
   static const String imagesNoDataFound = 'assets/images/no_data_found.webp';
   static const String imagesNoPostYet = 'assets/images/no_post_yet.png';
   static const String imagesParties = 'assets/images/parties.png';
+  static const String imagesPause = 'assets/images/pause.png';
   static const String imagesPerPeople = 'assets/images/per_people.png';
   static const String imagesPhoto = 'assets/images/photo.png';
   static const String imagesPicnic = 'assets/images/picnic.png';
   static const String imagesPicnicKids = 'assets/images/picnic_kids.png';
+  static const String imagesPlay = 'assets/images/play.png';
   static const String imagesPlusIcon = 'assets/images/plus_icon.png';
   static const String imagesProfileAvatar = 'assets/images/profile_avatar.png';
   static const String imagesRoamcticePicnic = 'assets/images/roamctice_picnic.png';

@@ -47,7 +47,8 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  Rx<TextEditingController> messageEditingController = TextEditingController().obs;
+  Rx<TextEditingController> messageEditingController =
+      TextEditingController().obs;
   ScrollController scrollController = ScrollController();
 
   String chatRoomID = "";
@@ -56,7 +57,6 @@ class _ChatScreenState extends State<ChatScreen> {
   String anotherUserID = "";
   String anotherUserName = "";
   String anotherUserImage = "";
-
 
   File? imageFile;
   File? videoFile;
@@ -96,6 +96,7 @@ class _ChatScreenState extends State<ChatScreen> {
   // Stream? chatMessageStream;
   RxInt lastMessageAt = 0.obs;
   RxString lastMessage = "".obs;
+
   // RxInt time = 0.obs;
   bool isOpenedUp = true;
   final Rx<ChatRoomModel> crm = ChatRoomModel().obs;
@@ -103,6 +104,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final RxBool isMatchedOrNot = false.obs;
   final RxString privacySettings = "Everyone".obs;
   final String deleteFor = "Everyone";
+
   // RxBool isArchivedRoom = false.obs;
   // RxBool isPrivacAllowed = true.obs;
 
@@ -258,7 +260,11 @@ class _ChatScreenState extends State<ChatScreen> {
     log("anotherUserImage: $anotherUserImage");
 
     chatRoomID = chatController.getChatRoomId(userID, anotherUserID);
-    otherUserListener = await ffstore.collection(accountsCollection).doc(anotherUserID).snapshots().listen((event) {
+    otherUserListener = await ffstore
+        .collection(accountsCollection)
+        .doc(anotherUserID)
+        .snapshots()
+        .listen((event) {
       log("updating anotherUserModel");
       anotherUserModel.value = UserDetailsModel.fromJson(event.data() ?? {});
     });
@@ -266,11 +272,19 @@ class _ChatScreenState extends State<ChatScreen> {
 
   getUserDataFromChatRoomDB() async {
     log("CHanging the crm values from getUserDataFromChatRoomDB");
-    await ffstore.collection("ChatRoom").doc(widget.docs!["chatRoomId"]).get().then((value) {
+    await ffstore
+        .collection("ChatRoom")
+        .doc(widget.docs!["chatRoomId"])
+        .get()
+        .then((value) {
       crm.value = ChatRoomModel.fromDocumentSnapshot(value);
       log("CHanging the crm values in get from getUserDataFromChatRoomDB");
     });
-    await ffstore.collection("ChatRoom").doc(chatRoomID).snapshots().listen((event) {
+    await ffstore
+        .collection("ChatRoom")
+        .doc(chatRoomID)
+        .snapshots()
+        .listen((event) {
       log("CHanging the crm values in snapshot from getUserDataFromChatRoomDB");
       crm.value = ChatRoomModel.fromDocumentSnapshot(event);
     });
@@ -323,13 +337,17 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future getVideoFromGallery() async {
     ImagePicker _picker = ImagePicker();
-    await _picker.pickVideo(source: ImageSource.gallery,).then((xFile) {
+    await _picker
+        .pickVideo(
+      source: ImageSource.gallery,
+    )
+        .then((xFile) {
       if (xFile != null) {
         videoFile = File(xFile.path);
         videoPath = xFile.path;
         // showLoading();
         Get.to(
-              () => PreviewVideoScreen(
+          () => PreviewVideoScreen(
             videoPath: videoPath,
             anotherUserId: anotherUserID,
             anotherUserName: anotherUserName,
@@ -393,9 +411,15 @@ class _ChatScreenState extends State<ChatScreen> {
                   GestureDetector(
                     onTap: () async {
                       loading();
-                      var ref = FirebaseStorage.instance.ref().child(chatRoomID).child("$fileName.jpg");
-                      var uploadTask = await ref.putFile(imageFile!).catchError((error) async {
-                        print('in uploading error and eoor is: $error'); // await FirebaseFirestore.instance
+                      var ref = FirebaseStorage.instance
+                          .ref()
+                          .child(chatRoomID)
+                          .child("$fileName.jpg");
+                      var uploadTask = await ref
+                          .putFile(imageFile!)
+                          .catchError((error) async {
+                        print(
+                            'in uploading error and eoor is: $error'); // await FirebaseFirestore.instance
                         status = 0;
                       });
                       if (status == 1) {
@@ -412,7 +436,9 @@ class _ChatScreenState extends State<ChatScreen> {
                       height: 50,
                       width: 50,
                       padding: EdgeInsets.all(12),
-                      decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(50)),
+                      decoration: BoxDecoration(
+                          color: Colors.green,
+                          borderRadius: BorderRadius.circular(50)),
                       child: Icon(
                         // FontAwesomeIcons.solidPaperPlane,
                         Icons.arrow_forward_rounded,
@@ -433,7 +459,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
   getChatRoomStream() async {
     // crm.value = ChatRoomModel.fromDocumentSnapshot(event);
-    chatRoomListener = await ffstore.collection("ChatRoom").doc(widget.docs!['chatRoomId']).snapshots().listen((event) {
+    chatRoomListener = await ffstore
+        .collection("ChatRoom")
+        .doc(widget.docs!['chatRoomId'])
+        .snapshots()
+        .listen((event) {
       lastMessageAt.value = event['lastMessageAt'];
       lastMessage.value = event['lastMessage'];
       crm.value = ChatRoomModel.fromDocumentSnapshot(event);
@@ -462,13 +492,16 @@ class _ChatScreenState extends State<ChatScreen> {
         "isRead": false,
         "isReceived": false,
       };
-      bool isDeletedFor = crm.value.notDeletedFor?.asMap().containsValue(anotherUserID) ?? false;
+      bool isDeletedFor =
+          crm.value.notDeletedFor?.asMap().containsValue(anotherUserID) ??
+              false;
       if (!isDeletedFor) {
         ffstore.collection("ChatRoom").doc(chatRoomID).update({
           "notDeletedFor": FieldValue.arrayUnion([anotherUserID])
         });
       }
-      chatController.addConversationMessage(chatRoomID, time, "text", messageMap, messageText);
+      chatController.addConversationMessage(
+          chatRoomID, time, "text", messageMap, messageText);
       // log("index is: ${lastIndex.value}");
     } else if (imageFile != null && (imageUrl != null || imageUrl != "")) {
       var time = DateTime.now().millisecondsSinceEpoch;
@@ -485,14 +518,17 @@ class _ChatScreenState extends State<ChatScreen> {
         "isRead": false,
         "isReceived": false,
       };
-      bool isDeletedFor = crm.value.notDeletedFor?.asMap().containsValue(anotherUserID) ?? false;
+      bool isDeletedFor =
+          crm.value.notDeletedFor?.asMap().containsValue(anotherUserID) ??
+              false;
 
       if (!isDeletedFor) {
         ffstore.collection("ChatRoom").doc(chatRoomID).update({
           "notDeletedFor": FieldValue.arrayUnion([anotherUserID])
         });
       }
-      chatController.addConversationMessage(chatRoomID, time, "image", messageMap, imageUrl!);
+      chatController.addConversationMessage(
+          chatRoomID, time, "image", messageMap, imageUrl!);
       // groupedItemScrollController.scrollTo(
       //   index: lastIndex.value,
       //   duration: Duration(microseconds: 300),
@@ -511,8 +547,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget chatMessageList() {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream:
-          ffstore.collection(chatRoomCollection).doc(chatRoomID).collection(messagesCollection).orderBy('time').snapshots(),
+      stream: ffstore
+          .collection(chatRoomCollection)
+          .doc(chatRoomID)
+          .collection(messagesCollection)
+          .orderBy('time')
+          .snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.hasData) {
           // scrollController.animateTo(
@@ -553,12 +593,15 @@ class _ChatScreenState extends State<ChatScreen> {
             // shrinkWrap: true,
             itemCount: snapshot.data?.docs.length,
             itemBuilder: (context, index) {
-              Map<String, dynamic> data = snapshot.data?.docs[index].data() as Map<String, dynamic>;
-              print("snapshot.data.docs[index].data()[type] is: ${data["type"]}");
+              Map<String, dynamic> data =
+                  snapshot.data?.docs[index].data() as Map<String, dynamic>;
+              print(
+                  "snapshot.data.docs[index].data()[type] is: ${data["type"]}");
               //TODO: Beware, here the widgets to show data start.
               //TODO: Beware, here the widgets to show data start.
               String type = data["type"];
-              String message = data["message"] != null ? data["message"] : "what is this?";
+              String message =
+                  data["message"] != null ? data["message"] : "what is this?";
               bool sendByMe = userDetailsModel.uID == data["sendById"];
               String time = data["time"].toString();
 
@@ -590,16 +633,27 @@ class _ChatScreenState extends State<ChatScreen> {
               } else {
                 ampm = 'am';
               }
-              return MessageBubbles(
-                receiveImage: anotherUserImage,
-                msg: message,
-                time: "${hour.toString()}:"
-                    "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
-                    "${ampm}",
-                senderType: !sendByMe ? 'receiver' : 'sender',
-                mediaType: type,
-                thumbnail: type == "video" ? data["thumbnail"] : "",
-              );
+              if (!sendByMe) {
+                return LeftMessageBubble(
+                  receiveImage: anotherUserImage,
+                  msg: message,
+                  time: "${hour.toString()}:"
+                      "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
+                      "${ampm}",
+                  mediaType: type,
+                  thumbnail: type == "video" ? data["thumbnail"] : "",
+                );
+              } else {
+                return RightMessageBubble(
+                  receiveImage: anotherUserImage,
+                  msg: message,
+                  time: "${hour.toString()}:"
+                      "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
+                      "${ampm}",
+                  mediaType: type,
+                  thumbnail: type == "video" ? data["thumbnail"] : "",
+                );
+              }
             },
           );
         } else {
@@ -650,7 +704,11 @@ class _ChatScreenState extends State<ChatScreen> {
               : GestureDetector(
                   onTap: () async {
                     UserDetailsModel? umdl;
-                    await ffstore.collection(accountsCollection).doc(anotherUserID).get().then((value) {
+                    await ffstore
+                        .collection(accountsCollection)
+                        .doc(anotherUserID)
+                        .get()
+                        .then((value) {
                       umdl = UserDetailsModel.fromJson(value.data() ?? {});
                     });
                     Get.to(() => OtherUserProfile(otherUserModel: umdl));
@@ -663,9 +721,10 @@ class _ChatScreenState extends State<ChatScreen> {
                         return profileImage(
                           context,
                           size: 34.0,
-                          profileImage: anotherUserModel.value.profileImageUrl != null
-                              ? anotherUserModel.value.profileImageUrl
-                              : anotherUserImage,
+                          profileImage:
+                              anotherUserModel.value.profileImageUrl != null
+                                  ? anotherUserModel.value.profileImageUrl
+                                  : anotherUserImage,
                         );
                       }),
                       Obx(() {
@@ -684,6 +743,20 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
           actions: [
+            // Padding(
+            //   padding: const EdgeInsets.only(
+            //     right: 15,
+            //   ),
+            //   child: Center(
+            //     child: GestureDetector(
+            //       onTap: () => chatController.showSearchBar(),
+            //       child: Image.asset(
+            //         Assets.imagesSearchWithBg,
+            //         height: 35,
+            //       ),
+            //     ),
+            //   ),
+            // ),
             Padding(
               padding: const EdgeInsets.only(
                 right: 15,
@@ -692,8 +765,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 child: GestureDetector(
                   onTap: () => chatController.showSearchBar(),
                   child: Image.asset(
-                    Assets.imagesSearchWithBg,
-                    height: 35,
+                    Assets.imagesDeleteMsg,
+                    height: 24,
                   ),
                 ),
               ),

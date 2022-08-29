@@ -11,6 +11,7 @@ import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/constant/constant_variables.dart';
+import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/main.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
@@ -25,7 +26,12 @@ class PreviewVideoScreen extends StatefulWidget {
   final String? chatRoomId;
 
   const PreviewVideoScreen(
-      {Key? key, this.videoPath, this.anotherUserId, this.anotherUserName, this.userId, this.chatRoomId})
+      {Key? key,
+      this.videoPath,
+      this.anotherUserId,
+      this.anotherUserName,
+      this.userId,
+      this.chatRoomId})
       : super(key: key);
 
   @override
@@ -35,6 +41,7 @@ class PreviewVideoScreen extends StatefulWidget {
 class _PreviewVideoScreenState extends State<PreviewVideoScreen> {
   String videoUrl = '';
   RxDouble uploadPercentageValue = 0.0.obs;
+
   // String videoPath = "";
   File? _video;
   VideoPlayerController? _videoPlayerController;
@@ -46,16 +53,30 @@ class _PreviewVideoScreenState extends State<PreviewVideoScreen> {
     _videoPlayerController = VideoPlayerController.file(_video!)
       ..initialize().then((_) {
         setState(() {});
-        _videoPlayerController!.play();
       });
     super.initState();
   }
+
   @override
   void dispose() {
     // TODO: implement dispose
-    if(_videoPlayerController!=null)_videoPlayerController?.dispose();
+    if (_videoPlayerController != null) _videoPlayerController?.dispose();
     super.dispose();
   }
+
+  void playPause() {
+    setState(() {
+      isPlaying = !isPlaying;
+      isPlaying
+          ? _videoPlayerController!.pause()
+          : _videoPlayerController!.play();
+      isPlaying ? opacity = 1.0 : opacity = 0.0;
+    });
+  }
+
+  bool isPlaying = false;
+
+  double opacity = 1.0;
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +86,8 @@ class _PreviewVideoScreenState extends State<PreviewVideoScreen> {
         _videoPlayerController?.pause();
         return true;
       },
-      child: Scaffold(extendBodyBehindAppBar: true,
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
         appBar: myAppBar(
           onTap: () {
             _videoPlayerController?.pause();
@@ -77,14 +99,44 @@ class _PreviewVideoScreenState extends State<PreviewVideoScreen> {
           // crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            GestureDetector(
-              onTap: () {
-                _videoPlayerController?.pause();
-              },
-              child: AspectRatio(
-                aspectRatio: _videoPlayerController!.value.aspectRatio,
-                child: VideoPlayer(_videoPlayerController!),
-              ),
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                AspectRatio(
+                  aspectRatio: _videoPlayerController!.value.aspectRatio,
+                  child: VideoPlayer(_videoPlayerController!),
+                ),
+                AnimatedOpacity(
+                  opacity: opacity,
+                  duration: Duration(
+                    milliseconds: 500,
+                  ),
+                  child: Container(
+                    height: 55,
+                    width: 55,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: kBlackColor.withOpacity(0.5),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: playPause,
+                        borderRadius: BorderRadius.circular(100),
+                        splashColor: kPrimaryColor.withOpacity(0.1),
+                        highlightColor: kPrimaryColor.withOpacity(0.1),
+                        child: Center(
+                          child: Image.asset(
+                            isPlaying ? Assets.imagesPause : Assets.imagesPlay,
+                            height: 23,
+                            color: kPrimaryColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             // SizedBox(
             //   height: 90,
@@ -113,8 +165,14 @@ class _PreviewVideoScreenState extends State<PreviewVideoScreen> {
     String fileName = Uuid().v1();
     String thumbnailFileName = Uuid().v1();
     String videoDocId = "";
-    var ref = FirebaseStorage.instance.ref().child("chatRooms/${widget.chatRoomId!}").child("$fileName.jpg");
-    var thumbnailRef = FirebaseStorage.instance.ref().child("chatRooms/${widget.chatRoomId!}").child("$thumbnailFileName.jpg");
+    var ref = FirebaseStorage.instance
+        .ref()
+        .child("chatRooms/${widget.chatRoomId!}")
+        .child("$fileName.jpg");
+    var thumbnailRef = FirebaseStorage.instance
+        .ref()
+        .child("chatRooms/${widget.chatRoomId!}")
+        .child("$thumbnailFileName.jpg");
     try {
       showDialog(
         context: context,
@@ -128,51 +186,53 @@ class _PreviewVideoScreenState extends State<PreviewVideoScreen> {
         video: widget.videoPath ?? "",
         thumbnailPath: path,
         imageFormat: ImageFormat.WEBP,
-        maxHeight: 64, // specify the height of the thumbnail, let the width auto-scaled to keep the source aspect ratio
+        maxHeight: 64,
+        // specify the height of the thumbnail, let the width auto-scaled to keep the source aspect ratio
         quality: 75,
       );
-      await thumbnailRef.putFile(File(thumbnailFile ?? ""))
-          .then((p0) async {
-            if(p0.state == TaskState.success){
-              await p0.ref.getDownloadURL().then((value) async {
-                var time = DateTime.now().millisecondsSinceEpoch;
-                Map<String, dynamic> messageMap = {
-                "sendById": userDetailsModel.uID,
-                "sendByName": userDetailsModel.fullName,
-                "receivedById": widget.anotherUserId,
-                "receivedByName": widget.anotherUserName,
-                "message": "Video being uploaded",
-                "thumbnail": value,
-                "type": "video",
-                'time': time,
-                'isDeletedFor': [],
-                'isRead': false,
-                "isReceived": false,
-                };
-                await FirebaseFirestore.instance
-                    .collection(chatRoomCollection)
-                    .doc(widget.chatRoomId!)
-                    .collection(messagesCollection)
-                    .add(messageMap)
-                    .then((value) async {
-                videoDocId = value.id;
-                // thumbnailFile.
-                if(File(thumbnailFile!).existsSync()){
-                  File(thumbnailFile).delete(recursive: true);
-                }
-                await FirebaseFirestore.instance.collection(chatRoomCollection).doc(widget.chatRoomId!)
-                    .update({
+      await thumbnailRef.putFile(File(thumbnailFile ?? "")).then((p0) async {
+        if (p0.state == TaskState.success) {
+          await p0.ref.getDownloadURL().then((value) async {
+            var time = DateTime.now().millisecondsSinceEpoch;
+            Map<String, dynamic> messageMap = {
+              "sendById": userDetailsModel.uID,
+              "sendByName": userDetailsModel.fullName,
+              "receivedById": widget.anotherUserId,
+              "receivedByName": widget.anotherUserName,
+              "message": "Video being uploaded",
+              "thumbnail": value,
+              "type": "video",
+              'time': time,
+              'isDeletedFor': [],
+              'isRead': false,
+              "isReceived": false,
+            };
+            await FirebaseFirestore.instance
+                .collection(chatRoomCollection)
+                .doc(widget.chatRoomId!)
+                .collection(messagesCollection)
+                .add(messageMap)
+                .then((value) async {
+              videoDocId = value.id;
+              // thumbnailFile.
+              if (File(thumbnailFile!).existsSync()) {
+                File(thumbnailFile).delete(recursive: true);
+              }
+              await FirebaseFirestore.instance
+                  .collection(chatRoomCollection)
+                  .doc(widget.chatRoomId!)
+                  .update({
                 'lastMessageAt': time,
                 'lastMessage': "Video being uploaded",
                 'lastMessageType': "video",
-                }).catchError((e) {
+              }).catchError((e) {
                 log('\n\n\n\n error in updating last message and last message time ${e.toString()}');
-                });
-                }).catchError((e) {
-                log('\n\n\n\n error in adding video mid message ${e.toString()}');
-                });
               });
-            }
+            }).catchError((e) {
+              log('\n\n\n\n error in adding video mid message ${e.toString()}');
+            });
+          });
+        }
       });
       // chatController.addConversationMessage(widget.chatRoomId!, time, "image", messageMap, "Video being uploaded");
       Get.back();
@@ -181,7 +241,8 @@ class _PreviewVideoScreenState extends State<PreviewVideoScreen> {
       uploadTask.snapshotEvents.listen((TaskSnapshot taskSnapshot) async {
         switch (taskSnapshot.state) {
           case TaskState.running:
-            uploadPercentageValue.value = 100.0 * (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes);
+            uploadPercentageValue.value = 100.0 *
+                (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes);
             print("Upload is $uploadPercentageValue% complete.");
             break;
           case TaskState.paused:
@@ -202,16 +263,19 @@ class _PreviewVideoScreenState extends State<PreviewVideoScreen> {
           case TaskState.success:
             // Handle successful uploads on complete
             videoUrl = await taskSnapshot.ref.getDownloadURL();
-            if (File(widget.videoPath!) != null && (videoUrl != null || videoUrl != "")) {
+            if (File(widget.videoPath!) != null &&
+                (videoUrl != null || videoUrl != "")) {
               var time = DateTime.now().millisecondsSinceEpoch;
               await FirebaseFirestore.instance
                   .collection(chatRoomCollection)
                   .doc(widget.chatRoomId!)
                   .collection(messagesCollection)
                   .doc(videoDocId)
-                  .update({"message": videoUrl})
-                  .then((value) async {
-                await FirebaseFirestore.instance.collection(chatRoomCollection).doc(widget.chatRoomId!).update({
+                  .update({"message": videoUrl}).then((value) async {
+                await FirebaseFirestore.instance
+                    .collection(chatRoomCollection)
+                    .doc(widget.chatRoomId!)
+                    .update({
                   'lastMessageAt': time,
                   'lastMessage': videoUrl,
                   'lastMessageType': "video",

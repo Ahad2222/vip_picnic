@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:vip_picnic/constant/color.dart';
+import 'package:vip_picnic/view/widget/loading.dart';
+import 'package:vip_picnic/view/widget/my_appbar.dart';
 
 class VideoPreview extends StatefulWidget {
   VideoPreview({
@@ -35,9 +38,11 @@ class _VideoPreviewState extends State<VideoPreview> {
   }
 
   Future<void> initializePlayer() async {
-    _videoPlayerController1 = VideoPlayerController.network(widget.videoUrl
-        ?? "https://assets.mixkit.co/videos/preview/mixkit-spinning-around-the-earth-29351-large.mp4");
-    await Future.wait([_videoPlayerController1.initialize(),]);
+    _videoPlayerController1 = VideoPlayerController.network(widget.videoUrl ??
+        "https://assets.mixkit.co/videos/preview/mixkit-spinning-around-the-earth-29351-large.mp4");
+    await Future.wait([
+      _videoPlayerController1.initialize(),
+    ]);
     _createChewieController();
     setState(() {});
   }
@@ -48,7 +53,9 @@ class _VideoPreviewState extends State<VideoPreview> {
       autoPlay: true,
       looping: false,
       progressIndicatorDelay:
-      bufferDelay != null ? Duration(milliseconds: bufferDelay!) : null,
+          bufferDelay != null ? Duration(milliseconds: bufferDelay!) : null,
+      aspectRatio: 0.8,
+      fullScreenByDefault: true,
       // subtitleBuilder: (context, dynamic subtitle) => Container(
       //   padding: const EdgeInsets.all(10.0),
       //   child: subtitle is InlineSpan
@@ -78,131 +85,125 @@ class _VideoPreviewState extends State<VideoPreview> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Title"),
-        ),
-        body: Column(
-          children: <Widget>[
-            Expanded(
-              child: Center(
-                child: _chewieController != null &&
-                    _chewieController!
-                        .videoPlayerController.value.isInitialized
-                    ? Chewie(
-                  controller: _chewieController!,
-                )
-                    : Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 20),
-                    Text('Loading'),
-                  ],
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                _chewieController?.enterFullScreen();
-              },
-              child: const Text('Fullscreen'),
-            ),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _videoPlayerController1.pause();
-                        _videoPlayerController1.seekTo(Duration.zero);
-                        _createChewieController();
-                      });
-                    },
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16.0),
-                      child: Text("Landscape Video"),
-                    ),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: _chewieController != null &&
+                    _chewieController!.videoPlayerController.value.isInitialized
+                ? Chewie(
+                    controller: _chewieController!,
+                  )
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      loading(),
+                      SizedBox(height: 20),
+                      Text('Loading'),
+                    ],
                   ),
-                ),
-              ],
-            ),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _platform = TargetPlatform.android;
-                      });
-                    },
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16.0),
-                      child: Text("Android controls"),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _platform = TargetPlatform.iOS;
-                      });
-                    },
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16.0),
-                      child: Text("iOS controls"),
-                    ),
-                  ),
-                )
-              ],
-            ),
-            // Row(
-            //   children: <Widget>[
-            //     Expanded(
-            //       child: TextButton(
-            //         onPressed: () {
-            //           setState(() {
-            //             _platform = TargetPlatform.windows;
-            //           });
-            //         },
-            //         child: const Padding(
-            //           padding: EdgeInsets.symmetric(vertical: 16.0),
-            //           child: Text("Desktop controls"),
-            //         ),
-            //       ),
-            //     ),
-            //   ],
-            // ),
-            if (Platform.isAndroid)
-              ListTile(
-                title: const Text("Delay"),
-                subtitle: DelaySlider(
-                  delay:
-                  _chewieController?.progressIndicatorDelay?.inMilliseconds,
-                  onSave: (delay) async {
-                    if (delay != null) {
-                      bufferDelay = delay == 0 ? null : delay;
-                      await initializePlayer();
-                    }
-                  },
-                ),
-              )
-          ],
-        ),
-      );
+          ),
+        ],
+      ),
+    );
   }
 }
 
+// TextButton(
+//   onPressed: () {
+//     _chewieController?.enterFullScreen();
+//   },
+//   child: const Text('Fullscreen'),
+// ),
+// Row(
+//   children: <Widget>[
+//     Expanded(
+//       child: TextButton(
+//         onPressed: () {
+//           setState(() {
+//             _videoPlayerController1.pause();
+//             _videoPlayerController1.seekTo(Duration.zero);
+//             _createChewieController();
+//           });
+//         },
+//         child: const Padding(
+//           padding: EdgeInsets.symmetric(vertical: 16.0),
+//           child: Text("Landscape Video"),
+//         ),
+//       ),
+//     ),
+//   ],
+// ),
+// Row(
+//   children: <Widget>[
+//     Expanded(
+//       child: TextButton(
+//         onPressed: () {
+//           setState(() {
+//             _platform = TargetPlatform.android;
+//           });
+//         },
+//         child: const Padding(
+//           padding: EdgeInsets.symmetric(vertical: 16.0),
+//           child: Text("Android controls"),
+//         ),
+//       ),
+//     ),
+//     Expanded(
+//       child: TextButton(
+//         onPressed: () {
+//           setState(() {
+//             _platform = TargetPlatform.iOS;
+//           });
+//         },
+//         child: const Padding(
+//           padding: EdgeInsets.symmetric(vertical: 16.0),
+//           child: Text("iOS controls"),
+//         ),
+//       ),
+//     )
+//   ],
+// ),
+// // Row(
+// //   children: <Widget>[
+// //     Expanded(
+// //       child: TextButton(
+// //         onPressed: () {
+// //           setState(() {
+// //             _platform = TargetPlatform.windows;
+// //           });
+// //         },
+// //         child: const Padding(
+// //           padding: EdgeInsets.symmetric(vertical: 16.0),
+// //           child: Text("Desktop controls"),
+// //         ),
+// //       ),
+// //     ),
+// //   ],
+// // ),
+// if (Platform.isAndroid)
+//   ListTile(
+//     title: const Text("Delay"),
+//     subtitle: DelaySlider(
+//       delay:
+//       _chewieController?.progressIndicatorDelay?.inMilliseconds,
+//       onSave: (delay) async {
+//         if (delay != null) {
+//           bufferDelay = delay == 0 ? null : delay;
+//           await initializePlayer();
+//         }
+//       },
+//     ),
+//   )
 class DelaySlider extends StatefulWidget {
   const DelaySlider({Key? key, required this.delay, required this.onSave})
       : super(key: key);
 
   final int? delay;
   final void Function(int?) onSave;
+
   @override
   State<DelaySlider> createState() => _DelaySliderState();
 }
@@ -238,11 +239,11 @@ class _DelaySliderState extends State<DelaySlider> {
         onPressed: saved
             ? null
             : () {
-          widget.onSave(delay);
-          setState(() {
-            saved = true;
-          });
-        },
+                widget.onSave(delay);
+                setState(() {
+                  saved = true;
+                });
+              },
       ),
     );
   }
