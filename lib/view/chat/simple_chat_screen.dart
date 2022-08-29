@@ -18,6 +18,7 @@ import 'package:vip_picnic/model/chat_models/chat_room_model.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/chat/preview_image.dart';
+import 'package:vip_picnic/view/chat/preview_video.dart';
 import 'package:vip_picnic/view/profile/other_user_profile.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/message_bubbles.dart';
@@ -58,6 +59,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
 
   File? imageFile;
+  File? videoFile;
 
   String imageUrl = '';
   String imgPlaceholder =
@@ -275,6 +277,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   String? path;
+  String? videoPath;
 
   Future getImageFromCamera() async {
     ImagePicker _picker = ImagePicker();
@@ -307,6 +310,27 @@ class _ChatScreenState extends State<ChatScreen> {
         Get.to(
           () => PreviewImageScreen(
             imagePath: path,
+            anotherUserId: anotherUserID,
+            anotherUserName: anotherUserName,
+            chatRoomId: crm.value.chatRoomId,
+            userId: userID,
+          ),
+        );
+        // uploadImage();
+      }
+    });
+  }
+
+  Future getVideoFromGallery() async {
+    ImagePicker _picker = ImagePicker();
+    await _picker.pickVideo(source: ImageSource.gallery,).then((xFile) {
+      if (xFile != null) {
+        videoFile = File(xFile.path);
+        videoPath = xFile.path;
+        // showLoading();
+        Get.to(
+              () => PreviewVideoScreen(
+            videoPath: videoPath,
             anotherUserId: anotherUserID,
             anotherUserName: anotherUserName,
             chatRoomId: crm.value.chatRoomId,
@@ -574,6 +598,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     "${ampm}",
                 senderType: !sendByMe ? 'receiver' : 'sender',
                 mediaType: type,
+                thumbnail: type == "video" ? data["thumbnail"] : "",
               );
             },
           );
@@ -736,7 +761,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         children: [
                           GestureDetector(
                             onTap: () {
-                              getImageFromGallery();
+                              // getImageFromGallery();
+                              getVideoFromGallery();
                             },
                             child: Image.asset(
                               Assets.imagesPhoto,

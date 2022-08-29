@@ -35,6 +35,7 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
   String imageUrl = '';
   RxDouble uploadPercentageValue = 0.0.obs;
 
+
   @override
   Widget build(BuildContext context) {
     log('${widget.imagePath} in preview');
@@ -78,7 +79,7 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
     String fileName = Uuid().v1();
     var ref = FirebaseStorage.instance
         .ref()
-        .child(widget.chatRoomId!)
+        .child("chatRooms/${widget.chatRoomId!}")
         .child("$fileName.jpg");
     try {
       final uploadTask = ref.putFile(File(widget.imagePath!));
