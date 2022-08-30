@@ -65,7 +65,7 @@ class HomeController extends GetxController {
         return loading();
       },
     );
-    if (selectedImages.isNotEmpty && descriptionCon.text.isNotEmpty) {
+    if (selectedImages.isNotEmpty || descriptionCon.text.isNotEmpty) {
       var postID = Uuid().v1();
       try {
         await uploadAllImages();
