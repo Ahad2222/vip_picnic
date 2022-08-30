@@ -118,7 +118,7 @@ class _EditPostState extends State<EditPost> {
         return loading();
       },
     );
-    if (newlyPickedImages.isNotEmpty && descController.text.isNotEmpty) {
+    if (postImages.isNotEmpty || descController.text.isNotEmpty) {
       var postID = widget.postModel?.postID;
       try {
         await uploadAllImages();
@@ -134,6 +134,8 @@ class _EditPostState extends State<EditPost> {
         await posts.doc(postID).update(updatedPostMap).then(
           (value) {
             log('Data set to FIREBASE!');
+            navigatorKey.currentState!.pop();
+            navigatorKey.currentState!.pop();
             newlyPickedImages.value = [];
             imagesToUpload = [];
             descController.clear();
@@ -141,8 +143,6 @@ class _EditPostState extends State<EditPost> {
             locationController.clear();
             taggedPeople = [];
             log('CLEAR');
-            navigatorKey.currentState!.pop();
-            navigatorKey.currentState!.pop();
           },
         );
       } on FirebaseException catch (e) {
