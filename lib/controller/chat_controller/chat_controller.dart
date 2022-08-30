@@ -18,6 +18,7 @@ class ChatController extends GetxController {
 
   RxBool isDeleting = false.obs;
   RxList deleteMsgIdList = [].obs;
+  RxList deleteLeftMsgIdList = [].obs;
   RxList deleteAudioIdList = [].obs;
   RxList deleteAudioLinksList = [].obs;
   RxList deleteImageLinksList = [].obs;

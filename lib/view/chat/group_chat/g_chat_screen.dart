@@ -465,7 +465,7 @@ class _GroupChatState extends State<GroupChat> {
                   time: "${hour.toString()}:"
                       "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
                       "${ampm}",
-                  mediaType: type,
+                  type: type,
                 );
               } else {
                 return RightMessageBubble(
@@ -474,7 +474,7 @@ class _GroupChatState extends State<GroupChat> {
                   time: "${hour.toString()}:"
                       "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
                       "${ampm}",
-                  mediaType: type,
+                  type: type,
                 );
               }
             },

@@ -19,6 +19,7 @@ class UserSimplePreference {
   static const _keyCreatedAt = 'createdAt';
   static const _keyLanguageIndex = 'languageIndex';
   static const _keyUserData = 'userData';
+  static const _videoMessageDocsIdsList = 'videoMessageDocsIdsList';
 
 
   static Future setUserData(UserDetailsModel obj) async {
@@ -27,6 +28,15 @@ class UserSimplePreference {
 
   static Future getUserData() async {
     return pref.read(_keyUserData);
+  }
+
+
+  static Future setVideoMessageDocsIdsListData(List<String> videoMessageDocsIdsList) async {
+    await pref.write(_videoMessageDocsIdsList, videoMessageDocsIdsList);
+  }
+
+  static Future getVideoMessageDocsIdsListData() async {
+    return pref.read(_videoMessageDocsIdsList);
   }
 
   static Future setProfileImageUrl(String imageUrl) async {

@@ -12,6 +12,7 @@ import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
+import 'package:vip_picnic/get_storage_data/get_storage_data.dart';
 import 'package:vip_picnic/main.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
@@ -168,11 +169,11 @@ class _PreviewVideoScreenState extends State<PreviewVideoScreen> {
     var ref = FirebaseStorage.instance
         .ref()
         .child("chatRooms/${widget.chatRoomId!}")
-        .child("$fileName.jpg");
+        .child("$fileName.mp4");
     var thumbnailRef = FirebaseStorage.instance
         .ref()
         .child("chatRooms/${widget.chatRoomId!}")
-        .child("$thumbnailFileName.jpg");
+        .child("$thumbnailFileName.mp4");
     try {
       showDialog(
         context: context,
@@ -214,6 +215,10 @@ class _PreviewVideoScreenState extends State<PreviewVideoScreen> {
                 .add(messageMap)
                 .then((value) async {
               videoDocId = value.id;
+              log("await UserSimplePreference.getVideoMessageDocsIdsListData(): ${await UserSimplePreference.getVideoMessageDocsIdsListData()}");
+              List<String> videoMessageDocsIdsList = await UserSimplePreference.getVideoMessageDocsIdsListData() ?? [];
+              videoMessageDocsIdsList.add(value.id);
+              await UserSimplePreference.setVideoMessageDocsIdsListData(videoMessageDocsIdsList);
               // thumbnailFile.
               if (File(thumbnailFile!).existsSync()) {
                 File(thumbnailFile).delete(recursive: true);
@@ -265,6 +270,13 @@ class _PreviewVideoScreenState extends State<PreviewVideoScreen> {
             videoUrl = await taskSnapshot.ref.getDownloadURL();
             if (File(widget.videoPath!) != null &&
                 (videoUrl != null || videoUrl != "")) {
+              List<String> videoMessageDocsIdsList = await UserSimplePreference.getVideoMessageDocsIdsListData() ?? [];
+              log("while updating the video link in db: videoDocId: ${videoDocId} and videoMessageDocsIdsList: ${videoMessageDocsIdsList}");
+              if(videoMessageDocsIdsList.isNotEmpty){
+                videoDocId = videoMessageDocsIdsList[0];
+                videoMessageDocsIdsList.removeAt(0);
+                await UserSimplePreference.setVideoMessageDocsIdsListData(videoMessageDocsIdsList);
+              }
               var time = DateTime.now().millisecondsSinceEpoch;
               await FirebaseFirestore.instance
                   .collection(chatRoomCollection)
