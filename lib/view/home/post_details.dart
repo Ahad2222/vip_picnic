@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,6 +15,7 @@ import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/home/edit_post.dart';
 import 'package:vip_picnic/view/home/post_image_preview.dart';
 import 'package:vip_picnic/view/widget/curved_header.dart';
+import 'package:vip_picnic/view/widget/custom_popup.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
@@ -113,49 +113,94 @@ class _PostDetailsState extends State<PostDetails> {
                                 PopupMenuItem(
                                   child: MyText(
                                     onTap: () {
-                                      Get.defaultDialog(
-                                          title: "Are you sure?",
-                                          content: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 15, vertical: 0),
-                                            child: Text(
-                                                "This can't be undone. Are you sure you want to delete this post?"),
-                                          ),
-                                          textConfirm: "Yes",
-                                          confirmTextColor: Colors.red,
-                                          textCancel: "No",
-                                          cancelTextColor: Colors.black,
-                                          onConfirm: () async {
-                                            try {
-                                              List<String> imageUrlsList =
-                                                  widget.postDocModel
-                                                          ?.postImages ??
-                                                      [];
-                                              Get.back();
-                                              Get.back();
-                                              Get.back();
-                                              Get.dialog(loading());
-                                              await posts
-                                                  .doc(
-                                                      addPostModel.value.postID)
-                                                  .delete();
-                                              Get.back();
-                                              // await posts.doc(addPostModel.value.postID).collection("comments").delete();
-                                              imageUrlsList
-                                                  .forEach((element) async {
-                                                await fstorage
-                                                    .refFromURL(element)
+                                      showDialog(
+                                        context: context,
+                                        builder: (_) {
+                                          return CustomPopup(
+                                            heading: 'Are you sure?',
+                                            description:
+                                                'This can\'t be undone. Are you sure you want to delete this post?',
+                                            onCancel: () => Get.back(),
+                                            onConfirm: () async {
+                                              try {
+                                                List<String> imageUrlsList =
+                                                    widget.postDocModel
+                                                            ?.postImages ??
+                                                        [];
+                                                Get.back();
+                                                Get.back();
+                                                Get.back();
+                                                Get.dialog(
+                                                  loading(),
+                                                );
+                                                await posts
+                                                    .doc(addPostModel
+                                                        .value.postID)
                                                     .delete();
-                                              });
-                                            } catch (e) {
-                                              print(e);
-                                              showMsg(
+                                                Get.back();
+                                                // await posts.doc(addPostModel.value.postID).collection("comments").delete();
+                                                imageUrlsList.forEach(
+                                                  (element) async {
+                                                    await fstorage
+                                                        .refFromURL(element)
+                                                        .delete();
+                                                  },
+                                                );
+                                              } catch (e) {
+                                                print(e);
+                                                showMsg(
                                                   context: context,
                                                   msg:
-                                                      "Something went wrong during post deletion. Please try again.");
-                                              log("error in post deletion $e");
-                                            }
-                                          });
+                                                      "Something went wrong during post deletion. Please try again.",
+                                                );
+                                              }
+                                            },
+                                          );
+                                        },
+                                      );
+                                      // Get.defaultDialog(
+                                      //     title: "Are you sure?",
+                                      //     content: Padding(
+                                      //       padding: const EdgeInsets.symmetric(
+                                      //           horizontal: 15, vertical: 0),
+                                      //       child: Text(
+                                      //           "This can't be undone. Are you sure you want to delete this post?"),
+                                      //     ),
+                                      //     textConfirm: "Yes",
+                                      //     confirmTextColor: Colors.red,
+                                      //     textCancel: "No",
+                                      //     cancelTextColor: Colors.black,
+                                      //     onConfirm: () async {
+                                      //       try {
+                                      //         List<String> imageUrlsList =
+                                      //             widget.postDocModel
+                                      //                     ?.postImages ??
+                                      //                 [];
+                                      //         Get.back();
+                                      //         Get.back();
+                                      //         Get.back();
+                                      //         Get.dialog(loading());
+                                      //         await posts
+                                      //             .doc(
+                                      //                 addPostModel.value.postID)
+                                      //             .delete();
+                                      //         Get.back();
+                                      //         // await posts.doc(addPostModel.value.postID).collection("comments").delete();
+                                      //         imageUrlsList
+                                      //             .forEach((element) async {
+                                      //           await fstorage
+                                      //               .refFromURL(element)
+                                      //               .delete();
+                                      //         });
+                                      //       } catch (e) {
+                                      //         print(e);
+                                      //         showMsg(
+                                      //             context: context,
+                                      //             msg:
+                                      //                 "Something went wrong during post deletion. Please try again.");
+                                      //         log("error in post deletion $e");
+                                      //       }
+                                      //     });
                                     },
                                     text: 'deletePost'.tr,
                                     size: 14,

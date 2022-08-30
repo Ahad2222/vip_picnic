@@ -16,6 +16,7 @@ import 'package:vip_picnic/view/home/edit_post.dart';
 import 'package:vip_picnic/view/home/post_details.dart';
 import 'package:vip_picnic/view/profile/other_user_profile.dart';
 import 'package:vip_picnic/view/profile/profile.dart';
+import 'package:vip_picnic/view/widget/custom_popup.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/my_appbar.dart';
@@ -60,12 +61,15 @@ class MyPosts extends StatelessWidget {
                   ),
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
-                    AddPostModel addPostModel =
-                    AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                    AddPostModel addPostModel = AddPostModel.fromJson(
+                        snapshot.data!.docs[index].data()
+                            as Map<String, dynamic>);
                     return PostWidget(
                       postDocModel: addPostModel,
                       postID: addPostModel.postID,
-                      isLikeByMe: addPostModel.likeIDs!.asMap().containsValue(auth.currentUser!.uid),
+                      isLikeByMe: addPostModel.likeIDs!
+                          .asMap()
+                          .containsValue(auth.currentUser!.uid),
                       profileImage: addPostModel.profileImage,
                       name: addPostModel.postBy,
                       postedTime: addPostModel.createdAt,
@@ -174,7 +178,20 @@ class PostWidget extends StatefulWidget {
 
 class _PostWidgetState extends State<PostWidget> {
   RxInt currentPost = 0.obs;
-  List<String> monthList = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  List<String> monthList = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec"
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -193,26 +210,31 @@ class _PostWidgetState extends State<PostWidget> {
                 leading: GestureDetector(
                   onTap: widget.isMyPost!
                       ? () => Get.to(
-                        () => Profile(),
-                  )
+                            () => Profile(),
+                          )
                       : () async {
-                    log("inside the lower going to user method");
-                    UserDetailsModel otherUser = UserDetailsModel();
-                    try {
-                      // loading();
-                      await ffstore.collection(accountsCollection).doc(widget.postDocModel!.uID).get().then(
-                            (value) {
-                          otherUser = UserDetailsModel.fromJson(value.data() ?? {});
+                          log("inside the lower going to user method");
+                          UserDetailsModel otherUser = UserDetailsModel();
+                          try {
+                            // loading();
+                            await ffstore
+                                .collection(accountsCollection)
+                                .doc(widget.postDocModel!.uID)
+                                .get()
+                                .then(
+                              (value) {
+                                otherUser = UserDetailsModel.fromJson(
+                                    value.data() ?? {});
+                              },
+                            );
+                          } catch (e) {
+                            print(e);
+                          }
+                          // navigatorKey.currentState!.pop();
+                          Get.to(
+                            () => OtherUserProfile(otherUserModel: otherUser),
+                          );
                         },
-                      );
-                    } catch (e) {
-                      print(e);
-                    }
-                    // navigatorKey.currentState!.pop();
-                    Get.to(
-                          () => OtherUserProfile(otherUserModel: otherUser),
-                    );
-                  },
                   child: Container(
                     height: 54,
                     width: 54,
@@ -231,51 +253,53 @@ class _PostWidgetState extends State<PostWidget> {
                     child: Center(
                       child: widget.isMyPost!
                           ? ClipRRect(
-                        borderRadius: BorderRadius.circular(100),
-                        child: Image.network(
-                          userDetailsModel.profileImageUrl!,
-                          height: height(context, 1.0),
-                          width: width(context, 1.0),
-                          fit: BoxFit.cover,
-                          errorBuilder: (
-                              BuildContext context,
-                              Object exception,
-                              StackTrace? stackTrace,
-                              ) {
-                            return const Text(' ');
-                          },
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) {
-                              return child;
-                            } else {
-                              return loading();
-                            }
-                          },
-                        ),
-                      )
+                              borderRadius: BorderRadius.circular(100),
+                              child: Image.network(
+                                userDetailsModel.profileImageUrl!,
+                                height: height(context, 1.0),
+                                width: width(context, 1.0),
+                                fit: BoxFit.cover,
+                                errorBuilder: (
+                                  BuildContext context,
+                                  Object exception,
+                                  StackTrace? stackTrace,
+                                ) {
+                                  return const Text(' ');
+                                },
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    return child;
+                                  } else {
+                                    return loading();
+                                  }
+                                },
+                              ),
+                            )
                           : ClipRRect(
-                        borderRadius: BorderRadius.circular(100),
-                        child: Image.network(
-                          widget.profileImage!,
-                          height: height(context, 1.0),
-                          width: width(context, 1.0),
-                          fit: BoxFit.cover,
-                          errorBuilder: (
-                              BuildContext context,
-                              Object exception,
-                              StackTrace? stackTrace,
-                              ) {
-                            return const Text(' ');
-                          },
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) {
-                              return child;
-                            } else {
-                              return loading();
-                            }
-                          },
-                        ),
-                      ),
+                              borderRadius: BorderRadius.circular(100),
+                              child: Image.network(
+                                widget.profileImage!,
+                                height: height(context, 1.0),
+                                width: width(context, 1.0),
+                                fit: BoxFit.cover,
+                                errorBuilder: (
+                                  BuildContext context,
+                                  Object exception,
+                                  StackTrace? stackTrace,
+                                ) {
+                                  return const Text(' ');
+                                },
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    return child;
+                                  } else {
+                                    return loading();
+                                  }
+                                },
+                              ),
+                            ),
                     ),
                   ),
                 ),
@@ -288,9 +312,14 @@ class _PostWidgetState extends State<PostWidget> {
                         UserDetailsModel otherUser = UserDetailsModel();
                         // loading();
                         try {
-                          await ffstore.collection(accountsCollection).doc(widget.postDocModel!.uID).get().then(
-                                (value) {
-                              otherUser = UserDetailsModel.fromJson(value.data() ?? {});
+                          await ffstore
+                              .collection(accountsCollection)
+                              .doc(widget.postDocModel!.uID)
+                              .get()
+                              .then(
+                            (value) {
+                              otherUser =
+                                  UserDetailsModel.fromJson(value.data() ?? {});
                             },
                           );
                         } catch (e) {
@@ -298,11 +327,12 @@ class _PostWidgetState extends State<PostWidget> {
                         }
                         // navigatorKey.currentState!.pop();
                         Get.to(
-                              () => OtherUserProfile(otherUserModel: otherUser),
+                          () => OtherUserProfile(otherUserModel: otherUser),
                         );
                       },
                       child: MyText(
-                        text: widget.isMyPost! ? 'yourPost'.tr : '${widget.name}',
+                        text:
+                            widget.isMyPost! ? 'yourPost'.tr : '${widget.name}',
                         size: 17,
                         weight: FontWeight.w600,
                         color: kSecondaryColor,
@@ -312,7 +342,7 @@ class _PostWidgetState extends State<PostWidget> {
                     MyText(
                       //+ 8/4/2022
                       text:
-                      '  •  ${widget.postedTime!.split(' ')[1].split("/")[1]} ${monthList[int.parse(widget.postedTime!.split(' ')[1].split("/")[0]) - 1]}',
+                          '  •  ${widget.postedTime!.split(' ')[1].split("/")[1]} ${monthList[int.parse(widget.postedTime!.split(' ')[1].split("/")[0]) - 1]}',
                       size: 15,
                       weight: FontWeight.w600,
                       color: kSecondaryColor.withOpacity(0.40),
@@ -321,82 +351,133 @@ class _PostWidgetState extends State<PostWidget> {
                 ),
                 trailing: widget.isMyPost!
                     ? PopupMenuButton(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  itemBuilder: (context) {
-                    return [
-                      PopupMenuItem(
-                        child: MyText(
-                          onTap: () => Get.to(
-                                () => EditPost(
-                                  postModel: widget.postDocModel,
-                              // editPost: true,
-                              // postImage: widget.postImage![0],
-                              // title: widget.title,
-                            ),
-                          ),
-                          text: 'editPost'.tr,
-                          size: 14,
-                          color: kSecondaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
                         ),
-                      ),
-                      PopupMenuItem(
-                        child: MyText(
-                          onTap: () {
-                            Get.defaultDialog(
-                                title: "Are you sure?",
-                                content: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 0),
-                                  child: Text(
-                                      "This can't be undone. Are you sure you want to delete this post?"),
+                        itemBuilder: (context) {
+                          return [
+                            PopupMenuItem(
+                              child: MyText(
+                                onTap: () => Get.to(
+                                  () => EditPost(
+                                    postModel: widget.postDocModel,
+                                    // editPost: true,
+                                    // postImage: widget.postImage![0],
+                                    // title: widget.title,
+                                  ),
                                 ),
-                                textConfirm: "Yes",
-                                confirmTextColor: Colors.red,
-                                textCancel: "No",
-                                cancelTextColor: Colors.black,
-                                onConfirm: () async {
-                                  try {
-                                    // Get.back();
-                                    List<String> imageUrlsList = widget.postDocModel?.postImages ?? [];
-                                    Get.back();
-                                    Get.back();
-                                    Get.dialog(loading());
-                                    await posts.doc(widget.postDocModel?.postID).delete();
-                                    Get.back();
-                                    imageUrlsList.forEach((element) async {
-                                      await fstorage.refFromURL(element).delete();
-                                    });
-                                    // await posts.doc(addPostModel.value.postID).collection("comments").delete();
-                                  } catch (e) {
-                                    print(e);
-                                    showMsg(
-                                        context: context,
-                                        msg: "Something went wrong during post deletion. Please try again.");
-                                    log("error in post deletion $e");
-                                  }
-                                });
-                          },
-                          text: 'deletePost'.tr,
-                          size: 14,
-                          color: kSecondaryColor,
+                                text: 'editPost'.tr,
+                                size: 14,
+                                color: kSecondaryColor,
+                              ),
+                            ),
+                            PopupMenuItem(
+                              child: MyText(
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (_) {
+                                      return CustomPopup(
+                                        heading: 'Are you sure?',
+                                        description:
+                                            'This can\'t be undone. Are you sure you want to delete this post?',
+                                        onCancel: () => Get.back(),
+                                        onConfirm: () async {
+                                          try {
+                                            // Get.back();
+                                            List<String> imageUrlsList = widget
+                                                    .postDocModel?.postImages ??
+                                                [];
+                                            Get.back();
+                                            Get.back();
+                                            Get.dialog(loading());
+                                            await posts
+                                                .doc(
+                                                    widget.postDocModel?.postID)
+                                                .delete();
+                                            Get.back();
+                                            imageUrlsList.forEach(
+                                              (element) async {
+                                                await fstorage
+                                                    .refFromURL(element)
+                                                    .delete();
+                                              },
+                                            );
+                                            // await posts.doc(addPostModel.value.postID).collection("comments").delete();
+                                          } catch (e) {
+                                            print(e);
+                                            showMsg(
+                                                context: context,
+                                                msg:
+                                                    "Something went wrong during post deletion. Please try again.");
+                                            log("error in post deletion $e");
+                                          }
+                                        },
+                                      );
+                                    },
+                                  );
+                                  // Get.defaultDialog(
+                                  //     title: "Are you sure?",
+                                  //     content: Padding(
+                                  //       padding: const EdgeInsets.symmetric(
+                                  //           horizontal: 15, vertical: 0),
+                                  //       child: Text(
+                                  //           "This can't be undone. Are you sure you want to delete this post?"),
+                                  //     ),
+                                  //     textConfirm: "Yes",
+                                  //     confirmTextColor: Colors.red,
+                                  //     textCancel: "No",
+                                  //     cancelTextColor: Colors.black,
+                                  //     onConfirm: () async {
+                                  //       try {
+                                  //         // Get.back();
+                                  //         List<String> imageUrlsList =
+                                  //             widget.postDocModel?.postImages ??
+                                  //                 [];
+                                  //         Get.back();
+                                  //         Get.back();
+                                  //         Get.dialog(loading());
+                                  //         await posts
+                                  //             .doc(widget.postDocModel?.postID)
+                                  //             .delete();
+                                  //         Get.back();
+                                  //         imageUrlsList
+                                  //             .forEach((element) async {
+                                  //           await fstorage
+                                  //               .refFromURL(element)
+                                  //               .delete();
+                                  //         });
+                                  //         // await posts.doc(addPostModel.value.postID).collection("comments").delete();
+                                  //       } catch (e) {
+                                  //         print(e);
+                                  //         showMsg(
+                                  //             context: context,
+                                  //             msg:
+                                  //                 "Something went wrong during post deletion. Please try again.");
+                                  //         log("error in post deletion $e");
+                                  //       }
+                                  //     });
+                                },
+                                text: 'deletePost'.tr,
+                                size: 14,
+                                color: kSecondaryColor,
+                              ),
+                            ),
+                          ];
+                        },
+                        child: Icon(
+                          Icons.more_vert,
+                          color: kDarkBlueColor.withOpacity(0.60),
+                          size: 30,
                         ),
-                      ),
-                    ];
-                  },
-                  child: Icon(
-                    Icons.more_vert,
-                    color: kDarkBlueColor.withOpacity(0.60),
-                    size: 30,
-                  ),
-                )
+                      )
                     : SizedBox(),
               ),
             ),
             GestureDetector(
               onTap: () => Get.to(
-                    () => PostDetails(
-                      isMyPost: true,
+                () => PostDetails(
+                  isMyPost: true,
                   isLikeByMe: widget.isLikeByMe,
                   postDocModel: widget.postDocModel,
                 ),
@@ -437,13 +518,14 @@ class _PostWidgetState extends State<PostWidget> {
                                   height: Get.height,
                                   fit: BoxFit.cover,
                                   errorBuilder: (
-                                      BuildContext context,
-                                      Object exception,
-                                      StackTrace? stackTrace,
-                                      ) {
+                                    BuildContext context,
+                                    Object exception,
+                                    StackTrace? stackTrace,
+                                  ) {
                                     return const Text(' ');
                                   },
-                                  loadingBuilder: (context, child, loadingProgress) {
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
                                     if (loadingProgress == null) {
                                       return child;
                                     } else {
@@ -458,27 +540,28 @@ class _PostWidgetState extends State<PostWidget> {
                         widget.postImage!.length == 1
                             ? SizedBox()
                             : Obx(() {
-                          return Positioned(
-                            top: 10,
-                            right: 30,
-                            child: Container(
-                              height: 35,
-                              width: 46,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(50),
-                                color: kSecondaryColor.withOpacity(0.5),
-                              ),
-                              child: Center(
-                                child: MyText(
-                                  text: '${currentPost.value + 1}/${widget.postImage!.length}',
-                                  size: 15,
-                                  weight: FontWeight.w600,
-                                  color: kPrimaryColor,
-                                ),
-                              ),
-                            ),
-                          );
-                        }),
+                                return Positioned(
+                                  top: 10,
+                                  right: 30,
+                                  child: Container(
+                                    height: 35,
+                                    width: 46,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(50),
+                                      color: kSecondaryColor.withOpacity(0.5),
+                                    ),
+                                    child: Center(
+                                      child: MyText(
+                                        text:
+                                            '${currentPost.value + 1}/${widget.postImage!.length}',
+                                        size: 15,
+                                        weight: FontWeight.w600,
+                                        color: kPrimaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }),
                       ],
                     ),
                   ),
@@ -502,12 +585,18 @@ class _PostWidgetState extends State<PostWidget> {
                     children: [
                       GestureDetector(
                         onTap: () async {
-                          await ffstore.collection(postsCollection).doc(widget.postID).update(
+                          await ffstore
+                              .collection(postsCollection)
+                              .doc(widget.postID)
+                              .update(
                             {
-                              "likeCount": FieldValue.increment(widget.isLikeByMe! ? -1 : 1),
+                              "likeCount": FieldValue.increment(
+                                  widget.isLikeByMe! ? -1 : 1),
                               "likeIDs": !widget.isLikeByMe!
-                                  ? FieldValue.arrayUnion([auth.currentUser!.uid])
-                                  : FieldValue.arrayRemove([auth.currentUser!.uid]),
+                                  ? FieldValue.arrayUnion(
+                                      [auth.currentUser!.uid])
+                                  : FieldValue.arrayRemove(
+                                      [auth.currentUser!.uid]),
                             },
                           );
                           // await fs.collection(postsCollection).doc(postID).collection("likes")
@@ -524,9 +613,13 @@ class _PostWidgetState extends State<PostWidget> {
                           //+this is giving us a small glitch because everytime for the first time app opens up,
                           //+ the red heart image is not loaded yet. which gives a small glitch on that first like
                           //+ but this hapens only when either no post is liked before or all post have been liked before
-                          widget.isLikeByMe! ? Assets.imagesHeartFull : Assets.imagesHeartEmpty,
+                          widget.isLikeByMe!
+                              ? Assets.imagesHeartFull
+                              : Assets.imagesHeartEmpty,
                           height: 24.0,
-                          color: widget.isLikeByMe! ? Color(0xffe31b23) : kDarkBlueColor.withOpacity(0.60),
+                          color: widget.isLikeByMe!
+                              ? Color(0xffe31b23)
+                              : kDarkBlueColor.withOpacity(0.60),
                         ),
                       ),
                       MyText(
@@ -542,7 +635,7 @@ class _PostWidgetState extends State<PostWidget> {
                     children: [
                       GestureDetector(
                         onTap: () => Get.to(
-                              () => PostDetails(
+                          () => PostDetails(
                             isLikeByMe: widget.isLikeByMe,
                             postDocModel: widget.postDocModel,
                           ),
@@ -554,22 +647,31 @@ class _PostWidgetState extends State<PostWidget> {
                         ),
                       ),
                       StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                        stream: ffstore.collection(postsCollection).doc(widget.postID).collection("comments").snapshots(),
+                        stream: ffstore
+                            .collection(postsCollection)
+                            .doc(widget.postID)
+                            .collection("comments")
+                            .snapshots(),
                         builder: (
-                            BuildContext context,
-                            AsyncSnapshot<QuerySnapshot> snapshot,
-                            ) {
-                          int previousCount = snapshot.data != null ? snapshot.data!.docs.length : 0;
+                          BuildContext context,
+                          AsyncSnapshot<QuerySnapshot> snapshot,
+                        ) {
+                          int previousCount = snapshot.data != null
+                              ? snapshot.data!.docs.length
+                              : 0;
                           log("inside stream-builder");
-                          if (snapshot.connectionState == ConnectionState.waiting) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
                             log("inside stream-builder in waiting state");
                             return MyText(
                               text: '$previousCount',
                               size: 18,
                               color: kDarkBlueColor.withOpacity(0.60),
                             );
-                          } else if (snapshot.connectionState == ConnectionState.active ||
-                              snapshot.connectionState == ConnectionState.done) {
+                          } else if (snapshot.connectionState ==
+                                  ConnectionState.active ||
+                              snapshot.connectionState ==
+                                  ConnectionState.done) {
                             if (snapshot.hasError) {
                               return MyText(
                                 text: "$previousCount",
@@ -615,7 +717,8 @@ class _PostWidgetState extends State<PostWidget> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      String shareLink = await DynamicLinkHandler.buildDynamicLinkForPost(
+                      String shareLink =
+                          await DynamicLinkHandler.buildDynamicLinkForPost(
                         postImageUrl: widget.postDocModel?.postImages![0] ??
                             "https://www.freeiconspng.com/uploads/no-image-icon-15.png",
                         postId: widget.postDocModel!.postID ?? "",

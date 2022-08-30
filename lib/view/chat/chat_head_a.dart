@@ -14,6 +14,7 @@ import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
 import 'package:vip_picnic/view/chat/create_new_chat.dart';
 import 'package:vip_picnic/view/chat/group_chat/g_chat_screen.dart';
 import 'package:vip_picnic/view/chat/simple_chat_screen.dart';
+import 'package:vip_picnic/view/widget/custom_popup.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:vip_picnic/view/widget/snack_bar.dart';
@@ -108,7 +109,8 @@ class _ChatHeadState extends State<ChatHead> {
                     ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(50),
-                      color: currentTab == index ? kSecondaryColor : kPrimaryColor,
+                      color:
+                          currentTab == index ? kSecondaryColor : kPrimaryColor,
                     ),
                     child: InkWell(
                       onTap: () => selectedTab(index),
@@ -116,7 +118,9 @@ class _ChatHeadState extends State<ChatHead> {
                         child: MyText(
                           text: index == 0 ? 'chat'.tr : 'group'.tr,
                           size: 16,
-                          color: currentTab == index ? kPrimaryColor : kSecondaryColor,
+                          color: currentTab == index
+                              ? kPrimaryColor
+                              : kSecondaryColor,
                         ),
                       ),
                     ),
@@ -185,16 +189,20 @@ class SimpleChatHeads extends StatelessWidget {
                 itemCount: snapshot.data!.docs.length,
                 itemBuilder: (context, index) {
                   ChatHeadModel data = ChatHeadModel();
-                  data = ChatHeadModel.fromDocumentSnapshot(snapshot.data!.docs[index]);
+                  data = ChatHeadModel.fromDocumentSnapshot(
+                      snapshot.data!.docs[index]);
                   return chatHeadTiles(
                     context,
                     profileImage: data.user1Id != userDetailsModel.uID
                         ? data.user1Model!.profileImageUrl
                         : data.user2Model!.profileImageUrl,
-                    name: data.user1Id != userDetailsModel.uID ? data.user1Model!.fullName : data.user2Model!.fullName,
+                    name: data.user1Id != userDetailsModel.uID
+                        ? data.user1Model!.fullName
+                        : data.user2Model!.fullName,
                     msg: data.lastMessage,
                     time: data.lastMessageAt,
-                    docs: snapshot.data!.docs[index].data() as Map<String, dynamic>,
+                    docs: snapshot.data!.docs[index].data()
+                        as Map<String, dynamic>,
                     chatRoomId: data.chatRoomId,
                   );
                 },
@@ -216,7 +224,12 @@ class SimpleChatHeads extends StatelessWidget {
   }
 
   Widget chatHeadTiles(BuildContext context,
-      {String? profileImage, name, msg, time, chatRoomId, Map<String, dynamic>? docs}) {
+      {String? profileImage,
+      name,
+      msg,
+      time,
+      chatRoomId,
+      Map<String, dynamic>? docs}) {
     return Padding(
       padding: const EdgeInsets.only(
         bottom: 10,
@@ -232,27 +245,56 @@ class SimpleChatHeads extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () async {
-                      Get.defaultDialog(
-                          title: "Are you sure?",
-                          content: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 0),
-                            child: Text("This can't be undone. Are you sure you want to delete this chat?"),
-                          ),
-                          textConfirm: "Yes",
-                          confirmTextColor: Colors.red,
-                          textCancel: "No",
-                          cancelTextColor: Colors.black,
-                          onConfirm: () async {
-                            try {
-                              await chatController.deleteAChatRoom(chatRoomId: chatRoomId);
-                            } catch (e) {
-                              print(e);
-                              showMsg(
-                                  context: context,
-                                  msg: "Something went wrong during chat deletion. Please try again.");
-                              log("error in chat deletion $e");
-                            }
-                          });
+                      showDialog(
+                        context: context,
+                        builder: (_) {
+                          return CustomPopup(
+                            heading: 'Are you Sure?',
+                            description:
+                                'This can\'t be undone. Are you sure you want to delete this chat?',
+                            onCancel: () => Get.back(),
+                            onConfirm: () async {
+                              try {
+                                await chatController.deleteAChatRoom(
+                                    chatRoomId: chatRoomId);
+                              } catch (e) {
+                                print(e);
+                                showMsg(
+                                    context: context,
+                                    msg:
+                                        "Something went wrong during chat deletion. Please try again.");
+                                log("error in chat deletion $e");
+                              }
+                            },
+                          );
+                        },
+                      );
+                      // Get.defaultDialog(
+                      //   title: "Are you sure?",
+                      //   content: Padding(
+                      //     padding: const EdgeInsets.symmetric(
+                      //         horizontal: 15, vertical: 0),
+                      //     child: Text(
+                      //         "This can't be undone. Are you sure you want to delete this chat?"),
+                      //   ),
+                      //   textConfirm: "Yes",
+                      //   confirmTextColor: Colors.red,
+                      //   textCancel: "No",
+                      //   cancelTextColor: Colors.black,
+                      //   onConfirm: () async {
+                      //     try {
+                      //       await chatController.deleteAChatRoom(
+                      //           chatRoomId: chatRoomId);
+                      //     } catch (e) {
+                      //       print(e);
+                      //       showMsg(
+                      //           context: context,
+                      //           msg:
+                      //               "Something went wrong during chat deletion. Please try again.");
+                      //       log("error in chat deletion $e");
+                      //     }
+                      //   },
+                      // );
                     },
                     child: Container(
                       height: 51,
@@ -342,7 +384,8 @@ class SimpleChatHeads extends StatelessWidget {
                 children: [
                   MyText(
                     paddingTop: 5,
-                    text: "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[0]}"
+                    text:
+                        "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[0]}"
                         ":"
                         "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[1]}",
                     weight: FontWeight.w300,
@@ -392,7 +435,8 @@ class GroupChatHeads extends StatelessWidget {
                 itemCount: snapshot.data!.docs.length,
                 itemBuilder: (context, index) {
                   GroupChatHeadModel data = GroupChatHeadModel();
-                  data = GroupChatHeadModel.fromDocumentSnapshot(snapshot.data!.docs[index]);
+                  data = GroupChatHeadModel.fromDocumentSnapshot(
+                      snapshot.data!.docs[index]);
                   return groupChatHeadsTiles(
                     context,
                     groupId: data.groupId,
@@ -454,12 +498,16 @@ class GroupChatHeads extends StatelessWidget {
           onTap: () async {
             log("clicked on group chat head");
             try {
-              await groupChatController.getAGroupChatRoomInfo(groupId!).then((value) => Get.to(() => GroupChat(
-                    docs: value.data(),
-                  )));
+              await groupChatController
+                  .getAGroupChatRoomInfo(groupId!)
+                  .then((value) => Get.to(() => GroupChat(
+                        docs: value.data(),
+                      )));
             } catch (e) {
               log("error in getting the group chat info is: $e");
-              showMsg(context: context, msg: "Please make sure you are connected to internet");
+              showMsg(
+                  context: context,
+                  msg: "Please make sure you are connected to internet");
             }
             //     Navigator.push(
             //   context,
@@ -501,7 +549,8 @@ class GroupChatHeads extends StatelessWidget {
             children: [
               MyText(
                 paddingBottom: 5,
-                text: "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[0]}"
+                text:
+                    "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[0]}"
                     ":"
                     "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[1]}",
                 weight: FontWeight.w300,

@@ -3,41 +3,52 @@ import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 
-
 // ignore: must_be_immutable
 class MyButton extends StatelessWidget {
   MyButton({
     Key? key,
     this.buttonText,
     this.onTap,
+    this.textSize = 19,
+    this.buttonHeight = 47,
+    this.iconSize = 11.77,
+    this.buttonColor = kTertiaryColor,
+    this.showIcon = true,
   }) : super(key: key);
   String? buttonText;
   VoidCallback? onTap;
+  Color buttonColor;
+  double textSize, buttonHeight, iconSize;
+  bool showIcon;
 
   @override
   Widget build(BuildContext context) {
     return MaterialButton(
       onPressed: onTap,
-      height: 47,
+      height: buttonHeight,
       elevation: 0,
       highlightElevation: 0,
       highlightColor: kPrimaryColor.withOpacity(0.1),
       splashColor: kPrimaryColor.withOpacity(0.1),
       shape: StadiumBorder(),
-      color: kTertiaryColor,
+      color: buttonColor,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: showIcon
+            ? MainAxisAlignment.spaceBetween
+            : MainAxisAlignment.center,
         children: [
           Container(),
           MyText(
-            size: 19,
+            size: textSize,
             text: '$buttonText'.toUpperCase(),
             color: kPrimaryColor,
           ),
-          Image.asset(
-            Assets.imagesArrowForward,
-            height: 11.77,
-          ),
+          showIcon
+              ? Image.asset(
+                  Assets.imagesArrowForward,
+                  height: iconSize,
+                )
+              : SizedBox(),
         ],
       ),
     );

@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
-import 'package:vip_picnic/view/widget/my_appbar.dart';
 
 class PostImagePreview extends StatelessWidget {
   PostImagePreview({

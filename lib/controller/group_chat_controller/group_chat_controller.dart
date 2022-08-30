@@ -15,7 +15,6 @@ class GroupChatController extends GetxController {
   RxString userSearchText = "".obs;
   RxString messageControllerText = "".obs;
 
-
   createGroupChatRoomAndStartConversation({
     required String groupName,
     required String groupImage,
@@ -87,7 +86,10 @@ class GroupChatController extends GetxController {
           );
 
           try {
-            await ffstore.collection(groupChatCollection).doc(groupId).set(groupChatRoomModel.toJson());
+            await ffstore
+                .collection(groupChatCollection)
+                .doc(groupId)
+                .set(groupChatRoomModel.toJson());
             Get.back();
             Get.to(() => GroupChat(docs: groupChatRoomModel.toJson()));
           } catch (e) {
@@ -97,12 +99,16 @@ class GroupChatController extends GetxController {
       });
     } else {
       Get.back();
-      Get.defaultDialog(title: 'Error', middleText: "You cannot add yourself to a group.");
+      Get.defaultDialog(
+        title: 'Error',
+        middleText: "You cannot add yourself to a group.",
+      );
       print('You cannot add yourself to a group.');
     }
   }
 
-  addConversationMessage(String groupId, var time, String type, messageMap, String msg) async {
+  addConversationMessage(
+      String groupId, var time, String type, messageMap, String msg) async {
     log('called addConversationMessage');
     await FirebaseFirestore.instance
         .collection(groupChatCollection)
@@ -110,7 +116,10 @@ class GroupChatController extends GetxController {
         .collection(messagesCollection)
         .add(messageMap)
         .then((value) async {
-      await FirebaseFirestore.instance.collection(groupChatCollection).doc(groupId).update({
+      await FirebaseFirestore.instance
+          .collection(groupChatCollection)
+          .doc(groupId)
+          .update({
         'lastMessageAt': time,
         'lastMessage': msg,
         'lastMessageById': userDetailsModel.uID,
@@ -124,8 +133,11 @@ class GroupChatController extends GetxController {
     });
   }
 
-
-  Future<DocumentSnapshot<Map<String, dynamic>>> getAGroupChatRoomInfo(String groupId) async {
-    return FirebaseFirestore.instance.collection(groupChatCollection).doc(groupId).get();
+  Future<DocumentSnapshot<Map<String, dynamic>>> getAGroupChatRoomInfo(
+      String groupId) async {
+    return FirebaseFirestore.instance
+        .collection(groupChatCollection)
+        .doc(groupId)
+        .get();
   }
 }

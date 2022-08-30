@@ -2,12 +2,15 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/model/chat_models/chat_head_model.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
+import 'package:vip_picnic/view/widget/custom_popup.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
+import 'package:vip_picnic/view/widget/snack_bar.dart';
 
 import '../../view/chat/simple_chat_screen.dart';
 
@@ -26,6 +29,7 @@ class ChatController extends GetxController {
 
   RxBool isPlayingMsg = false.obs;
   RxString selectedVoiceId = ''.obs;
+
   // RxBool isAudioBeingSent = false.obs;
 
   RxList<ChatHeadModel> chatHeads = RxList<ChatHeadModel>([]);
@@ -35,6 +39,7 @@ class ChatController extends GetxController {
   RxBool isKeyboardOpen = false.obs;
   RxBool isBlocked = false.obs;
   RxString blockedById = "".obs;
+
   // RxString selectedChatOption = "Active Chats".obs;
   // RxBool isRecordingAudio = false.obs;
   //
@@ -144,7 +149,11 @@ class ChatController extends GetxController {
     var myid = myId;
 
     if (myid != null && myid != '') {
-      return ffstore.collection('ChatRoom').where('users', arrayContains: myId).snapshots().map((QuerySnapshot querySnap) {
+      return ffstore
+          .collection('ChatRoom')
+          .where('users', arrayContains: myId)
+          .snapshots()
+          .map((QuerySnapshot querySnap) {
         List<ChatHeadModel> myChats = [];
         // log('stream inside the myChatHeadsList Snapshot and querySnap.docs.length = ${querySnap.docs.length} and chatHeads.length = ${chatHeads.value.length}:');
         querySnap.docs.forEach((doc) {
@@ -190,7 +199,8 @@ class ChatController extends GetxController {
 
 //first time creating chat head
   createChatRoomAndStartConversation(
-      {required UserDetailsModel user1Model, required UserDetailsModel user2Model}) async {
+      {required UserDetailsModel user1Model,
+      required UserDetailsModel user2Model}) async {
     loading();
     log("inside createChatRoomAndStartConversation and userDetailsModel.uID is: ${userDetailsModel.uID} and userDetailsModel.fullName is: ${userDetailsModel.fullName}");
     List<String> users;
@@ -200,10 +210,14 @@ class ChatController extends GetxController {
         "${user1Model.uID}",
         "${user2Model.uID}",
       ];
-      String chatRoomId = getChatRoomId(user1Model.uID ?? "", user2Model.uID ?? "");
-      var anotherUserId = user1Model.uID == userDetailsModel.uID ? user2Model.uID : user1Model.uID;
-      var anotherUserName =
-          user1Model.uID == userDetailsModel.uID ? "${user2Model.fullName}" : "${user1Model.fullName}";
+      String chatRoomId =
+          getChatRoomId(user1Model.uID ?? "", user2Model.uID ?? "");
+      var anotherUserId = user1Model.uID == userDetailsModel.uID
+          ? user2Model.uID
+          : user1Model.uID;
+      var anotherUserName = user1Model.uID == userDetailsModel.uID
+          ? "${user2Model.fullName}"
+          : "${user1Model.fullName}";
 
       var myName = "${userDetailsModel.fullName}";
       log("anotherUserId: $anotherUserId");
@@ -232,12 +246,21 @@ class ChatController extends GetxController {
       //     .where("passengerId", isEqualTo: userDetailsModel.currentUserId)
       //     .where("searchParameters", arrayContains: "varToSearch").snapshots();
 
-      await ffstore.collection(chatRoomCollection).doc(chatRoomId).get().then((value) async {
+      await ffstore
+          .collection(chatRoomCollection)
+          .doc(chatRoomId)
+          .get()
+          .then((value) async {
         if (value.exists) {
           //+means chat head is already created
           Get.back();
-          if (!value["notDeletedFor"].asMap().containsValue(auth.currentUser!.uid)) {
-            await FirebaseFirestore.instance.collection('ChatRoom').doc(chatRoomId).update({
+          if (!value["notDeletedFor"]
+              .asMap()
+              .containsValue(auth.currentUser!.uid)) {
+            await FirebaseFirestore.instance
+                .collection('ChatRoom')
+                .doc(chatRoomId)
+                .update({
               "notDeletedFor": FieldValue.arrayUnion([auth.currentUser!.uid])
             });
             Get.to(() => ChatScreen(docs: value.data()));
@@ -267,19 +290,26 @@ class ChatController extends GetxController {
               .collection(chatRoomCollection)
               .doc(chatRoomId)
               .set(chatRoomMap)
-              .catchError((e) => print("error in generating an  chat  ${e.toString()}"));
+              .catchError((e) =>
+                  print("error in generating an  chat  ${e.toString()}"));
           Get.back();
           Get.to(() => ChatScreen(docs: chatRoomMap));
         }
       });
     } else {
       Get.back();
-      Get.defaultDialog(title: 'Error', middleText: "You cannot send message to yourself.");
-      print('You can not send message to yourself.');
+      Get.defaultDialog(
+        title: 'Error',
+        middleText: "You cannot send message to yourself.",
+      );
+      print(
+        'You can not send message to yourself.',
+      );
     }
   }
 
-  addConversationMessage(String chatRoomId, var time, String type, messageMap, String msg) async {
+  addConversationMessage(
+      String chatRoomId, var time, String type, messageMap, String msg) async {
     log('called addConversationMessage');
     await FirebaseFirestore.instance
         .collection(chatRoomCollection)
@@ -287,7 +317,10 @@ class ChatController extends GetxController {
         .collection(messagesCollection)
         .add(messageMap)
         .then((value) async {
-      await FirebaseFirestore.instance.collection(chatRoomCollection).doc(chatRoomId).update({
+      await FirebaseFirestore.instance
+          .collection(chatRoomCollection)
+          .doc(chatRoomId)
+          .update({
         'lastMessageAt': time,
         'lastMessage': msg,
         'lastMessageType': type,
@@ -307,7 +340,12 @@ class ChatController extends GetxController {
       await ffstore.collection("ChatRoom").doc(chatRoomId).update({
         "notDeletedFor": FieldValue.arrayRemove([auth.currentUser!.uid])
       }).then((value) async {
-        await ffstore.collection("ChatRoom").doc(chatRoomId).collection("chats").get().then((value) {
+        await ffstore
+            .collection("ChatRoom")
+            .doc(chatRoomId)
+            .collection("chats")
+            .get()
+            .then((value) {
           value.docs.forEach((element) {
             element.reference.update({
               "isDeletedFor": FieldValue.arrayUnion([auth.currentUser!.uid])
@@ -322,11 +360,20 @@ class ChatController extends GetxController {
     }
   }
 
-  Future<DocumentSnapshot<Map<String, dynamic>>> getAChatRoomInfo(String chatRoomId) async {
-    return FirebaseFirestore.instance.collection(chatRoomCollection).doc(chatRoomId).get();
+  Future<DocumentSnapshot<Map<String, dynamic>>> getAChatRoomInfo(
+      String chatRoomId) async {
+    return FirebaseFirestore.instance
+        .collection(chatRoomCollection)
+        .doc(chatRoomId)
+        .get();
   }
 
   getConversationMessage(String chatRoomId) async {
-    return ffstore.collection(chatRoomCollection).doc(chatRoomId).collection(messagesCollection).orderBy('time').snapshots();
+    return ffstore
+        .collection(chatRoomCollection)
+        .doc(chatRoomId)
+        .collection(messagesCollection)
+        .orderBy('time')
+        .snapshots();
   }
 }

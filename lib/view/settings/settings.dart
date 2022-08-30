@@ -18,6 +18,8 @@ import 'package:vip_picnic/view/choose_language/choose_language.dart';
 import 'package:vip_picnic/view/profile/profile.dart';
 import 'package:vip_picnic/view/report_problem/report_problem.dart';
 import 'package:vip_picnic/view/user/social_login.dart';
+import 'package:vip_picnic/view/widget/custom_popup.dart';
+import 'package:vip_picnic/view/widget/my_button.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/view/widget/snack_bar.dart';
@@ -77,7 +79,8 @@ class Settings extends StatelessWidget {
             title: 'reportProblem'.tr,
             onTap: () {
               launchUrl(
-                Uri.parse('mailto:info@vippicnic.com?subject=Problem &body=Hi, Write your message here'),
+                Uri.parse(
+                    'mailto:info@vippicnic.com?subject=Problem &body=Hi, Write your message here'),
               );
               // Get.to(() => ReportProblem());
             },
@@ -110,10 +113,14 @@ class Settings extends StatelessWidget {
                   minimumVersion: '0',
                 ),
                 socialMetaTagParameters: SocialMetaTagParameters(
-                    description: "Install VIP Picnic to get the best events related services you'll ever get",
-                    title: "VIP Picnic"),
+                  description:
+                      "Install VIP Picnic to get the best events related services you'll ever get",
+                  title: "VIP Picnic",
+                ),
               );
-              final ShortDynamicLink dynamicUrl = await FirebaseDynamicLinks.instance.buildShortLink(parameters);
+              final ShortDynamicLink dynamicUrl = await FirebaseDynamicLinks
+                  .instance
+                  .buildShortLink(parameters);
               String finalUrl = dynamicUrl.shortUrl.toString();
               log("generated short-url is: $finalUrl");
               ShareResult sr = await Share.shareWithResult(finalUrl);
@@ -128,40 +135,94 @@ class Settings extends StatelessWidget {
             iconSize: 26.83,
             title: 'deactivateAccount'.tr,
             onTap: () async {
-              Get.defaultDialog(
-                  title: "Are you sure?",
-                  content: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 0),
-                    child: Text(
-                        "Are you sure you want to De-activate your account? You will be signed out and you can't activate it again yourself. "
-                        "You would have to contact customer support to get it activated again."),
-                  ),
-                  textConfirm: "Yes",
-                  confirmTextColor: Colors.red,
-                  textCancel: "No",
-                  cancelTextColor: Colors.black,
-                  onConfirm: () async {
-                    try {
-                      await ffstore.collection(deactivatedCollection).doc(auth.currentUser?.uid).set({
-                        "uID": auth.currentUser?.uid,
-                        "deactivatedAt": DateTime.now().toIso8601String(),
-                        "deactivatedAtMilliSecondsSinceEpoch": DateTime.now().millisecondsSinceEpoch,
-                      }).then((value) async {
-                        try {
-                          await auth.signOut();
-                          await GoogleSignIn().signOut();
-                          await FacebookAuth.instance.logOut();
-                        } catch (e) {
-                          log("error in signing out after de-activation $e");
-                        }
-                        Get.offAll(() => SocialLogin());
-                      });
-                    } catch (e) {
-                      print(e);
-                      showMsg(context: context, msg: "Something went wrong during de-activation. Please try again.");
-                      log("error in account de-activation $e");
-                    }
-                  });
+              showDialog(
+                context: context,
+                builder: (_) {
+                  return CustomPopup(
+                    heading: 'Are you sure?',
+                    description:
+                        'Are you sure you want to De-activate your account? You will be signed out and you can\'t activate it again yourself. You would have to contact customer support to get it activated again.',
+                    onCancel: () => Get.back(),
+                    onConfirm: () async {
+                      try {
+                        await ffstore
+                            .collection(deactivatedCollection)
+                            .doc(auth.currentUser?.uid)
+                            .set({
+                          "uID": auth.currentUser?.uid,
+                          "deactivatedAt": DateTime.now().toIso8601String(),
+                          "deactivatedAtMilliSecondsSinceEpoch":
+                              DateTime.now().millisecondsSinceEpoch,
+                        }).then((value) async {
+                          try {
+                            await auth.signOut();
+                            await GoogleSignIn().signOut();
+                            await FacebookAuth.instance.logOut();
+                          } catch (e) {
+                            log("error in signing out after de-activation $e");
+                          }
+                          Get.offAll(() => SocialLogin());
+                        });
+                      } catch (e) {
+                        print(e);
+                        showMsg(
+                            context: context,
+                            msg:
+                                "Something went wrong during de-activation. Please try again.");
+                        log("error in account de-activation $e");
+                      }
+                    },
+                  );
+                },
+              );
+              // Get.defaultDialog(
+              //   title: "Are you sure ?",
+              //   content: MyText(
+              //     size: 12,
+              //     align: TextAlign.center,
+              //     text:
+              //         'Are you sure you want to De-activate your account? You will be signed out and you can\'t activate it again yourself. You would have to contact customer support to get it activated again.',
+              //   ),
+              //   contentPadding: EdgeInsets.symmetric(
+              //     horizontal: 15,
+              //     vertical: 20,
+              //   ),
+              //   buttonColor: kTertiaryColor,
+              //   radius: 12.0,
+              //   textConfirm: "Yes",
+              //   confirmTextColor: Colors.red,
+              //   textCancel: "No",
+              //   cancelTextColor: Colors.black,
+              //   onConfirm: () async {
+              //     try {
+              //       await ffstore
+              //           .collection(deactivatedCollection)
+              //           .doc(auth.currentUser?.uid)
+              //           .set({
+              //         "uID": auth.currentUser?.uid,
+              //         "deactivatedAt": DateTime.now().toIso8601String(),
+              //         "deactivatedAtMilliSecondsSinceEpoch":
+              //             DateTime.now().millisecondsSinceEpoch,
+              //       }).then((value) async {
+              //         try {
+              //           await auth.signOut();
+              //           await GoogleSignIn().signOut();
+              //           await FacebookAuth.instance.logOut();
+              //         } catch (e) {
+              //           log("error in signing out after de-activation $e");
+              //         }
+              //         Get.offAll(() => SocialLogin());
+              //       });
+              //     } catch (e) {
+              //       print(e);
+              //       showMsg(
+              //           context: context,
+              //           msg:
+              //               "Something went wrong during de-activation. Please try again.");
+              //       log("error in account de-activation $e");
+              //     }
+              //   },
+              // );
             },
           ),
           // settingsTiles(
