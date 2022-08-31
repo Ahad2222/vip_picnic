@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -711,49 +712,46 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
           ),
-          title: chatController.showSearch.value
-              ? SearchBar()
-              : GestureDetector(
-                  onTap: () async {
-                    UserDetailsModel? umdl;
-                    await ffstore
-                        .collection(accountsCollection)
-                        .doc(anotherUserID)
-                        .get()
-                        .then((value) {
-                      umdl = UserDetailsModel.fromJson(value.data() ?? {});
-                    });
-                    Get.to(() => OtherUserProfile(otherUserModel: umdl));
-                  },
-                  child: Row(
-                    // crossAxisAlignment: WrapCrossAlignment.center,
-                    // spacing: 10.0,
-                    children: [
-                      Obx(() {
-                        return profileImage(
-                          context,
-                          size: 34.0,
-                          profileImage:
-                              anotherUserModel.value.profileImageUrl != null
-                                  ? anotherUserModel.value.profileImageUrl
-                                  : anotherUserImage,
-                        );
-                      }),
-                      Obx(() {
-                        return Expanded(
-                          child: MyText(
-                            paddingLeft: 15,
-                            text: anotherUserModel.value.fullName != null
-                                ? anotherUserModel.value.fullName
-                                : anotherUserName,
-                            size: 19,
-                            color: kSecondaryColor,
-                          ),
-                        );
-                      }),
-                    ],
-                  ),
-                ),
+          title: GestureDetector(
+            onTap: () async {
+              UserDetailsModel? umdl;
+              await ffstore
+                  .collection(accountsCollection)
+                  .doc(anotherUserID)
+                  .get()
+                  .then((value) {
+                umdl = UserDetailsModel.fromJson(value.data() ?? {});
+              });
+              Get.to(() => OtherUserProfile(otherUserModel: umdl));
+            },
+            child: Row(
+              // crossAxisAlignment: WrapCrossAlignment.center,
+              // spacing: 10.0,
+              children: [
+                Obx(() {
+                  return profileImage(
+                    context,
+                    size: 34.0,
+                    profileImage: anotherUserModel.value.profileImageUrl != null
+                        ? anotherUserModel.value.profileImageUrl
+                        : anotherUserImage,
+                  );
+                }),
+                Obx(() {
+                  return Expanded(
+                    child: MyText(
+                      paddingLeft: 15,
+                      text: anotherUserModel.value.fullName != null
+                          ? anotherUserModel.value.fullName
+                          : anotherUserName,
+                      size: 19,
+                      color: kSecondaryColor,
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
           actions: [
             // Padding(
             //   padding: const EdgeInsets.only(
@@ -1814,14 +1812,35 @@ class _ChatScreenState extends State<ChatScreen> {
                       prefixIcon: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          GestureDetector(
-                            onTap: () {
-                              // getImageFromGallery();
-                              getVideoFromGallery();
-                            },
-                            child: Image.asset(
-                              Assets.imagesPhoto,
-                              height: 16.52,
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: 15,
+                            ),
+                            child: Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              spacing: 10.0,
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    getVideoFromGallery();
+                                  },
+                                  child: Image.asset(
+                                    Assets.imagesFilm,
+                                    color: kLightPurpleColor,
+                                    height: 19.52,
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    getImageFromGallery();
+                                  },
+                                  child: Image.asset(
+                                    Assets.imagesPhoto,
+                                    height: 16.52,
+                                  ),
+                                ),
+                                SizedBox(),
+                              ],
                             ),
                           ),
                         ],

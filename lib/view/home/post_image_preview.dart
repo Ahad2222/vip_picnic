@@ -41,8 +41,8 @@ class PostImagePreview extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: 50,
-            left: 15,
+            top: 40,
+            left: 5,
             child: IconButton(
               onPressed: () => Get.back(),
               icon: Image.asset(

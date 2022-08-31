@@ -28,6 +28,7 @@ class Assets {
   static const String imagesEmoji = 'assets/images/emoji.png';
   static const String imagesEvents = 'assets/images/events.png';
   static const String imagesFacebook = 'assets/images/facebook.png';
+  static const String imagesFilm = 'assets/images/film.png';
   static const String imagesGallery = 'assets/images/gallery.png';
   static const String imagesGenderReveal = 'assets/images/gender_reveal.png';
   static const String imagesGetStarted = 'assets/images/get_started.png';

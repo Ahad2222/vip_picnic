@@ -484,79 +484,124 @@ class GroupChatHeads extends StatelessWidget {
     totalMembers,
     time,
   }) {
-    return Container(
-      margin: EdgeInsets.only(
-        bottom: 10,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Color(0xffF5F5F6),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: ListTile(
-          onTap: () async {
-            log("clicked on group chat head");
-            try {
-              await groupChatController
-                  .getAGroupChatRoomInfo(groupId!)
-                  .then((value) => Get.to(() => GroupChat(
-                        docs: value.data(),
-                      )));
-            } catch (e) {
-              log("error in getting the group chat info is: $e");
-              showMsg(
-                  context: context,
-                  msg: "Please make sure you are connected to internet");
-            }
-            //     Navigator.push(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder: (_) => GroupChat(),
-            //   ),
-            // ),
-          },
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 15,
-            vertical: 10,
-          ),
-          leading: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              '$groupPhoto',
-              height: 56,
-              width: 56,
-              fit: BoxFit.cover,
+    return Slidable(
+      endActionPane: ActionPane(
+        extentRatio: 0.3,
+        motion: const ScrollMotion(),
+        children: [
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                GestureDetector(
+                  onTap: () async {
+                    showDialog(
+                      context: context,
+                      builder: (_) {
+                        return CustomPopup(
+                          heading: 'Are you Sure?',
+                          description:
+                              'This can\'t be undone. Are you sure you want to delete this chat?',
+                          onCancel: () => Get.back(),
+                          onConfirm: () async {},
+                        );
+                      },
+                    );
+                  },
+                  child: Container(
+                    height: 51,
+                    width: 62,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.red.withOpacity(0.1),
+                    ),
+                    child: Center(
+                      child: Image.asset(
+                        Assets.imagesDeleteMsg,
+                        height: 24,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          title: MyText(
-            text: '$name',
-            size: 14,
-            weight: FontWeight.w600,
-            color: kSecondaryColor,
-          ),
-          subtitle: MyText(
-            paddingTop: 8,
-            text: '$totalMembers members',
-            size: 14,
-            weight: FontWeight.w300,
-            color: kSecondaryColor,
-            maxLines: 1,
-            overFlow: TextOverflow.ellipsis,
-          ),
-          trailing: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              MyText(
-                paddingBottom: 5,
-                text:
-                    "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[0]}"
-                    ":"
-                    "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[1]}",
-                weight: FontWeight.w300,
-                color: kSecondaryColor,
+        ],
+      ),
+      child: Container(
+        margin: EdgeInsets.only(
+          bottom: 10,
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Color(0xffF5F5F6),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: ListTile(
+            onTap: () async {
+              log("clicked on group chat head");
+              try {
+                await groupChatController
+                    .getAGroupChatRoomInfo(groupId!)
+                    .then((value) => Get.to(() => GroupChat(
+                          docs: value.data(),
+                        )));
+              } catch (e) {
+                log("error in getting the group chat info is: $e");
+                showMsg(
+                    context: context,
+                    msg: "Please make sure you are connected to internet");
+              }
+              //     Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (_) => GroupChat(),
+              //   ),
+              // ),
+            },
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 15,
+              vertical: 10,
+            ),
+            leading: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                '$groupPhoto',
+                height: 56,
+                width: 56,
+                fit: BoxFit.cover,
               ),
-            ],
+            ),
+            title: MyText(
+              text: '$name',
+              size: 14,
+              weight: FontWeight.w600,
+              color: kSecondaryColor,
+            ),
+            subtitle: MyText(
+              paddingTop: 8,
+              text: '$totalMembers members',
+              size: 14,
+              weight: FontWeight.w300,
+              color: kSecondaryColor,
+              maxLines: 1,
+              overFlow: TextOverflow.ellipsis,
+            ),
+            trailing: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                MyText(
+                  paddingBottom: 5,
+                  text:
+                      "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[0]}"
+                      ":"
+                      "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[1]}",
+                  weight: FontWeight.w300,
+                  color: kSecondaryColor,
+                ),
+              ],
+            ),
           ),
         ),
       ),
