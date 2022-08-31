@@ -338,6 +338,7 @@ Future<void> backgroundHandler() async {
       });
       List<String> isChatRoomOrGroupChatRoomList = jsonDecode(result.response ?? "")['id'].split("/");
       bool isChatRoom = isChatRoomOrGroupChatRoomList.asMap().containsValue("chatRooms");
+      bool isGroupChatRoom = isChatRoomOrGroupChatRoomList.asMap().containsValue("groupChatRooms");
       if(isChatRoom){
         String chatRoomId = isChatRoomOrGroupChatRoomList[2];
         String fileName = isChatRoomOrGroupChatRoomList[3].split(".")[0];
@@ -349,6 +350,19 @@ Future<void> backgroundHandler() async {
             .child("$fileName.mp4");
         String url = await ref.getDownloadURL();
         FirebaseFirestore.instance.collection("ChatRoom").doc(chatRoomId)
+            .collection("messages").doc(fileName)
+            .update({"message": url});
+      }else if(isGroupChatRoom){
+        String groupId = isChatRoomOrGroupChatRoomList[2];
+        String fileName = isChatRoomOrGroupChatRoomList[3].split(".")[0];
+        log("groupId in upload result:  $groupId");
+        log("fileName in upload result:  $fileName");
+        var ref = FirebaseStorage.instance
+            .ref()
+            .child("groupChatRooms/${groupId}")
+            .child("$fileName.mp4");
+        String url = await ref.getDownloadURL();
+        FirebaseFirestore.instance.collection("GroupChatRoom").doc(groupId)
             .collection("messages").doc(fileName)
             .update({"message": url});
       }
