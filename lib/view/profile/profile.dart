@@ -25,7 +25,8 @@ class Profile extends StatelessWidget {
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
-              expandedHeight: 570,
+              expandedHeight: 450,
+              // expandedHeight: 570,
               centerTitle: true,
               pinned: true,
               toolbarHeight: 75,
@@ -60,14 +61,15 @@ class Profile extends StatelessWidget {
                       color: kSecondaryColor,
                       align: TextAlign.center,
                       paddingTop: 15,
-                    ),
-                    MyText(
-                      text: '@Username',
-                      color: kSecondaryColor,
-                      align: TextAlign.center,
-                      paddingTop: 5,
                       paddingBottom: 30,
                     ),
+                    // MyText(
+                    //   text: '@Username',
+                    //   color: kSecondaryColor,
+                    //   align: TextAlign.center,
+                    //   paddingTop: 5,
+                    //   paddingBottom: 30,
+                    // ),
                     Wrap(
                       alignment: WrapAlignment.center,
                       crossAxisAlignment: WrapCrossAlignment.center,
@@ -120,9 +122,9 @@ class Profile extends StatelessWidget {
                         ),
                       ],
                     ),
-                    bioBox(
-                      bio: 'Musician since 2018, available to new events. Love plant and planet 🌱',
-                    ),
+                    // bioBox(
+                    //   bio: 'Musician since 2018, available to new events. Love plant and planet 🌱',
+                    // ),
                   ],
                 ),
                 collapseMode: CollapseMode.none,
@@ -219,37 +221,37 @@ class Profile extends StatelessWidget {
     );
   }
 
-  Widget bioBox({
-    String? bio,
-  }) {
-    return Container(
-      margin: EdgeInsets.symmetric(
-        horizontal: 30,
-        vertical: 30,
-      ),
-      padding: EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: kSecondaryColor.withOpacity(0.08),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          MyText(
-            text: 'bio'.tr,
-            size: 16,
-            weight: FontWeight.w600,
-            color: kSecondaryColor,
-            paddingBottom: 7,
-          ),
-          MyText(
-            text: bio,
-            color: kSecondaryColor,
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget bioBox({
+  //   String? bio,
+  // }) {
+  //   return Container(
+  //     margin: EdgeInsets.symmetric(
+  //       horizontal: 30,
+  //       vertical: 30,
+  //     ),
+  //     padding: EdgeInsets.all(15),
+  //     decoration: BoxDecoration(
+  //       borderRadius: BorderRadius.circular(12),
+  //       color: kSecondaryColor.withOpacity(0.08),
+  //     ),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.stretch,
+  //       children: [
+  //         MyText(
+  //           text: 'bio'.tr,
+  //           size: 16,
+  //           weight: FontWeight.w600,
+  //           color: kSecondaryColor,
+  //           paddingBottom: 7,
+  //         ),
+  //         MyText(
+  //           text: bio,
+  //           color: kSecondaryColor,
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget profileButtons({
     String? buttonText,
