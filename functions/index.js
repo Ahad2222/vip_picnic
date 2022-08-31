@@ -83,9 +83,9 @@ async function TextGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) {
     groupImage = snapshot.data().groupImage;
 
     
-    functions.logger.logger(`userList: ${userList} before deletion`);
+    functions.logger.log(`userList: ${userList} before deletion`);
     removeItemOnce(userList, senderId);
-    functions.logger.logger(`userList: ${userList} after deletion`);
+    functions.logger.log(`userList: ${userList} after deletion`);
 
     for (const index in userList) {
       await admin
@@ -178,9 +178,9 @@ async function AudioGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) 
         groupName = snapshot.data().groupName;
         groupImage = snapshot.data().groupImage;
 
-        functions.logger.logger(`userList: ${userList} before deletion`);
+        functions.logger.log(`userList: ${userList} before deletion`);
         removeItemOnce(userList, senderId);
-        functions.logger.logger(`userList: ${userList} after deletion`);
+        functions.logger.log(`userList: ${userList} after deletion`);
 
         for (const index in userList) {
           await admin
@@ -238,9 +238,9 @@ async function VideoGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) 
         groupName = snapshot.data().groupName;
         groupImage = snapshot.data().groupImage;
 
-        functions.logger.logger(`userList: ${userList} before deletion`);
+        functions.logger.log(`userList: ${userList} before deletion`);
         removeItemOnce(userList, senderId);
-        functions.logger.logger(`userList: ${userList} after deletion`);
+        functions.logger.log(`userList: ${userList} after deletion`);
 
 
         for (const index in userList) {
@@ -363,9 +363,9 @@ async function ImageGroupChatsNotiSingle(generalImage, senderId, senderName, cha
         groupName = snapshot.data().groupName;
         groupImage = snapshot.data().groupImage;
 
-        functions.logger.logger(`userList: ${userList} before deletion`);
+        functions.logger.log(`userList: ${userList} before deletion`);
         removeItemOnce(userList, senderId);
-        functions.logger.logger(`userList: ${userList} after deletion`);
+        functions.logger.log(`userList: ${userList} after deletion`);
 
         for (const index in userList) {
           await admin
