@@ -40,6 +40,7 @@ class _EditProfileState extends State<EditProfile> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController currentPasswordController = TextEditingController();
   TextEditingController newPasswordController = TextEditingController();
+  TextEditingController newEmailController = TextEditingController();
   DocumentReference myDoc = accounts.doc(auth.currentUser?.uid ?? "");
 
   @override
@@ -202,30 +203,226 @@ class _EditProfileState extends State<EditProfile> {
           // SizedBox(
           //   height: 15,
           // ),
-          ETextField(
-            labelText: 'Email:',
-            // initialValue: 'Current Email',
-            controller: emailController,
-            isReadOnly: true,
-            isEditAble: false,
-            onEditTap: () {
-              showModalBottomSheet(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                context: context,
-                builder: (context) {
-                  return bottomSheetForEdit(
-                    context,
-                    title: 'Email',
-                    selectedField: ETextField(
-                      controller: emailController,
-                      labelText: 'Email:',
-                    ),
-                    onSave: () {},
+
+          FutureBuilder<List<String>>(
+            future: auth.fetchSignInMethodsForEmail(userDetailsModel.email ?? ""),
+            builder: (
+              BuildContext context,
+              AsyncSnapshot<List<String>> snapshot,
+            ) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return ETextField(
+                  labelText: 'Email:',
+                  // initialValue: 'Current Email',
+                  controller: emailController,
+                  isReadOnly: true,
+                  isEditAble: false,
+                  onEditTap: () {
+                    showModalBottomSheet(
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      context: context,
+                      builder: (context) {
+                        return bottomSheetForEdit(
+                          context,
+                          title: 'Email',
+                          selectedField: ETextField(
+                            controller: emailController,
+                            labelText: 'Email:',
+                          ),
+                          onSave: () {},
+                        );
+                      },
+                      isScrollControlled: true,
+                    );
+                  },
+                );
+              } else if (snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.hasError) {
+                  return ETextField(
+                    labelText: 'Email:',
+                    // initialValue: 'Current Email',
+                    controller: emailController,
+                    isReadOnly: true,
+                    isEditAble: false,
+                    onEditTap: () {
+                      showModalBottomSheet(
+                        backgroundColor: Colors.transparent,
+                        elevation: 0,
+                        context: context,
+                        builder: (context) {
+                          return bottomSheetForEdit(
+                            context,
+                            title: 'Email',
+                            selectedField: ETextField(
+                              controller: emailController,
+                              labelText: 'Email:',
+                            ),
+                            onSave: () {},
+                          );
+                        },
+                        isScrollControlled: true,
+                      );
+                    },
                   );
-                },
-                isScrollControlled: true,
-              );
+                } else if (snapshot.hasData) {
+                  log("list is: ${snapshot.data}");
+                  List<String> signInMethodsList = snapshot.data ?? [];
+                  return ETextField(
+                    labelText: 'Email:',
+                    // initialValue: 'Current Email',
+                    controller: emailController,
+                    isReadOnly: true,
+                    isEditAble: signInMethodsList.contains("password") ? true : false,
+                    onEditTap: () {
+                      showModalBottomSheet(
+                        backgroundColor: Colors.transparent,
+                        elevation: 0,
+                        context: context,
+                        builder: (context) {
+                          return passwordBottomSheetForEdit(
+                            context,
+                            title: 'Current Password',
+                            selectedField: ETextField(
+                              labelText: 'Current Password:',
+                              controller: currentPasswordController,
+                              isObSecure: true,
+                            ),
+                            onSave: () async {
+                              Get.dialog(loading());
+                              AuthCredential credential = EmailAuthProvider.credential(
+                                  email: userDetailsModel.email ?? "", password: currentPasswordController.text);
+                              try {
+                                await auth.currentUser?.reauthenticateWithCredential(credential).then((value) {
+                                  Get.back();
+                                  Get.back();
+                                  showModalBottomSheet(
+                                      backgroundColor: Colors.transparent,
+                                      elevation: 0,
+                                      context: context,
+                                      builder: (context) {
+                                        return bottomSheetForEdit(
+                                          context,
+                                          title: 'Email',
+                                          selectedField: ETextField(
+                                            controller: newEmailController,
+                                            labelText: 'Email:',
+                                          ),
+                                          onSave: () async {
+                                            Get.dialog(loading());
+                                            await FirebaseAuth.instance.currentUser
+                                                ?.updateEmail(newEmailController.text)
+                                                .then((value) async {
+                                              Get.back();
+                                              showMsg(
+                                                msg: "Email changed successfully. Please sign-in again.",
+                                                bgColor: Colors.red,
+                                                context: context,
+                                              );
+                                              Future.delayed(Duration(seconds: 1), () async {
+                                                await auth.signOut();
+                                                Get.offAll(() => SocialLogin());
+                                              });
+                                            });
+                                          },
+                                        );
+                                      });
+                                });
+                              } on FirebaseAuthException catch (e) {
+                                Get.back();
+                                Get.back();
+                                currentPasswordController.clear();
+                                newEmailController.clear();
+                                log("error in re-authentication is: ${e.message}");
+                                showMsg(
+                                  msg: "${e.message}",
+                                  bgColor: Colors.red,
+                                  context: context,
+                                );
+                              } catch (e) {
+                                Get.back();
+                                Get.back();
+                                currentPasswordController.clear();
+                                newEmailController.clear();
+                                log("error in re-authentication is: $e");
+                                showMsg(
+                                  msg: "Something went wrong. Please try again in a few minutes.",
+                                  bgColor: Colors.red,
+                                  context: context,
+                                );
+                              }
+                            },
+                          );
+                          //   bottomSheetForEdit(
+                          //   context,
+                          //   title: 'Email',
+                          //   selectedField: ETextField(
+                          //     controller: emailController,
+                          //     labelText: 'Email:',
+                          //   ),
+                          //   onSave: () {},
+                          // );
+                        },
+                        isScrollControlled: true,
+                      );
+                    },
+                  );
+                } else {
+                  return ETextField(
+                    labelText: 'Email:',
+                    // initialValue: 'Current Email',
+                    controller: emailController,
+                    isReadOnly: true,
+                    isEditAble: false,
+                    onEditTap: () {
+                      showModalBottomSheet(
+                        backgroundColor: Colors.transparent,
+                        elevation: 0,
+                        context: context,
+                        builder: (context) {
+                          return bottomSheetForEdit(
+                            context,
+                            title: 'Email',
+                            selectedField: ETextField(
+                              controller: emailController,
+                              labelText: 'Email:',
+                            ),
+                            onSave: () {},
+                          );
+                        },
+                        isScrollControlled: true,
+                      );
+                    },
+                  );
+                }
+              } else {
+                return ETextField(
+                  labelText: 'Email:',
+                  // initialValue: 'Current Email',
+                  controller: emailController,
+                  isReadOnly: true,
+                  isEditAble: false,
+                  onEditTap: () {
+                    showModalBottomSheet(
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      context: context,
+                      builder: (context) {
+                        return bottomSheetForEdit(
+                          context,
+                          title: 'Email',
+                          selectedField: ETextField(
+                            controller: emailController,
+                            labelText: 'Email:',
+                          ),
+                          onSave: () {},
+                        );
+                      },
+                      isScrollControlled: true,
+                    );
+                  },
+                );
+              }
             },
           ),
           SizedBox(
@@ -638,7 +835,7 @@ class _EditProfileState extends State<EditProfile> {
               Container(),
               Expanded(
                 child: MyText(
-                  text: 'Please enter current password to re-authenticate and then you may enter new password',
+                  text: 'Please enter current password to re-authenticate as this is a security sensitive operation',
                   size: 14,
                   color: kSecondaryColor,
                   maxLines: 3,
