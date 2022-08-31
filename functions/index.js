@@ -16,6 +16,14 @@ admin.firestore().settings({ ignoreUndefinedProperties: true });
 //   response.send("Hello from Firebase!");
 // });
 
+function removeItemOnce(arr, value) {
+  var index = arr.indexOf(value);
+  if (index > -1) {
+    arr.splice(index, 1);
+  }
+  return arr;
+}
+
 async function TextChatsNotiSingle(
   token_o,
   msg,
@@ -52,28 +60,13 @@ async function TextChatsNotiSingle(
     });
 }
 
-async function TextGroupChatsNotiSingle(
-  // token_o,
-  msg,
-  // groupImage,
-  senderName,
-  // groupName,
-  chatRoomId
-) {
+async function TextGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) {
 
   // var senName = snap.data().sendByName;
     var groupName = "";
     var groupImage = "";
     var userList = [];
     var tokenList = [];
-
-    // var message = snap.data().message;
-    // var chatRoomId = context.params.documentId;
-
-    // var imageUrl = "No Name";
-
-    // var generalImage = "";
-    // var myRetToken = "Not Retrieved Yet from Accounts Collection";
 
   functions.logger.log("Group Text multi token method executed");
   functions.logger.log("ChatRoomID is ");
@@ -88,6 +81,11 @@ async function TextGroupChatsNotiSingle(
     userList = snapshot.data().users;
     groupName = snapshot.data().groupName;
     groupImage = snapshot.data().groupImage;
+
+    
+    functions.logger.logger(`userList: ${userList} before deletion`);
+    removeItemOnce(userList, senderId);
+    functions.logger.logger(`userList: ${userList} after deletion`);
 
     for (const index in userList) {
       await admin
@@ -159,7 +157,7 @@ async function AudioChatsNotiSingle(
     });
 }
 
-async function AudioGroupChatsNotiSingle(msg, senderName, chatRoomId) {
+async function AudioGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) {
   functions.logger.log("Single Token function is executed");
   functions.logger.log("ChatRoomID is ");
   functions.logger.log(chatRoomId);
@@ -179,6 +177,10 @@ async function AudioGroupChatsNotiSingle(msg, senderName, chatRoomId) {
         userList = snapshot.data().users;
         groupName = snapshot.data().groupName;
         groupImage = snapshot.data().groupImage;
+
+        functions.logger.logger(`userList: ${userList} before deletion`);
+        removeItemOnce(userList, senderId);
+        functions.logger.logger(`userList: ${userList} after deletion`);
 
         for (const index in userList) {
           await admin
@@ -216,7 +218,7 @@ async function AudioGroupChatsNotiSingle(msg, senderName, chatRoomId) {
 
 }
 
-async function VideoGroupChatsNotiSingle(msg, senderName, chatRoomId) {
+async function VideoGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) {
   functions.logger.log("Single Token function is executed");
   functions.logger.log("ChatRoomID is ");
   functions.logger.log(chatRoomId);
@@ -235,6 +237,11 @@ async function VideoGroupChatsNotiSingle(msg, senderName, chatRoomId) {
         userList = snapshot.data().users;
         groupName = snapshot.data().groupName;
         groupImage = snapshot.data().groupImage;
+
+        functions.logger.logger(`userList: ${userList} before deletion`);
+        removeItemOnce(userList, senderId);
+        functions.logger.logger(`userList: ${userList} after deletion`);
+
 
         for (const index in userList) {
           await admin
@@ -336,7 +343,7 @@ async function ImageChatsNotiSingle(token_o, msg, profileImageUrl, generalImageU
     });
 }
 
-async function ImageGroupChatsNotiSingle(generalImage, senderName, chatRoomId) {
+async function ImageGroupChatsNotiSingle(generalImage, senderId, senderName, chatRoomId) {
   functions.logger.log("Single Token function is executed");
   functions.logger.log("ChatRoomID is ");
   functions.logger.log(chatRoomId);
@@ -355,6 +362,10 @@ async function ImageGroupChatsNotiSingle(generalImage, senderName, chatRoomId) {
         userList = snapshot.data().users;
         groupName = snapshot.data().groupName;
         groupImage = snapshot.data().groupImage;
+
+        functions.logger.logger(`userList: ${userList} before deletion`);
+        removeItemOnce(userList, senderId);
+        functions.logger.logger(`userList: ${userList} after deletion`);
 
         for (const index in userList) {
           await admin
@@ -398,7 +409,7 @@ exports.notifyReceiverForGroupChat = functions.firestore
   .document("/GroupChatRoom/{documentId}/messages/{chatDocumentId}")
   .onCreate(async (snap, context) => {
     // var recId = snap.data().receivedById;
-    var senId = snap.data().sendById;
+    var senderId = snap.data().sendById;
 
     // var recName = snap.data().receivedByName;
     var senderName = snap.data().sendByName;
@@ -420,20 +431,20 @@ exports.notifyReceiverForGroupChat = functions.firestore
       functions.logger.info("In Chat function: type is Image");
       generalImage = snap.data().message;
 
-      await ImageGroupChatsNotiSingle(generalImage, senderName, chatRoomId);
+      await ImageGroupChatsNotiSingle(generalImage, senderId, senderName, chatRoomId);
      
     }
     else if (snap.data().type == "text") {
       //getting image and token of receiver from the firestore through admin sdk
       functions.logger.info("In Chat function: type is text");
 
-      await TextGroupChatsNotiSingle(message, senderName, chatRoomId);
+      await TextGroupChatsNotiSingle(message, senderId, senderName, chatRoomId);
 
     }
     else if (snap.data().type == "audio") {
       functions.logger.info("In Chat function: type is audio");
       //getting image and token of receiver from the firestore through admin sdk
-      AudioGroupChatsNotiSingle(message, senderName, chatRoomId);
+      AudioGroupChatsNotiSingle(message, senderId, senderName, chatRoomId);
 
     } else if (snap.data().type == "video") {
 
@@ -458,7 +469,7 @@ exports.notifyReceiverForGroupChat = functions.firestore
         functions.logger.log(`error in setting the uploadUrl is:${e.toString()}`);
       });
 
-      await VideoGroupChatsNotiSingle(message, senderName, chatRoomId);
+      await VideoGroupChatsNotiSingle(message, senderId, senderName, chatRoomId);
       //getting image and token of receiver from the firestore through admin sdk
       // await admin
       //   .firestore()
@@ -486,7 +497,7 @@ exports.notifyReceiverForGroupChat = functions.firestore
       functions.logger.info("In Chat function: type is Else block");
       //getting image and token of receiver from the firestore through admin sdk
 
-      await TextGroupChatsNotiSingle(message, senderName, chatRoomId);
+      await TextGroupChatsNotiSingle(message, senderId, senderName, chatRoomId);
     }
   });
 
