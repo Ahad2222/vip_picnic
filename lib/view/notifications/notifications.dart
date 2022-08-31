@@ -48,10 +48,10 @@ class Notifications extends StatelessWidget {
             if (snapshot.hasError) {
               return const Text('Some unknown error occurred');
             } else if (snapshot.hasData) {
-              // log("inside hasData and ${snapshot.data!.docs}");
+              // log("inside alert hasData and ${snapshot.data!.docs.length}");
               if (snapshot.data!.docs.length > 0) {
                 return ListView.builder(
-                  shrinkWrap: true,
+                  // shrinkWrap: true,
                   physics: BouncingScrollPhysics(),
                   padding: EdgeInsets.symmetric(
                     vertical: 20,

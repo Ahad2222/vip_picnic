@@ -152,7 +152,7 @@ class LeftMessageBubble extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Hero(
-                      tag: 'chatMedia',
+                      tag: 'imagePreviewChatMedia',
                       transitionOnUserGestures: true,
                       child: GestureDetector(
                         onTap: () => Navigator.push(
@@ -210,7 +210,7 @@ class LeftMessageBubble extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Hero(
-                              tag: 'chatMedia',
+                              tag: 'videoPreviewChatMedia',
                               transitionOnUserGestures: true,
                               child: GestureDetector(
                                 onTap: () {
@@ -276,7 +276,7 @@ class LeftMessageBubble extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Hero(
-                              tag: 'chatMedia',
+                              tag: 'uploadedVideoPreviewChatMedia',
                               transitionOnUserGestures: true,
                               child: GestureDetector(
                                 onTap: () => Navigator.push(
@@ -548,7 +548,7 @@ class RightMessageBubble extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Hero(
-                      tag: 'chatMedia',
+                      tag: 'rightImagePreviewChatMedia',
                       transitionOnUserGestures: true,
                       child: GestureDetector(
                         onTap: () => Navigator.push(
@@ -606,7 +606,7 @@ class RightMessageBubble extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Hero(
-                              tag: 'chatMedia',
+                              tag: 'rightVideoPreviewChatMedia',
                               transitionOnUserGestures: true,
                               child: GestureDetector(
                                 onTap: () {
@@ -672,7 +672,7 @@ class RightMessageBubble extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Hero(
-                              tag: 'chatMedia',
+                              tag: 'rightUploadVideoPreviewChatMedia',
                               transitionOnUserGestures: true,
                               child: GestureDetector(
                                 onTap: () => Navigator.push(

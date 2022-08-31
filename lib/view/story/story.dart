@@ -151,7 +151,9 @@ class _StoryState extends State<Story> {
               profileTile(
                 widget.profileImage!,
                 widget.name,
-                // '13 m',
+                // '${timeago.}',
+                // + Can't be done because we would have to use another streambuilder here
+                //+ or can be if we can get the index of story being shown.
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(

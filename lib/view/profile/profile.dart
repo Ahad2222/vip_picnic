@@ -167,7 +167,7 @@ class Profile extends StatelessWidget {
                         onTap: () {
                           Get.to(() => PostDetails(isMyPost: true, isLikeByMe: false, postDocModel: postModel));
                         },
-                        child: Image.network(
+                        child: postModel.postImages!.isNotEmpty ? Image.network(
                           postModel.postImages![0],
                           height: height(context, 1.0),
                           width: width(context, 1.0),
@@ -186,7 +186,7 @@ class Profile extends StatelessWidget {
                               return loading();
                             }
                           },
-                        ),
+                        ) : Center(child: Text("${postModel.postTitle}")),
                       );
                     },
                   );

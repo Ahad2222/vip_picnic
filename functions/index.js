@@ -133,9 +133,9 @@ exports.notifyReceiverForChat = functions.firestore
     var imageUrl = "No Name";
     var generalImage = "";
     var myRetToken = "Not Retrieved Yet from Accounts Collection";
-    functions.logger.info(recId.toString());
+    functions.logger.info(recId);
     functions.logger.info("Message By the Sender is:");
-    functions.logger.info(message.toString());
+    functions.logger.info(message);
 
     if (snap.data().type == "image") {
       functions.logger.info("In Chat function: type is Image");
@@ -212,6 +212,50 @@ exports.notifyReceiverForChat = functions.firestore
         recName,
         chatRoomId
       );
+    }else if (snap.data().type == "video") {
+      functions.logger.info("In Chat function: type is video");
+
+      const bucket = admin.storage().bucket();
+      functions.logger.log(`bucket is: ${bucket.name}`);
+      functions.logger.log(`chatDocumentId is: ${context.params.chatDocumentId}`);
+
+        const fileName = `${context.params.chatDocumentId}.mp4`;
+      functions.logger.log(`fileName is: ${fileName}`);
+        const videoFile = bucket.file(`chatRooms/${chatRoomId}/${fileName}`);
+        const resumableUpload = await videoFile.createResumableUpload();
+        functions.logger.log(`resumableUpload is: ${resumableUpload}`);
+        const uploadUrl = resumableUpload[0];
+        functions.logger.log(`uploadUrl is: ${uploadUrl}`);
+        console.log(uploadUrl);
+
+        await admin.firestore().collection(`/ChatRoom/${chatRoomId}/messages`).doc(context.params.chatDocumentId).set({
+            uploadUrl: uploadUrl
+        }, { merge: true }).catch((e) => {
+          functions.logger.log(`error in setting the uploadUrl is:${e.toString()}`);
+        });
+
+      //getting image and token of receiver from the firestore through admin sdk
+      // await admin
+      //   .firestore()
+      //   .collection("Accounts")
+      //   .doc(recId)
+      //   .get()
+      //   .then((snapshot) => {
+      //     imageUrl = snapshot.data().profileImageUrl;
+      //     myRetToken = snapshot.data().fcmToken;
+      //   })
+      //   .catch((e) => {
+      //     functions.logger.log(e.toString());
+      //   });
+      // //Now sending the notification using SingleTOken function
+      // await AudioChatsNotiSingle(
+      //   myRetToken,
+      //   message,
+      //   imageUrl,
+      //   senName,
+      //   recName,
+      //   chatRoomId
+      // );
     }
     else {
       functions.logger.info("In Chat function: type is Else block");
@@ -239,6 +283,24 @@ exports.notifyReceiverForChat = functions.firestore
       );
     }
   });
+
+//   exports.newStorageFile = functions.storage.object().onFinalize(async (object) => {
+//     const filePath = object.name;
+//     console.log("filePath:")
+//     console.log(filePath)
+//     const extension = filePath.split('.')[filePath.split('.').length - 1];
+//     if (extension != 'mp4') {
+//         return console.log(`File extension: ${extension}. This is not a video. Exiting function.`);
+//     }
+
+//     const videoId = filePath.split('.')[0]
+//     console.log(`Setting data in firestore doc: ${videoId}`)
+//     await admin.firestore().collection("videos").doc(videoId).set({
+//         uploadComplete: true
+//     }, { merge: true });
+
+//     console.log('Done');
+// });
 
 
 exports.liking = functions.firestore

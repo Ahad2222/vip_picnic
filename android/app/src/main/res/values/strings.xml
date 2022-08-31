@@ -4,4 +4,9 @@
     <string name="facebook_app_id">464317302253959</string>
     <string name="fb_login_protocol_scheme">fb464317302253959</string>
     <string name="facebook_client_token">b14e35abec2e2556108d788bb1708f73</string>
+    <string name="flutter_uploader_notification_started">Upload started</string>
+    <string name="flutter_uploader_notification_in_progress">Upload in progress</string>
+    <string name="flutter_uploader_notification_canceled">Upload canceled</string>
+    <string name="flutter_uploader_notification_failed">Upload failed</string>
+    <string name="flutter_uploader_notification_complete">Upload complete</string>
 </resources>

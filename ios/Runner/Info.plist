@@ -74,5 +74,16 @@
 	<true/>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<!-- changes this number to configure the maximum number of concurrent tasks -->
+    <key>FUMaximumConnectionsPerHost</key>
+    <integer>3</integer>
+    <!-- changes this number to configure the maximum number of concurrent tasks -->
+    <key>FUMaximumUploadOperation</key>
+    <integer>3</integer>
+    <!-- changes this number to configure the request timeout -->
+    <key>FUTimeoutInSeconds</key>
+    <integer>3600</integer>
+    <key>FUAllFilesUploadedMessage</key>
+    <string>All files have been uploaded</string>
 </dict>
 </plist>
