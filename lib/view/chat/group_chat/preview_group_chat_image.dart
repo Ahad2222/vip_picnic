@@ -78,7 +78,7 @@ class _PreviewGroupChatImageScreenState extends State<PreviewGroupChatImageScree
     String fileName = Uuid().v1();
     var ref = FirebaseStorage.instance
         .ref()
-        .child(widget.chatRoomId!)
+        .child("groupChatRooms/${widget.chatRoomId!}")
         .child("$fileName.jpg");
     try {
       final uploadTask = ref.putFile(File(widget.imagePath!));

@@ -4,12 +4,17 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_android/shared_preferences_android.dart';
+import 'package:shared_preferences_ios/shared_preferences_ios.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/config/theme/light_theme.dart';
 import 'package:vip_picnic/constant/constant_variables.dart';
@@ -252,12 +257,185 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print("Handling a background message: ${message.messageId}");
 }
 
+FlutterUploader _uploader = FlutterUploader();
+
+Future<void> backgroundHandler() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  if (Platform.isAndroid) SharedPreferencesAndroid.registerWith();
+  if (Platform.isIOS) SharedPreferencesIOS.registerWith();
+
+  // Notice these instances belong to a forked isolate.
+  var uploader = FlutterUploader();
+
+
+  // Only show notifications for unprocessed uploads.
+  SharedPreferences.getInstance().then((preferences) {
+    var processed = preferences.getStringList('processed') ?? <String>[];
+
+    log("after getting the processed list: ${processed}");
+
+    if (Platform.isAndroid) {
+      uploader.progress.listen((progress) {
+        FirebaseFirestore.instance.collection("uploadProgress")
+        .add({
+      "progress.status": progress.status.description,
+      "progress.progress": progress.progress,
+      "progress.taskId": progress.taskId,
+      "dateTime": DateTime.now(),
+    });
+        if (processed.contains(progress.taskId)) {
+          return;
+        }
+        // AndroidNotificationDetails('vipPicnic', 'vip',
+        //     channelDescription: 'Vibrate and show notification',
+        //     importance: Importance.max,
+        //     priority: Priority.high,
+        //     icon: '@mipmap/launcher_icon',
+        //     largeIcon: FilePathAndroidBitmap(largeIconPath),
+        //     styleInformation: bigTextStyleInformation,
+        //     // vibrationPattern: vibrationPattern,
+        //     enableLights: true,
+        //     color: const Color.fromARGB(255, 255, 0, 0),
+        //     ledColor: const Color.fromARGB(255, 255, 0, 0),
+        //     ledOnMs: 1000,
+        //     ledOffMs: 500);
+
+        flutterLocalNotificationsPlugin.show(
+          progress.taskId.hashCode,
+          'Background Uploading',
+          'Upload in progress...',
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              'FlutterUploader.Example',
+              'FlutterUploader',
+              channelDescription: 'Vibrate and show Flutter Uploader notification',
+              progress: progress.progress ?? 0,
+              icon: 'ic_upload',
+              enableVibration: false,
+              importance: Importance.low,
+              showProgress: true,
+              onlyAlertOnce: true,
+              maxProgress: 100,
+              channelShowBadge: false,
+            ),
+            iOS: IOSNotificationDetails(),
+          ),
+        );
+      });
+    }
+
+    uploader.result.listen((result) async {
+      FirebaseFirestore.instance.collection("uploadResults")
+          .add({
+        "result.status": result.status?.description ?? "was null",
+        "result.statusCode": result.statusCode,
+        "result.response": result.response,
+        "result.taskId": result.taskId,
+        "dateTime": DateTime.now(),
+      });
+      List<String> isChatRoomOrGroupChatRoomList = jsonDecode(result.response ?? "")['id'].split("/");
+      bool isChatRoom = isChatRoomOrGroupChatRoomList.asMap().containsValue("chatRooms");
+      if(isChatRoom){
+        String chatRoomId = isChatRoomOrGroupChatRoomList[2];
+        String fileName = isChatRoomOrGroupChatRoomList[3].split(".")[0];
+        log("chatRoomId in upload result:  $chatRoomId");
+        log("fileName in upload result:  $fileName");
+        var ref = FirebaseStorage.instance
+            .ref()
+            .child("chatRooms/${chatRoomId}")
+            .child("$fileName.mp4");
+        String url = await ref.getDownloadURL();
+        FirebaseFirestore.instance.collection("ChatRoom").doc(chatRoomId)
+            .collection("messages").doc(fileName)
+            .update({"message": url});
+      }
+      if (processed.contains(result.taskId)) {
+        return;
+      }
+
+      processed.add(result.taskId);
+      preferences.setStringList('processed', processed);
+
+      flutterLocalNotificationsPlugin.cancel(result.taskId.hashCode);
+
+      final successful = result.status == UploadTaskStatus.complete;
+
+      var title = 'Upload Complete';
+      if (result.status == UploadTaskStatus.failed) {
+        title = 'Upload Failed';
+      } else if (result.status == UploadTaskStatus.canceled) {
+        title = 'Upload Canceled';
+      }
+
+      flutterLocalNotificationsPlugin
+          .show(
+        result.taskId.hashCode,
+        'Background Uploading',
+        title,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            'FlutterUploader.Example',
+            'FlutterUploader',
+            channelDescription: 'Vibrate and show Flutter Uploader notification',
+            icon: 'ic_upload',
+            enableVibration: !successful,
+            importance: result.status == UploadTaskStatus.failed
+                ? Importance.high
+                : Importance.min,
+          ),
+          iOS: IOSNotificationDetails(
+            presentAlert: true,
+          ),
+        ),
+      )
+          .catchError((e, stack) {
+        print('error while showing notification: $e, $stack');
+      });
+    });
+  });
+}
+
+// void backgroundHandler() {
+//   // Needed so that plugin communication works.
+//   WidgetsFlutterBinding.ensureInitialized();
+//
+//   // This uploader instance works within the isolate only.
+//   FlutterUploader uploader = FlutterUploader();
+//
+//   // You have now access to:
+//   uploader.progress.listen((progress) {
+//     // upload progress
+//     ffstore.collection("uploadProgress")
+//         .add({
+//       "progress.status": progress.status,
+//       "progress.progress": progress.progress,
+//       "progress.taskId": progress.taskId,
+//       "dateTime": DateTime.now(),
+//     });
+//   });
+//   uploader.result.listen((result) {
+//     // upload results
+//     ffstore.collection("uploadResults")
+//         .add({
+//       "result.status": result.status,
+//       "result.statusCode": result.statusCode,
+//       "result.response": result.response,
+//       "result.taskId": result.taskId,
+//       "dateTime": DateTime.now(),
+//     });
+//   });
+// }
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  FlutterUploader().setBackgroundHandler(backgroundHandler);
 
   channel = const AndroidNotificationChannel(
     'high_importance_channel', // id

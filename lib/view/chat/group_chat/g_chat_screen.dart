@@ -15,7 +15,9 @@ import 'package:vip_picnic/model/group_chat_models/group_chat_room_model.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/dynamic_link_handler.dart';
 import 'package:vip_picnic/utils/instances.dart';
+import 'package:vip_picnic/view/chat/group_chat/group_preview_video.dart';
 import 'package:vip_picnic/view/chat/group_chat/preview_group_chat_image.dart';
+import 'package:vip_picnic/view/chat/preview_video.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/message_bubbles.dart';
@@ -39,12 +41,14 @@ class GroupChat extends StatefulWidget {
 }
 
 class _GroupChatState extends State<GroupChat> {
-  Rx<TextEditingController> messageEditingController =
-      TextEditingController().obs;
+  Rx<TextEditingController> messageEditingController = TextEditingController().obs;
   ScrollController scrollController = ScrollController();
 
   String chatRoomID = "";
   File? imageFile;
+  File? videoFile;
+
+
   int i = 0;
   String imageUrl = '';
   bool isOpenedUp = true;
@@ -167,6 +171,7 @@ class _GroupChatState extends State<GroupChat> {
   // }
 
   String? path;
+  String? videoPath;
 
   Future getImageFromCamera() async {
     ImagePicker _picker = ImagePicker();
@@ -205,6 +210,30 @@ class _GroupChatState extends State<GroupChat> {
       }
     });
   }
+
+  Future getVideoFromGallery() async {
+    ImagePicker _picker = ImagePicker();
+    await _picker
+        .pickVideo(
+      source: ImageSource.gallery,
+    )
+        .then((xFile) {
+      if (xFile != null) {
+        videoFile = File(xFile.path);
+        videoPath = xFile.path;
+        // showLoading();
+        Get.to(
+              () => GroupPreviewVideoScreen(
+            videoPath: videoPath,
+            chatRoomId: widget.docs!["groupId"],
+            userId: userDetailsModel.uID!,
+          ),
+        );
+        // uploadImage();
+      }
+    });
+  }
+
 
   // Future uploadImage() async {
   //   String fileName = Uuid().v1();
@@ -334,8 +363,7 @@ class _GroupChatState extends State<GroupChat> {
       //     "notDeletedFor": FieldValue.arrayUnion([anotherUserID])
       //   });
       // }
-      groupChatController.addConversationMessage(
-          chatRoomID, time, "text", messageMap, messageText);
+      groupChatController.addConversationMessage(chatRoomID, time, "text", messageMap, messageText);
       // log("index is: ${lastIndex.value}");
     } else if (imageFile != null && (imageUrl != null || imageUrl != "")) {
       var time = DateTime.now().millisecondsSinceEpoch;
@@ -360,8 +388,7 @@ class _GroupChatState extends State<GroupChat> {
       //     "notDeletedFor": FieldValue.arrayUnion([anotherUserID])
       //   });
       // }
-      groupChatController.addConversationMessage(
-          chatRoomID, time, "image", messageMap, imageUrl!);
+      groupChatController.addConversationMessage(chatRoomID, time, "image", messageMap, imageUrl!);
       messageEditingController.value.text = "";
 
       imageUrl = "";
@@ -417,18 +444,17 @@ class _GroupChatState extends State<GroupChat> {
             // shrinkWrap: true,
             itemCount: snapshot.data?.docs.length,
             itemBuilder: (context, index) {
-              Map<String, dynamic> data =
-                  snapshot.data?.docs[index].data() as Map<String, dynamic>;
-              print(
-                  "snapshot.data.docs[index].data()[type] is: ${data["type"]}");
+              Map<String, dynamic> data = snapshot.data?.docs[index].data() as Map<String, dynamic>;
+              print("snapshot.data.docs[index].data()[type] is: ${data["type"]}");
               //TODO: Beware, here the widgets to show data start.
               //TODO: Beware, here the widgets to show data start.
               String type = data["type"];
-              String message =
-                  data["message"] != null ? data["message"] : "what is this?";
+              String message = data["message"] != null ? data["message"] : "what is this?";
               bool sendByMe = userDetailsModel.uID == data["sendById"];
               String time = data["time"].toString();
               String senderImage = data["sendByImage"];
+              bool isDeletedForMe = data["isDeletedFor"].contains(userDetailsModel.uID);
+
 
               var day = DateTime.fromMillisecondsSinceEpoch(
                 int.parse(time),
@@ -492,305 +518,1218 @@ class _GroupChatState extends State<GroupChat> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        toolbarHeight: 75,
-        leading: Padding(
-          padding: const EdgeInsets.only(
-            left: 5,
-          ),
-          child: IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: Image.asset(
-              Assets.imagesArrowBack,
-              height: 22.04,
-            ),
-          ),
-        ),
-        title: chatController.showSearch.value
-            ? SearchBar()
-            : MyText(
-                //+docs!['groupName']
-                text: '${widget.docs!['groupName'] ?? ""}',
-                size: 19,
-                color: kSecondaryColor,
-              ),
-        actions: [
-          Padding(
+    return WillPopScope(
+      onWillPop: () async {
+        log("in on will pop group chat");
+        if (chatController.isDeleting.value) {
+          log("on will pop inside if");
+          chatController.isDeleting.value = false;
+          chatController.deleteMsgIdList.clear();
+          chatController.deleteLeftMsgIdList.clear();
+          chatController.deleteAudioIdList.clear();
+          chatController.deleteAudioLinksList.clear();
+          chatController.deleteImageIdsList.clear();
+          chatController.deleteImageLinksList.clear();
+          return false;
+        } else {
+          return true;
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          toolbarHeight: 75,
+          leading: Padding(
             padding: const EdgeInsets.only(
-              right: 10,
-              left: 15,
+              left: 5,
             ),
-            child: Center(
-              child: GestureDetector(
-                onTap: () => chatController.showSearchBar(),
-                //+ we can implement the search by putting an onChange on the send message field
-                //+ but we might have to be very careful with the length of the search array being saved into it.
-                child: Image.asset(
-                  Assets.imagesSearchWithBg,
-                  height: 35,
+            child: IconButton(
+              onPressed: () {
+                chatController.isDeleting.value = false;
+                chatController.deleteMsgIdList.clear();
+                chatController.deleteLeftMsgIdList.clear();
+                chatController.deleteAudioIdList.clear();
+                chatController.deleteAudioLinksList.clear();
+                chatController.deleteImageIdsList.clear();
+                chatController.deleteImageLinksList.clear();
+                Navigator.pop(context);
+              },
+              icon: Image.asset(
+                Assets.imagesArrowBack,
+                height: 22.04,
+              ),
+            ),
+          ),
+          title: chatController.showSearch.value
+              ? SearchBar()
+              : MyText(
+                  //+docs!['groupName']
+                  text: '${widget.docs!['groupName'] ?? ""}',
+                  size: 19,
+                  color: kSecondaryColor,
                 ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-              right: 15,
-            ),
-            child: Center(
-              child: GestureDetector(
-                onTap: () {
-                  showModalBottomSheet(
-                    backgroundColor: Colors.transparent,
-                    elevation: 0,
-                    context: context,
-                    builder: (context) {
-                      return Container(
-                        height: 400,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 30,
-                        ),
-                        decoration: BoxDecoration(
-                          color: kPrimaryColor,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(28),
-                            topRight: Radius.circular(28),
-                          ),
-                        ),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Container(),
-                                  MyText(
-                                    text: 'Send invitation',
-                                    size: 19,
-                                    color: kSecondaryColor,
-                                  ),
-                                  GestureDetector(
-                                    onTap: () async {
-                                      Navigator.pop(context);
-                                    },
-                                    child: Image.asset(
-                                      Assets.imagesRoundedClose,
-                                      height: 22.44,
+          actions: [
+            // Padding(
+            //   padding: const EdgeInsets.only(
+            //     right: 10,
+            //     left: 15,
+            //   ),
+            //   child: Center(
+            //     child: GestureDetector(
+            //       onTap: () => chatController.showSearchBar(),
+            //       //+ we can implement the search by putting an onChange on the send message field
+            //       //+ but we might have to be very careful with the length of the search array being saved into it.
+            //       child: Image.asset(
+            //         Assets.imagesSearchWithBg,
+            //         height: 35,
+            //       ),
+            //     ),
+            //   ),
+            // ),
+
+            Obx(() {
+              if (chatController.isDeleting.value) {
+                return Padding(
+                  padding: const EdgeInsets.only(
+                    right: 15,
+                  ),
+                  child: Center(
+                    child: GestureDetector(
+                      onTap: () {
+                        // chatController.showSearchBar();
+                        Get.bottomSheet(
+                          Container(
+                            height: chatController.deleteLeftMsgIdList.length > 0 ? 150 : 200,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 15,
+                              vertical: 10,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                InkWell(
+                                  child: Center(
+                                    child: MyText(
+                                      paddingTop: 12,
+                                      text: 'Cancel',
+                                      size: 16,
+                                      paddingBottom: 12,
                                     ),
                                   ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 30,
-                              ),
-                              SimpleTextField(
-                                hintText: 'Type username,  email...',
-                                controller: userNameController,
-                                onChanged: (value) {
-                                  userNameObsString.value = value;
-                                },
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Obx(() {
-                                if (userNameObsString.value != "") {
-                                  // List<String> tempList = selectedUsers.length > 0 ? List<String>.from(selectedUsers.keys.toList()) : ["check"];
-                                  return StreamBuilder<
-                                      QuerySnapshot<Map<String, dynamic>>>(
-                                    stream: ffstore
-                                        .collection(accountsCollection)
-                                        .where("userSearchParameters",
-                                            arrayContains:
-                                                userNameObsString.value.trim())
-                                        .limit(3)
-                                        // .where("uID", whereNotIn: tempList)
-                                        .snapshots(),
-                                    builder: (
-                                      BuildContext context,
-                                      AsyncSnapshot<QuerySnapshot> snapshot,
-                                    ) {
-                                      log("inside stream-builder");
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        log("inside stream-builder in waiting state");
-                                        return Center(
-                                            child: CircularProgressIndicator());
-                                      } else if (snapshot.connectionState ==
-                                              ConnectionState.active ||
-                                          snapshot.connectionState ==
-                                              ConnectionState.done) {
-                                        if (snapshot.hasError) {
-                                          return const Text(
-                                              'Some unknown error occurred');
-                                        } else if (snapshot.hasData) {
-                                          // log("inside hasData and ${snapshot.data!.docs}");
-                                          if (snapshot.data!.docs.length > 0) {
-                                            return ListView.builder(
-                                              shrinkWrap: true,
-                                              physics: BouncingScrollPhysics(),
-                                              padding: EdgeInsets.symmetric(
-                                                horizontal: 15,
-                                              ),
-                                              itemCount:
-                                                  snapshot.data!.docs.length,
-                                              itemBuilder: (context, index) {
-                                                UserDetailsModel umdl =
-                                                    UserDetailsModel.fromJson(
-                                                        snapshot.data!
-                                                                .docs[index]
-                                                                .data()
-                                                            as Map<String,
-                                                                dynamic>);
-                                                return Obx(() {
-                                                  if (selectedId.value ==
-                                                          umdl.uID ||
-                                                      umdl.uID ==
-                                                          auth.currentUser
-                                                              ?.uid) {
-                                                    return SizedBox();
-                                                  }
-                                                  return contactTiles(
-                                                    profileImage:
-                                                        umdl.profileImageUrl,
-                                                    name: umdl.fullName,
-                                                    id: umdl.uID,
-                                                    email: umdl.email,
-                                                  );
-                                                });
-                                              },
-                                            );
+                                  borderRadius: BorderRadius.circular(6),
+                                  splashColor: kBlackColor.withOpacity(0.05),
+                                  highlightColor: kBlackColor.withOpacity(0.05),
+                                  onTap: () {
+                                    // Get.back();
+                                    chatController.isDeleting.value = false;
+                                    chatController.deleteMsgIdList.clear();
+                                    chatController.deleteLeftMsgIdList.clear();
+                                    chatController.deleteLeftMsgIdList.clear();
+                                    chatController.deleteAudioIdList.clear();
+                                    chatController.deleteAudioLinksList.clear();
+                                    chatController.deleteImageIdsList.clear();
+                                    chatController.deleteImageLinksList.clear();
+                                    Get.back();
+                                  },
+                                ),
+                                Container(
+                                  height: 1,
+                                  color: kSecondaryColor.withOpacity(0.2),
+                                ),
+                                InkWell(
+                                  child: Center(
+                                    child: MyText(
+                                      paddingTop: 12,
+                                      text: 'Delete for me',
+                                      size: 16,
+                                      paddingBottom: 12,
+                                    ),
+                                  ),
+                                  borderRadius: BorderRadius.circular(6),
+                                  splashColor: kBlackColor.withOpacity(0.05),
+                                  highlightColor: kBlackColor.withOpacity(0.05),
+                                  onTap: () async {
+                                    int deleteCount = 0;
+                                    Get.back();
+                                    Get.dialog(loading());
+                                    log("logging the list on delete button: ${chatController.deleteMsgIdList} ");
+                                    // chatController.deleteMsgIdList.forEach((element) async {
+                                    //   try {
+                                    //     await ffstore
+                                    //         .collection('ChatRoom')
+                                    //         .doc(widget.docs['chatRoomId'])
+                                    //         .collection('chats')
+                                    //         .doc(element)
+                                    //         .delete();
+                                    //   } catch (e) {
+                                    //     log("error is: $e");
+                                    //     //+show an error widget/dialog/snackbar.
+                                    //   }
+                                    //   log("deleted: $element and list before deletion is: ${chatController.deleteMsgIdList}");
+                                    //   chatController.deleteMsgIdList.remove(element);
+                                    //   log("deleted: $element and list after deletion is: ${chatController.deleteMsgIdList}");
+                                    // });
+                                    log("initial deleteMsgIdList: ${chatController.deleteMsgIdList}");
+                                    // for (int i = 0; i < chatController.deleteAudioLinksList.length; i++) {
+                                    //   deleteCount++;
+                                    //   log("deleting through URL : ${chatController.deleteAudioLinksList[i]}");
+                                    //   try {
+                                    //     // await FirebaseStorage.instance
+                                    //     //     .refFromURL(chatController.deleteAudioLinksList[i])
+                                    //     //     .delete()
+                                    //     //     .then((value) async {
+                                    //     //   log("after deleting the audio from storage");
+                                    //     await ffstore
+                                    //         .collection('ChatRoom')
+                                    //         .doc(widget.docs!['chatRoomId'])
+                                    //         .collection('chats')
+                                    //         .doc(chatController.deleteAudioIdList[i])
+                                    //         .update({
+                                    //       "isDeletedFor": FieldValue.arrayUnion([auth.currentUser?.uid])
+                                    //     }).then((value) {
+                                    //       log("after deleting the audio from storage");
+                                    //       chatController.deleteMsgIdList
+                                    //           .remove(chatController.deleteAudioIdList[i]);
+                                    //       chatController.deleteAudioIdList.removeAt(i);
+                                    //       chatController.deleteAudioLinksList.removeAt(i);
+                                    //     });
+                                    //     // });
+                                    //   } catch (e) {
+                                    //     log("error is: $e");
+                                    //     //+show an error widget/dialog/snackbar.
+                                    //   }
+                                    // }
+                                    for (int j = 0; j < chatController.deleteImageLinksList.length; j++) {
+                                      deleteCount++;
+                                      try {
+                                        await ffstore
+                                            .collection(groupChatCollection)
+                                            .doc(widget.docs!['groupId'])
+                                            .collection('messages')
+                                            .doc(chatController.deleteImageIdsList[j])
+                                            .update({
+                                          "isDeletedFor": FieldValue.arrayUnion([auth.currentUser?.uid])
+                                        }).then((value) {
+                                          log("after deleting the audio from storage");
+                                          chatController.deleteMsgIdList.remove(chatController.deleteImageIdsList[j]);
+                                          chatController.deleteImageIdsList.removeAt(j);
+                                          chatController.deleteImageLinksList.removeAt(j);
+                                        });
+                                        // });
+                                      } catch (e) {
+                                        log("error is: $e");
+                                        //+show an error widget/dialog/snackbar.
+                                      }
+                                    }
+                                    log("remaining deleteMsgIdList: ${chatController.deleteMsgIdList}");
+                                    chatController.deleteMsgIdList.forEach((element) async {
+                                      deleteCount++;
+                                      log("in deleteMsgIdList.forEach widget.docs!['chatRoomId']: "
+                                          "${widget.docs!['groupId']}");
+                                      try {
+                                        await ffstore
+                                            .collection(groupChatCollection)
+                                            .doc(widget.docs!['groupId'])
+                                            .collection('messages')
+                                            .doc(element)
+                                            .update({
+                                          "isDeletedFor": FieldValue.arrayUnion([auth.currentUser?.uid])
+                                        });
+                                      } catch (e) {
+                                        log("error is: $e");
+                                        //+show an error widget/dialog/snackbar.
+                                      }
+                                      log("deleted: $element and list before deletion is: ${chatController.deleteMsgIdList}");
+                                      chatController.deleteMsgIdList.remove(element);
+                                      log("deleted: $element and list after deletion is: ${chatController.deleteMsgIdList}");
+                                    });
+                                    // chatController.deleteAudioIdList.forEach((element) async {
+                                    //   try {
+                                    //     await ffstore
+                                    //         .collection('ChatRoom')
+                                    //         .doc(widget.docs['chatRoomId'])
+                                    //         .collection('chats')
+                                    //         .doc(element)
+                                    //         .delete();
+                                    //   } catch (e) {
+                                    //     log("error is: $e");
+                                    //     //+show an error widget/dialog/snackbar.
+                                    //   }
+                                    // });
+                                    chatController.isDeleting.value = false;
+                                    chatController.deleteMsgIdList.clear();
+                                    chatController.deleteLeftMsgIdList.clear();
+                                    chatController.deleteAudioIdList.clear();
+                                    chatController.deleteAudioLinksList.clear();
+                                    chatController.deleteImageIdsList.clear();
+                                    chatController.deleteImageLinksList.clear();
+                                    Get.back();
+                                    //
+                                    // List a = [];
+                                    // a.c
+                                    //+ below code is for updating the last message for me.
+                                    try {
+                                      await ffstore
+                                          .collection(groupChatCollection)
+                                          .doc(chatRoomID)
+                                          .collection("messages")
+                                      // .where("isDeletedFor", whereIn: [
+                                      //   [authController.userModel.value.id],
+                                      //   [authController.userModel.value.id, anotherUserID]
+                                      // ])
+                                          .orderBy("time", descending: true)
+                                          .get()
+                                          .then((value) {
+                                        log("in then of  update last message query is: ${value.docs.length}");
+                                        if (value.docs.length > 0) {
+                                          log("why not inside");
+                                          // var firstEndDoc = value.docs.firstWhere((element) => element['message'] == "yyyy");
+                                          var firstEndDoc = value.docs.firstWhereOrNull(
+                                                  (element) => !element['isDeletedFor'].contains(auth.currentUser?.uid));
+                                          log("firstEndDoc: $firstEndDoc");
+                                          if (firstEndDoc != null) {
+                                            log("firstEndDoc is: ${firstEndDoc.data()}");
+                                            // if(firstEndDoc['type'] == "text"){
+                                            // }
+                                            ffstore.collection(groupChatCollection).doc(chatRoomID).update({
+                                              "lastMessageAt": firstEndDoc['time'],
+                                              "lastMessage": firstEndDoc['message'],
+                                              "lastMessageById": firstEndDoc['sendById'],
+                                              "lastMessageByName": firstEndDoc['sendByName'],
+                                              "lastMessageType": firstEndDoc['type'],
+                                            });
                                           } else {
+                                            ffstore.collection(groupChatCollection).doc(chatRoomID).update({
+                                              "lastMessage": "",
+                                              "lastMessageType": "text",
+                                            });
+                                          }
+                                        } else {
+                                          ffstore.collection(groupChatCollection).doc(chatRoomID).update({
+                                            "lastMessage": "",
+                                            "lastMessageType": "text",
+                                          });
+                                        }
+                                      });
+                                    } catch (e) {
+                                      log("error in updating last message is: $e");
+                                    }
+                                  },
+                                ),
+                                Container(
+                                  height: 1,
+                                  color: kSecondaryColor.withOpacity(0.2),
+                                ),
+                                if (chatController.deleteLeftMsgIdList.length == 0)
+                                  InkWell(
+                                    child: Center(
+                                      child: MyText(
+                                        paddingTop: 12,
+                                        text: 'Delete for everyone',
+                                        size: 16,
+                                        paddingBottom: 12,
+                                      ),
+                                    ),
+                                    borderRadius: BorderRadius.circular(6),
+                                    splashColor: kBlackColor.withOpacity(0.05),
+                                    highlightColor: kBlackColor.withOpacity(0.05),
+                                    onTap: () async {
+                                      int deleteCount = 0;
+                                      Get.back();
+                                      Get.dialog(loading());
+                                      log("logging the list on delete button: ${chatController.deleteMsgIdList} ");
+                                      // chatController.deleteMsgIdList.forEach((element) async {
+                                      //   try {
+                                      //     await ffstore
+                                      //         .collection('ChatRoom')
+                                      //         .doc(widget.docs['chatRoomId'])
+                                      //         .collection('chats')
+                                      //         .doc(element)
+                                      //         .delete();
+                                      //   } catch (e) {
+                                      //     log("error is: $e");
+                                      //     //+show an error widget/dialog/snackbar.
+                                      //   }
+                                      //   log("deleted: $element and list before deletion is: ${chatController.deleteMsgIdList}");
+                                      //   chatController.deleteMsgIdList.remove(element);
+                                      //   log("deleted: $element and list after deletion is: ${chatController.deleteMsgIdList}");
+                                      // });
+                                      log("initial deleteMsgIdList: ${chatController.deleteMsgIdList}");
+                                      // for (int i = 0; i < chatController.deleteAudioLinksList.length; i++) {
+                                      //   deleteCount++;
+                                      //   log("deleting through URL : ${chatController.deleteAudioLinksList[i]}");
+                                      //   try {
+                                      //     await FirebaseStorage.instance
+                                      //         .refFromURL(chatController.deleteAudioLinksList[i])
+                                      //         .delete()
+                                      //         .then((value) async {
+                                      //       log("after deleting the audio from storage");
+                                      //       await ffstore
+                                      //           .collection('ChatRoom')
+                                      //           .doc(widget.docs!['chatRoomId'])
+                                      //           .collection('messages')
+                                      //           .doc(chatController.deleteAudioIdList[i])
+                                      //           .delete()
+                                      //           .then((value) {
+                                      //         log("after deleting the audio from storage");
+                                      //         chatController.deleteMsgIdList
+                                      //             .remove(chatController.deleteAudioIdList[i]);
+                                      //         chatController.deleteAudioIdList.removeAt(i);
+                                      //         chatController.deleteAudioLinksList.removeAt(i);
+                                      //       });
+                                      //     });
+                                      //   } catch (e) {
+                                      //     log("error is: $e");
+                                      //     //+show an error widget/dialog/snackbar.
+                                      //   }
+                                      // }
+                                      for (int j = 0; j < chatController.deleteImageLinksList.length; j++) {
+                                        deleteCount++;
+                                        try {
+                                          await fstorage
+                                              .refFromURL(chatController.deleteImageLinksList[j])
+                                              .delete()
+                                              .then(
+                                                (value) async {
+                                              log("after deleting the audio from storage");
+                                              await ffstore
+                                                  .collection(groupChatCollection)
+                                                  .doc(widget.docs!['groupId'])
+                                                  .collection('messages')
+                                                  .doc(chatController.deleteImageIdsList[j])
+                                                  .delete()
+                                                  .then(
+                                                    (value) {
+                                                  log("after deleting the audio from storage");
+                                                  chatController.deleteMsgIdList
+                                                      .remove(chatController.deleteImageIdsList[j]);
+                                                  chatController.deleteImageIdsList.removeAt(j);
+                                                  chatController.deleteImageLinksList.removeAt(j);
+                                                },
+                                              );
+                                            },
+                                          );
+                                        } catch (e) {
+                                          log("error is: $e");
+                                          //+show an error widget/dialog/snackbar.
+                                        }
+                                      }
+                                      log("remaining deleteMsgIdList: ${chatController.deleteMsgIdList}");
+                                      chatController.deleteMsgIdList.forEach(
+                                            (element) async {
+                                          deleteCount++;
+
+                                          try {
+                                            await ffstore
+                                                .collection(groupChatCollection)
+                                                .doc(widget.docs!['groupId'])
+                                                .collection('messages')
+                                                .doc(element)
+                                                .delete();
+                                          } catch (e) {
+                                            log("error is: $e");
+                                            //+show an error widget/dialog/snackbar.
+                                          }
+                                          log("deleted: $element and list before deletion is: ${chatController.deleteMsgIdList}");
+                                          chatController.deleteMsgIdList.remove(element);
+                                          log("deleted: $element and list after deletion is: ${chatController.deleteMsgIdList}");
+                                        },
+                                      );
+                                      // chatController.deleteAudioIdList.forEach((element) async {
+                                      //   try {
+                                      //     await ffstore
+                                      //         .collection('ChatRoom')
+                                      //         .doc(widget.docs['chatRoomId'])
+                                      //         .collection('chats')
+                                      //         .doc(element)
+                                      //         .delete();
+                                      //   } catch (e) {
+                                      //     log("error is: $e");
+                                      //     //+show an error widget/dialog/snackbar.
+                                      //   }
+                                      // });
+                                      chatController.isDeleting.value = false;
+                                      chatController.deleteMsgIdList.clear();
+                                      chatController.deleteLeftMsgIdList.clear();
+                                      chatController.deleteAudioIdList.clear();
+                                      chatController.deleteAudioLinksList.clear();
+                                      chatController.deleteImageIdsList.clear();
+                                      chatController.deleteImageLinksList.clear();
+                                      Get.back();
+
+                                      try {
+                                        ffstore
+                                            .collection(groupChatCollection)
+                                            .doc(chatRoomID)
+                                            .collection("messages")
+                                            .orderBy("time", descending: true)
+                                            .get()
+                                            .then(
+                                              (value) {
+                                            if (value.docs.length > 0) {
+                                              var firstEndDoc = value.docs.firstWhereOrNull((element) =>
+                                              !element['isDeletedFor'].contains(auth.currentUser?.uid));
+                                              if (firstEndDoc != null) {
+                                                log("firstEndDoc is: ${firstEndDoc.data()}");
+                                                ffstore.collection(groupChatCollection).doc(chatRoomID).update(
+                                                  {
+                                                    "lastMessageAt": firstEndDoc['time'],
+                                                    "lastMessage": firstEndDoc['message'],
+                                                    "lastMessageById": firstEndDoc['sendById'],
+                                                    "lastMessageByName": firstEndDoc['sendByName'],
+                                                    "lastMessageType": firstEndDoc['type'],
+                                                  },
+                                                );
+                                              } else {
+                                                log("in else of docsnot being greater than zero in updating the lastMessage");
+                                                ffstore.collection(groupChatCollection).doc(chatRoomID).update(
+                                                  {
+                                                    "lastMessage": "",
+                                                    "lastMessageType": "text",
+                                                  },
+                                                );
+                                              }
+                                            } else {
+                                              log("in else of docsnot being greater than zero in updating the lastMessage");
+                                              ffstore.collection(groupChatCollection).doc(chatRoomID).update(
+                                                {
+                                                  "lastMessage": "",
+                                                  "lastMessageType": "text",
+                                                },
+                                              );
+                                            }
+                                          },
+                                        );
+                                      } catch (e) {
+                                        log("error in updating last message is: $e");
+                                      }
+                                    },
+                                  ),
+
+                                // Row(
+                                //   mainAxisAlignment:
+                                //       MainAxisAlignment.spaceEvenly,
+                                //   children: [
+                                //
+                                //     Expanded(
+                                //       child: GradientButton(
+                                //         buttonText: 'Cancel',
+                                //         onTap: () {
+                                //           // Get.back();
+                                //           chatController.isDeleting.value =
+                                //               false;
+                                //           chatController.deleteMsgIdList
+                                //               .clear();
+                                //           chatController.deleteLeftMsgIdList
+                                //               .clear();
+                                //           chatController.deleteAudioIdList
+                                //               .clear();
+                                //           chatController
+                                //               .deleteAudioLinksList
+                                //               .clear();
+                                //           chatController.deleteImageIdsList
+                                //               .clear();
+                                //           chatController
+                                //               .deleteImageLinksList
+                                //               .clear();
+                                //           Get.back();
+                                //         },
+                                //       ),
+                                //     ),
+                                //   ],
+                                // ),
+                                // Row(
+                                //   mainAxisAlignment:
+                                //       MainAxisAlignment.spaceEvenly,
+                                //   children: [
+                                //     Expanded(
+                                //       child: GradientButton(
+                                //         buttonText: 'Delete for Me',
+                                //         onTap: () async {
+                                //           int deleteCount = 0;
+                                //           Get.back();
+                                //           Get.dialog(loading());
+                                //           log("logging the list on delete button: ${chatController.deleteMsgIdList} ");
+                                //           // chatController.deleteMsgIdList.forEach((element) async {
+                                //           //   try {
+                                //           //     await ffstore
+                                //           //         .collection('ChatRoom')
+                                //           //         .doc(widget.docs['chatRoomId'])
+                                //           //         .collection('chats')
+                                //           //         .doc(element)
+                                //           //         .delete();
+                                //           //   } catch (e) {
+                                //           //     log("error is: $e");
+                                //           //     //+show an error widget/dialog/snackbar.
+                                //           //   }
+                                //           //   log("deleted: $element and list before deletion is: ${chatController.deleteMsgIdList}");
+                                //           //   chatController.deleteMsgIdList.remove(element);
+                                //           //   log("deleted: $element and list after deletion is: ${chatController.deleteMsgIdList}");
+                                //           // });
+                                //           log("initial deleteMsgIdList: ${chatController.deleteMsgIdList}");
+                                //           // for (int i = 0; i < chatController.deleteAudioLinksList.length; i++) {
+                                //           //   deleteCount++;
+                                //           //   log("deleting through URL : ${chatController.deleteAudioLinksList[i]}");
+                                //           //   try {
+                                //           //     // await FirebaseStorage.instance
+                                //           //     //     .refFromURL(chatController.deleteAudioLinksList[i])
+                                //           //     //     .delete()
+                                //           //     //     .then((value) async {
+                                //           //     //   log("after deleting the audio from storage");
+                                //           //     await ffstore
+                                //           //         .collection('ChatRoom')
+                                //           //         .doc(widget.docs!['chatRoomId'])
+                                //           //         .collection('chats')
+                                //           //         .doc(chatController.deleteAudioIdList[i])
+                                //           //         .update({
+                                //           //       "isDeletedFor": FieldValue.arrayUnion([auth.currentUser?.uid])
+                                //           //     }).then((value) {
+                                //           //       log("after deleting the audio from storage");
+                                //           //       chatController.deleteMsgIdList
+                                //           //           .remove(chatController.deleteAudioIdList[i]);
+                                //           //       chatController.deleteAudioIdList.removeAt(i);
+                                //           //       chatController.deleteAudioLinksList.removeAt(i);
+                                //           //     });
+                                //           //     // });
+                                //           //   } catch (e) {
+                                //           //     log("error is: $e");
+                                //           //     //+show an error widget/dialog/snackbar.
+                                //           //   }
+                                //           // }
+                                //           for (int j = 0;
+                                //               j <
+                                //                   chatController
+                                //                       .deleteImageLinksList
+                                //                       .length;
+                                //               j++) {
+                                //             deleteCount++;
+                                //             try {
+                                //               await ffstore
+                                //                   .collection('ChatRoom')
+                                //                   .doc(widget
+                                //                       .docs!['chatRoomId'])
+                                //                   .collection('messages')
+                                //                   .doc(chatController
+                                //                       .deleteImageIdsList[j])
+                                //                   .update({
+                                //                 "isDeletedFor":
+                                //                     FieldValue.arrayUnion([
+                                //                   auth.currentUser?.uid
+                                //                 ])
+                                //               }).then((value) {
+                                //                 log("after deleting the audio from storage");
+                                //                 chatController
+                                //                     .deleteMsgIdList
+                                //                     .remove(chatController
+                                //                         .deleteImageIdsList[j]);
+                                //                 chatController
+                                //                     .deleteImageIdsList
+                                //                     .removeAt(j);
+                                //                 chatController
+                                //                     .deleteImageLinksList
+                                //                     .removeAt(j);
+                                //               });
+                                //               // });
+                                //             } catch (e) {
+                                //               log("error is: $e");
+                                //               //+show an error widget/dialog/snackbar.
+                                //             }
+                                //           }
+                                //           log("remaining deleteMsgIdList: ${chatController.deleteMsgIdList}");
+                                //           chatController.deleteMsgIdList
+                                //               .forEach((element) async {
+                                //             deleteCount++;
+                                //             log("in deleteMsgIdList.forEach widget.docs!['chatRoomId']: "
+                                //                 "${widget.docs!['chatRoomId']}");
+                                //             try {
+                                //               await ffstore
+                                //                   .collection('ChatRoom')
+                                //                   .doc(widget
+                                //                       .docs!['chatRoomId'])
+                                //                   .collection('messages')
+                                //                   .doc(element)
+                                //                   .update({
+                                //                 "isDeletedFor":
+                                //                     FieldValue.arrayUnion([
+                                //                   auth.currentUser?.uid
+                                //                 ])
+                                //               });
+                                //             } catch (e) {
+                                //               log("error is: $e");
+                                //               //+show an error widget/dialog/snackbar.
+                                //             }
+                                //             log("deleted: $element and list before deletion is: ${chatController.deleteMsgIdList}");
+                                //             chatController.deleteMsgIdList
+                                //                 .remove(element);
+                                //             log("deleted: $element and list after deletion is: ${chatController.deleteMsgIdList}");
+                                //           });
+                                //           // chatController.deleteAudioIdList.forEach((element) async {
+                                //           //   try {
+                                //           //     await ffstore
+                                //           //         .collection('ChatRoom')
+                                //           //         .doc(widget.docs['chatRoomId'])
+                                //           //         .collection('chats')
+                                //           //         .doc(element)
+                                //           //         .delete();
+                                //           //   } catch (e) {
+                                //           //     log("error is: $e");
+                                //           //     //+show an error widget/dialog/snackbar.
+                                //           //   }
+                                //           // });
+                                //           chatController.isDeleting.value =
+                                //               false;
+                                //           chatController.deleteMsgIdList
+                                //               .clear();
+                                //           chatController.deleteAudioIdList
+                                //               .clear();
+                                //           chatController
+                                //               .deleteAudioLinksList
+                                //               .clear();
+                                //           chatController.deleteImageIdsList
+                                //               .clear();
+                                //           chatController
+                                //               .deleteImageLinksList
+                                //               .clear();
+                                //           Get.back();
+                                //           //
+                                //           // List a = [];
+                                //           // a.c
+                                //           //+ below code is for updating the last message for me.
+                                //           try {
+                                //             await ffstore
+                                //                 .collection("ChatRoom")
+                                //                 .doc(chatRoomID)
+                                //                 .collection("messages")
+                                //                 // .where("isDeletedFor", whereIn: [
+                                //                 //   [authController.userModel.value.id],
+                                //                 //   [authController.userModel.value.id, anotherUserID]
+                                //                 // ])
+                                //                 .orderBy("time",
+                                //                     descending: true)
+                                //                 .get()
+                                //                 .then((value) {
+                                //               log("in then of  update last message query is: ${value.docs.length}");
+                                //               if (value.docs.length > 0) {
+                                //                 log("why not inside");
+                                //                 // var firstEndDoc = value.docs.firstWhere((element) => element['message'] == "yyyy");
+                                //                 var firstEndDoc = value.docs
+                                //                     .firstWhereOrNull(
+                                //                         (element) => !element[
+                                //                                 'isDeletedFor']
+                                //                             .contains(auth
+                                //                                 .currentUser
+                                //                                 ?.uid));
+                                //                 log("firstEndDoc: $firstEndDoc");
+                                //                 if (firstEndDoc != null) {
+                                //                   log("firstEndDoc is: ${firstEndDoc.data()}");
+                                //                   // if(firstEndDoc['type'] == "text"){
+                                //                   // }
+                                //                   ffstore
+                                //                       .collection(
+                                //                           "ChatRoom")
+                                //                       .doc(chatRoomID)
+                                //                       .update({
+                                //                     "lastMessageAt":
+                                //                         firstEndDoc['time'],
+                                //                     "lastMessage":
+                                //                         firstEndDoc[
+                                //                             'message'],
+                                //                     "lastMessageType":
+                                //                         firstEndDoc['type'],
+                                //                   });
+                                //                 } else {
+                                //                   ffstore
+                                //                       .collection(
+                                //                           "ChatRoom")
+                                //                       .doc(chatRoomID)
+                                //                       .update({
+                                //                     "lastMessage": "",
+                                //                     "lastMessageType":
+                                //                         "text",
+                                //                   });
+                                //                 }
+                                //               } else {
+                                //                 ffstore
+                                //                     .collection("ChatRoom")
+                                //                     .doc(chatRoomID)
+                                //                     .update({
+                                //                   "lastMessage": "",
+                                //                   "lastMessageType": "text",
+                                //                 });
+                                //               }
+                                //             });
+                                //           } catch (e) {
+                                //             log("error in updating last message is: $e");
+                                //           }
+                                //         },
+                                //       ),
+                                //     ),
+                                //   ],
+                                // ),
+                                // if (chatController.deleteLeftMsgIdList.length ==
+                                //     0)
+                                //   Row(
+                                //     mainAxisAlignment:
+                                //         MainAxisAlignment.spaceEvenly,
+                                //     children: [
+                                //       Expanded(
+                                //         child: GradientButton(
+                                //           buttonText: 'Delete for everyone',
+                                //           onTap: () async {
+                                //             int deleteCount = 0;
+                                //             Get.back();
+                                //             Get.dialog(loading());
+                                //             log("logging the list on delete button: ${chatController.deleteMsgIdList} ");
+                                //             // chatController.deleteMsgIdList.forEach((element) async {
+                                //             //   try {
+                                //             //     await ffstore
+                                //             //         .collection('ChatRoom')
+                                //             //         .doc(widget.docs['chatRoomId'])
+                                //             //         .collection('chats')
+                                //             //         .doc(element)
+                                //             //         .delete();
+                                //             //   } catch (e) {
+                                //             //     log("error is: $e");
+                                //             //     //+show an error widget/dialog/snackbar.
+                                //             //   }
+                                //             //   log("deleted: $element and list before deletion is: ${chatController.deleteMsgIdList}");
+                                //             //   chatController.deleteMsgIdList.remove(element);
+                                //             //   log("deleted: $element and list after deletion is: ${chatController.deleteMsgIdList}");
+                                //             // });
+                                //             log("initial deleteMsgIdList: ${chatController.deleteMsgIdList}");
+                                //             // for (int i = 0; i < chatController.deleteAudioLinksList.length; i++) {
+                                //             //   deleteCount++;
+                                //             //   log("deleting through URL : ${chatController.deleteAudioLinksList[i]}");
+                                //             //   try {
+                                //             //     await FirebaseStorage.instance
+                                //             //         .refFromURL(chatController.deleteAudioLinksList[i])
+                                //             //         .delete()
+                                //             //         .then((value) async {
+                                //             //       log("after deleting the audio from storage");
+                                //             //       await ffstore
+                                //             //           .collection('ChatRoom')
+                                //             //           .doc(widget.docs!['chatRoomId'])
+                                //             //           .collection('messages')
+                                //             //           .doc(chatController.deleteAudioIdList[i])
+                                //             //           .delete()
+                                //             //           .then((value) {
+                                //             //         log("after deleting the audio from storage");
+                                //             //         chatController.deleteMsgIdList
+                                //             //             .remove(chatController.deleteAudioIdList[i]);
+                                //             //         chatController.deleteAudioIdList.removeAt(i);
+                                //             //         chatController.deleteAudioLinksList.removeAt(i);
+                                //             //       });
+                                //             //     });
+                                //             //   } catch (e) {
+                                //             //     log("error is: $e");
+                                //             //     //+show an error widget/dialog/snackbar.
+                                //             //   }
+                                //             // }
+                                //             for (int j = 0;
+                                //                 j <
+                                //                     chatController
+                                //                         .deleteImageLinksList
+                                //                         .length;
+                                //                 j++) {
+                                //               deleteCount++;
+                                //               try {
+                                //                 await FirebaseStorage.instance
+                                //                     .refFromURL(chatController
+                                //                         .deleteImageLinksList[j])
+                                //                     .delete()
+                                //                     .then(
+                                //                   (value) async {
+                                //                     log("after deleting the audio from storage");
+                                //                     await ffstore
+                                //                         .collection('ChatRoom')
+                                //                         .doc(widget.docs![
+                                //                             'chatRoomId'])
+                                //                         .collection('messages')
+                                //                         .doc(chatController
+                                //                             .deleteImageIdsList[j])
+                                //                         .delete()
+                                //                         .then(
+                                //                       (value) {
+                                //                         log("after deleting the audio from storage");
+                                //                         chatController
+                                //                             .deleteMsgIdList
+                                //                             .remove(chatController
+                                //                                 .deleteImageIdsList[j]);
+                                //                         chatController
+                                //                             .deleteImageIdsList
+                                //                             .removeAt(j);
+                                //                         chatController
+                                //                             .deleteImageLinksList
+                                //                             .removeAt(j);
+                                //                       },
+                                //                     );
+                                //                   },
+                                //                 );
+                                //               } catch (e) {
+                                //                 log("error is: $e");
+                                //                 //+show an error widget/dialog/snackbar.
+                                //               }
+                                //             }
+                                //             log("remaining deleteMsgIdList: ${chatController.deleteMsgIdList}");
+                                //             chatController.deleteMsgIdList
+                                //                 .forEach(
+                                //               (element) async {
+                                //                 deleteCount++;
+                                //
+                                //                 try {
+                                //                   await ffstore
+                                //                       .collection('ChatRoom')
+                                //                       .doc(widget
+                                //                           .docs!['chatRoomId'])
+                                //                       .collection('messages')
+                                //                       .doc(element)
+                                //                       .delete();
+                                //                 } catch (e) {
+                                //                   log("error is: $e");
+                                //                   //+show an error widget/dialog/snackbar.
+                                //                 }
+                                //                 log("deleted: $element and list before deletion is: ${chatController.deleteMsgIdList}");
+                                //                 chatController.deleteMsgIdList
+                                //                     .remove(element);
+                                //                 log("deleted: $element and list after deletion is: ${chatController.deleteMsgIdList}");
+                                //               },
+                                //             );
+                                //             // chatController.deleteAudioIdList.forEach((element) async {
+                                //             //   try {
+                                //             //     await ffstore
+                                //             //         .collection('ChatRoom')
+                                //             //         .doc(widget.docs['chatRoomId'])
+                                //             //         .collection('chats')
+                                //             //         .doc(element)
+                                //             //         .delete();
+                                //             //   } catch (e) {
+                                //             //     log("error is: $e");
+                                //             //     //+show an error widget/dialog/snackbar.
+                                //             //   }
+                                //             // });
+                                //             chatController.isDeleting.value =
+                                //                 false;
+                                //             chatController.deleteMsgIdList
+                                //                 .clear();
+                                //             chatController.deleteAudioIdList
+                                //                 .clear();
+                                //             chatController.deleteAudioLinksList
+                                //                 .clear();
+                                //             chatController.deleteImageIdsList
+                                //                 .clear();
+                                //             chatController.deleteImageLinksList
+                                //                 .clear();
+                                //             Get.back();
+                                //
+                                //             try {
+                                //               ffstore
+                                //                   .collection("ChatRoom")
+                                //                   .doc(chatRoomID)
+                                //                   .collection("messages")
+                                //                   .orderBy("time",
+                                //                       descending: true)
+                                //                   .get()
+                                //                   .then(
+                                //                 (value) {
+                                //                   if (value.docs.length > 0) {
+                                //                     var firstEndDoc = value.docs
+                                //                         .firstWhereOrNull(
+                                //                             (element) => !element[
+                                //                                     'isDeletedFor']
+                                //                                 .contains(auth
+                                //                                     .currentUser
+                                //                                     ?.uid));
+                                //                     if (firstEndDoc != null) {
+                                //                       log("firstEndDoc is: ${firstEndDoc.data()}");
+                                //                       ffstore
+                                //                           .collection(
+                                //                               "ChatRoom")
+                                //                           .doc(chatRoomID)
+                                //                           .update(
+                                //                         {
+                                //                           "lastMessageAt":
+                                //                               firstEndDoc[
+                                //                                   'time'],
+                                //                           "lastMessage":
+                                //                               firstEndDoc[
+                                //                                   'message'],
+                                //                           "lastMessageType":
+                                //                               firstEndDoc[
+                                //                                   'type'],
+                                //                         },
+                                //                       );
+                                //                     } else {
+                                //                       log("in else of docsnot being greater than zero in updating the lastMessage");
+                                //                       ffstore
+                                //                           .collection(
+                                //                               "ChatRoom")
+                                //                           .doc(chatRoomID)
+                                //                           .update(
+                                //                         {
+                                //                           "lastMessage": "",
+                                //                           "lastMessageType":
+                                //                               "text",
+                                //                         },
+                                //                       );
+                                //                     }
+                                //                   } else {
+                                //                     log("in else of docsnot being greater than zero in updating the lastMessage");
+                                //                     ffstore
+                                //                         .collection("ChatRoom")
+                                //                         .doc(chatRoomID)
+                                //                         .update(
+                                //                       {
+                                //                         "lastMessage": "",
+                                //                         "lastMessageType":
+                                //                             "text",
+                                //                       },
+                                //                     );
+                                //                   }
+                                //                 },
+                                //               );
+                                //             } catch (e) {
+                                //               log("error in updating last message is: $e");
+                                //             }
+                                //           },
+                                //         ),
+                                //       ),
+                                //     ],
+                                //   ),
+                              ],
+                            ),
+                          ),
+                          backgroundColor: kPrimaryColor,
+                          isScrollControlled: true,
+                        );
+                      },
+                      child: Image.asset(
+                        Assets.imagesDeleteMsg,
+                        height: 24,
+                      ),
+                    ),
+                  ),
+                );
+              } else {
+                return SizedBox();
+              }
+            }),
+
+            Padding(
+              padding: const EdgeInsets.only(
+                right: 15,
+              ),
+              child: Center(
+                child: GestureDetector(
+                  onTap: () {
+                    showModalBottomSheet(
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      context: context,
+                      builder: (context) {
+                        return Container(
+                          height: 400,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 30,
+                          ),
+                          decoration: BoxDecoration(
+                            color: kPrimaryColor,
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(28),
+                              topRight: Radius.circular(28),
+                            ),
+                          ),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Container(),
+                                    MyText(
+                                      text: 'Send invitation',
+                                      size: 19,
+                                      color: kSecondaryColor,
+                                    ),
+                                    GestureDetector(
+                                      onTap: () async {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Image.asset(
+                                        Assets.imagesRoundedClose,
+                                        height: 22.44,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 30,
+                                ),
+                                SimpleTextField(
+                                  hintText: 'Type username,  email...',
+                                  controller: userNameController,
+                                  onChanged: (value) {
+                                    userNameObsString.value = value;
+                                  },
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Obx(() {
+                                  if (userNameObsString.value != "") {
+                                    // List<String> tempList = selectedUsers.length > 0 ? List<String>.from(selectedUsers.keys.toList()) : ["check"];
+                                    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                                      stream: ffstore
+                                          .collection(accountsCollection)
+                                          .where("userSearchParameters", arrayContains: userNameObsString.value.trim())
+                                          .limit(3)
+                                          // .where("uID", whereNotIn: tempList)
+                                          .snapshots(),
+                                      builder: (
+                                        BuildContext context,
+                                        AsyncSnapshot<QuerySnapshot> snapshot,
+                                      ) {
+                                        log("inside stream-builder");
+                                        if (snapshot.connectionState == ConnectionState.waiting) {
+                                          log("inside stream-builder in waiting state");
+                                          return Center(child: CircularProgressIndicator());
+                                        } else if (snapshot.connectionState == ConnectionState.active ||
+                                            snapshot.connectionState == ConnectionState.done) {
+                                          if (snapshot.hasError) {
+                                            return const Text('Some unknown error occurred');
+                                          } else if (snapshot.hasData) {
+                                            // log("inside hasData and ${snapshot.data!.docs}");
+                                            if (snapshot.data!.docs.length > 0) {
+                                              return ListView.builder(
+                                                shrinkWrap: true,
+                                                physics: BouncingScrollPhysics(),
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: 15,
+                                                ),
+                                                itemCount: snapshot.data!.docs.length,
+                                                itemBuilder: (context, index) {
+                                                  UserDetailsModel umdl = UserDetailsModel.fromJson(
+                                                      snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                                                  return Obx(() {
+                                                    if (selectedId.value == umdl.uID ||
+                                                        umdl.uID == auth.currentUser?.uid) {
+                                                      return SizedBox();
+                                                    }
+                                                    return contactTiles(
+                                                      profileImage: umdl.profileImageUrl,
+                                                      name: umdl.fullName,
+                                                      id: umdl.uID,
+                                                      email: umdl.email,
+                                                    );
+                                                  });
+                                                },
+                                              );
+                                            } else {
+                                              if (finalizedNameString == "") {
+                                                return Center(child: const Text('No Users Found'));
+                                              }
+                                              return SizedBox();
+                                            }
+                                          } else {
+                                            log("in else of hasData done and: ${snapshot.connectionState} and"
+                                                " snapshot.hasData: ${snapshot.hasData}");
                                             if (finalizedNameString == "") {
-                                              return Center(
-                                                  child: const Text(
-                                                      'No Users Found'));
+                                              return Center(child: const Text('No Users Found'));
                                             }
                                             return SizedBox();
                                           }
                                         } else {
-                                          log("in else of hasData done and: ${snapshot.connectionState} and"
-                                              " snapshot.hasData: ${snapshot.hasData}");
-                                          if (finalizedNameString == "") {
-                                            return Center(
-                                                child: const Text(
-                                                    'No Users Found'));
-                                          }
-                                          return SizedBox();
+                                          log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+                                          return Center(child: Text('Some Error occurred while fetching the posts'));
                                         }
-                                      } else {
-                                        log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
-                                        return Center(
-                                            child: Text(
-                                                'Some Error occurred while fetching the posts'));
-                                      }
-                                    },
-                                  );
-                                }
-                                return SizedBox();
-                              }),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(
-                                    bottom: MediaQuery.of(context)
-                                        .viewInsets
-                                        .bottom),
-                                child: SimpleTextField(
-                                  maxLines: 5,
-                                  hintText: 'Message...',
-                                  controller: messageController,
-                                ),
-                              ),
-                              SizedBox(
-                                height: 20,
-                              ),
-                              MyButton(
-                                onTap: () async {
-                                  //+ put the code to present the option or just by default do both.
-                                  //+ sending a notification and also open sharing sheet to share via
-                                  //+ social media or something.
-                                  if (finalizedNameString != "" &&
-                                      messageController.text.trim() != "") {
-                                    loading();
-                                    GroupChatRoomModel groupChatModel =
-                                        GroupChatRoomModel.fromJson(
-                                            widget.docs ?? {});
-                                    log("groupChatModel: ${groupChatModel.toJson()}");
-                                    String shareLink = await DynamicLinkHandler
-                                        .buildDynamicLinkGroupInvite(
-                                      groupId: groupChatModel.groupId ?? "",
-                                      groupName: groupChatModel.groupName ?? "",
-                                      groupImage:
-                                          groupChatModel.groupImage ?? "",
-                                      groupInviteMessage:
-                                          "${userDetailsModel.fullName} invited you to ${groupChatModel.groupName} "
-                                          "group chat: ${messageController.text.trim()}.",
-                                      short: true,
+                                      },
                                     );
-                                    log("fetched shareLink: $shareLink");
-                                    ShareResult sr =
-                                        await Share.shareWithResult(shareLink);
-                                    Get.back();
-                                    await ffstore
-                                        .collection(
-                                            groupChatInvitationCollection)
-                                        .add({
-                                      "groupId": groupChatModel.groupId ?? "",
-                                      "groupName":
-                                          groupChatModel.groupName ?? "",
-                                      "groupImage":
-                                          groupChatModel.groupImage ?? "",
-                                      "invitedId": selectedId.value,
-                                      "invitedName":
-                                          userNameController.text.trim(),
-                                      "invitedById": userDetailsModel.uID,
-                                      "invitedByName":
-                                          userDetailsModel.fullName,
-                                      "invitedAt":
-                                          DateTime.now().millisecondsSinceEpoch,
-                                    });
-                                    log("ShareResult is: ${sr.status} sr.status == ShareResultStatus.success: ${sr.status == ShareResultStatus.success}");
-                                    log("ShareResult is: ${sr.status} sr.status == ShareResultStatus.dismissed: ${sr.status == ShareResultStatus.dismissed}");
-                                    log("ShareResult.raw is: ${sr.raw}");
-                                  } else {
-                                    showMsg(
-                                        context: context,
-                                        msg:
-                                            "Please fill out both fields properly to send the invite.");
                                   }
-                                },
-                                buttonText: 'Invite to the group',
-                              ),
-                            ],
+                                  return SizedBox();
+                                }),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+                                  child: SimpleTextField(
+                                    maxLines: 5,
+                                    hintText: 'Message...',
+                                    controller: messageController,
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                MyButton(
+                                  onTap: () async {
+                                    //+ put the code to present the option or just by default do both.
+                                    //+ sending a notification and also open sharing sheet to share via
+                                    //+ social media or something.
+                                    if (finalizedNameString != "" && messageController.text.trim() != "") {
+                                      loading();
+                                      GroupChatRoomModel groupChatModel = GroupChatRoomModel.fromJson(widget.docs ?? {});
+                                      log("groupChatModel: ${groupChatModel.toJson()}");
+                                      String shareLink = await DynamicLinkHandler.buildDynamicLinkGroupInvite(
+                                        groupId: groupChatModel.groupId ?? "",
+                                        groupName: groupChatModel.groupName ?? "",
+                                        groupImage: groupChatModel.groupImage ?? "",
+                                        groupInviteMessage:
+                                            "${userDetailsModel.fullName} invited you to ${groupChatModel.groupName} "
+                                            "group chat: ${messageController.text.trim()}.",
+                                        short: true,
+                                      );
+                                      log("fetched shareLink: $shareLink");
+                                      ShareResult sr = await Share.shareWithResult(shareLink);
+                                      Get.back();
+                                      await ffstore.collection(groupChatInvitationCollection).add({
+                                        "groupId": groupChatModel.groupId ?? "",
+                                        "groupName": groupChatModel.groupName ?? "",
+                                        "groupImage": groupChatModel.groupImage ?? "",
+                                        "invitedId": selectedId.value,
+                                        "invitedName": userNameController.text.trim(),
+                                        "invitedById": userDetailsModel.uID,
+                                        "invitedByName": userDetailsModel.fullName,
+                                        "invitedAt": DateTime.now().millisecondsSinceEpoch,
+                                      });
+                                      log("ShareResult is: ${sr.status} sr.status == ShareResultStatus.success: ${sr.status == ShareResultStatus.success}");
+                                      log("ShareResult is: ${sr.status} sr.status == ShareResultStatus.dismissed: ${sr.status == ShareResultStatus.dismissed}");
+                                      log("ShareResult.raw is: ${sr.raw}");
+                                    } else {
+                                      showMsg(
+                                          context: context,
+                                          msg: "Please fill out both fields properly to send the invite.");
+                                    }
+                                  },
+                                  buttonText: 'Invite to the group',
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                    isScrollControlled: true,
-                  );
-                },
-                child: Image.asset(
-                  Assets.imagesInvite,
-                  height: 35,
+                        );
+                      },
+                      isScrollControlled: true,
+                    );
+                  },
+                  child: Image.asset(
+                    Assets.imagesInvite,
+                    height: 35,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          chatMessageList(),
-          sendField(context),
-        ],
+          ],
+        ),
+        body: Stack(
+          children: [
+            chatMessageList(),
+            sendField(context),
+          ],
+        ),
       ),
     );
   }
@@ -918,7 +1857,8 @@ class _GroupChatState extends State<GroupChat> {
                         children: [
                           GestureDetector(
                             onTap: () {
-                              getImageFromGallery();
+                              // getImageFromGallery();
+                              getVideoFromGallery();
                             },
                             child: Image.asset(
                               Assets.imagesPhoto,

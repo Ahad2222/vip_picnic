@@ -135,6 +135,7 @@ class _ChatHeadState extends State<ChatHead> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: "NewChatButton",
         onPressed: currentTab == 0
             ? () => Get.to(
                   () => CreateNewChat(),
