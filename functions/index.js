@@ -2,6 +2,7 @@ const functions = require("firebase-functions");
 // The Firebase Admin SDK to access Firestore.
 const admin = require('firebase-admin');
 const { getFirestore } = require('firebase-admin/firestore');
+const { log } = require("firebase-functions/logger");
 // import { getFirestore } from 'firebase-admin/firestore'; 
 admin.initializeApp();
 admin.firestore().settings({ ignoreUndefinedProperties: true });
@@ -51,6 +52,78 @@ async function TextChatsNotiSingle(
     });
 }
 
+async function TextGroupChatsNotiSingle(
+  // token_o,
+  msg,
+  // groupImage,
+  senderName,
+  // groupName,
+  chatRoomId
+) {
+
+  // var senName = snap.data().sendByName;
+    var groupName = "";
+    var groupImage = "";
+    var userList = [];
+    var tokenList = [];
+
+    // var message = snap.data().message;
+    // var chatRoomId = context.params.documentId;
+
+    // var imageUrl = "No Name";
+
+    // var generalImage = "";
+    // var myRetToken = "Not Retrieved Yet from Accounts Collection";
+
+  functions.logger.log("Group Text multi token method executed");
+  functions.logger.log("ChatRoomID is ");
+  functions.logger.log(chatRoomId);
+
+  await admin
+  .firestore()
+  .collection("GroupChatRoom")
+  .doc(chatRoomId)
+  .get()
+  .then(async (snapshot) => {
+    userList = snapshot.data().users;
+    groupName = snapshot.data().groupName;
+    groupImage = snapshot.data().groupImage;
+
+    for (const index in userList) {
+      await admin
+        .firestore()
+        .collection("Accounts").doc(userList[index])
+        .get().then((snap) => {
+          tokenList.push(snap.data().fcmToken);
+          functions.logger.log(`list is now: ${tokenList}`);
+        });
+    }
+  });
+
+  await admin
+    .messaging()
+    .sendMulticast({
+      tokens: tokenList,
+      notification: {
+        title: `${groupName}`,
+        body: `${senderName}: ${msg}`,
+        //Below line has use in terminated or background state of app
+        imageUrl: groupImage,
+      },
+      data: {
+        imageUrl: groupImage,
+        groupId: chatRoomId,
+        screenName: "groupChatScreen",
+      },
+    })
+    .then((value) => {
+      functions.logger.log("Notifications for text  sent to the Group Receivers");
+    })
+    .catch((e) => {
+      functions.logger.log(e.toString());
+    });
+}
+
 async function AudioChatsNotiSingle(
   token_o,
   msg,
@@ -86,6 +159,151 @@ async function AudioChatsNotiSingle(
     });
 }
 
+async function AudioGroupChatsNotiSingle(msg, senderName, chatRoomId) {
+  functions.logger.log("Single Token function is executed");
+  functions.logger.log("ChatRoomID is ");
+  functions.logger.log(chatRoomId);
+
+  
+  var groupName = "";
+  var groupImage = "";
+  var userList = [];
+  var tokenList = [];
+
+  await admin
+      .firestore()
+      .collection("GroupChatRoom")
+      .doc(chatRoomId)
+      .get()
+      .then(async  (snapshot) => {
+        userList = snapshot.data().users;
+        groupName = snapshot.data().groupName;
+        groupImage = snapshot.data().groupImage;
+
+        for (const index in userList) {
+          await admin
+            .firestore()
+            .collection("Accounts").doc(userList[index])
+            .get().then((snap) => {
+              tokenList.push(snap.data().fcmToken);
+              functions.logger.log(`list is now: ${tokenList}`);
+            });
+        }
+      });
+
+      await admin
+        .messaging()
+        .sendMulticast({
+          tokens: tokenList,
+          notification: {
+            title: `${groupName}`,
+            body: `${senderName}: Audio`,
+            //Below line has use in terminated or background state of app
+            imageUrl: url,
+          },
+          data: {
+            imageUrl: url,
+            groupId: chatRoomId,
+            screenName: "groupChatScreen",
+          },
+        })
+        .then((value) => {
+          functions.logger.log("Notifications sent to the Receiver");
+        })
+        .catch((e) => {
+          functions.logger.log(e.toString());
+        });
+
+}
+
+async function VideoGroupChatsNotiSingle(msg, senderName, chatRoomId) {
+  functions.logger.log("Single Token function is executed");
+  functions.logger.log("ChatRoomID is ");
+  functions.logger.log(chatRoomId);
+
+  var groupName = "";
+  var groupImage = "";
+  var userList = [];
+  var tokenList = [];
+
+  await admin
+      .firestore()
+      .collection("GroupChatRoom")
+      .doc(chatRoomId)
+      .get()
+      .then(async (snapshot) => {
+        userList = snapshot.data().users;
+        groupName = snapshot.data().groupName;
+        groupImage = snapshot.data().groupImage;
+
+        for (const index in userList) {
+          await admin
+            .firestore()
+            .collection("Accounts").doc(userList[index])
+            .get().then((snap) => {
+              tokenList.push(snap.data().fcmToken);
+              functions.logger.log(`list is now: ${tokenList}`);
+            });
+        }
+      });
+
+
+      await admin
+        .messaging()
+        .sendMulticast({
+          tokens: tokenList,
+          notification: {
+            title: `${groupName}`,
+            body: `${senderName}: 🎥 Video`,
+
+            //Below line has use in terminated or background state of app
+            imageUrl: groupImage,
+          },
+          data: {
+            imageUrl: groupImage,
+            groupId: chatRoomId,
+            screenName: "groupChatScreen",
+          },
+        })
+        .then((value) => {
+          functions.logger.log("Notifications for video  sent to the Group Receivers");
+        })
+        .catch((e) => {
+          functions.logger.log(e.toString());
+        });
+
+
+}
+
+async function VideoChatsNotiSingle(token_o, msg, profileImageUrl, generalImageUrl, senderName, recName, chatRoomId) {
+  functions.logger.log("Single Token function is executed");
+  functions.logger.log("ChatRoomID is ");
+  functions.logger.log(chatRoomId);
+
+  await admin
+    .messaging()
+    .send({
+      token: token_o,
+      notification: {
+        title: `${senderName}`,
+        body: "🎥 Video",
+        //Below line has use in terminated or background state of app
+        imageUrl: generalImageUrl,
+      },
+      data: {
+        imageUrl: profileImageUrl,
+        // generalImageUrl: generalImageUrl,
+        chatRoomId: chatRoomId,
+        screenName: "chatScreen",
+      },
+    })
+    .then((value) => {
+      functions.logger.log("Notifications sent to the Receiver");
+    })
+    .catch((e) => {
+      functions.logger.log(e.toString());
+    });
+}
 //When chat is of type image,  profile image and general image will be sent
 // in the payload
 async function ImageChatsNotiSingle(token_o, msg, profileImageUrl, generalImageUrl, senderName, recName, chatRoomId) {
@@ -98,8 +316,8 @@ async function ImageChatsNotiSingle(token_o, msg, profileImageUrl, generalImageU
     .send({
       token: token_o,
       notification: {
-        title: `You received an Image from  ${recName}`,
-        body: {},
+        title: `${senderName}`,
+        body: `📷 Image`,
         //Below line has use in terminated or background state of app
         imageUrl: generalImageUrl,
       },
@@ -118,6 +336,161 @@ async function ImageChatsNotiSingle(token_o, msg, profileImageUrl, generalImageU
     });
 }
 
+async function ImageGroupChatsNotiSingle(generalImage, senderName, chatRoomId) {
+  functions.logger.log("Single Token function is executed");
+  functions.logger.log("ChatRoomID is ");
+  functions.logger.log(chatRoomId);
+
+  var groupName = "";
+  var groupImage = "";
+  var userList = [];
+  var tokenList = [];
+
+  await admin
+      .firestore()
+      .collection("GroupChatRoom")
+      .doc(chatRoomId)
+      .get()
+      .then(async (snapshot) => {
+        userList = snapshot.data().users;
+        groupName = snapshot.data().groupName;
+        groupImage = snapshot.data().groupImage;
+
+        for (const index in userList) {
+          await admin
+            .firestore()
+            .collection("Accounts").doc(userList[index])
+            .get().then((snap) => {
+              tokenList.push(snap.data().fcmToken);
+              functions.logger.log(`list is now: ${tokenList}`);
+            });
+        }
+      });
+
+      await admin
+        .messaging()
+        .sendMulticast({
+          tokens: tokenList,
+          notification: {
+            title: `${groupName}`,
+            body: `${senderName}: 📷 Image`,
+            //Below line has use in terminated or background state of app
+            imageUrl: groupImage,
+          },
+          data: {
+            imageUrl: groupImage,
+            generalImageUrl: generalImage,
+            groupId: chatRoomId,
+            screenName: "groupChatScreen",
+          },
+        })
+        .then((value) => {
+          functions.logger.log("Notifications sent to the Group Receivers");
+        })
+        .catch((e) => {
+          functions.logger.log(e.toString());
+        });
+
+}
+
+//+ ------------------------------------ --------notification for group chat----------------------------------------------------------------
+exports.notifyReceiverForGroupChat = functions.firestore
+  .document("/GroupChatRoom/{documentId}/messages/{chatDocumentId}")
+  .onCreate(async (snap, context) => {
+    // var recId = snap.data().receivedById;
+    var senId = snap.data().sendById;
+
+    // var recName = snap.data().receivedByName;
+    var senderName = snap.data().sendByName;
+    var groupName = "";
+    var groupImage = "";
+    var userList = [];
+    
+
+    var message = snap.data().message;
+    var chatRoomId = context.params.documentId;
+
+    var generalImage = "";
+
+
+    functions.logger.info("Message By the Sender is:");
+    functions.logger.info(message);
+
+    if (snap.data().type == "image") {
+      functions.logger.info("In Chat function: type is Image");
+      generalImage = snap.data().message;
+
+      await ImageGroupChatsNotiSingle(generalImage, senderName, chatRoomId);
+     
+    }
+    else if (snap.data().type == "text") {
+      //getting image and token of receiver from the firestore through admin sdk
+      functions.logger.info("In Chat function: type is text");
+
+      await TextGroupChatsNotiSingle(message, senderName, chatRoomId);
+
+    }
+    else if (snap.data().type == "audio") {
+      functions.logger.info("In Chat function: type is audio");
+      //getting image and token of receiver from the firestore through admin sdk
+      AudioGroupChatsNotiSingle(message, senderName, chatRoomId);
+
+    } else if (snap.data().type == "video") {
+
+      functions.logger.info("In Chat function: type is video");
+
+      const bucket = admin.storage().bucket();
+      functions.logger.log(`bucket is: ${bucket.name}`);
+      functions.logger.log(`chatDocumentId is: ${context.params.chatDocumentId}`);
+
+      const fileName = `${context.params.chatDocumentId}.mp4`;
+      functions.logger.log(`fileName is: ${fileName}`);
+      const videoFile = bucket.file(`groupChatRooms/${chatRoomId}/${fileName}`);
+      const resumableUpload = await videoFile.createResumableUpload();
+      functions.logger.log(`resumableUpload is: ${resumableUpload}`);
+      const uploadUrl = resumableUpload[0];
+      functions.logger.log(`uploadUrl is: ${uploadUrl}`);
+      console.log(uploadUrl);
+
+      admin.firestore().collection(`/GroupChatRoom/${chatRoomId}/messages`).doc(context.params.chatDocumentId).set({
+        uploadUrl: uploadUrl
+      }, { merge: true }).catch((e) => {
+        functions.logger.log(`error in setting the uploadUrl is:${e.toString()}`);
+      });
+
+      await VideoGroupChatsNotiSingle(message, senderName, chatRoomId);
+      //getting image and token of receiver from the firestore through admin sdk
+      // await admin
+      //   .firestore()
+      //   .collection("Accounts")
+      //   .doc(recId)
+      //   .get()
+      //   .then((snapshot) => {
+      //     imageUrl = snapshot.data().profileImageUrl;
+      //     myRetToken = snapshot.data().fcmToken;
+      //   })
+      //   .catch((e) => {
+      //     functions.logger.log(e.toString());
+      //   });
+      // //Now sending the notification using SingleTOken function
+      // await AudioChatsNotiSingle(
+      //   myRetToken,
+      //   message,
+      //   imageUrl,
+      //   senName,
+      //   recName,
+      //   chatRoomId
+      // );
+    }
+    else {
+      functions.logger.info("In Chat function: type is Else block");
+      //getting image and token of receiver from the firestore through admin sdk
+
+      await TextGroupChatsNotiSingle(message, senderName, chatRoomId);
+    }
+  });
+
+
 exports.notifyReceiverForChat = functions.firestore
   .document("/ChatRoom/{documentId}/messages/{chatDocumentId}")
   .onCreate(async (snap, context) => {
@@ -126,6 +499,8 @@ exports.notifyReceiverForChat = functions.firestore
 
     var recName = snap.data().receivedByName;
     var senName = snap.data().sendByName;
+    var sendByImage = snap.data().sendByImage;
+
 
     var message = snap.data().message;
     var chatRoomId = context.params.documentId;
@@ -156,7 +531,7 @@ exports.notifyReceiverForChat = functions.firestore
       await ImageChatsNotiSingle(
         myRetToken,
         message,
-        imageUrl,
+        sendByImage,
         generalImage,
         senName,
         recName,
@@ -182,7 +557,7 @@ exports.notifyReceiverForChat = functions.firestore
       await TextChatsNotiSingle(
         myRetToken,
         message,
-        imageUrl,
+        sendByImage,
         senName,
         recName,
         chatRoomId
@@ -207,33 +582,58 @@ exports.notifyReceiverForChat = functions.firestore
       await AudioChatsNotiSingle(
         myRetToken,
         message,
-        imageUrl,
+        sendByImage,
         senName,
         recName,
         chatRoomId
       );
-    }else if (snap.data().type == "video") {
+    } else if (snap.data().type == "video") {
       functions.logger.info("In Chat function: type is video");
 
       const bucket = admin.storage().bucket();
       functions.logger.log(`bucket is: ${bucket.name}`);
       functions.logger.log(`chatDocumentId is: ${context.params.chatDocumentId}`);
 
-        const fileName = `${context.params.chatDocumentId}.mp4`;
+      const fileName = `${context.params.chatDocumentId}.mp4`;
       functions.logger.log(`fileName is: ${fileName}`);
-        const videoFile = bucket.file(`chatRooms/${chatRoomId}/${fileName}`);
-        const resumableUpload = await videoFile.createResumableUpload();
-        functions.logger.log(`resumableUpload is: ${resumableUpload}`);
-        const uploadUrl = resumableUpload[0];
-        functions.logger.log(`uploadUrl is: ${uploadUrl}`);
-        console.log(uploadUrl);
+      const videoFile = bucket.file(`chatRooms/${chatRoomId}/${fileName}`);
+      const resumableUpload = await videoFile.createResumableUpload();
+      functions.logger.log(`resumableUpload is: ${resumableUpload}`);
+      const uploadUrl = resumableUpload[0];
+      functions.logger.log(`uploadUrl is: ${uploadUrl}`);
+      console.log(uploadUrl);
 
-        await admin.firestore().collection(`/ChatRoom/${chatRoomId}/messages`).doc(context.params.chatDocumentId).set({
-            uploadUrl: uploadUrl
-        }, { merge: true }).catch((e) => {
-          functions.logger.log(`error in setting the uploadUrl is:${e.toString()}`);
+      await admin.firestore().collection(`/ChatRoom/${chatRoomId}/messages`).doc(context.params.chatDocumentId).set({
+        uploadUrl: uploadUrl
+      }, { merge: true }).catch((e) => {
+        functions.logger.log(`error in setting the uploadUrl is:${e.toString()}`);
+      });
+
+      var thumbnailUrl = snap.data().thumbnail;
+
+
+      await admin
+        .firestore()
+        .collection("Accounts")
+        .doc(recId)
+        .get()
+        .then((snapshot) => {
+          imageUrl = snapshot.data().profileImageUrl;
+          myRetToken = snapshot.data().fcmToken;
+        })
+        .catch((e) => {
+          functions.logger.log(e.toString());
         });
-
+      //Now sending the notification using SingleTOken function
+      await VideoChatsNotiSingle(
+        myRetToken,
+        message,
+        sendByImage,
+        thumbnailUrl,
+        senName,
+        recName,
+        chatRoomId
+      );
       //getting image and token of receiver from the firestore through admin sdk
       // await admin
       //   .firestore()
@@ -276,7 +676,7 @@ exports.notifyReceiverForChat = functions.firestore
       await TextChatsNotiSingle(
         myRetToken,
         message,
-        imageUrl,
+        sendByImage,
         senName,
         recName,
         chatRoomId
@@ -284,18 +684,20 @@ exports.notifyReceiverForChat = functions.firestore
     }
   });
 
+
+
 //   exports.newStorageFile = functions.storage.object().onFinalize(async (object) => {
 //     const filePath = object.name;
-//     console.log("filePath:")
-//     console.log(filePath)
+//     functions.logger.log("filePath:")
+//     functions.logger.log(filePath)
 //     const extension = filePath.split('.')[filePath.split('.').length - 1];
 //     if (extension != 'mp4') {
 //         return console.log(`File extension: ${extension}. This is not a video. Exiting function.`);
 //     }
 
 //     const videoId = filePath.split('.')[0]
-//     console.log(`Setting data in firestore doc: ${videoId}`)
-//     await admin.firestore().collection("videos").doc(videoId).set({
+//     functions.logger.log(`Setting data in firestore doc: ${videoId}`)
+//     await admin.firestore().collection(`/ChatRoom/${chatRoomId}/messages`).doc(videoId).set({
 //         uploadComplete: true
 //     }, { merge: true });
 

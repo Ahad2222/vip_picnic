@@ -344,14 +344,22 @@ Future<void> backgroundHandler() async {
         String fileName = isChatRoomOrGroupChatRoomList[3].split(".")[0];
         log("chatRoomId in upload result:  $chatRoomId");
         log("fileName in upload result:  $fileName");
-        var ref = FirebaseStorage.instance
-            .ref()
-            .child("chatRooms/${chatRoomId}")
-            .child("$fileName.mp4");
-        String url = await ref.getDownloadURL();
-        FirebaseFirestore.instance.collection("ChatRoom").doc(chatRoomId)
-            .collection("messages").doc(fileName)
-            .update({"message": url});
+        log("result.statusCode is: ${result.statusCode}");
+        log("result.status?.description is: ${result.status?.description ?? ""}");
+        log("result.taskId is: ${result.taskId}");
+        try {
+          var ref = FirebaseStorage.instance
+                      .ref()
+                      .child("chatRooms/${chatRoomId}")
+                      .child("$fileName.mp4");
+          String url = await ref.getDownloadURL();
+          await FirebaseFirestore.instance.collection("ChatRoom").doc(chatRoomId)
+                      .collection("messages").doc(fileName)
+                      .update({"message": url});
+          uploader.clearUploads();
+        } catch (e) {
+          log("error in upload thingy $e");
+        }
       }else if(isGroupChatRoom){
         String groupId = isChatRoomOrGroupChatRoomList[2];
         String fileName = isChatRoomOrGroupChatRoomList[3].split(".")[0];
@@ -366,6 +374,7 @@ Future<void> backgroundHandler() async {
             .collection("messages").doc(fileName)
             .update({"message": url});
       }
+
       if (processed.contains(result.taskId)) {
         return;
       }

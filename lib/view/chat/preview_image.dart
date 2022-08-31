@@ -120,6 +120,7 @@ class _PreviewImageScreenState extends State<PreviewImageScreen> {
               Map<String, dynamic> messageMap = {
                 "sendById": userDetailsModel.uID,
                 "sendByName": userDetailsModel.fullName,
+                "sendByImage": userDetailsModel.profileImageUrl,
                 "receivedById": widget.anotherUserId,
                 "receivedByName": widget.anotherUserName,
                 "message": imageUrl,

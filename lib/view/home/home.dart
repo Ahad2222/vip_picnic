@@ -774,7 +774,8 @@ class _PostWidgetState extends State<PostWidget> {
                     overFlow: TextOverflow.ellipsis,
                     color: kSecondaryColor,
                   ),
-                  SizedBox(
+                  (widget.postDocModel?.postImages?.length ?? 0) > 0
+                      ? SizedBox(
                     height: 220,
                     child: Stack(
                       children: [
@@ -841,7 +842,8 @@ class _PostWidgetState extends State<PostWidget> {
                               }),
                       ],
                     ),
-                  ),
+                  )
+                      : SizedBox(),
                 ],
               ),
             ),

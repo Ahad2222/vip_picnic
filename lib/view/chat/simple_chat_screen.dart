@@ -485,6 +485,7 @@ class _ChatScreenState extends State<ChatScreen> {
       Map<String, dynamic> messageMap = {
         "sendById": userDetailsModel.uID,
         "sendByName": userDetailsModel.fullName,
+        "sendByImage": userDetailsModel.profileImageUrl,
         "receivedById": anotherUserID,
         "receivedByName": anotherUserName,
         "message": messageText,
@@ -511,6 +512,7 @@ class _ChatScreenState extends State<ChatScreen> {
       Map<String, dynamic> messageMap = {
         "sendById": userDetailsModel.uID,
         "sendByName": userDetailsModel.fullName,
+        "sendByImage": userDetailsModel.profileImageUrl,
         "receivedById": anotherUserID,
         "receivedByName": anotherUserName,
         "message": imageUrl,

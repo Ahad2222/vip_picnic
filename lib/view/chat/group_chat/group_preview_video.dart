@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
@@ -242,71 +244,92 @@ class _GroupPreviewVideoScreenState extends State<GroupPreviewVideoScreen> {
         }
       });
       // chatController.addConversationMessage(widget.chatRoomId!, time, "image", messageMap, "Video being uploaded");
-      Get.back();
-      Get.back();
-      final uploadTask = ref.putFile(File(widget.videoPath!));
-      uploadTask.snapshotEvents.listen((TaskSnapshot taskSnapshot) async {
-        switch (taskSnapshot.state) {
-          case TaskState.running:
-            uploadPercentageValue.value = 100.0 *
-                (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes);
-            print("Upload is $uploadPercentageValue% complete.");
-            break;
-          case TaskState.paused:
-            log("Upload is paused.");
-            break;
-          case TaskState.canceled:
-            log("Upload was canceled");
-            break;
-          case TaskState.error:
-          // Handle unsuccessful uploads
-            log("Upload resulted in error.");
-            showMsg(
-              msg: 'Storage Error!',
-              context: context,
-              bgColor: Colors.red,
-            );
-            break;
-          case TaskState.success:
-          // Handle successful uploads on complete
-            videoUrl = await taskSnapshot.ref.getDownloadURL();
-            if (File(widget.videoPath!) != null &&
-                (videoUrl != null || videoUrl != "")) {
-              List<String> videoMessageDocsIdsList = await UserSimplePreference.getVideoMessageDocsIdsListData() ?? [];
-              log("while updating the video link in db: videoDocId: ${videoDocId} and videoMessageDocsIdsList: ${videoMessageDocsIdsList}");
-              if(videoMessageDocsIdsList.isNotEmpty){
-                videoDocId = videoMessageDocsIdsList[0];
-                videoMessageDocsIdsList.removeAt(0);
-                await UserSimplePreference.setVideoMessageDocsIdsListData(videoMessageDocsIdsList);
-              }
-              var time = DateTime.now().millisecondsSinceEpoch;
-              await FirebaseFirestore.instance
-                  .collection(chatRoomCollection)
-                  .doc(widget.chatRoomId!)
-                  .collection(messagesCollection)
-                  .doc(videoDocId)
-                  .update({"message": videoUrl}).then((value) async {
-                await FirebaseFirestore.instance
-                    .collection(chatRoomCollection)
-                    .doc(widget.chatRoomId!)
-                    .update({
-                  'lastMessageAt': time,
-                  'lastMessage': videoUrl,
-                  'lastMessageType': "video",
-                }).catchError((e) {
-                  log('\n\n\n\n error in updating last message and last message time ${e.toString()}');
-                });
-              }).catchError((e) {
-                log('\n\n\n\n error in adding message ${e.toString()}');
-              });
-              // chatController.addConversationMessage(widget.chatRoomId!, time, "image", messageMap, videoUrl);
-              videoUrl = "";
-              // navigatorKey.currentState!.pop();
-              // Get.back();
-            }
-            break;
+      StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>?  videoDocStream;
+      videoDocStream = ffstore.collection(chatRoomCollection)
+          .doc(widget.chatRoomId).collection(messagesCollection).doc(videoDocId).snapshots()
+          .listen((event) async {
+        log("inside the videoDocId stream");
+        bool containsUploadUrl = event.data()?.containsKey("uploadUrl") ?? false;
+        if(containsUploadUrl){
+          log("inside containsUploadUrl");
+          // final taskId =
+          await FlutterUploader().enqueue(
+            RawUpload(
+              url: event.data()?['uploadUrl'] ?? "", // required: url to upload to
+              path: widget.videoPath, // required: list of files that you want to upload
+              method: UploadMethod.PUT, // HTTP method  (POST or PUT or PATCH)
+              // headers: {"apikey": "api_123456", "userkey": "userkey_123456"},
+              tag: 'chat video uploading', // custom tag which is returned in result/progress
+            ),
+          );
+          if(videoDocStream != null) videoDocStream.cancel();
         }
       });
+      Get.back();
+      Get.back();
+      // final uploadTask = ref.putFile(File(widget.videoPath!));
+      // uploadTask.snapshotEvents.listen((TaskSnapshot taskSnapshot) async {
+      //   switch (taskSnapshot.state) {
+      //     case TaskState.running:
+      //       uploadPercentageValue.value = 100.0 *
+      //           (taskSnapshot.bytesTransferred / taskSnapshot.totalBytes);
+      //       print("Upload is $uploadPercentageValue% complete.");
+      //       break;
+      //     case TaskState.paused:
+      //       log("Upload is paused.");
+      //       break;
+      //     case TaskState.canceled:
+      //       log("Upload was canceled");
+      //       break;
+      //     case TaskState.error:
+      //     // Handle unsuccessful uploads
+      //       log("Upload resulted in error.");
+      //       showMsg(
+      //         msg: 'Storage Error!',
+      //         context: context,
+      //         bgColor: Colors.red,
+      //       );
+      //       break;
+      //     case TaskState.success:
+      //     // Handle successful uploads on complete
+      //       videoUrl = await taskSnapshot.ref.getDownloadURL();
+      //       if (File(widget.videoPath!) != null &&
+      //           (videoUrl != null || videoUrl != "")) {
+      //         List<String> videoMessageDocsIdsList = await UserSimplePreference.getVideoMessageDocsIdsListData() ?? [];
+      //         log("while updating the video link in db: videoDocId: ${videoDocId} and videoMessageDocsIdsList: ${videoMessageDocsIdsList}");
+      //         if(videoMessageDocsIdsList.isNotEmpty){
+      //           videoDocId = videoMessageDocsIdsList[0];
+      //           videoMessageDocsIdsList.removeAt(0);
+      //           await UserSimplePreference.setVideoMessageDocsIdsListData(videoMessageDocsIdsList);
+      //         }
+      //         var time = DateTime.now().millisecondsSinceEpoch;
+      //         await FirebaseFirestore.instance
+      //             .collection(chatRoomCollection)
+      //             .doc(widget.chatRoomId!)
+      //             .collection(messagesCollection)
+      //             .doc(videoDocId)
+      //             .update({"message": videoUrl}).then((value) async {
+      //           await FirebaseFirestore.instance
+      //               .collection(chatRoomCollection)
+      //               .doc(widget.chatRoomId!)
+      //               .update({
+      //             'lastMessageAt': time,
+      //             'lastMessage': videoUrl,
+      //             'lastMessageType': "video",
+      //           }).catchError((e) {
+      //             log('\n\n\n\n error in updating last message and last message time ${e.toString()}');
+      //           });
+      //         }).catchError((e) {
+      //           log('\n\n\n\n error in adding message ${e.toString()}');
+      //         });
+      //         // chatController.addConversationMessage(widget.chatRoomId!, time, "image", messageMap, videoUrl);
+      //         videoUrl = "";
+      //         // navigatorKey.currentState!.pop();
+      //         // Get.back();
+      //       }
+      //       break;
+      //   }
+      // });
     } on FirebaseException catch (e) {
       //+ Handle the storage relevant codes here in free time from:
       //+ https://firebase.google.com/docs/storage/flutter/handle-errors
