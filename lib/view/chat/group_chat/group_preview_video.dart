@@ -217,10 +217,10 @@ class _GroupPreviewVideoScreenState extends State<GroupPreviewVideoScreen> {
                 .add(messageMap)
                 .then((value) async {
               videoDocId = value.id;
-              log("await UserSimplePreference.getVideoMessageDocsIdsListData(): ${await UserSimplePreference.getVideoMessageDocsIdsListData()}");
-              List<String> videoMessageDocsIdsList = await UserSimplePreference.getVideoMessageDocsIdsListData() ?? [];
-              videoMessageDocsIdsList.add(value.id);
-              await UserSimplePreference.setVideoMessageDocsIdsListData(videoMessageDocsIdsList);
+              // log("await UserSimplePreference.getVideoMessageDocsIdsListData(): ${await UserSimplePreference.getVideoMessageDocsIdsListData()}");
+              // List<String> videoMessageDocsIdsList = await UserSimplePreference.getVideoMessageDocsIdsListData() ?? [];
+              // videoMessageDocsIdsList.add(value.id);
+              // await UserSimplePreference.setVideoMessageDocsIdsListData(videoMessageDocsIdsList);
               // thumbnailFile.
               if (File(thumbnailFile!).existsSync()) {
                 File(thumbnailFile).delete(recursive: true);
