@@ -107,7 +107,7 @@ class _FollowersState extends State<Followers> {
                         // log("inside hasData and ${snapshot.data!.docs}");
                         if (snapshot.data!.docs.length > 0) {
                           return ListView.builder(
-                            shrinkWrap: true,
+                            // shrinkWrap: true,
                             physics: BouncingScrollPhysics(),
                             padding: EdgeInsets.symmetric(
                               vertical: 20,

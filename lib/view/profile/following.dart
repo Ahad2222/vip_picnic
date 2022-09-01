@@ -13,7 +13,6 @@ import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/profile/other_user_profile.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
-import 'package:vip_picnic/view/widget/my_textfields.dart';
 
 class Following extends StatefulWidget {
   @override
@@ -25,15 +24,15 @@ class _FollowingState extends State<Following> {
   //+ without any issues
 
   StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? userDetailsModelStream;
-  RxString searchText = "".obs;
 
   @override
   void initState() {
     // TODO: implement initState
-    userDetailsModelStream = ffstore.collection(accountsCollection).doc(auth.currentUser!.uid).snapshots().listen((event) {
-      userDetailsModel = UserDetailsModel.fromJson(event.data() ?? {});
-      // setState(() {});
-    });
+    userDetailsModelStream =
+        ffstore.collection(accountsCollection).doc(auth.currentUser!.uid).snapshots().listen((event) {
+          userDetailsModel = UserDetailsModel.fromJson(event.data() ?? {});
+          // setState(() {});
+        });
     super.initState();
   }
 
@@ -62,205 +61,112 @@ class _FollowingState extends State<Following> {
             ),
           ),
         ),
-        title: SearchBar(
-          textSize: 16,
-          borderColor: Colors.transparent,
-          fillColor: kSecondaryColor.withOpacity(0.05),
-          onChanged: (value) {
-            searchText.value = value.trim();
-          },
+        title: MyText(
+          text: "Your Followers",
         ),
       ),
-      body: Obx(() {
-        if (searchText.value != "") {
-          return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-            stream:
-            ffstore.collection(accountsCollection).where("userSearchParameters", arrayContains: searchText.value).snapshots(),
-            builder: (
-                BuildContext context,
-                AsyncSnapshot<QuerySnapshot> snapshot,
-                ) {
-              log("inside stream-builder");
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                log("inside stream-builder in waiting state");
-                return Center(child: CircularProgressIndicator());
-              } else if (snapshot.connectionState == ConnectionState.active ||
-                  snapshot.connectionState == ConnectionState.done) {
-                if (snapshot.hasError) {
-                  return const Text('Some unknown error occurred');
-                } else if (snapshot.hasData) {
-                  if (snapshot.data!.docs.length > 0) {
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      physics: BouncingScrollPhysics(),
-                      padding: EdgeInsets.symmetric(
-                        vertical: 20,
-                      ),
-                      itemCount: snapshot.data!.docs.length,
-                      itemBuilder: (context, index) {
-                        UserDetailsModel umdl =
-                        UserDetailsModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
-                        if (umdl.uID != auth.currentUser!.uid) {
-                          return GestureDetector(
-                            onTap: () async {
-                              Get.to(() => OtherUserProfile(otherUserModel: umdl));
-                            },
-                            child: SearchTiles(
-                              umdl: umdl,
-                              profileImage: umdl.profileImageUrl,
-                              name: umdl.fullName,
-                              isFollowed: userDetailsModel.iFollowed != null
-                                  ? userDetailsModel.iFollowed!.asMap().containsValue(umdl.uID)
-                                  ? true
-                                  : false
-                                  : false,
+      body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+        stream: ffstore.collection(accountsCollection).doc(auth.currentUser!.uid).snapshots(),
+        builder: (
+            BuildContext context,
+            AsyncSnapshot<DocumentSnapshot> snapshot,
+            ) {
+          // log("inside stream-builder");
+          // log(userDetailsModel.profileImageUrl!);
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // log("inside stream-builder in waiting state");
+            return Center(child: const Text('No Users Found'));
+          } else if (snapshot.connectionState == ConnectionState.active ||
+              snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError) {
+              return const Text('Some unknown error occurred');
+            } else if (snapshot.hasData) {
+              // log("inside hasData and ${snapshot.data!.docs}");
+              if (snapshot.data!.exists) {
+                userDetailsModel = UserDetailsModel.fromJson(snapshot.data!.data() as Map<String, dynamic>);
+                // var theyFollowedListToBeChecked =
+                // userDetailsModel.TheyFollowed!.length > 0 ? userDetailsModel.TheyFollowed : ["something"];
+                // followedListToBeChecked?.add(auth.currentUser?.uid ?? "");
+                return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  stream: ffstore.collection(accountsCollection).doc(auth.currentUser?.uid)
+                      .collection(iFollowedCollection).snapshots(),
+                  builder: (
+                      BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot,
+                      ) {
+                    log("inside stream-builder");
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      log("inside stream-builder in waiting state");
+                      return Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(kTertiaryColor)));
+                    } else if (snapshot.connectionState == ConnectionState.active ||
+                        snapshot.connectionState == ConnectionState.done) {
+                      if (snapshot.hasError) {
+                        return const Text('Some unknown error occurred');
+                      } else if (snapshot.hasData) {
+                        // log("inside hasData and ${snapshot.data!.docs}");
+                        if (snapshot.data!.docs.length > 0) {
+                          return ListView.builder(
+                            // shrinkWrap: true,
+                            physics: BouncingScrollPhysics(),
+                            padding: EdgeInsets.symmetric(
+                              vertical: 20,
                             ),
+                            itemCount: snapshot.data!.docs.length,
+                            itemBuilder: (context, index) {
+                              IFollowedModel umdl =
+                              IFollowedModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                              return GestureDetector(
+                                onTap: () async {
+                                  await ffstore.collection(accountsCollection).doc(umdl.followedId).get().then((value) {
+                                    UserDetailsModel otherUserDetailsModel = UserDetailsModel.fromJson(value.data() ?? {});
+                                    Get.to(() => OtherUserProfile(otherUserModel: otherUserDetailsModel));
+                                  });
+                                },
+                                child: SearchTiles(
+                                  umdl: umdl,
+                                  profileImage: umdl.followedImage,
+                                  name: umdl.followedName,
+                                  isFollowed: userDetailsModel.iFollowed != null
+                                      ? userDetailsModel.iFollowed!.asMap().containsValue(umdl.followedId)
+                                      ? true
+                                      : false
+                                      : false,
+                                ),
+                              );
+                            },
                           );
                         } else {
-                          return SizedBox();
+                          return Center(child: const Text('No Users Found'));
                         }
-                      },
-                    );
-                    // return ListView.builder(
-                    //   // shrinkWrap: true,
-                    //   physics: BouncingScrollPhysics(),
-                    //   itemCount: snapshot.data!.docs.length,
-                    //   itemBuilder: (BuildContext context, int index) {
-                    //     AddPostModel addPostModel = AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
-                    //     log("addPostModel = ${addPostModel.toJson()}");
-                    //     return ListView(
-                    //       shrinkWrap: true,
-                    //       physics: BouncingScrollPhysics(),
-                    //       padding: EdgeInsets.symmetric(
-                    //         vertical: 20,
-                    //       ),
-                    //       children: [
-                    //         SizedBox(
-                    //           height: 80,
-                    //           child: ListView(
-                    //             shrinkWrap: true,
-                    //             scrollDirection: Axis.horizontal,
-                    //             physics: const BouncingScrollPhysics(),
-                    //             children: [
-                    //               addStoryButton(context),
-                    //               ListView.builder(
-                    //                 shrinkWrap: true,
-                    //                 scrollDirection: Axis.horizontal,
-                    //                 itemCount: 6,
-                    //                 padding: const EdgeInsets.only(
-                    //                   right: 8,
-                    //                 ),
-                    //                 physics: const BouncingScrollPhysics(),
-                    //                 itemBuilder: (context, index) {
-                    //                   return stories(
-                    //                     context,
-                    //                     'assets/images/baby_shower.png',
-                    //                     index.isOdd ? 'Khan' : 'Stephan',
-                    //                     index,
-                    //                   );
-                    //                 },
-                    //               ),
-                    //             ],
-                    //           ),
-                    //         ),
-                    //         ListView.builder(
-                    //           shrinkWrap: true,
-                    //           physics: BouncingScrollPhysics(),
-                    //           padding: EdgeInsets.symmetric(
-                    //             vertical: 30,
-                    //           ),
-                    //           itemCount: 4,
-                    //           itemBuilder: (context, index) {
-                    //             return PostWidget(
-                    //               profileImage: Assets.imagesDummyProfileImage,
-                    //               name: 'Username',
-                    //               postedTime: '11 feb',
-                    //               title: 'It was a great event 😀',
-                    //               isMyPost: index.isOdd ? true : false,
-                    //               postImage: Assets.imagesPicnicKids,
-                    //             );
-                    //           },
-                    //         ),
-                    //       ],
-                    //     );
-                    //   },
-                    //
-                    // );
-                  } else {
-                    return Center(child: const Text('No Users Found'));
-                  }
-                } else {
-                  log("in else of hasData done and: ${snapshot.connectionState} and"
-                      " snapshot.hasData: ${snapshot.hasData}");
-                  return Center(child: const Text('No Users Found'));
-                }
+                      } else {
+                        log("in else of hasData done and: ${snapshot.connectionState} and"
+                            " snapshot.hasData: ${snapshot.hasData}");
+                        return Center(child: const Text('No Users Found'));
+                      }
+                    } else {
+                      log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+                      return Center(child: Text('Some Error occurred while fetching the posts'));
+                    }
+                  },
+                );
+
               } else {
-                log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
-                return Center(child: Text('Some Error occurred while fetching the users'));
+                return Center(child: const Text('No Users Found'));
+
               }
-            },
-          );
-        } else {
-          return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-            stream: ffstore.collection(accountsCollection).where("uID", isNotEqualTo: auth.currentUser!.uid).snapshots(),
-            builder: (
-                BuildContext context,
-                AsyncSnapshot<QuerySnapshot> snapshot,
-                ) {
-              log("inside stream-builder");
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                log("inside stream-builder in waiting state");
-                return Center(child: CircularProgressIndicator());
-              } else if (snapshot.connectionState == ConnectionState.active ||
-                  snapshot.connectionState == ConnectionState.done) {
-                if (snapshot.hasError) {
-                  return const Text('Some unknown error occurred');
-                } else if (snapshot.hasData) {
-                  // log("inside hasData and ${snapshot.data!.docs}");
-                  if (snapshot.data!.docs.length > 0) {
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      physics: BouncingScrollPhysics(),
-                      padding: EdgeInsets.symmetric(
-                        vertical: 20,
-                      ),
-                      itemCount: snapshot.data!.docs.length,
-                      itemBuilder: (context, index) {
-                        UserDetailsModel umdl =
-                        UserDetailsModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
-                        return GestureDetector(
-                          onTap: () async {
-                            Get.to(() => OtherUserProfile(otherUserModel: umdl));
-                          },
-                          child: SearchTiles(
-                            umdl: umdl,
-                            profileImage: umdl.profileImageUrl,
-                            name: umdl.fullName,
-                            isFollowed: userDetailsModel.iFollowed != null
-                                ? userDetailsModel.iFollowed!.asMap().containsValue(umdl.uID)
-                                ? true
-                                : false
-                                : false,
-                          ),
-                        );
-                      },
-                    );
-                  } else {
-                    return Center(child: const Text('No Users Found'));
-                  }
-                } else {
-                  log("in else of hasData done and: ${snapshot.connectionState} and"
-                      " snapshot.hasData: ${snapshot.hasData}");
-                  return Center(child: const Text('No Users Found'));
-                }
-              } else {
-                log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
-                return Center(child: Text('Some Error occurred while fetching the posts'));
-              }
-            },
-          );
-        }
-      }),
+            } else {
+              // log("in else of hasData done and: ${snapshot.connectionState} and"
+              //     " snapshot.hasData: ${snapshot.hasData}");
+              return Center(child: const Text('No Users Found'));
+
+            }
+          } else {
+            log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+            return Center(child: const Text('No Users Found'));
+
+          }
+        },
+      ),
     );
   }
 }
@@ -277,7 +183,7 @@ class SearchTiles extends StatelessWidget {
 
   String? profileImage, name;
   bool? isFollowed;
-  UserDetailsModel? umdl;
+  IFollowedModel? umdl;
 
   @override
   Widget build(BuildContext context) {
@@ -309,7 +215,7 @@ class SearchTiles extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(100),
                     child: Image.network(
-                      profileImage!,
+                      profileImage ?? "",
                       height: height(context, 1.0),
                       width: width(context, 1.0),
                       fit: BoxFit.cover,
@@ -340,15 +246,15 @@ class SearchTiles extends StatelessWidget {
                         onTap: !isFollowed!
                             ? () async {
                           await ffstore.collection(accountsCollection).doc(auth.currentUser!.uid).update({
-                            "iFollowed": FieldValue.arrayUnion([umdl!.uID]),
+                            "iFollowed": FieldValue.arrayUnion([umdl!.followedId]),
                           });
-                          await ffstore.collection(accountsCollection).doc(umdl!.uID).update({
+                          await ffstore.collection(accountsCollection).doc(umdl!.followedId).update({
                             "TheyFollowed": FieldValue.arrayUnion([auth.currentUser!.uid]),
                           });
                           IFollowedModel iFollowedProfile = IFollowedModel(
-                            followedId: umdl!.uID,
-                            followedName: umdl!.fullName,
-                            followedImage: umdl!.profileImageUrl,
+                            followedId: umdl!.followedId,
+                            followedName: umdl!.followedName,
+                            followedImage: umdl!.followedImage,
                             followedAt: DateTime.now().millisecondsSinceEpoch,
                           );
 
@@ -364,7 +270,7 @@ class SearchTiles extends StatelessWidget {
                               .collection(accountsCollection)
                               .doc(auth.currentUser!.uid)
                               .collection("iFollowed")
-                              .doc(umdl!.uID)
+                              .doc(umdl!.followedId)
                               .set(iFollowedProfile.toJson());
                           // await fs
                           //     .collection(accountsCollection)
@@ -376,20 +282,20 @@ class SearchTiles extends StatelessWidget {
                             : () async {
                           //+unfollow code goes here
                           await ffstore.collection(accountsCollection).doc(auth.currentUser!.uid).update({
-                            "iFollowed": FieldValue.arrayRemove([umdl!.uID]),
+                            "iFollowed": FieldValue.arrayRemove([umdl!.followedId]),
                           });
-                          await ffstore.collection(accountsCollection).doc(umdl!.uID).update({
+                          await ffstore.collection(accountsCollection).doc(umdl!.followedId).update({
                             "TheyFollowed": FieldValue.arrayRemove([auth.currentUser!.uid]),
                           });
                           await ffstore
                               .collection(accountsCollection)
                               .doc(auth.currentUser!.uid)
                               .collection("iFollowed")
-                              .doc(umdl!.uID)
+                              .doc(umdl!.followedId)
                               .delete();
                           await ffstore
                               .collection(accountsCollection)
-                              .doc(umdl!.uID)
+                              .doc(umdl!.followedId)
                               .collection("TheyFollowed")
                               .doc(userDetailsModel.uID)
                               .delete();
