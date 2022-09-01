@@ -81,7 +81,7 @@ class _EditProfileState extends State<EditProfile> {
         shrinkWrap: true,
         physics: BouncingScrollPhysics(),
         padding: EdgeInsets.symmetric(
-          horizontal: 30,
+          horizontal: 15,
           vertical: 15,
         ),
         children: [
@@ -96,7 +96,7 @@ class _EditProfileState extends State<EditProfile> {
           //   color: kSecondaryColor,
           // ),
           SizedBox(
-            height: 15,
+            height: 40,
           ),
           ETextField(
             labelText: 'Name:',
