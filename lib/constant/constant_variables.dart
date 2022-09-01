@@ -10,6 +10,8 @@ String deactivatedCollection = "DeactivatedAccounts";
 String accountsCollection = "Accounts";
 String postsCollection = "Posts";
 String alertsCollection = "Notifications";
+String theyFollowedCollection = "TheyFollowed";
+String iFollowedCollection = "iFollowed";
 
 //+ underlying collections or sub-collections
 String messagesCollection = "messages";

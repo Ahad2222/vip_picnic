@@ -163,7 +163,7 @@ class SendInvitations extends StatelessWidget {
                   //+ social media or something.
                   if (finalizedNameString != "" &&
                       messageController.text.trim() != "") {
-                    loading();
+                    Get.dialog(loading());
                     GroupChatRoomModel groupChatModel =
                         GroupChatRoomModel.fromJson(docs ?? {});
                     log("groupChatModel: ${groupChatModel.toJson()}");
@@ -177,6 +177,7 @@ class SendInvitations extends StatelessWidget {
                           "group chat: ${messageController.text.trim()}.",
                       short: true,
                     );
+                    Get.back();
                     log("fetched shareLink: $shareLink");
                     ShareResult sr = await Share.shareWithResult(shareLink);
                     Get.back();

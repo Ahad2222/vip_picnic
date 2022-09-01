@@ -11,6 +11,8 @@ import 'package:vip_picnic/model/home_model/add_post_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/home/my_posts.dart';
 import 'package:vip_picnic/view/home/post_details.dart';
+import 'package:vip_picnic/view/profile/followers.dart';
+import 'package:vip_picnic/view/profile/following.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
@@ -84,18 +86,28 @@ class Profile extends StatelessWidget {
                           width: 1,
                           color: kSecondaryColor,
                         ),
-                        eventFollowingFollower(
-                          count: userDetailsModel.iFollowed?.length ?? 0,
-                          title: 'following'.tr,
+                        GestureDetector(
+                          onTap: () {
+                            Get.to(() => Following());
+                          },
+                          child: eventFollowingFollower(
+                            count: userDetailsModel.iFollowed?.length ?? 0,
+                            title: 'following'.tr,
+                          ),
                         ),
                         Container(
                           height: 15,
                           width: 1,
                           color: kSecondaryColor,
                         ),
-                        eventFollowingFollower(
-                          count: userDetailsModel.TheyFollowed?.length ?? 0,
-                          title: 'followers'.tr,
+                        GestureDetector(
+                          onTap: () {
+                            Get.to(() => Followers());
+                          },
+                          child: eventFollowingFollower(
+                            count: userDetailsModel.TheyFollowed?.length ?? 0,
+                            title: 'followers'.tr,
+                          ),
                         ),
                       ],
                     ),
