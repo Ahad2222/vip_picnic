@@ -362,6 +362,8 @@ class _PostWidgetState extends State<PostWidget> {
                                     try {
                                       // Get.back();
                                       List<String> imageUrlsList = widget.postDocModel?.postImages ?? [];
+                                      List<String> videoUrlsList = widget.postDocModel?.postVideos ?? [];
+                                      List<String> videoThumbnailsList = widget.postDocModel?.thumbnailsUrls ?? [];
                                       Get.back();
                                       // Get.back();
                                       Get.dialog(loading());
@@ -372,6 +374,10 @@ class _PostWidgetState extends State<PostWidget> {
                                           await fstorage.refFromURL(element).delete();
                                         },
                                       );
+                                      for (int i = 0; i < videoUrlsList.length; i++) {
+                                        await fstorage.refFromURL(videoUrlsList[i]).delete();
+                                        await fstorage.refFromURL(videoThumbnailsList[i]).delete();
+                                      }
                                       // await posts.doc(addPostModel.value.postID).collection("comments").delete();
                                     } catch (e) {
                                       print(e);

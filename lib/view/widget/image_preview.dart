@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,8 +15,11 @@ class ImagePreview extends StatelessWidget {
       tag: 'chatMedia',
       transitionOnUserGestures: true,
       child: InteractiveViewer(
+        scaleEnabled: true,
+        panEnabled: true,
         child: Image.network(
           imageUrl!,
+          scale: 0.7,
           fit: BoxFit.cover,
           width: Get.width,
           height: Get.height,

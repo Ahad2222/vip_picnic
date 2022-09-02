@@ -360,6 +360,35 @@ class ChatController extends GetxController {
     }
   }
 
+  //+0iSxhYZw7SUJRgTtQGf1bbJ8rxv1
+  Future<void> deleteAGroupChatRoom({String? groupId}) async {
+    // showLoading();
+    log("inside groupId delete and chatRoom Id: $groupId");
+    try {
+      log("inside groupId delete and chatRoom Id: $groupId");
+      await ffstore.collection(groupChatCollection).doc(groupId).update({
+        "notDeletedFor": FieldValue.arrayRemove([auth.currentUser!.uid])
+      }).then((value) async {
+        await ffstore
+            .collection(groupChatCollection)
+            .doc(groupId)
+            .collection(messagesCollection)
+            .get()
+            .then((value) {
+          value.docs.forEach((element) {
+            element.reference.update({
+              "isDeletedFor": FieldValue.arrayUnion([auth.currentUser!.uid])
+            });
+          });
+        });
+      });
+    } catch (e) {
+      // dismissLoadingWidget();
+      // showErrorDialog(title: "Error!", description: "Some unexpected error occurred.");
+      log("Following error was thrown in chat deletion: ${e.toString()}. Please try again.");
+    }
+  }
+
   Future<DocumentSnapshot<Map<String, dynamic>>> getAChatRoomInfo(
       String chatRoomId) async {
     return FirebaseFirestore.instance

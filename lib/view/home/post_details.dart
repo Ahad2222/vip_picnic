@@ -20,6 +20,7 @@ import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:vip_picnic/view/widget/snack_bar.dart';
+import 'package:vip_picnic/view/widget/video_preview.dart';
 
 // ignore: must_be_immutable
 class PostDetails extends StatefulWidget {
@@ -131,6 +132,9 @@ class _PostDetailsState extends State<PostDetails> {
                                           onConfirm: () async {
                                             try {
                                               List<String> imageUrlsList = widget.postDocModel?.postImages ?? [];
+                                              List<String> videoUrlsList = widget.postDocModel?.postVideos ?? [];
+                                              List<String> videoThumbnailsList =
+                                                  widget.postDocModel?.thumbnailsUrls ?? [];
                                               Get.back();
                                               Get.back();
                                               // Get.back();
@@ -148,6 +152,12 @@ class _PostDetailsState extends State<PostDetails> {
                                                   // log("inside foreach after image deletion: ${DateTime.now()}");
                                                 },
                                               );
+
+                                              for (int i = 0; i < videoUrlsList.length; i++) {
+                                                await fstorage.refFromURL(videoUrlsList[i]).delete();
+                                                await fstorage.refFromURL(videoThumbnailsList[i]).delete();
+                                              }
+
                                               // log("after foreach after deleting all images: ${DateTime.now()}");
                                             } catch (e) {
                                               print(e);
@@ -229,32 +239,144 @@ class _PostDetailsState extends State<PostDetails> {
                                   )
                                 : PageView.builder(
                                     onPageChanged: (index) => homeController.getCurrentPostIndex(index),
-                                    itemCount: widget.postDocModel!.postImages!.length,
+                                    itemCount: (widget.postDocModel?.postImages?.length ?? 0) +
+                                        (widget.postDocModel?.postVideos?.length ?? 0),
                                     physics: BouncingScrollPhysics(),
                                     itemBuilder: (context, index) {
-                                      return GestureDetector(
-                                        onTap: () => Get.to(
-                                          () => PostImagePreview(
-                                            imageUrl: widget.postDocModel!.postImages![index],
+                                      if ((widget.postDocModel?.postImages?.length ?? 0) > 0 &&
+                                          index < (widget.postDocModel?.postImages?.length ?? 0)) {
+                                        return GestureDetector(
+                                          onTap: () => Get.to(
+                                            () => PostImagePreview(
+                                              imageUrl: widget.postDocModel!.postImages![index],
+                                            ),
                                           ),
-                                        ),
-                                        child: Image.network(
-                                          widget.postDocModel!.postImages![index],
-                                          height: height(context, 1.0),
-                                          width: width(context, 1.0),
-                                          fit: BoxFit.cover,
-                                          loadingBuilder: (context, child, loadingProgress) {
-                                            if (loadingProgress == null) {
-                                              return child;
-                                            } else {
-                                              return loading();
-                                            }
-                                          },
-                                        ),
-                                      );
+                                          child: Image.network(
+                                            widget.postDocModel?.postImages![index] ?? "",
+                                            height: height(context, 1.0),
+                                            width: width(context, 1.0),
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (
+                                              BuildContext context,
+                                              Object exception,
+                                              StackTrace? stackTrace,
+                                            ) {
+                                              return const Text('Error');
+                                            },
+                                            loadingBuilder: (context, child, loadingProgress) {
+                                              if (loadingProgress == null) {
+                                                return child;
+                                              } else {
+                                                return loading();
+                                              }
+                                            },
+                                          ),
+                                        );
+                                      } else {
+                                        return Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 15,
+                                              ),
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.circular(16),
+                                                child: Image.network(
+                                                  widget.postDocModel?.thumbnailsUrls![
+                                                          index - (widget.postDocModel?.postImages?.length ?? 0)] ??
+                                                      "",
+                                                  height: Get.height,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (
+                                                    BuildContext context,
+                                                    Object exception,
+                                                    StackTrace? stackTrace,
+                                                  ) {
+                                                    return const Text(' ');
+                                                  },
+                                                  loadingBuilder: (context, child, loadingProgress) {
+                                                    if (loadingProgress == null) {
+                                                      return child;
+                                                    } else {
+                                                      return loading();
+                                                    }
+                                                  },
+                                                ),
+                                              ),
+                                            ),
+                                            // Container(
+                                            //   height: Get.height,
+                                            //   width: Get.width,
+                                            //   child: ClipRRect(
+                                            //     borderRadius: BorderRadius.circular(8),
+                                            //     child: Image.network(
+                                            //       widget.postDocModel?.thumbnailsUrls![index - (widget.postImage?.length ?? 0)] ?? "",
+                                            //       height: Get.height,
+                                            //       fit: BoxFit.cover,
+                                            //       errorBuilder: (
+                                            //           BuildContext context,
+                                            //           Object exception,
+                                            //           StackTrace? stackTrace,
+                                            //           ) {
+                                            //         return const Text(' ');
+                                            //       },
+                                            //       loadingBuilder: (context, child, loadingProgress) {
+                                            //         if (loadingProgress == null) {
+                                            //           return child;
+                                            //         } else {
+                                            //           return loading();
+                                            //         }
+                                            //       },
+                                            //     ),
+                                            //   ),
+                                            // ),
+                                            AnimatedOpacity(
+                                              opacity: 1.0,
+                                              duration: Duration(
+                                                milliseconds: 500,
+                                              ),
+                                              child: Container(
+                                                height: 55,
+                                                width: 55,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: kBlackColor.withOpacity(0.5),
+                                                ),
+                                                child: Material(
+                                                  color: Colors.transparent,
+                                                  child: InkWell(
+                                                    onTap: () {
+                                                      Get.to(() => VideoPreview(
+                                                            videoUrl: widget.postDocModel?.postVideos![
+                                                                index - (widget.postDocModel?.postImages?.length ?? 0)],
+                                                          ));
+                                                    },
+                                                    borderRadius: BorderRadius.circular(100),
+                                                    splashColor: kPrimaryColor.withOpacity(0.1),
+                                                    highlightColor: kPrimaryColor.withOpacity(0.1),
+                                                    child: Center(
+                                                      child: Image.asset(
+                                                        Assets.imagesPlay,
+                                                        height: 23,
+                                                        color: kPrimaryColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      }
                                     },
                                   ),
-                            widget.postDocModel!.postImages!.length == 1 || widget.postDocModel?.postImages?.length == 0
+                            (widget.postDocModel?.postImages?.length ?? 0) +
+                                            (widget.postDocModel?.postVideos?.length ?? 0) ==
+                                        1 ||
+                                    (widget.postDocModel?.postImages?.length ?? 0) +
+                                            (widget.postDocModel?.postVideos?.length ?? 0) ==
+                                        0
                                 ? SizedBox()
                                 : Obx(
                                     () {
@@ -270,8 +392,8 @@ class _PostDetailsState extends State<PostDetails> {
                                           ),
                                           child: Center(
                                             child: MyText(
-                                              text:
-                                                  '${homeController.currentPost.value + 1}/${widget.postDocModel!.postImages!.length}',
+                                              text: '${homeController.currentPost.value + 1}/'
+                                                  '${(widget.postDocModel?.postImages?.length ?? 0) + (widget.postDocModel?.postVideos?.length ?? 0)}',
                                               size: 15,
                                               weight: FontWeight.w600,
                                               color: kPrimaryColor,

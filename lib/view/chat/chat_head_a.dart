@@ -505,7 +505,20 @@ class GroupChatHeads extends StatelessWidget {
                           description:
                               'This can\'t be undone. Are you sure you want to delete this chat?',
                           onCancel: () => Get.back(),
-                          onConfirm: () async {},
+                          onConfirm: () async {
+                            try {
+                              Get.back();
+                              await chatController.deleteAGroupChatRoom(
+                                  groupId: groupId);
+                            } catch (e) {
+                              print(e);
+                              showMsg(
+                                  context: context,
+                                  msg:
+                                  "Something went wrong during chat deletion. Please try again.");
+                              log("error in chat deletion $e");
+                            }
+                          },
                         );
                       },
                     );

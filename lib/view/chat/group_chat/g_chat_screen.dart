@@ -40,8 +40,7 @@ class GroupChat extends StatefulWidget {
 }
 
 class _GroupChatState extends State<GroupChat> {
-  Rx<TextEditingController> messageEditingController =
-      TextEditingController().obs;
+  Rx<TextEditingController> messageEditingController = TextEditingController().obs;
   ScrollController scrollController = ScrollController();
 
   String chatRoomID = "";
@@ -335,8 +334,7 @@ class _GroupChatState extends State<GroupChat> {
       //     "notDeletedFor": FieldValue.arrayUnion([anotherUserID])
       //   });
       // }
-      groupChatController.addConversationMessage(
-          chatRoomID, time, "text", messageMap, messageText);
+      groupChatController.addConversationMessage(chatRoomID, time, "text", messageMap, messageText);
       // log("index is: ${lastIndex.value}");
     } else if (imageFile != null && (imageUrl != null || imageUrl != "")) {
       var time = DateTime.now().millisecondsSinceEpoch;
@@ -362,8 +360,7 @@ class _GroupChatState extends State<GroupChat> {
       //     "notDeletedFor": FieldValue.arrayUnion([anotherUserID])
       //   });
       // }
-      groupChatController.addConversationMessage(
-          chatRoomID, time, "image", messageMap, imageUrl!);
+      groupChatController.addConversationMessage(chatRoomID, time, "image", messageMap, imageUrl!);
       messageEditingController.value.text = "";
 
       imageUrl = "";
@@ -419,18 +416,16 @@ class _GroupChatState extends State<GroupChat> {
             // shrinkWrap: true,
             itemCount: snapshot.data?.docs.length,
             itemBuilder: (context, index) {
-              Map<String, dynamic> data =
-                  snapshot.data?.docs[index].data() as Map<String, dynamic>;
-              print(
-                  "snapshot.data.docs[index].data()[type] is: ${data["type"]}");
+              Map<String, dynamic> data = snapshot.data?.docs[index].data() as Map<String, dynamic>;
+              print("snapshot.data.docs[index].data()[type] is: ${data["type"]}");
               //TODO: Beware, here the widgets to show data start.
               //TODO: Beware, here the widgets to show data start.
               String type = data["type"];
-              String message =
-                  data["message"] != null ? data["message"] : "what is this?";
+              String message = data["message"] != null ? data["message"] : "what is this?";
               bool sendByMe = userDetailsModel.uID == data["sendById"];
               String time = data["time"].toString();
               String senderImage = data["sendByImage"];
+              bool isDeletedForMe = data["isDeletedFor"].contains(userDetailsModel.uID);
 
               var day = DateTime.fromMillisecondsSinceEpoch(
                 int.parse(time),
@@ -460,24 +455,28 @@ class _GroupChatState extends State<GroupChat> {
               } else {
                 ampm = 'am';
               }
-              if (!sendByMe) {
-                return LeftMessageBubble(
-                  receiveImage: senderImage,
-                  msg: message,
-                  time: "${hour.toString()}:"
-                      "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
-                      "${ampm}",
-                  type: type,
-                );
+              if (!isDeletedForMe) {
+                if (!sendByMe) {
+                  return LeftMessageBubble(
+                    receiveImage: senderImage,
+                    msg: message,
+                    time: "${hour.toString()}:"
+                        "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
+                        "${ampm}",
+                    type: type,
+                  );
+                } else {
+                  return RightMessageBubble(
+                    receiveImage: senderImage,
+                    msg: message,
+                    time: "${hour.toString()}:"
+                        "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
+                        "${ampm}",
+                    type: type,
+                  );
+                }
               } else {
-                return RightMessageBubble(
-                  receiveImage: senderImage,
-                  msg: message,
-                  time: "${hour.toString()}:"
-                      "${(min.toString().length < 2) ? "0${min.toString()}" : min.toString()} "
-                      "${ampm}",
-                  type: type,
-                );
+                return SizedBox();
               }
             },
           );
