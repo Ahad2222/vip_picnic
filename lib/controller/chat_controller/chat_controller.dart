@@ -341,9 +341,9 @@ class ChatController extends GetxController {
         "notDeletedFor": FieldValue.arrayRemove([auth.currentUser!.uid])
       }).then((value) async {
         await ffstore
-            .collection("ChatRoom")
+            .collection(chatRoomCollection)
             .doc(chatRoomId)
-            .collection("chats")
+            .collection(messagesCollection)
             .get()
             .then((value) {
           value.docs.forEach((element) {

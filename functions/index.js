@@ -1156,55 +1156,58 @@ exports.taggedPeopleNotification = functions.firestore
     }
 
     await admin.firestore().collection(`Posts`).doc(context.params.documentId).set({
+      videoIds: [],
+      taggedPeopleToken: [],
       uploadUrls: uploadUrls
     }, { merge: true }).catch((e) => {
       functions.logger.log(`error in setting the uploadUrl is:${e.toString()}`);
     });
 
     //Sending notification to Post Poster
-    await admin
-      .messaging()
-      .sendMulticast({
-        tokens: tagPeopleTokenList,
-        notification: {
-          title: `Tagged in a post`,
-          body: `${posterName} tagged you in their post`,
-          imageUrl: posterImage,
-        },
-        data: {
-          id: posterId,
-          postId: postId,
-          posterName: posterName,
-          imageUrl: posterImage,
-          screenName: "postScreen",
-          type: "postTagged",
-        },
-      })
-      .then((value) => {
-        functions.logger.log(
-          "Notification for tag post send to tag people "
-        );
-      })
-      .catch((e) => {
-        functions.logger.log(e.toString());
-      });
-
-    for (const index in taggedPeopleIds) {
+    if (tagPeopleTokenList.length > 0) {
       await admin
-        .firestore()
-        .collection("Notifications")
-        .add({
-          forId: taggedPeopleIds[index],
-          image: posterImage,
-          message: `${posterName} tagged you in their post`,
-          type: "postTagged",
-          dataId: postId,
-          createdAt: Date.now(),
+        .messaging()
+        .sendMulticast({
+          tokens: tagPeopleTokenList,
+          notification: {
+            title: `Tagged in a post`,
+            body: `${posterName} tagged you in their post`,
+            imageUrl: posterImage,
+          },
+          data: {
+            id: posterId,
+            postId: postId,
+            posterName: posterName,
+            imageUrl: posterImage,
+            screenName: "postScreen",
+            type: "postTagged",
+          },
+        })
+        .then((value) => {
+          functions.logger.log(
+            "Notification for tag post send to tag people "
+          );
+        })
+        .catch((e) => {
+          functions.logger.log(e.toString());
         });
-      console.log(`A JavaScript type is: ${type}`)
+
+      for (const index in taggedPeopleIds) {
+        await admin
+          .firestore()
+          .collection("Notifications")
+          .add({
+            forId: taggedPeopleIds[index],
+            image: posterImage,
+            message: `${posterName} tagged you in their post`,
+            type: "postTagged",
+            dataId: postId,
+            createdAt: Date.now(),
+          });
+        // console.log(`A JavaScript type is: ${type}`)
+      }
+
     }
-
-
   });
 
 
@@ -1212,43 +1215,80 @@ exports.taggedPeopleNotification = functions.firestore
 
 exports.taggedPeopleNotificationOnUpdate = functions.firestore
   .document("/Posts/{documentId}")
-  .onUpdate(async (snap, context) => {
+  .onUpdate(async (change, context) => {
 
     const tagPeopleTokenList = change.after.data().taggedPeopleToken;
     const posterName = change.after.data().postBy;
     const postId = change.after.data().postID;
     const posterImage = change.after.data().profileImage;
     const posterId = change.after.data().uID;
+    const videosIds = change.after.data().videoIds;
+    const uploadUrls = [];
+
     // const taggedPeopleIdsOlder = change.before.data().taggedPeople;
     // const taggedPeopleIdsNewer = change.after.data().taggedPeople;
-
     //Sending notification to Post Poster
-    await admin
-      .messaging()
-      .sendMulticast({
-        tokens: tagPeopleTokenList,
-        notification: {
-          title: `Tagged in a post`,
-          body: `${posterName} tagged you in their post`,
-          imageUrl: posterImage,
-        },
-        data: {
-          id: posterId,
-          postId: postId,
-          posterName: posterName,
-          imageUrl: posterImage,
-          screenName: "postScreen",
-          type: "postTagged",
-        },
-      })
-      .then((value) => {
-        functions.logger.log(
-          "Notification for tag post send to tag people on update"
-        );
-      })
-      .catch((e) => {
-        functions.logger.log(e.toString());
+
+    if (videosIds.length > 0) {
+
+      for (const index in videosIds) {
+
+        functions.logger.info("In Chat function: type is video");
+        const bucket = admin.storage().bucket();
+        functions.logger.log(`bucket is: ${bucket.name}`);
+        functions.logger.log(`single videoId at index: ${index} is: ${videosIds[index]}`);
+
+        const fileName = `${videosIds[index]}.mp4`;
+        functions.logger.log(`fileName is: ${fileName}`);
+
+        const videoFile = bucket.file(`postVideos/${context.params.documentId}/${fileName}`);
+        const resumableUpload = await videoFile.createResumableUpload();
+        functions.logger.log(`resumableUpload is: ${resumableUpload}`);
+
+        const uploadUrl = resumableUpload[0];
+        functions.logger.log(`single uploadUrl is: ${uploadUrl}`);
+        console.log(uploadUrl);
+        uploadUrls.push(uploadUrl);
+      }
+
+      await admin.firestore().collection(`Posts`).doc(context.params.documentId).set({
+        videoIds: [],
+        taggedPeopleToken: [],
+        uploadUrls: uploadUrls
+      }, { merge: true }).catch((e) => {
+        functions.logger.log(`error in setting the uploadUrl is:${e.toString()}`);
       });
+    }
+
+
+    if (tagPeopleTokenList > 0) {
+      await admin
+        .messaging()
+        .sendMulticast({
+          tokens: tagPeopleTokenList,
+          notification: {
+            title: `Tagged in a post`,
+            body: `${posterName} tagged you in their post`,
+            imageUrl: posterImage,
+          },
+          data: {
+            id: posterId,
+            postId: postId,
+            posterName: posterName,
+            imageUrl: posterImage,
+            screenName: "postScreen",
+            type: "postTagged",
+          },
+        })
+        .then((value) => {
+          functions.logger.log(
+            "Notification for tag post send to tag people on update"
+          );
+        })
+        .catch((e) => {
+          functions.logger.log(e.toString());
+        });
+    }
 
     // for (let i = 0; i < cars.length; i++) {
     //   await admin

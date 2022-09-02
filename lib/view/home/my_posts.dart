@@ -23,6 +23,7 @@ import 'package:vip_picnic/view/widget/my_appbar.dart';
 import 'package:get/get.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:vip_picnic/view/widget/snack_bar.dart';
+import 'package:vip_picnic/view/widget/video_preview.dart';
 
 class MyPosts extends StatelessWidget {
   @override
@@ -456,34 +457,72 @@ class _PostWidgetState extends State<PostWidget> {
                     overFlow: TextOverflow.ellipsis,
                     color: kSecondaryColor,
                   ),
-                  (widget.postDocModel?.postImages?.length ?? 0) > 0
+                  (widget.postDocModel?.postImages?.length ?? 0) > 0 ||
+                      (widget.postDocModel?.postVideos?.length ?? 0) > 0
                       ? SizedBox(
-                          height: 220,
-                          child: Stack(
-                            children: [
-                              PageView.builder(
-                                onPageChanged: (index) {
-                                  currentPost.value = index;
-                                  // homeController.getCurrentPostIndex(index);
-                                },
-                                physics: BouncingScrollPhysics(),
-                                itemCount: widget.postImage!.length,
-                                itemBuilder: (context, index) {
-                                  return Padding(
+                    height: 220,
+                    child: Stack(
+                      children: [
+                        PageView.builder(
+                          onPageChanged: (index) {
+                            currentPost.value = index;
+                            // homeController.getCurrentPostIndex(index);
+                          },
+                          physics: BouncingScrollPhysics(),
+                          itemCount:
+                          (widget.postImage?.length ?? 0) + (widget.postDocModel?.postVideos?.length ?? 0),
+                          itemBuilder: (context, index) {
+                            if ((widget.postImage?.length ?? 0) > 0 && index < (widget.postImage?.length ?? 0)) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 15,
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Image.network(
+                                    widget.postImage![index],
+                                    height: Get.height,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (
+                                        BuildContext context,
+                                        Object exception,
+                                        StackTrace? stackTrace,
+                                        ) {
+                                      return const Text(' ');
+                                    },
+                                    loadingBuilder: (context, child, loadingProgress) {
+                                      if (loadingProgress == null) {
+                                        return child;
+                                      } else {
+                                        return loading();
+                                      }
+                                    },
+                                  ),
+                                ),
+                              );
+                            } else {
+                              //+ this would be executed when there are no images
+                              //+ or images are there and index is out of their range.
+                              return Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Padding(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 15,
                                     ),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(16),
                                       child: Image.network(
-                                        widget.postImage![index],
+                                        widget.postDocModel
+                                            ?.thumbnailsUrls![index - (widget.postImage?.length ?? 0)] ??
+                                            "",
                                         height: Get.height,
                                         fit: BoxFit.cover,
                                         errorBuilder: (
-                                          BuildContext context,
-                                          Object exception,
-                                          StackTrace? stackTrace,
-                                        ) {
+                                            BuildContext context,
+                                            Object exception,
+                                            StackTrace? stackTrace,
+                                            ) {
                                           return const Text(' ');
                                         },
                                         loadingBuilder: (context, child, loadingProgress) {
@@ -495,36 +534,101 @@ class _PostWidgetState extends State<PostWidget> {
                                         },
                                       ),
                                     ),
-                                  );
-                                },
-                              ),
-                              widget.postImage!.length == 1
-                                  ? SizedBox()
-                                  : Obx(() {
-                                      return Positioned(
-                                        top: 10,
-                                        right: 30,
-                                        child: Container(
-                                          height: 35,
-                                          width: 46,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(50),
-                                            color: kSecondaryColor.withOpacity(0.5),
-                                          ),
+                                  ),
+                                  // Container(
+                                  //   height: Get.height,
+                                  //   width: Get.width,
+                                  //   child: ClipRRect(
+                                  //     borderRadius: BorderRadius.circular(8),
+                                  //     child: Image.network(
+                                  //       widget.postDocModel?.thumbnailsUrls![index - (widget.postImage?.length ?? 0)] ?? "",
+                                  //       height: Get.height,
+                                  //       fit: BoxFit.cover,
+                                  //       errorBuilder: (
+                                  //           BuildContext context,
+                                  //           Object exception,
+                                  //           StackTrace? stackTrace,
+                                  //           ) {
+                                  //         return const Text(' ');
+                                  //       },
+                                  //       loadingBuilder: (context, child, loadingProgress) {
+                                  //         if (loadingProgress == null) {
+                                  //           return child;
+                                  //         } else {
+                                  //           return loading();
+                                  //         }
+                                  //       },
+                                  //     ),
+                                  //   ),
+                                  // ),
+                                  AnimatedOpacity(
+                                    opacity: 1.0,
+                                    duration: Duration(
+                                      milliseconds: 500,
+                                    ),
+                                    child: Container(
+                                      height: 55,
+                                      width: 55,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: kBlackColor.withOpacity(0.5),
+                                      ),
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          onTap: () {
+                                            Get.to(() => VideoPreview(
+                                              videoUrl: widget.postDocModel
+                                                  ?.postVideos![index - (widget.postImage?.length ?? 0)],
+                                            ));
+                                          },
+                                          borderRadius: BorderRadius.circular(100),
+                                          splashColor: kPrimaryColor.withOpacity(0.1),
+                                          highlightColor: kPrimaryColor.withOpacity(0.1),
                                           child: Center(
-                                            child: MyText(
-                                              text: '${currentPost.value + 1}/${widget.postImage!.length}',
-                                              size: 15,
-                                              weight: FontWeight.w600,
+                                            child: Image.asset(
+                                              Assets.imagesPlay,
+                                              height: 23,
                                               color: kPrimaryColor,
                                             ),
                                           ),
                                         ),
-                                      );
-                                    }),
-                            ],
-                          ),
-                        )
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }
+                          },
+                        ),
+                        (widget.postImage?.length ?? 0) + (widget.postDocModel?.postVideos?.length ?? 0) == 1
+                            ? SizedBox()
+                            : Obx(() {
+                          return Positioned(
+                            top: 10,
+                            right: 30,
+                            child: Container(
+                              height: 35,
+                              width: 46,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(50),
+                                color: kSecondaryColor.withOpacity(0.5),
+                              ),
+                              child: Center(
+                                child: MyText(
+                                  text: '${currentPost.value + 1}/'
+                                      '${(widget.postImage?.length ?? 0) + (widget.postDocModel?.postVideos?.length ?? 0)}',
+                                  size: 15,
+                                  weight: FontWeight.w600,
+                                  color: kPrimaryColor,
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  )
                       : SizedBox(),
                 ],
               ),

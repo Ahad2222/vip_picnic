@@ -51,7 +51,7 @@ class HomeController extends GetxController {
     try {
       List<XFile>? images = await ImagePicker().pickMultiImage();
       if (images != null) {
-        selectedImages.value = images;
+        selectedImages.addAll(images);
       } else {
         return [].obs;
       }
@@ -154,10 +154,10 @@ class HomeController extends GetxController {
         );
         log('Data assigned to POST MODEL CLASS!');
         await posts.doc(postID).set(addPostModel.toJson()).then(
-          (value) {
+          (value) async {
             log('Data set to FIREBASE!');
             StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? postDocStream;
-            postDocStream = ffstore.collection(postsCollection).doc(postID).snapshots().listen((event) async {
+            postDocStream = await ffstore.collection(postsCollection).doc(postID).snapshots().listen((event) async {
               log("inside the postDoc stream");
               bool containsUploadUrl = event.data()?.containsKey("uploadUrls") ?? false;
               if (containsUploadUrl) {
@@ -186,6 +186,10 @@ class HomeController extends GetxController {
             });
             selectedImages = [].obs;
             imagesToUpload = [];
+            thumbnailsUrls.clear();
+            // selectedVideos.clear();
+            // videoIds.clear();
+            selectedVideosThumbnails.clear();
             descriptionCon.clear();
             tagCon.clear();
             locationCon.clear();
@@ -221,6 +225,16 @@ class HomeController extends GetxController {
     return imagesToUpload;
   }
 
+  Future uploadSingleImage(XFile image) async {
+    Reference ref = await fstorage.ref().child(
+      'postImages/images/${DateTime.now().toString()}',
+    );
+    await ref.putFile(
+      File(image.path),
+    );
+    return ref.getDownloadURL();
+  }
+
   Future uploadAllVideos() async {
     for (int i = 0; i < selectedVideos.length; i++) {
       var thumbnailRef = await fstorage.ref().child('postImages/images/${DateTime.now().toString()}');
@@ -234,15 +248,7 @@ class HomeController extends GetxController {
     }
   }
 
-  Future uploadSingleImage(XFile image) async {
-    Reference ref = await fstorage.ref().child(
-          'postImages/images/${DateTime.now().toString()}',
-        );
-    await ref.putFile(
-      File(image.path),
-    );
-    return ref.getDownloadURL();
-  }
+
 
   void removeImage(int index) {
     selectedImages.removeAt(index);

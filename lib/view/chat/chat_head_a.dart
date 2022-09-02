@@ -256,6 +256,7 @@ class SimpleChatHeads extends StatelessWidget {
                             onCancel: () => Get.back(),
                             onConfirm: () async {
                               try {
+                                Get.back();
                                 await chatController.deleteAChatRoom(
                                     chatRoomId: chatRoomId);
                               } catch (e) {

@@ -1,11 +1,16 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
@@ -15,12 +20,14 @@ import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/collections.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/utils/validators.dart';
+import 'package:vip_picnic/view/home/post_video_preview_from_file.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/my_appbar.dart';
 import 'package:vip_picnic/view/widget/my_button.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:vip_picnic/view/widget/my_textfields.dart';
 import 'package:vip_picnic/view/widget/snack_bar.dart';
+import 'package:vip_picnic/view/widget/video_preview.dart';
 
 // ignore: must_be_immutable
 class EditPost extends StatefulWidget {
@@ -38,7 +45,14 @@ class _EditPostState extends State<EditPost> {
   TextEditingController tagController = TextEditingController();
   RxList<XFile> newlyPickedImages = List<XFile>.from([]).obs;
   RxList<String> postImages = List<String>.from([]).obs;
+  RxList<String> postVideos = List<String>.from([]).obs;
+  RxList<String> postVideosThumbnailUrls = List<String>.from([]).obs;
   List<String> imagesToUpload = [];
+  RxList newlySelectedVideos = [].obs;
+  RxList newlySelectedVideosThumbnails = [].obs;
+  List<String> newThumbnailsUrls = [];
+  List<String> newVideoIds = [];
+
   List<String> userIds = [];
   List<String> taggedPeople = [];
   List<String> taggedPeopleToken = [];
@@ -53,6 +67,8 @@ class _EditPostState extends State<EditPost> {
     descController.text = widget.postModel?.postTitle ?? "";
 
     postImages.value = widget.postModel?.postImages ?? [];
+    postVideos.value = widget.postModel?.postVideos ?? [];
+    postVideosThumbnailUrls.value = widget.postModel?.thumbnailsUrls ?? [];
     taggedPeople = widget.postModel?.taggedPeople ?? [];
 
     bool isPostModelTaggedPeopleIdsEmpty = widget.postModel?.taggedPeople?.isEmpty ?? true;
@@ -74,13 +90,43 @@ class _EditPostState extends State<EditPost> {
     super.initState();
   }
 
-  Future pickImages(
-    BuildContext context,
-  ) async {
+  Future pickImages(BuildContext context) async {
     try {
       List<XFile>? images = await ImagePicker().pickMultiImage();
       if (images != null) {
-        newlyPickedImages.value = images;
+        log("adding images to newlypicked images newlyPickedImages: $newlyPickedImages");
+        newlyPickedImages.addAll(images);
+        log("newlyPickedImages: $newlyPickedImages");
+      } else {
+        return [].obs;
+      }
+    } on PlatformException catch (e) {
+      showMsg(
+        msg: e.message,
+        bgColor: Colors.red,
+        context: context,
+      );
+    }
+  }
+
+  Future pickVideo(BuildContext context) async {
+    try {
+      XFile? videoFile = await ImagePicker().pickVideo(source: ImageSource.gallery);
+      String videoPath = videoFile?.path ?? "";
+
+      if (videoFile != null) {
+        Directory tempDirectory = await getTemporaryDirectory();
+        String path = tempDirectory.path;
+        final thumbnailFile = await VideoThumbnail.thumbnailFile(
+          video: videoPath,
+          thumbnailPath: path,
+          imageFormat: ImageFormat.WEBP,
+          maxHeight: 64,
+          // specify the height of the thumbnail, let the width auto-scaled to keep the source aspect ratio
+          quality: 100,
+        );
+        newlySelectedVideos.add(videoFile);
+        newlySelectedVideosThumbnails.add(thumbnailFile);
       } else {
         return [].obs;
       }
@@ -110,6 +156,19 @@ class _EditPostState extends State<EditPost> {
     return ref.getDownloadURL();
   }
 
+  Future uploadAllVideos() async {
+    for (int i = 0; i < newlySelectedVideos.length; i++) {
+      var thumbnailRef = await fstorage.ref().child('postImages/images/${DateTime.now().toString()}');
+      String videoId = Uuid().v1();
+      newVideoIds.add(videoId);
+      await thumbnailRef.putFile(File(newlySelectedVideosThumbnails[i] ?? "")).then((p0) async {
+        await p0.ref.getDownloadURL().then((value) {
+          newThumbnailsUrls.add(value);
+        });
+      });
+    }
+  }
+
   Future uploadPost(BuildContext context) async {
     showDialog(
       context: context,
@@ -118,21 +177,58 @@ class _EditPostState extends State<EditPost> {
         return loading();
       },
     );
-    if (postImages.isNotEmpty || descController.text.isNotEmpty) {
+    if (newlyPickedImages.isNotEmpty || newlySelectedVideos.isNotEmpty || descController.text.isNotEmpty) {
       var postID = widget.postModel?.postID;
       try {
         await uploadAllImages();
+        await uploadAllVideos();
         log('Images UPLOADED!');
+        log("newVideoIds: $newVideoIds");
+        log("newlySelectedVideos: $newlySelectedVideos");
+        log("newlySelectedVideos: $newlySelectedVideos");
         Map<String, dynamic> updatedPostMap = {
           "postImages": postImages,
+          "videoIds": newVideoIds,
+          "thumbnailsUrls": FieldValue.arrayUnion(newThumbnailsUrls),
           "postTitle": descController.text.trim(),
           "taggedPeople": taggedPeople,
+          "uploadUrls": FieldValue.delete(),
           "taggedPeopleToken": taggedPeopleToken,
           "location": locationController.text.trim(),
         };
         log('Data assigned to POST MODEL CLASS!');
         await posts.doc(postID).update(updatedPostMap).then(
-          (value) {
+          (value) async {
+            StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? postDocStream;
+            postDocStream = await ffstore.collection(postsCollection).doc(postID).snapshots().listen((event) async {
+              log("inside the postDoc stream");
+              bool containsUploadUrl = event.data()?.containsKey("uploadUrls") ?? false;
+              if (containsUploadUrl) {
+                log("inside containsUploadUrl");
+                // final taskId =
+                List<String> uploadUrls = List<String>.from(event.data()?["uploadUrls"].map((x) => x));
+
+                for (int i = 0; i < newlySelectedVideos.length; i++) {
+                  log("inside loop where we are enqueuing uploads");
+                  await FlutterUploader().enqueue(
+                    RawUpload(
+                      url: uploadUrls[i], // required: url to upload to
+                      path: newlySelectedVideos[i].path, // required: list of files that you want to upload
+                      method: UploadMethod.PUT, // HTTP method  (POST or PUT or PATCH)
+                      // headers: {"apikey": "api_123456", "userkey": "userkey_123456"},
+                      tag: 'post video uploading', // custom tag which is returned in result/progress
+                    ),
+                  );
+                }
+
+                if (postDocStream != null) {
+                  log("canceling the post doc stream");
+                  postDocStream.cancel();
+                }
+              }
+            });
+
+
             log('Data set to FIREBASE!');
             navigatorKey.currentState!.pop();
             navigatorKey.currentState!.pop();
@@ -159,6 +255,18 @@ class _EditPostState extends State<EditPost> {
         context: context,
       );
     }
+  }
+
+
+
+  // void removeImage(int index) {
+  //   selectedImages.removeAt(index);
+  // }
+
+  void removeVideo(int index) {
+    newlySelectedVideos.removeAt(index);
+    newlySelectedVideosThumbnails.removeAt(index);
+    // update();
   }
 
   @override
@@ -193,66 +301,563 @@ class _EditPostState extends State<EditPost> {
                       borderRadius: BorderRadius.circular(16),
                       child: Obx(() {
                         bool isPostModelPostImagesEmpty = postImages.isEmpty;
-                        return GestureDetector(
-                          onTap: () => pickImages(context),
-                          child: isPostModelPostImagesEmpty && newlyPickedImages.isEmpty
-                              ? Image.asset(
-                                  Assets.imagesUploadPicture,
-                                  height: 108.9,
-                                  fit: BoxFit.cover,
-                                )
-                              : Stack(
-                                  children: [
-                                    Obx(() {
-                                      return ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: newlyPickedImages.isNotEmpty
-                                            ? Image.file(
-                                                File(newlyPickedImages[0].path),
-                                                height: Get.height,
-                                                width: Get.width,
-                                                fit: BoxFit.cover,
-                                              )
-                                            : Image.network(
-                                                postImages[0],
-                                                height: Get.height,
-                                                width: Get.width,
-                                                fit: BoxFit.cover,
-                                              ),
-                                      );
-                                    }),
-                                    Positioned(
-                                      top: 10,
-                                      right: 10,
-                                      child: GestureDetector(
-                                        onTap: () async {
-                                          if (newlyPickedImages.isNotEmpty) {
-                                            newlyPickedImages.removeAt(0);
-                                          } else {
-                                            String link = postImages[0];
-                                            postImages.remove(postImages[0]);
-                                            await fstorage.refFromURL(link).delete().then((value) async {
-                                              await posts.doc(widget.postModel?.postID).update({"postImages": postImages,});
-                                            });
-                                          }
+                        if (newlyPickedImages.isNotEmpty) {
+                          return GestureDetector(
+                            onTap: () => showModalBottomSheet(
+                              context: context,
+                              builder: (context) {
+                                return Container(
+                                  height: 180,
+                                  decoration: BoxDecoration(
+                                    color: kPrimaryColor,
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      ListTile(
+                                        onTap: () {
+                                          pickImages(context);
                                         },
-                                        child: Container(
-                                          height: 30,
-                                          width: 30,
-                                          decoration: BoxDecoration(
-                                            color: Colors.red,
-                                            borderRadius: BorderRadius.circular(6),
+                                        leading: Image.asset(
+                                          Assets.imagesGallery,
+                                          color: kGreyColor,
+                                          height: 35,
+                                        ),
+                                        title: MyText(
+                                          text: 'Image',
+                                          size: 20,
+                                        ),
+                                      ),
+                                      ListTile(
+                                        onTap: () => pickVideo(context),
+                                        // ImageSource.gallery
+                                        leading: Image.asset(
+                                          Assets.imagesFilm,
+                                          height: 35,
+                                          color: kGreyColor,
+                                        ),
+                                        title: MyText(
+                                          text: 'Video',
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                              isScrollControlled: true,
+                            ),
+                            child: newlyPickedImages.isEmpty
+                                ? Image.asset(
+                                    Assets.imagesUploadPicture,
+                                    height: 108.9,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Stack(
+                                    children: [
+                                      Obx(() {
+                                        return ClipRRect(
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: Image.file(
+                                            File(newlyPickedImages[0].path),
+                                            height: Get.height,
+                                            width: Get.width,
+                                            fit: BoxFit.cover,
                                           ),
-                                          child: Icon(
-                                            Icons.close,
-                                            size: 20,
+                                        );
+                                      }),
+                                      Positioned(
+                                        top: 10,
+                                        right: 10,
+                                        child: GestureDetector(
+                                          onTap: () async {
+                                            // if (newlyPickedImages.isNotEmpty) {
+                                            newlyPickedImages.removeAt(0);
+                                            // } else {
+                                            //   String link = postImages[0];
+                                            //   postImages.remove(postImages[0]);
+                                            //   await fstorage.refFromURL(link).delete().then((value) async {
+                                            //     await posts.doc(widget.postModel?.postID).update({"postImages": postImages,});
+                                            //   });
+                                            // }
+                                          },
+                                          child: Container(
+                                            height: 30,
+                                            width: 30,
+                                            decoration: BoxDecoration(
+                                              color: Colors.red,
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            child: Icon(
+                                              Icons.close,
+                                              size: 20,
+                                              color: kPrimaryColor,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                          );
+                          // return ClipRRect(
+                          //   borderRadius: BorderRadius.circular(8),
+                          //   child: Image.file(
+                          //     File(newlyPickedImages[0].path),
+                          //     height: Get.height,
+                          //     width: Get.width,
+                          //     fit: BoxFit.cover,
+                          //   ),
+                          // );
+                        } else if (newlySelectedVideos.isNotEmpty) {
+                          return GestureDetector(
+                            onTap: () => showModalBottomSheet(
+                              context: context,
+                              builder: (context) {
+                                return Container(
+                                  height: 180,
+                                  decoration: BoxDecoration(
+                                    color: kPrimaryColor,
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      ListTile(
+                                        onTap: () {
+                                          pickImages(context);
+                                        },
+                                        leading: Image.asset(
+                                          Assets.imagesGallery,
+                                          color: kGreyColor,
+                                          height: 35,
+                                        ),
+                                        title: MyText(
+                                          text: 'Image',
+                                          size: 20,
+                                        ),
+                                      ),
+                                      ListTile(
+                                        onTap: () => pickVideo(context),
+                                        // ImageSource.gallery
+                                        leading: Image.asset(
+                                          Assets.imagesFilm,
+                                          height: 35,
+                                          color: kGreyColor,
+                                        ),
+                                        title: MyText(
+                                          text: 'Video',
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                              isScrollControlled: true,
+                            ),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  height: Get.height,
+                                  width: Get.width,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.file(
+                                      File(
+                                        newlySelectedVideosThumbnails[0],
+                                      ),
+                                      height: Get.height,
+                                      width: Get.width,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                AnimatedOpacity(
+                                  opacity: 1.0,
+                                  duration: Duration(
+                                    milliseconds: 500,
+                                  ),
+                                  child: Container(
+                                    height: 55,
+                                    width: 55,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: kBlackColor.withOpacity(0.5),
+                                    ),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        onTap: () {
+                                          Get.to(() => PostVideoPreview(
+                                                videoFile: newlySelectedVideos[0],
+                                              ));
+                                        },
+                                        borderRadius: BorderRadius.circular(100),
+                                        splashColor: kPrimaryColor.withOpacity(0.1),
+                                        highlightColor: kPrimaryColor.withOpacity(0.1),
+                                        child: Center(
+                                          child: Image.asset(
+                                            Assets.imagesPlay,
+                                            height: 23,
                                             color: kPrimaryColor,
                                           ),
                                         ),
                                       ),
                                     ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 10,
+                                  right: 10,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      newlySelectedVideosThumbnails.removeAt(0);
+                                      newlySelectedVideos.removeAt(0);
+                                    },
+                                    child: Container(
+                                      height: 30,
+                                      width: 30,
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Icon(
+                                        Icons.close,
+                                        size: 20,
+                                        color: kPrimaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        } else if (postImages.isNotEmpty) {
+                          return GestureDetector(
+                            onTap: () => showModalBottomSheet(
+                              context: context,
+                              builder: (context) {
+                                return Container(
+                                  height: 180,
+                                  decoration: BoxDecoration(
+                                    color: kPrimaryColor,
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      ListTile(
+                                        onTap: () {
+                                          pickImages(context);
+                                        },
+                                        leading: Image.asset(
+                                          Assets.imagesGallery,
+                                          color: kGreyColor,
+                                          height: 35,
+                                        ),
+                                        title: MyText(
+                                          text: 'Image',
+                                          size: 20,
+                                        ),
+                                      ),
+                                      ListTile(
+                                        onTap: () => pickVideo(context),
+                                        // ImageSource.gallery
+                                        leading: Image.asset(
+                                          Assets.imagesFilm,
+                                          height: 35,
+                                          color: kGreyColor,
+                                        ),
+                                        title: MyText(
+                                          text: 'Video',
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                              isScrollControlled: true,
+                            ),
+                            child: Stack(
+                              children: [
+                                Obx(() {
+                                  return ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.network(
+                                      postImages[0],
+                                      height: Get.height,
+                                      width: Get.width,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  );
+                                }),
+                                Positioned(
+                                  top: 10,
+                                  right: 10,
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      if (newlyPickedImages.isNotEmpty) {
+                                        newlyPickedImages.removeAt(0);
+                                      } else {
+                                        String link = postImages[0];
+                                        postImages.remove(postImages[0]);
+                                        await fstorage.refFromURL(link).delete().then((value) async {
+                                          await posts.doc(widget.postModel?.postID).update({
+                                            "postImages": postImages,
+                                          });
+                                        });
+                                      }
+                                    },
+                                    child: Container(
+                                      height: 30,
+                                      width: 30,
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Icon(
+                                        Icons.close,
+                                        size: 20,
+                                        color: kPrimaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        } else if (postVideos.isNotEmpty) {
+                          return GestureDetector(
+                            onTap: () => showModalBottomSheet(
+                              context: context,
+                              builder: (context) {
+                                return Container(
+                                  height: 180,
+                                  decoration: BoxDecoration(
+                                    color: kPrimaryColor,
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      ListTile(
+                                        onTap: () {
+                                          pickImages(context);
+                                        },
+                                        leading: Image.asset(
+                                          Assets.imagesGallery,
+                                          color: kGreyColor,
+                                          height: 35,
+                                        ),
+                                        title: MyText(
+                                          text: 'Image',
+                                          size: 20,
+                                        ),
+                                      ),
+                                      ListTile(
+                                        onTap: () => pickVideo(context),
+                                        // ImageSource.gallery
+                                        leading: Image.asset(
+                                          Assets.imagesFilm,
+                                          height: 35,
+                                          color: kGreyColor,
+                                        ),
+                                        title: MyText(
+                                          text: 'Video',
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                              isScrollControlled: true,
+                            ),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  height: Get.height,
+                                  width: Get.width,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.network(
+                                      postVideosThumbnailUrls[0],
+                                      height: Get.height,
+                                      width: Get.width,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                AnimatedOpacity(
+                                  opacity: 1.0,
+                                  duration: Duration(
+                                    milliseconds: 500,
+                                  ),
+                                  child: Container(
+                                    height: 55,
+                                    width: 55,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: kBlackColor.withOpacity(0.5),
+                                    ),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        onTap: () {
+                                          Get.to(() => VideoPreview(
+                                                videoUrl: postVideos[0],
+                                              ));
+                                        },
+                                        borderRadius: BorderRadius.circular(100),
+                                        splashColor: kPrimaryColor.withOpacity(0.1),
+                                        highlightColor: kPrimaryColor.withOpacity(0.1),
+                                        child: Center(
+                                          child: Image.asset(
+                                            Assets.imagesPlay,
+                                            height: 23,
+                                            color: kPrimaryColor,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 10,
+                                  right: 10,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      postVideosThumbnailUrls.removeAt(0);
+                                      postVideos.removeAt(0);
+                                    },
+                                    child: Container(
+                                      height: 30,
+                                      width: 30,
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Icon(
+                                        Icons.close,
+                                        size: 20,
+                                        color: kPrimaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            // Stack(
+                            //   children: [
+                            //     Obx(() {
+                            //       return ClipRRect(
+                            //         borderRadius: BorderRadius.circular(8),
+                            //         child: Image.network(
+                            //           postVideosThumbnailUrls[0],
+                            //           height: Get.height,
+                            //           width: Get.width,
+                            //           fit: BoxFit.cover,
+                            //         ),
+                            //       );
+                            //     }),
+                            //     Positioned(
+                            //       top: 10,
+                            //       right: 10,
+                            //       child: GestureDetector(
+                            //         onTap: () async {
+                            //           if (newlyPickedImages.isNotEmpty) {
+                            //             newlyPickedImages.removeAt(0);
+                            //           } else {
+                            //             String link = postImages[0];
+                            //             postImages.remove(postImages[0]);
+                            //             await fstorage.refFromURL(link).delete().then((value) async {
+                            //               await posts.doc(widget.postModel?.postID).update({"postImages": postImages,});
+                            //             });
+                            //           }
+                            //         },
+                            //         child: Container(
+                            //           height: 30,
+                            //           width: 30,
+                            //           decoration: BoxDecoration(
+                            //             color: Colors.red,
+                            //             borderRadius: BorderRadius.circular(6),
+                            //           ),
+                            //           child: Icon(
+                            //             Icons.close,
+                            //             size: 20,
+                            //             color: kPrimaryColor,
+                            //           ),
+                            //         ),
+                            //       ),
+                            //     ),
+                            //   ],
+                            // ),
+                          );
+                          // return ClipRRect(
+                          //   borderRadius: BorderRadius.circular(8),
+                          //   child: Image.network(
+                          //     postVideosThumbnailUrls[0],
+                          //     height: Get.height,
+                          //     width: Get.width,
+                          //     fit: BoxFit.cover,
+                          //   ),
+                          // );
+                        }
+                        return GestureDetector(
+                          onTap: () => showModalBottomSheet(
+                            context: context,
+                            builder: (context) {
+                              return Container(
+                                height: 180,
+                                decoration: BoxDecoration(
+                                  color: kPrimaryColor,
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    ListTile(
+                                      onTap: () {
+                                        pickImages(context);
+                                      },
+                                      leading: Image.asset(
+                                        Assets.imagesGallery,
+                                        color: kGreyColor,
+                                        height: 35,
+                                      ),
+                                      title: MyText(
+                                        text: 'Image',
+                                        size: 20,
+                                      ),
+                                    ),
+                                    ListTile(
+                                      onTap: () => pickVideo(context),
+                                      // ImageSource.gallery
+                                      leading: Image.asset(
+                                        Assets.imagesFilm,
+                                        height: 35,
+                                        color: kGreyColor,
+                                      ),
+                                      title: MyText(
+                                        text: 'Video',
+                                        size: 20,
+                                      ),
+                                    ),
                                   ],
                                 ),
+                              );
+                            },
+                            isScrollControlled: true,
+                          ),
+                          child: Image.asset(
+                            Assets.imagesUploadPicture,
+                            height: 108.9,
+                            fit: BoxFit.cover,
+                          ),
                         );
                       }),
                     ),
@@ -263,204 +868,615 @@ class _EditPostState extends State<EditPost> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      isPostModelPostImagesEmpty && newlyPickedImages.isEmpty
-                          ? SizedBox()
-                          : !isPostModelPostImagesEmpty && newlyPickedImages.isNotEmpty
-                              ? Column(
+                      //+ images list
+                      Container(
+                        margin: EdgeInsets.only(
+                          top: 20,
+                        ),
+                        height: 100,
+                        child: ListView.builder(
+                          physics: BouncingScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: newlyPickedImages.length + postImages.length,
+                          scrollDirection: Axis.horizontal,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 7,
+                          ),
+                          itemBuilder: (context, index) {
+                            if (index < newlyPickedImages.length) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 7,
+                                ),
+                                child: Stack(
                                   children: [
-                                    Container(
-                                      margin: EdgeInsets.only(
-                                        top: 20,
-                                      ),
-                                      height: 100,
-                                      child: ListView.builder(
-                                        physics: BouncingScrollPhysics(),
-                                        shrinkWrap: true,
-                                        itemCount: newlyPickedImages.length,
-                                        scrollDirection: Axis.horizontal,
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 7,
-                                        ),
-                                        itemBuilder: (context, index) {
-                                          return Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 7,
-                                            ),
-                                            child: Stack(
-                                              children: [
-                                                ClipRRect(
-                                                  borderRadius: BorderRadius.circular(8),
-                                                  child: Image.file(
-                                                    File(newlyPickedImages[index].path),
-                                                    height: 100,
-                                                    width: 100,
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                ),
-                                                Positioned(
-                                                  top: 5,
-                                                  right: 5,
-                                                  child: GestureDetector(
-                                                    onTap: () async {
-                                                      newlyPickedImages.removeAt(index);
-                                                      // await fstorage
-                                                      //     .refFromURL(widget.postModel?.postImages![index] ?? "")
-                                                      //     .delete()
-                                                      //     .then((value) {
-                                                      //   widget.postModel?.postImages
-                                                      //       ?.remove(widget.postModel?.postImages![index]);
-                                                      // });
-                                                    },
-                                                    child: Container(
-                                                      height: 20,
-                                                      width: 20,
-                                                      decoration: BoxDecoration(
-                                                        color: Colors.red,
-                                                        borderRadius: BorderRadius.circular(6),
-                                                      ),
-                                                      child: Icon(
-                                                        Icons.close,
-                                                        size: 15,
-                                                        color: kPrimaryColor,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        },
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.file(
+                                        File(newlyPickedImages[index].path),
+                                        height: 100,
+                                        width: 100,
+                                        fit: BoxFit.cover,
                                       ),
                                     ),
-                                    Container(
-                                      margin: EdgeInsets.only(
-                                        top: 20,
-                                      ),
-                                      height: 100,
-                                      child: Obx(() {
-                                        return ListView.builder(
-                                          physics: BouncingScrollPhysics(),
-                                          shrinkWrap: true,
-                                          itemCount: postImages.length,
-                                          scrollDirection: Axis.horizontal,
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: 7,
+                                    Positioned(
+                                      top: 5,
+                                      right: 5,
+                                      child: GestureDetector(
+                                        onTap: () async {
+                                          newlyPickedImages.removeAt(index);
+                                          // await fstorage
+                                          //     .refFromURL(widget.postModel?.postImages![index] ?? "")
+                                          //     .delete()
+                                          //     .then((value) {
+                                          //   widget.postModel?.postImages
+                                          //       ?.remove(widget.postModel?.postImages![index]);
+                                          // });
+                                        },
+                                        child: Container(
+                                          height: 20,
+                                          width: 20,
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            borderRadius: BorderRadius.circular(6),
                                           ),
-                                          itemBuilder: (context, index) {
-                                            return Padding(
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 7,
-                                              ),
-                                              child: Stack(
-                                                children: [
-                                                  ClipRRect(
-                                                    borderRadius: BorderRadius.circular(8),
-                                                    child: Image.network(
-                                                      postImages[index],
-                                                      height: 100,
-                                                      width: 100,
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  ),
-                                                  Positioned(
-                                                    top: 5,
-                                                    right: 5,
-                                                    child: GestureDetector(
-                                                      onTap: () async {
-                                                        log("delete clicked for post previous image deletion");
-                                                        String link = postImages[index];
-                                                        postImages.remove(postImages[index]);
-                                                        await fstorage.refFromURL(link).delete().then((value) async {
-                                                          await posts.doc(widget.postModel?.postID).update({"postImages": postImages,});
-                                                        });
-                                                      },
-                                                      child: Container(
-                                                        height: 20,
-                                                        width: 20,
-                                                        decoration: BoxDecoration(
-                                                          color: Colors.red,
-                                                          borderRadius: BorderRadius.circular(6),
-                                                        ),
-                                                        child: Icon(
-                                                          Icons.close,
-                                                          size: 15,
-                                                          color: kPrimaryColor,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          },
-                                        );
-                                      }),
+                                          child: Icon(
+                                            Icons.close,
+                                            size: 15,
+                                            color: kPrimaryColor,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ],
-                                )
-                              : Container(
-                                  margin: EdgeInsets.only(
-                                    top: 20,
-                                  ),
-                                  height: 100,
-                                  child: Obx(() {
-                                    return ListView.builder(
-                                      physics: BouncingScrollPhysics(),
-                                      shrinkWrap: true,
-                                      itemCount: postImages.length,
-                                      scrollDirection: Axis.horizontal,
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 7,
-                                      ),
-                                      itemBuilder: (context, index) {
-                                        return Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 7,
-                                          ),
-                                          child: Stack(
-                                            children: [
-                                              ClipRRect(
-                                                borderRadius: BorderRadius.circular(8),
-                                                child: Image.network(
-                                                  postImages[index],
-                                                  height: 100,
-                                                  width: 100,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
-                                              Positioned(
-                                                top: 5,
-                                                right: 5,
-                                                child: GestureDetector(
-                                                  onTap: () async {
-                                                    String link = postImages[index];
-                                                    postImages.remove(postImages[index]);
-                                                    await fstorage.refFromURL(link).delete().then((value) async {
-                                                      await posts.doc(widget.postModel?.postID).update({"postImages": postImages,});
-                                                    });
-                                                  },
-                                                  child: Container(
-                                                    height: 20,
-                                                    width: 20,
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.red,
-                                                      borderRadius: BorderRadius.circular(6),
-                                                    ),
-                                                    child: Icon(
-                                                      Icons.close,
-                                                      size: 15,
-                                                      color: kPrimaryColor,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  }),
                                 ),
+                              );
+                            } else {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 7,
+                                ),
+                                child: Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(
+                                        postImages[index - newlyPickedImages.length],
+                                        height: 100,
+                                        width: 100,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 5,
+                                      right: 5,
+                                      child: GestureDetector(
+                                        onTap: () async {
+                                          log("delete clicked for post previous image deletion");
+                                          String link = postImages[index - newlyPickedImages.length];
+                                          postImages.remove(postImages[index - newlyPickedImages.length]);
+                                          await fstorage.refFromURL(link).delete().then((value) async {
+                                            await posts.doc(widget.postModel?.postID).update({
+                                              "postImages": postImages,
+                                            });
+                                          });
+                                        },
+                                        child: Container(
+                                          height: 20,
+                                          width: 20,
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Icon(
+                                            Icons.close,
+                                            size: 15,
+                                            color: kPrimaryColor,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                            // return Padding(
+                            //   padding: const EdgeInsets.symmetric(
+                            //     horizontal: 7,
+                            //   ),
+                            //   child: Stack(
+                            //     children: [
+                            //       ClipRRect(
+                            //         borderRadius: BorderRadius.circular(8),
+                            //         child: Image.file(
+                            //           File(newlyPickedImages[index].path),
+                            //           height: 100,
+                            //           width: 100,
+                            //           fit: BoxFit.cover,
+                            //         ),
+                            //       ),
+                            //       Positioned(
+                            //         top: 5,
+                            //         right: 5,
+                            //         child: GestureDetector(
+                            //           onTap: () async {
+                            //             newlyPickedImages.removeAt(index);
+                            //             // await fstorage
+                            //             //     .refFromURL(widget.postModel?.postImages![index] ?? "")
+                            //             //     .delete()
+                            //             //     .then((value) {
+                            //             //   widget.postModel?.postImages
+                            //             //       ?.remove(widget.postModel?.postImages![index]);
+                            //             // });
+                            //           },
+                            //           child: Container(
+                            //             height: 20,
+                            //             width: 20,
+                            //             decoration: BoxDecoration(
+                            //               color: Colors.red,
+                            //               borderRadius: BorderRadius.circular(6),
+                            //             ),
+                            //             child: Icon(
+                            //               Icons.close,
+                            //               size: 15,
+                            //               color: kPrimaryColor,
+                            //             ),
+                            //           ),
+                            //         ),
+                            //       ),
+                            //     ],
+                            //   ),
+                            // );
+                          },
+                        ),
+                      ),
+                      //+ Videos List
+                      Container(
+                        margin: EdgeInsets.only(
+                          top: 20,
+                        ),
+                        height: 100,
+                        child: ListView.builder(
+                          physics: BouncingScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: newlySelectedVideos.length + postVideos.length,
+                          scrollDirection: Axis.horizontal,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 7,
+                          ),
+                          itemBuilder: (context, index) {
+                            //+for newly selected videos
+                            if (index < newlySelectedVideos.length) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 7,
+                                ),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Container(
+                                      height: 100,
+                                      width: 100,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.file(
+                                          File(
+                                            newlySelectedVideosThumbnails[index],
+                                          ),
+                                          height: 100,
+                                          width: 100,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                    AnimatedOpacity(
+                                      opacity: 1.0,
+                                      duration: Duration(
+                                        milliseconds: 500,
+                                      ),
+                                      child: Container(
+                                        height: 55,
+                                        width: 55,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: kBlackColor.withOpacity(0.5),
+                                        ),
+                                        child: Material(
+                                          color: Colors.transparent,
+                                          child: InkWell(
+                                            onTap: () {
+                                              Get.to(() => PostVideoPreview(
+                                                videoFile: newlySelectedVideos[index],
+                                              ));
+                                            },
+                                            borderRadius: BorderRadius.circular(100),
+                                            splashColor: kPrimaryColor.withOpacity(0.1),
+                                            highlightColor: kPrimaryColor.withOpacity(0.1),
+                                            child: Center(
+                                              child: Image.asset(
+                                                Assets.imagesPlay,
+                                                height: 23,
+                                                color: kPrimaryColor,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 10,
+                                      right: 10,
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          removeVideo(index);
+                                        },
+                                        child: Container(
+                                          height: 20,
+                                          width: 20,
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Icon(
+                                            Icons.close,
+                                            size: 15,
+                                            color: kPrimaryColor,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            } else {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 7,
+                                ),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Container(
+                                      height: 100,
+                                      width: 100,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                            postVideosThumbnailUrls[index - newlySelectedVideos.length],
+                                          height: 100,
+                                          width: 100,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                    AnimatedOpacity(
+                                      opacity: 1.0,
+                                      duration: Duration(
+                                        milliseconds: 500,
+                                      ),
+                                      child: Container(
+                                        height: 55,
+                                        width: 55,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: kBlackColor.withOpacity(0.5),
+                                        ),
+                                        child: Material(
+                                          color: Colors.transparent,
+                                          child: InkWell(
+                                            onTap: () {
+                                              Get.to(() => VideoPreview(
+                                                videoUrl: postVideos[0],
+                                              ));
+                                            },
+                                            borderRadius: BorderRadius.circular(100),
+                                            splashColor: kPrimaryColor.withOpacity(0.1),
+                                            highlightColor: kPrimaryColor.withOpacity(0.1),
+                                            child: Center(
+                                              child: Image.asset(
+                                                Assets.imagesPlay,
+                                                height: 23,
+                                                color: kPrimaryColor,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 10,
+                                      right: 10,
+                                      child: GestureDetector(
+                                        onTap: () async {
+                                          // removeVideo(index);
+                                          log("delete clicked for post previous image deletion");
+                                          String link = postVideos[index - newlySelectedVideos.length];
+                                          String thumbnailLink = postVideosThumbnailUrls[index - newlySelectedVideos.length];
+                                          postVideos.remove(postVideos[index - newlySelectedVideos.length]);
+                                          postVideosThumbnailUrls.remove(postVideosThumbnailUrls[index - newlySelectedVideos.length]);
+                                          await fstorage.refFromURL(link).delete().then((value) async {
+                                            await fstorage.refFromURL(thumbnailLink).delete();
+                                            await posts.doc(widget.postModel?.postID).update({
+                                              "postVideos": postVideos,
+                                              "thumbnailsUrls": postVideosThumbnailUrls,
+                                            });
+                                          });
+                                        },
+                                        child: Container(
+                                          height: 20,
+                                          width: 20,
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Icon(
+                                            Icons.close,
+                                            size: 15,
+                                            color: kPrimaryColor,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                            // return Padding(
+                            //   padding: const EdgeInsets.symmetric(
+                            //     horizontal: 7,
+                            //   ),
+                            //   child: Stack(
+                            //     children: [
+                            //       ClipRRect(
+                            //         borderRadius: BorderRadius.circular(8),
+                            //         child: Image.file(
+                            //           File(newlyPickedImages[index].path),
+                            //           height: 100,
+                            //           width: 100,
+                            //           fit: BoxFit.cover,
+                            //         ),
+                            //       ),
+                            //       Positioned(
+                            //         top: 5,
+                            //         right: 5,
+                            //         child: GestureDetector(
+                            //           onTap: () async {
+                            //             newlyPickedImages.removeAt(index);
+                            //             // await fstorage
+                            //             //     .refFromURL(widget.postModel?.postImages![index] ?? "")
+                            //             //     .delete()
+                            //             //     .then((value) {
+                            //             //   widget.postModel?.postImages
+                            //             //       ?.remove(widget.postModel?.postImages![index]);
+                            //             // });
+                            //           },
+                            //           child: Container(
+                            //             height: 20,
+                            //             width: 20,
+                            //             decoration: BoxDecoration(
+                            //               color: Colors.red,
+                            //               borderRadius: BorderRadius.circular(6),
+                            //             ),
+                            //             child: Icon(
+                            //               Icons.close,
+                            //               size: 15,
+                            //               color: kPrimaryColor,
+                            //             ),
+                            //           ),
+                            //         ),
+                            //       ),
+                            //     ],
+                            //   ),
+                            // );
+                          },
+                        ),
+                      ),
+
+                      // postImages.isNotEmpty ||
+                      //         newlyPickedImages.isNotEmpty ||
+                      //         postVideos.isNotEmpty ||
+                      //         newlySelectedVideos.isNotEmpty
+                      //     ? Column(
+                      //             children: [
+                      //               Container(
+                      //                 margin: EdgeInsets.only(
+                      //                   top: 20,
+                      //                 ),
+                      //                 height: 100,
+                      //                 child: ListView.builder(
+                      //                   physics: BouncingScrollPhysics(),
+                      //                   shrinkWrap: true,
+                      //                   itemCount: newlyPickedImages.length,
+                      //                   scrollDirection: Axis.horizontal,
+                      //                   padding: EdgeInsets.symmetric(
+                      //                     horizontal: 7,
+                      //                   ),
+                      //                   itemBuilder: (context, index) {
+                      //                     return Padding(
+                      //                       padding: const EdgeInsets.symmetric(
+                      //                         horizontal: 7,
+                      //                       ),
+                      //                       child: Stack(
+                      //                         children: [
+                      //                           ClipRRect(
+                      //                             borderRadius: BorderRadius.circular(8),
+                      //                             child: Image.file(
+                      //                               File(newlyPickedImages[index].path),
+                      //                               height: 100,
+                      //                               width: 100,
+                      //                               fit: BoxFit.cover,
+                      //                             ),
+                      //                           ),
+                      //                           Positioned(
+                      //                             top: 5,
+                      //                             right: 5,
+                      //                             child: GestureDetector(
+                      //                               onTap: () async {
+                      //                                 newlyPickedImages.removeAt(index);
+                      //                                 // await fstorage
+                      //                                 //     .refFromURL(widget.postModel?.postImages![index] ?? "")
+                      //                                 //     .delete()
+                      //                                 //     .then((value) {
+                      //                                 //   widget.postModel?.postImages
+                      //                                 //       ?.remove(widget.postModel?.postImages![index]);
+                      //                                 // });
+                      //                               },
+                      //                               child: Container(
+                      //                                 height: 20,
+                      //                                 width: 20,
+                      //                                 decoration: BoxDecoration(
+                      //                                   color: Colors.red,
+                      //                                   borderRadius: BorderRadius.circular(6),
+                      //                                 ),
+                      //                                 child: Icon(
+                      //                                   Icons.close,
+                      //                                   size: 15,
+                      //                                   color: kPrimaryColor,
+                      //                                 ),
+                      //                               ),
+                      //                             ),
+                      //                           ),
+                      //                         ],
+                      //                       ),
+                      //                     );
+                      //                   },
+                      //                 ),
+                      //               ),
+                      //               Container(
+                      //                 margin: EdgeInsets.only(
+                      //                   top: 20,
+                      //                 ),
+                      //                 height: 100,
+                      //                 child: Obx(() {
+                      //                   return ListView.builder(
+                      //                     physics: BouncingScrollPhysics(),
+                      //                     shrinkWrap: true,
+                      //                     itemCount: postImages.length,
+                      //                     scrollDirection: Axis.horizontal,
+                      //                     padding: EdgeInsets.symmetric(
+                      //                       horizontal: 7,
+                      //                     ),
+                      //                     itemBuilder: (context, index) {
+                      //                       return Padding(
+                      //                         padding: const EdgeInsets.symmetric(
+                      //                           horizontal: 7,
+                      //                         ),
+                      //                         child: Stack(
+                      //                           children: [
+                      //                             ClipRRect(
+                      //                               borderRadius: BorderRadius.circular(8),
+                      //                               child: Image.network(
+                      //                                 postImages[index],
+                      //                                 height: 100,
+                      //                                 width: 100,
+                      //                                 fit: BoxFit.cover,
+                      //                               ),
+                      //                             ),
+                      //                             Positioned(
+                      //                               top: 5,
+                      //                               right: 5,
+                      //                               child: GestureDetector(
+                      //                                 onTap: () async {
+                      //                                   log("delete clicked for post previous image deletion");
+                      //                                   String link = postImages[index];
+                      //                                   postImages.remove(postImages[index]);
+                      //                                   await fstorage.refFromURL(link).delete().then((value) async {
+                      //                                     await posts.doc(widget.postModel?.postID).update({
+                      //                                       "postImages": postImages,
+                      //                                     });
+                      //                                   });
+                      //                                 },
+                      //                                 child: Container(
+                      //                                   height: 20,
+                      //                                   width: 20,
+                      //                                   decoration: BoxDecoration(
+                      //                                     color: Colors.red,
+                      //                                     borderRadius: BorderRadius.circular(6),
+                      //                                   ),
+                      //                                   child: Icon(
+                      //                                     Icons.close,
+                      //                                     size: 15,
+                      //                                     color: kPrimaryColor,
+                      //                                   ),
+                      //                                 ),
+                      //                               ),
+                      //                             ),
+                      //                           ],
+                      //                         ),
+                      //                       );
+                      //                     },
+                      //                   );
+                      //                 }),
+                      //               ),
+                      //             ],
+                      //           )
+                      /**/
+                      // : Container(
+                      //     margin: EdgeInsets.only(
+                      //       top: 20,
+                      //     ),
+                      //     height: 100,
+                      //     child: Obx(() {
+                      //       return ListView.builder(
+                      //         physics: BouncingScrollPhysics(),
+                      //         shrinkWrap: true,
+                      //         itemCount: postImages.length,
+                      //         scrollDirection: Axis.horizontal,
+                      //         padding: EdgeInsets.symmetric(
+                      //           horizontal: 7,
+                      //         ),
+                      //         itemBuilder: (context, index) {
+                      //           return Padding(
+                      //             padding: const EdgeInsets.symmetric(
+                      //               horizontal: 7,
+                      //             ),
+                      //             child: Stack(
+                      //               children: [
+                      //                 ClipRRect(
+                      //                   borderRadius: BorderRadius.circular(8),
+                      //                   child: Image.network(
+                      //                     postImages[index],
+                      //                     height: 100,
+                      //                     width: 100,
+                      //                     fit: BoxFit.cover,
+                      //                   ),
+                      //                 ),
+                      //                 Positioned(
+                      //                   top: 5,
+                      //                   right: 5,
+                      //                   child: GestureDetector(
+                      //                     onTap: () async {
+                      //                       String link = postImages[index];
+                      //                       postImages.remove(postImages[index]);
+                      //                       await fstorage.refFromURL(link).delete().then((value) async {
+                      //                         await posts.doc(widget.postModel?.postID).update({
+                      //                           "postImages": postImages,
+                      //                         });
+                      //                       });
+                      //                     },
+                      //                     child: Container(
+                      //                       height: 20,
+                      //                       width: 20,
+                      //                       decoration: BoxDecoration(
+                      //                         color: Colors.red,
+                      //                         borderRadius: BorderRadius.circular(6),
+                      //                       ),
+                      //                       child: Icon(
+                      //                         Icons.close,
+                      //                         size: 15,
+                      //                         color: kPrimaryColor,
+                      //                       ),
+                      //                     ),
+                      //                   ),
+                      //                 ),
+                      //               ],
+                      //             ),
+                      //           );
+                      //         },
+                      //       );
+                      //     }),
+                      //   )
+                      // : SizedBox()
                     ],
                   );
                 }),

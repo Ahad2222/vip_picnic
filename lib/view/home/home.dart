@@ -421,10 +421,19 @@ class Home extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: '',
-        onPressed: () => Navigator.pushNamed(
-          context,
-          AppLinks.addNewPost,
-        ),
+        onPressed: () {
+          homeController.selectedVideos.clear();
+          homeController.videoIds.clear();
+          homeController.selectedImages.clear();
+          homeController.imagesToUpload.clear();
+          homeController.thumbnailsUrls.clear();
+          homeController.selectedVideosThumbnails.clear();
+          homeController.descriptionCon.clear();
+          homeController.tagCon.clear();
+          homeController.locationCon.clear();
+          homeController.taggedPeople = [];
+          Navigator.pushNamed(context, AppLinks.addNewPost);
+        },
         elevation: 5,
         highlightElevation: 1,
         splashColor: kPrimaryColor.withOpacity(0.1),
