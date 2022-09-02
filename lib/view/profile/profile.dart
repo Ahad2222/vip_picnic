@@ -145,7 +145,11 @@ class Profile extends StatelessWidget {
           ];
         },
         body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-          stream: ffstore.collection(postsCollection).where("uID", isEqualTo: auth.currentUser!.uid).snapshots(),
+          stream: ffstore
+              .collection(postsCollection)
+              .where("uID", isEqualTo: auth.currentUser!.uid)
+              .orderBy("createdAtMilliSeconds", descending: true)
+              .snapshots(),
           builder: (
             BuildContext context,
             AsyncSnapshot<QuerySnapshot> snapshot,
@@ -181,26 +185,28 @@ class Profile extends StatelessWidget {
                         onTap: () {
                           Get.to(() => PostDetails(isMyPost: true, isLikeByMe: false, postDocModel: postModel));
                         },
-                        child: postModel.postImages!.isNotEmpty ? Image.network(
-                          postModel.postImages![0],
-                          height: height(context, 1.0),
-                          width: width(context, 1.0),
-                          fit: BoxFit.cover,
-                          errorBuilder: (
-                            BuildContext context,
-                            Object exception,
-                            StackTrace? stackTrace,
-                          ) {
-                            return const Text(' ');
-                          },
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) {
-                              return child;
-                            } else {
-                              return loading();
-                            }
-                          },
-                        ) : Center(child: Text("${postModel.postTitle}")),
+                        child: postModel.postImages!.isNotEmpty
+                            ? Image.network(
+                                postModel.postImages![0],
+                                height: height(context, 1.0),
+                                width: width(context, 1.0),
+                                fit: BoxFit.cover,
+                                errorBuilder: (
+                                  BuildContext context,
+                                  Object exception,
+                                  StackTrace? stackTrace,
+                                ) {
+                                  return const Text(' ');
+                                },
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    return child;
+                                  } else {
+                                    return loading();
+                                  }
+                                },
+                              )
+                            : Center(child: Text("${postModel.postTitle}")),
                       );
                     },
                   );

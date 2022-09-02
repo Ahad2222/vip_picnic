@@ -1,12 +1,18 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/main.dart';
 import 'package:vip_picnic/model/home_model/add_post_model.dart';
 import 'package:vip_picnic/utils/collections.dart';
@@ -29,6 +35,10 @@ class HomeController extends GetxController {
   int? likeCount;
   int? shareCount;
   RxList selectedImages = [].obs;
+  RxList selectedVideos = [].obs;
+  RxList selectedVideosThumbnails = [].obs;
+  List<String> thumbnailsUrls = [];
+  List<String> videoIds = [];
   final pageController = PageController();
   RxInt currentPost = 0.obs;
 
@@ -37,9 +47,7 @@ class HomeController extends GetxController {
     update();
   }
 
-  Future pickImages(
-    BuildContext context,
-  ) async {
+  Future pickImages(BuildContext context) async {
     try {
       List<XFile>? images = await ImagePicker().pickMultiImage();
       if (images != null) {
@@ -57,6 +65,59 @@ class HomeController extends GetxController {
     }
   }
 
+  Future pickVideo(BuildContext context) async {
+    try {
+      XFile? videoFile = await ImagePicker().pickVideo(source: ImageSource.gallery);
+      String videoPath = videoFile?.path ?? "";
+
+      if (videoFile != null) {
+        Directory tempDirectory = await getTemporaryDirectory();
+        String path = tempDirectory.path;
+        final thumbnailFile = await VideoThumbnail.thumbnailFile(
+          video: videoPath,
+          thumbnailPath: path,
+          imageFormat: ImageFormat.WEBP,
+          maxHeight: 64,
+          // specify the height of the thumbnail, let the width auto-scaled to keep the source aspect ratio
+          quality: 100,
+        );
+        selectedVideos.add(videoFile);
+        selectedVideosThumbnails.add(thumbnailFile);
+      } else {
+        return [].obs;
+      }
+      update();
+    } on PlatformException catch (e) {
+      showMsg(
+        msg: e.message,
+        bgColor: Colors.red,
+        context: context,
+      );
+    }
+  }
+
+  // Future getVideoFromGallery() async {
+  //   ImagePicker _picker = ImagePicker();
+  //   await _picker.pickVideo(source: ImageSource.gallery).then((xFile) {
+  //     if (xFile != null) {
+  //       File videoFile = File(xFile.path);
+  //       String videoPath = xFile.path;
+  //       selectedVideos.add(videoFile);
+  //       // showLoading();
+  //       // Get.to(
+  //       //   () => PreviewVideoScreen(
+  //       //     videoPath: videoPath,
+  //       //     anotherUserId: anotherUserID,
+  //       //     anotherUserName: anotherUserName,
+  //       //     chatRoomId: crm.value.chatRoomId,
+  //       //     userId: userID,
+  //       //   ),
+  //       // );
+  //       // uploadImage();
+  //     }
+  //   });
+  // }
+
   Future uploadPost(BuildContext context) async {
     showDialog(
       context: context,
@@ -65,10 +126,11 @@ class HomeController extends GetxController {
         return loading();
       },
     );
-    if (selectedImages.isNotEmpty || descriptionCon.text.isNotEmpty) {
+    if (selectedImages.isNotEmpty || selectedVideos.isNotEmpty || descriptionCon.text.isNotEmpty) {
       var postID = Uuid().v1();
       try {
         await uploadAllImages();
+        await uploadAllVideos();
         log('Images UPLOADED!');
         addPostModel = AddPostModel(
           postID: postID,
@@ -76,6 +138,9 @@ class HomeController extends GetxController {
           postBy: userDetailsModel.fullName,
           profileImage: userDetailsModel.profileImageUrl,
           postImages: imagesToUpload,
+          postVideos: [],
+          videoIds: videoIds,
+          thumbnailsUrls: thumbnailsUrls,
           postTitle: descriptionCon.text.trim(),
           taggedPeople: taggedPeople,
           taggedPeopleToken: taggedPeopleToken,
@@ -91,6 +156,34 @@ class HomeController extends GetxController {
         await posts.doc(postID).set(addPostModel.toJson()).then(
           (value) {
             log('Data set to FIREBASE!');
+            StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? postDocStream;
+            postDocStream = ffstore.collection(postsCollection).doc(postID).snapshots().listen((event) async {
+              log("inside the postDoc stream");
+              bool containsUploadUrl = event.data()?.containsKey("uploadUrls") ?? false;
+              if (containsUploadUrl) {
+                log("inside containsUploadUrl");
+                // final taskId =
+                List<String> uploadUrls = List<String>.from(event.data()?["uploadUrls"].map((x) => x));
+
+                for (int i = 0; i < selectedVideos.length; i++) {
+                  log("inside loop where we are enqueuing uploads");
+                  await FlutterUploader().enqueue(
+                    RawUpload(
+                      url: uploadUrls[i], // required: url to upload to
+                      path: selectedVideos[i].path, // required: list of files that you want to upload
+                      method: UploadMethod.PUT, // HTTP method  (POST or PUT or PATCH)
+                      // headers: {"apikey": "api_123456", "userkey": "userkey_123456"},
+                      tag: 'post video uploading', // custom tag which is returned in result/progress
+                    ),
+                  );
+                }
+
+                if (postDocStream != null) {
+                  log("canceling the post doc stream");
+                  postDocStream.cancel();
+                }
+              }
+            });
             selectedImages = [].obs;
             imagesToUpload = [];
             descriptionCon.clear();
@@ -128,6 +221,19 @@ class HomeController extends GetxController {
     return imagesToUpload;
   }
 
+  Future uploadAllVideos() async {
+    for (int i = 0; i < selectedVideos.length; i++) {
+      var thumbnailRef = await fstorage.ref().child('postImages/images/${DateTime.now().toString()}');
+      String videoId = Uuid().v1();
+      videoIds.add(videoId);
+      await thumbnailRef.putFile(File(selectedVideosThumbnails[i] ?? "")).then((p0) async {
+        await p0.ref.getDownloadURL().then((value) {
+          thumbnailsUrls.add(value);
+        });
+      });
+    }
+  }
+
   Future uploadSingleImage(XFile image) async {
     Reference ref = await fstorage.ref().child(
           'postImages/images/${DateTime.now().toString()}',
@@ -139,10 +245,14 @@ class HomeController extends GetxController {
   }
 
   void removeImage(int index) {
-    selectedImages.removeWhere(
-      (element) => element.path == selectedImages[index].path,
-    );
+    selectedImages.removeAt(index);
     update();
+  }
+
+  void removeVideo(int index) {
+    selectedVideos.removeAt(index);
+    selectedVideosThumbnails.removeAt(index);
+    // update();
   }
 
   @override

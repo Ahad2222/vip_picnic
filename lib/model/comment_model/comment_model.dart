@@ -8,6 +8,7 @@ class CommentModel {
   String? commentText;
   // String? location;
   String? createdAt;
+  int? createdAtMilliSeconds;
   // List<String>? postImages;
   // List<String>? taggedPeople;
   List<String>? likeIDs;
@@ -23,6 +24,7 @@ class CommentModel {
     this.commentText = '',
     // this.location = '',
     this.createdAt,
+    this.createdAtMilliSeconds,
     // this.postImages,
     // this.taggedPeople,
     this.likeIDs,
@@ -39,6 +41,7 @@ class CommentModel {
     commentText: json['commentText'] ?? "",
     // location: json['location'] ?? "",
     createdAt: json['createdAt'] ?? "",
+    createdAtMilliSeconds: (json.containsKey("createdAtMilliSeconds")) ? json['createdAtMilliSeconds'] ?? DateTime.now().millisecondsSinceEpoch : DateTime.now().millisecondsSinceEpoch,
     // postImages: json['postImages'] != null ? List<String>.from(json['postImages'].map((x) => x)) : [],
     // taggedPeople: json['taggedPeople'] != null ? List<String>.from(json['taggedPeople'].map((x) => x)) : [],
     likeIDs: json['likeIDs'] != null ? List<String>.from(json['likeIDs'].map((x) => x)) : [],
@@ -55,6 +58,7 @@ class CommentModel {
     'commentText': commentText,
     // 'location': location,
     'createdAt': createdAt,
+    'createdAtMilliSeconds': createdAtMilliSeconds ?? DateTime.now().millisecondsSinceEpoch,
     // 'postImages': postImages != null ? List<String>.from(postImages!.map((x) => x)) : [],
     // 'taggedPeople': taggedPeople != null ? List<String>.from(taggedPeople!.map((x) => x)) : [],
     'likeIDs': likeIDs != null ? List<String>.from(likeIDs!.map((x) => x)) : [],

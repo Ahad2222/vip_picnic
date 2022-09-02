@@ -2,23 +2,24 @@ import 'dart:io';
 
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/my_appbar.dart';
 
-class VideoPreview extends StatefulWidget {
-  VideoPreview({
-    this.videoUrl,
+class PostVideoPreview extends StatefulWidget {
+  PostVideoPreview({
+    this.videoFile,
   });
 
-  String? videoUrl;
+  XFile? videoFile;
 
   @override
-  State<VideoPreview> createState() => _VideoPreviewState();
+  State<PostVideoPreview> createState() => _PostVideoPreviewState();
 }
 
-class _VideoPreviewState extends State<VideoPreview> {
+class _PostVideoPreviewState extends State<PostVideoPreview> {
   TargetPlatform? _platform;
   late VideoPlayerController _videoPlayerController1;
   ChewieController? _chewieController;
@@ -38,8 +39,7 @@ class _VideoPreviewState extends State<VideoPreview> {
   }
 
   Future<void> initializePlayer() async {
-    _videoPlayerController1 = VideoPlayerController.network(widget.videoUrl ??
-        "https://assets.mixkit.co/videos/preview/mixkit-spinning-around-the-earth-29351-large.mp4");
+    _videoPlayerController1 = VideoPlayerController.file(File(widget.videoFile?.path ?? ""));
     await Future.wait([
       _videoPlayerController1.initialize(),
     ]);
@@ -53,7 +53,7 @@ class _VideoPreviewState extends State<VideoPreview> {
       autoPlay: true,
       looping: false,
       progressIndicatorDelay:
-          bufferDelay != null ? Duration(milliseconds: bufferDelay!) : null,
+      bufferDelay != null ? Duration(milliseconds: bufferDelay!) : null,
       aspectRatio: _videoPlayerController1.value.aspectRatio,
       fullScreenByDefault: true,
       hideControlsTimer: const Duration(seconds: 1),
@@ -67,18 +67,18 @@ class _VideoPreviewState extends State<VideoPreview> {
         children: <Widget>[
           Expanded(
             child: _chewieController != null &&
-                    _chewieController!.videoPlayerController.value.isInitialized
+                _chewieController!.videoPlayerController.value.isInitialized
                 ? Chewie(
-                    controller: _chewieController!,
-                  )
+              controller: _chewieController!,
+            )
                 : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      loading(),
-                      SizedBox(height: 20),
-                      Text('Loading'),
-                    ],
-                  ),
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                loading(),
+                SizedBox(height: 20),
+                Text('Loading'),
+              ],
+            ),
           ),
         ],
       ),
@@ -214,11 +214,11 @@ class _DelaySliderState extends State<DelaySlider> {
         onPressed: saved
             ? null
             : () {
-                widget.onSave(delay);
-                setState(() {
-                  saved = true;
-                });
-              },
+          widget.onSave(delay);
+          setState(() {
+            saved = true;
+          });
+        },
       ),
     );
   }

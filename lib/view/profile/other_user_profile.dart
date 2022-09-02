@@ -240,6 +240,7 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
           stream: ffstore
               .collection(postsCollection)
               .where("uID", isEqualTo: widget.otherUserModel!.uID)
+              .orderBy("createdAtMilliSeconds", descending: true)
               .snapshots(),
           builder: (
             BuildContext context,

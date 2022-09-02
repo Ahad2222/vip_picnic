@@ -63,40 +63,40 @@ async function TextChatsNotiSingle(
 async function TextGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) {
 
   // var senName = snap.data().sendByName;
-    var groupName = "";
-    var groupImage = "";
-    var userList = [];
-    var tokenList = [];
+  var groupName = "";
+  var groupImage = "";
+  var userList = [];
+  var tokenList = [];
 
   functions.logger.log("Group Text multi token method executed");
   functions.logger.log("ChatRoomID is ");
   functions.logger.log(chatRoomId);
 
   await admin
-  .firestore()
-  .collection("GroupChatRoom")
-  .doc(chatRoomId)
-  .get()
-  .then(async (snapshot) => {
-    userList = snapshot.data().users;
-    groupName = snapshot.data().groupName;
-    groupImage = snapshot.data().groupImage;
+    .firestore()
+    .collection("GroupChatRoom")
+    .doc(chatRoomId)
+    .get()
+    .then(async (snapshot) => {
+      userList = snapshot.data().users;
+      groupName = snapshot.data().groupName;
+      groupImage = snapshot.data().groupImage;
 
-    
-    functions.logger.log(`userList: ${userList} before deletion`);
-    removeItemOnce(userList, senderId);
-    functions.logger.log(`userList: ${userList} after deletion`);
 
-    for (const index in userList) {
-      await admin
-        .firestore()
-        .collection("Accounts").doc(userList[index])
-        .get().then((snap) => {
-          tokenList.push(snap.data().fcmToken);
-          functions.logger.log(`list is now: ${tokenList}`);
-        });
-    }
-  });
+      functions.logger.log(`userList: ${userList} before deletion`);
+      removeItemOnce(userList, senderId);
+      functions.logger.log(`userList: ${userList} after deletion`);
+
+      for (const index in userList) {
+        await admin
+          .firestore()
+          .collection("Accounts").doc(userList[index])
+          .get().then((snap) => {
+            tokenList.push(snap.data().fcmToken);
+            functions.logger.log(`list is now: ${tokenList}`);
+          });
+      }
+    });
 
   await admin
     .messaging()
@@ -162,59 +162,59 @@ async function AudioGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) 
   functions.logger.log("ChatRoomID is ");
   functions.logger.log(chatRoomId);
 
-  
+
   var groupName = "";
   var groupImage = "";
   var userList = [];
   var tokenList = [];
 
   await admin
-      .firestore()
-      .collection("GroupChatRoom")
-      .doc(chatRoomId)
-      .get()
-      .then(async  (snapshot) => {
-        userList = snapshot.data().users;
-        groupName = snapshot.data().groupName;
-        groupImage = snapshot.data().groupImage;
+    .firestore()
+    .collection("GroupChatRoom")
+    .doc(chatRoomId)
+    .get()
+    .then(async (snapshot) => {
+      userList = snapshot.data().users;
+      groupName = snapshot.data().groupName;
+      groupImage = snapshot.data().groupImage;
 
-        functions.logger.log(`userList: ${userList} before deletion`);
-        removeItemOnce(userList, senderId);
-        functions.logger.log(`userList: ${userList} after deletion`);
+      functions.logger.log(`userList: ${userList} before deletion`);
+      removeItemOnce(userList, senderId);
+      functions.logger.log(`userList: ${userList} after deletion`);
 
-        for (const index in userList) {
-          await admin
-            .firestore()
-            .collection("Accounts").doc(userList[index])
-            .get().then((snap) => {
-              tokenList.push(snap.data().fcmToken);
-              functions.logger.log(`list is now: ${tokenList}`);
-            });
-        }
-      });
+      for (const index in userList) {
+        await admin
+          .firestore()
+          .collection("Accounts").doc(userList[index])
+          .get().then((snap) => {
+            tokenList.push(snap.data().fcmToken);
+            functions.logger.log(`list is now: ${tokenList}`);
+          });
+      }
+    });
 
-      await admin
-        .messaging()
-        .sendMulticast({
-          tokens: tokenList,
-          notification: {
-            title: `${groupName}`,
-            body: `${senderName}: Audio`,
-            //Below line has use in terminated or background state of app
-            imageUrl: url,
-          },
-          data: {
-            imageUrl: url,
-            groupId: chatRoomId,
-            screenName: "groupChatScreen",
-          },
-        })
-        .then((value) => {
-          functions.logger.log("Notifications sent to the Receiver");
-        })
-        .catch((e) => {
-          functions.logger.log(e.toString());
-        });
+  await admin
+    .messaging()
+    .sendMulticast({
+      tokens: tokenList,
+      notification: {
+        title: `${groupName}`,
+        body: `${senderName}: Audio`,
+        //Below line has use in terminated or background state of app
+        imageUrl: url,
+      },
+      data: {
+        imageUrl: url,
+        groupId: chatRoomId,
+        screenName: "groupChatScreen",
+      },
+    })
+    .then((value) => {
+      functions.logger.log("Notifications sent to the Receiver");
+    })
+    .catch((e) => {
+      functions.logger.log(e.toString());
+    });
 
 }
 
@@ -229,55 +229,55 @@ async function VideoGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) 
   var tokenList = [];
 
   await admin
-      .firestore()
-      .collection("GroupChatRoom")
-      .doc(chatRoomId)
-      .get()
-      .then(async (snapshot) => {
-        userList = snapshot.data().users;
-        groupName = snapshot.data().groupName;
-        groupImage = snapshot.data().groupImage;
+    .firestore()
+    .collection("GroupChatRoom")
+    .doc(chatRoomId)
+    .get()
+    .then(async (snapshot) => {
+      userList = snapshot.data().users;
+      groupName = snapshot.data().groupName;
+      groupImage = snapshot.data().groupImage;
 
-        functions.logger.log(`userList: ${userList} before deletion`);
-        removeItemOnce(userList, senderId);
-        functions.logger.log(`userList: ${userList} after deletion`);
-
-
-        for (const index in userList) {
-          await admin
-            .firestore()
-            .collection("Accounts").doc(userList[index])
-            .get().then((snap) => {
-              tokenList.push(snap.data().fcmToken);
-              functions.logger.log(`list is now: ${tokenList}`);
-            });
-        }
-      });
+      functions.logger.log(`userList: ${userList} before deletion`);
+      removeItemOnce(userList, senderId);
+      functions.logger.log(`userList: ${userList} after deletion`);
 
 
-      await admin
-        .messaging()
-        .sendMulticast({
-          tokens: tokenList,
-          notification: {
-            title: `${groupName}`,
-            body: `${senderName}: 🎥 Video`,
+      for (const index in userList) {
+        await admin
+          .firestore()
+          .collection("Accounts").doc(userList[index])
+          .get().then((snap) => {
+            tokenList.push(snap.data().fcmToken);
+            functions.logger.log(`list is now: ${tokenList}`);
+          });
+      }
+    });
 
-            //Below line has use in terminated or background state of app
-            imageUrl: groupImage,
-          },
-          data: {
-            imageUrl: groupImage,
-            groupId: chatRoomId,
-            screenName: "groupChatScreen",
-          },
-        })
-        .then((value) => {
-          functions.logger.log("Notifications for video  sent to the Group Receivers");
-        })
-        .catch((e) => {
-          functions.logger.log(e.toString());
-        });
+
+  await admin
+    .messaging()
+    .sendMulticast({
+      tokens: tokenList,
+      notification: {
+        title: `${groupName}`,
+        body: `${senderName}: 🎥 Video`,
+
+        //Below line has use in terminated or background state of app
+        imageUrl: groupImage,
+      },
+      data: {
+        imageUrl: groupImage,
+        groupId: chatRoomId,
+        screenName: "groupChatScreen",
+      },
+    })
+    .then((value) => {
+      functions.logger.log("Notifications for video  sent to the Group Receivers");
+    })
+    .catch((e) => {
+      functions.logger.log(e.toString());
+    });
 
 
 }
@@ -354,53 +354,53 @@ async function ImageGroupChatsNotiSingle(generalImage, senderId, senderName, cha
   var tokenList = [];
 
   await admin
-      .firestore()
-      .collection("GroupChatRoom")
-      .doc(chatRoomId)
-      .get()
-      .then(async (snapshot) => {
-        userList = snapshot.data().users;
-        groupName = snapshot.data().groupName;
-        groupImage = snapshot.data().groupImage;
+    .firestore()
+    .collection("GroupChatRoom")
+    .doc(chatRoomId)
+    .get()
+    .then(async (snapshot) => {
+      userList = snapshot.data().users;
+      groupName = snapshot.data().groupName;
+      groupImage = snapshot.data().groupImage;
 
-        functions.logger.log(`userList: ${userList} before deletion`);
-        removeItemOnce(userList, senderId);
-        functions.logger.log(`userList: ${userList} after deletion`);
+      functions.logger.log(`userList: ${userList} before deletion`);
+      removeItemOnce(userList, senderId);
+      functions.logger.log(`userList: ${userList} after deletion`);
 
-        for (const index in userList) {
-          await admin
-            .firestore()
-            .collection("Accounts").doc(userList[index])
-            .get().then((snap) => {
-              tokenList.push(snap.data().fcmToken);
-              functions.logger.log(`list is now: ${tokenList}`);
-            });
-        }
-      });
+      for (const index in userList) {
+        await admin
+          .firestore()
+          .collection("Accounts").doc(userList[index])
+          .get().then((snap) => {
+            tokenList.push(snap.data().fcmToken);
+            functions.logger.log(`list is now: ${tokenList}`);
+          });
+      }
+    });
 
-      await admin
-        .messaging()
-        .sendMulticast({
-          tokens: tokenList,
-          notification: {
-            title: `${groupName}`,
-            body: `${senderName}: 📷 Image`,
-            //Below line has use in terminated or background state of app
-            imageUrl: groupImage,
-          },
-          data: {
-            imageUrl: groupImage,
-            generalImageUrl: generalImage,
-            groupId: chatRoomId,
-            screenName: "groupChatScreen",
-          },
-        })
-        .then((value) => {
-          functions.logger.log("Notifications sent to the Group Receivers");
-        })
-        .catch((e) => {
-          functions.logger.log(e.toString());
-        });
+  await admin
+    .messaging()
+    .sendMulticast({
+      tokens: tokenList,
+      notification: {
+        title: `${groupName}`,
+        body: `${senderName}: 📷 Image`,
+        //Below line has use in terminated or background state of app
+        imageUrl: groupImage,
+      },
+      data: {
+        imageUrl: groupImage,
+        generalImageUrl: generalImage,
+        groupId: chatRoomId,
+        screenName: "groupChatScreen",
+      },
+    })
+    .then((value) => {
+      functions.logger.log("Notifications sent to the Group Receivers");
+    })
+    .catch((e) => {
+      functions.logger.log(e.toString());
+    });
 
 }
 
@@ -416,7 +416,7 @@ exports.notifyReceiverForGroupChat = functions.firestore
     var groupName = "";
     var groupImage = "";
     var userList = [];
-    
+
 
     var message = snap.data().message;
     var chatRoomId = context.params.documentId;
@@ -432,7 +432,7 @@ exports.notifyReceiverForGroupChat = functions.firestore
       generalImage = snap.data().message;
 
       await ImageGroupChatsNotiSingle(generalImage, senderId, senderName, chatRoomId);
-     
+
     }
     else if (snap.data().type == "text") {
       //getting image and token of receiver from the firestore through admin sdk
@@ -501,6 +501,7 @@ exports.notifyReceiverForGroupChat = functions.firestore
     }
   });
 
+//+------------------------------------------------------Notification for notifyReceiverForChat ------------------
 
 exports.notifyReceiverForChat = functions.firestore
   .document("/ChatRoom/{documentId}/messages/{chatDocumentId}")
@@ -715,6 +716,7 @@ exports.notifyReceiverForChat = functions.firestore
 //     console.log('Done');
 // });
 
+//+------------------------------------------------------Notification for liking ------------------
 
 exports.liking = functions.firestore
   .document("/Accounts/{documentId}/iFollowed/{iFollowedDoc}")
@@ -840,6 +842,7 @@ exports.liking = functions.firestore
     //   'createdAt': createdAt,
     // };
   });
+//+------------------------------------------------------Notification for postLikedNotification ------------------
 
 exports.postLikedNotification = functions.firestore
   .document("/Posts/{documentId}")
@@ -933,6 +936,7 @@ exports.postLikedNotification = functions.firestore
         });
     }
   });
+//+------------------------------------------------------Notification for postCommentedNotification ------------------
 
 exports.postCommentedNotification = functions.firestore
   .document("/Posts/{documentId}/comments/{commentId}")
@@ -1030,6 +1034,7 @@ exports.postCommentedNotification = functions.firestore
         createdAt: Date.now(),
       });
   });
+//+------------------------------------------------------Notification for notifyInvitedAboutGroupInvite ------------------
 
 exports.notifyInvitedAboutGroupInvite = functions.firestore
   .document("/GroupChatInvitations/{documentId}")
@@ -1115,7 +1120,7 @@ exports.notifyInvitedAboutGroupInvite = functions.firestore
   });
 
 
-//------------------------------------------------------Notification for Tag Posts ---------------------------------------
+//+------------------------------------------------------Notification for Tag Posts ---------------------------------------
 exports.taggedPeopleNotification = functions.firestore
   .document("/Posts/{documentId}")
   .onCreate(async (snap, context) => {
@@ -1126,7 +1131,35 @@ exports.taggedPeopleNotification = functions.firestore
     const posterImage = snap.data().profileImage;
     const posterId = snap.data().uID;
     const taggedPeopleIds = snap.data().taggedPeople;
+    const videosIds = snap.data().videoIds;
+    const uploadUrls = [];
 
+
+    for (const index in videosIds) {
+
+      functions.logger.info("In Chat function: type is video");
+      const bucket = admin.storage().bucket();
+      functions.logger.log(`bucket is: ${bucket.name}`);
+      functions.logger.log(`single videoId at index: ${index} is: ${videosIds[index]}`);
+
+      const fileName = `${videosIds[index]}.mp4`;
+      functions.logger.log(`fileName is: ${fileName}`);
+
+      const videoFile = bucket.file(`postVideos/${context.params.documentId}/${fileName}`);
+      const resumableUpload = await videoFile.createResumableUpload();
+      functions.logger.log(`resumableUpload is: ${resumableUpload}`);
+
+      const uploadUrl = resumableUpload[0];
+      functions.logger.log(`single uploadUrl is: ${uploadUrl}`);
+      console.log(uploadUrl);
+      uploadUrls.push(uploadUrl);
+    }
+
+    await admin.firestore().collection(`Posts`).doc(context.params.documentId).set({
+      uploadUrls: uploadUrls
+    }, { merge: true }).catch((e) => {
+      functions.logger.log(`error in setting the uploadUrl is:${e.toString()}`);
+    });
 
     //Sending notification to Post Poster
     await admin
@@ -1173,6 +1206,9 @@ exports.taggedPeopleNotification = functions.firestore
 
 
   });
+
+
+//+------------------------------------------------------Notification for taggedPeopleNotificationOnUpdate ------------------
 
 exports.taggedPeopleNotificationOnUpdate = functions.firestore
   .document("/Posts/{documentId}")
@@ -1232,6 +1268,8 @@ exports.taggedPeopleNotificationOnUpdate = functions.firestore
 
   });
 
+//+------------------------------------------------------Notification for deletingCommentsOnPostDeletion --------------------
+
 exports.deletingCommentsOnPostDeletion = functions.firestore
   .document("/Posts/{documentId}")
   .onDelete(async (snap, context) => {
@@ -1243,3 +1281,11 @@ exports.deletingCommentsOnPostDeletion = functions.firestore
       functions.logger.log(e.toString());
     });
   });
+
+
+
+
+
+
+
+

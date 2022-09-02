@@ -206,10 +206,7 @@ class _EditProfileState extends State<EditProfile> {
 
           FutureBuilder<List<String>>(
             future: auth.fetchSignInMethodsForEmail(userDetailsModel.email ?? ""),
-            builder: (
-              BuildContext context,
-              AsyncSnapshot<List<String>> snapshot,
-            ) {
+            builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return ETextField(
                   labelText: 'Email:',
@@ -864,10 +861,7 @@ class _EditProfileState extends State<EditProfile> {
   RxString pickedImagePath = "".obs;
   String pickedImageUrl = "";
 
-  Widget pickProfileImage(
-    BuildContext context,
-    // SignupController controller,
-  ) {
+  Widget pickProfileImage(BuildContext context) {
     return Center(
       child: GestureDetector(
         onTap: () => showModalBottomSheet(

@@ -98,105 +98,112 @@ class _PostDetailsState extends State<PostDetails> {
                                 itemBuilder: (context) {
                                   return [
                                     PopupMenuItem(
+                                      value: 0,
                                       child: MyText(
-                                        onTap: () => Get.to(
-                                          () => EditPost(postModel: addPostModel.value),
-                                        ),
                                         text: 'editPost'.tr,
                                         size: 14,
                                         color: kSecondaryColor,
                                       ),
                                     ),
                                     PopupMenuItem(
+                                      value: 1,
                                       child: MyText(
-                                        onTap: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (_) {
-                                              return CustomPopup(
-                                                heading: 'Are you sure?',
-                                                description:
-                                                    'This can\'t be undone. Are you sure you want to delete this post?',
-                                                onCancel: () => Get.back(),
-                                                onConfirm: () async {
-                                                  try {
-                                                    List<String> imageUrlsList = widget.postDocModel?.postImages ?? [];
-                                                    Get.back();
-                                                    Get.back();
-                                                    Get.back();
-                                                    Get.dialog(
-                                                      loading(),
-                                                    );
-                                                    await posts.doc(addPostModel.value.postID).delete();
-                                                    Get.back();
-                                                    // await posts.doc(addPostModel.value.postID).collection("comments").delete();
-                                                    imageUrlsList.forEach(
-                                                      (element) async {
-                                                        await fstorage.refFromURL(element).delete();
-                                                      },
-                                                    );
-                                                  } catch (e) {
-                                                    print(e);
-                                                    showMsg(
-                                                      context: context,
-                                                      msg:
-                                                          "Something went wrong during post deletion. Please try again.",
-                                                    );
-                                                  }
-                                                },
-                                              );
-                                            },
-                                          );
-                                          // Get.defaultDialog(
-                                          //     title: "Are you sure?",
-                                          //     content: Padding(
-                                          //       padding: const EdgeInsets.symmetric(
-                                          //           horizontal: 15, vertical: 0),
-                                          //       child: Text(
-                                          //           "This can't be undone. Are you sure you want to delete this post?"),
-                                          //     ),
-                                          //     textConfirm: "Yes",
-                                          //     confirmTextColor: Colors.red,
-                                          //     textCancel: "No",
-                                          //     cancelTextColor: Colors.black,
-                                          //     onConfirm: () async {
-                                          //       try {
-                                          //         List<String> imageUrlsList =
-                                          //             widget.postDocModel
-                                          //                     ?.postImages ??
-                                          //                 [];
-                                          //         Get.back();
-                                          //         Get.back();
-                                          //         Get.back();
-                                          //         Get.dialog(loading());
-                                          //         await posts
-                                          //             .doc(
-                                          //                 addPostModel.value.postID)
-                                          //             .delete();
-                                          //         Get.back();
-                                          //         // await posts.doc(addPostModel.value.postID).collection("comments").delete();
-                                          //         imageUrlsList
-                                          //             .forEach((element) async {
-                                          //           await fstorage
-                                          //               .refFromURL(element)
-                                          //               .delete();
-                                          //         });
-                                          //       } catch (e) {
-                                          //         print(e);
-                                          //         showMsg(
-                                          //             context: context,
-                                          //             msg:
-                                          //                 "Something went wrong during post deletion. Please try again.");
-                                          //         log("error in post deletion $e");
-                                          //       }
-                                          //     });
-                                        },
                                         text: 'deletePost'.tr,
                                         size: 14,
                                         color: kSecondaryColor,
                                       ),
                                     ),
                                   ];
+                                },
+                                onSelected: (value) {
+                                  if (value == 0) {
+                                    log("onTap edit post clicked");
+                                    Get.to(() => EditPost(postModel: addPostModel.value));
+                                  } else if (value == 1) {
+                                    showDialog(
+                                      context: context,
+                                      builder: (_) {
+                                        return CustomPopup(
+                                          heading: 'Are you sure?',
+                                          description:
+                                              'This can\'t be undone. Are you sure you want to delete this post?',
+                                          onCancel: () => Get.back(),
+                                          onConfirm: () async {
+                                            try {
+                                              List<String> imageUrlsList = widget.postDocModel?.postImages ?? [];
+                                              Get.back();
+                                              Get.back();
+                                              // Get.back();
+                                              Get.dialog(
+                                                loading(),
+                                              );
+                                              await posts.doc(addPostModel.value.postID).delete();
+                                              Get.back();
+                                              // await posts.doc(addPostModel.value.postID).collection("comments").delete();
+                                              // log("before starting image deletion: ${DateTime.now()}");
+                                              imageUrlsList.forEach(
+                                                (element) async {
+                                                  // log("inside foreach before image deletion: ${DateTime.now()}");
+                                                  await fstorage.refFromURL(element).delete();
+                                                  // log("inside foreach after image deletion: ${DateTime.now()}");
+                                                },
+                                              );
+                                              // log("after foreach after deleting all images: ${DateTime.now()}");
+                                            } catch (e) {
+                                              print(e);
+                                              showMsg(
+                                                context: context,
+                                                msg: "Something went wrong during post deletion. Please try again.",
+                                              );
+                                            }
+                                          },
+                                        );
+                                      },
+                                    );
+                                    // Get.defaultDialog(
+                                    //     title: "Are you sure?",
+                                    //     content: Padding(
+                                    //       padding: const EdgeInsets.symmetric(
+                                    //           horizontal: 15, vertical: 0),
+                                    //       child: Text(
+                                    //           "This can't be undone. Are you sure you want to delete this post?"),
+                                    //     ),
+                                    //     textConfirm: "Yes",
+                                    //     confirmTextColor: Colors.red,
+                                    //     textCancel: "No",
+                                    //     cancelTextColor: Colors.black,
+                                    //     onConfirm: () async {
+                                    //       try {
+                                    //         List<String> imageUrlsList =
+                                    //             widget.postDocModel
+                                    //                     ?.postImages ??
+                                    //                 [];
+                                    //         Get.back();
+                                    //         Get.back();
+                                    //         Get.back();
+                                    //         Get.dialog(loading());
+                                    //         await posts
+                                    //             .doc(
+                                    //                 addPostModel.value.postID)
+                                    //             .delete();
+                                    //         Get.back();
+                                    //         // await posts.doc(addPostModel.value.postID).collection("comments").delete();
+                                    //         imageUrlsList
+                                    //             .forEach((element) async {
+                                    //           await fstorage
+                                    //               .refFromURL(element)
+                                    //               .delete();
+                                    //         });
+                                    //       } catch (e) {
+                                    //         print(e);
+                                    //         showMsg(
+                                    //             context: context,
+                                    //             msg:
+                                    //                 "Something went wrong during post deletion. Please try again.");
+                                    //         log("error in post deletion $e");
+                                    //       }
+                                    //     });
+                                  }
                                 },
                                 child: Icon(
                                   Icons.more_vert,
@@ -212,8 +219,7 @@ class _PostDetailsState extends State<PostDetails> {
                             widget.postDocModel?.postImages?.length == 0
                                 ? Center(
                                     child: MyText(
-                                      text:
-                                          "${widget.postDocModel?.postTitle}",
+                                      text: "${widget.postDocModel?.postTitle}",
                                       size: 16,
                                       paddingLeft: 15,
                                       paddingRight: 15,
@@ -573,6 +579,7 @@ class _PostDetailsState extends State<PostDetails> {
                         .collection(postsCollection)
                         .doc(widget.postDocModel!.postID)
                         .collection("comments")
+                        .orderBy("createdAtMilliSeconds", descending: true)
                         .snapshots(),
                     builder: (
                       BuildContext context,
@@ -724,6 +731,7 @@ class _PostDetailsState extends State<PostDetails> {
                 commenterImage: userDetailsModel.profileImageUrl ?? "",
                 commenterName: userDetailsModel.fullName ?? "",
                 createdAt: DateFormat.yMEd().add_jms().format(DateTime.now()).toString(),
+                createdAtMilliSeconds: DateTime.now().millisecondsSinceEpoch,
                 likeCount: 0,
                 likeIDs: [],
                 postID: addPostModel.value.postID,

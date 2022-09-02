@@ -270,7 +270,6 @@ Future<void> backgroundHandler() async {
   // Notice these instances belong to a forked isolate.
   var uploader = FlutterUploader();
 
-
   // Only show notifications for unprocessed uploads.
   SharedPreferences.getInstance().then((preferences) {
     var processed = preferences.getStringList('processed') ?? <String>[];
@@ -279,13 +278,12 @@ Future<void> backgroundHandler() async {
 
     if (Platform.isAndroid) {
       uploader.progress.listen((progress) {
-        FirebaseFirestore.instance.collection("uploadProgress")
-        .add({
-      "progress.status": progress.status.description,
-      "progress.progress": progress.progress,
-      "progress.taskId": progress.taskId,
-      "dateTime": DateTime.now(),
-    });
+        FirebaseFirestore.instance.collection("uploadProgress").add({
+          "progress.status": progress.status.description,
+          "progress.progress": progress.progress,
+          "progress.taskId": progress.taskId,
+          "dateTime": DateTime.now(),
+        });
         if (processed.contains(progress.taskId)) {
           return;
         }
@@ -328,51 +326,69 @@ Future<void> backgroundHandler() async {
     }
 
     uploader.result.listen((result) async {
-      FirebaseFirestore.instance.collection("uploadResults")
-          .add({
+      FirebaseFirestore.instance.collection("uploadResults").add({
         "result.status": result.status?.description ?? "was null",
         "result.statusCode": result.statusCode,
         "result.response": result.response,
         "result.taskId": result.taskId,
         "dateTime": DateTime.now(),
       });
-      List<String> isChatRoomOrGroupChatRoomList = jsonDecode(result.response ?? "")['id'].split("/");
-      bool isChatRoom = isChatRoomOrGroupChatRoomList.asMap().containsValue("chatRooms");
-      bool isGroupChatRoom = isChatRoomOrGroupChatRoomList.asMap().containsValue("groupChatRooms");
-      if(isChatRoom){
-        String chatRoomId = isChatRoomOrGroupChatRoomList[2];
-        String fileName = isChatRoomOrGroupChatRoomList[3].split(".")[0];
-        log("chatRoomId in upload result:  $chatRoomId");
-        log("fileName in upload result:  $fileName");
-        log("result.statusCode is: ${result.statusCode}");
-        log("result.status?.description is: ${result.status?.description ?? ""}");
-        log("result.taskId is: ${result.taskId}");
-        try {
-          var ref = FirebaseStorage.instance
-                      .ref()
-                      .child("chatRooms/${chatRoomId}")
-                      .child("$fileName.mp4");
+      // log("result.status: ${result.status}");
+      if (result.status?.description == "Completed") {
+        List<String> uploadedVideoIdList = jsonDecode(result.response ?? "{" ":" "}")['id'].split("/");
+        log("uploadedVideoIdList: $uploadedVideoIdList");
+        bool isChatRoom = uploadedVideoIdList.asMap().containsValue("chatRooms");
+        bool isPostVideo = uploadedVideoIdList.asMap().containsValue("postVideos");
+        bool isGroupChatRoom = uploadedVideoIdList.asMap().containsValue("groupChatRooms");
+        log("isChatRoom: $isChatRoom \n and isPostVideo: $isPostVideo \n and isGroupChatRoom: $isGroupChatRoom");
+
+        if (isChatRoom) {
+          String chatRoomId = uploadedVideoIdList[2];
+          String fileName = uploadedVideoIdList[3].split(".")[0];
+          log("chatRoomId in upload result:  $chatRoomId");
+          log("fileName in upload result:  $fileName");
+          log("result.statusCode is: ${result.statusCode}");
+          log("result.status?.description is: ${result.status?.description ?? ""}");
+          log("result.taskId is: ${result.taskId}");
+          try {
+            var ref = FirebaseStorage.instance.ref().child("chatRooms/${chatRoomId}").child("$fileName.mp4");
+            String url = await ref.getDownloadURL();
+            await FirebaseFirestore.instance
+                .collection("ChatRoom")
+                .doc(chatRoomId)
+                .collection("messages")
+                .doc(fileName)
+                .update({"message": url});
+            uploader.clearUploads();
+          } catch (e) {
+            log("error in upload thingy $e");
+          }
+        } else if (isGroupChatRoom) {
+          String groupId = uploadedVideoIdList[2];
+          String fileName = uploadedVideoIdList[3].split(".")[0];
+          log("groupId in upload result:  $groupId");
+          log("fileName in upload result:  $fileName");
+          var ref = FirebaseStorage.instance.ref().child("groupChatRooms/${groupId}").child("$fileName.mp4");
           String url = await ref.getDownloadURL();
-          await FirebaseFirestore.instance.collection("ChatRoom").doc(chatRoomId)
-                      .collection("messages").doc(fileName)
-                      .update({"message": url});
+          FirebaseFirestore.instance
+              .collection("GroupChatRoom")
+              .doc(groupId)
+              .collection("messages")
+              .doc(fileName)
+              .update({"message": url});
           uploader.clearUploads();
-        } catch (e) {
-          log("error in upload thingy $e");
+        } else if (isPostVideo) {
+          String postId = uploadedVideoIdList[2];
+          String fileName = uploadedVideoIdList[3].split(".")[0];
+          log("postId in upload result:  $postId");
+          log("fileName in upload result:  $fileName");
+          var ref = FirebaseStorage.instance.ref().child("postVideos/${postId}").child("$fileName.mp4");
+          String url = await ref.getDownloadURL();
+          FirebaseFirestore.instance.collection("Posts").doc(postId).update({
+            "postVideos": FieldValue.arrayUnion([url])
+          });
+          uploader.clearUploads();
         }
-      }else if(isGroupChatRoom){
-        String groupId = isChatRoomOrGroupChatRoomList[2];
-        String fileName = isChatRoomOrGroupChatRoomList[3].split(".")[0];
-        log("groupId in upload result:  $groupId");
-        log("fileName in upload result:  $fileName");
-        var ref = FirebaseStorage.instance
-            .ref()
-            .child("groupChatRooms/${groupId}")
-            .child("$fileName.mp4");
-        String url = await ref.getDownloadURL();
-        FirebaseFirestore.instance.collection("GroupChatRoom").doc(groupId)
-            .collection("messages").doc(fileName)
-            .update({"message": url});
       }
 
       if (processed.contains(result.taskId)) {
@@ -405,9 +421,7 @@ Future<void> backgroundHandler() async {
             channelDescription: 'Vibrate and show Flutter Uploader notification',
             icon: 'ic_upload',
             enableVibration: !successful,
-            importance: result.status == UploadTaskStatus.failed
-                ? Importance.high
-                : Importance.min,
+            importance: result.status == UploadTaskStatus.failed ? Importance.high : Importance.min,
           ),
           iOS: IOSNotificationDetails(
             presentAlert: true,

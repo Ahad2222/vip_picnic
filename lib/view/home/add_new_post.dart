@@ -3,12 +3,14 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/utils/validators.dart';
+import 'package:vip_picnic/view/home/post_video_preview_from_file.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/my_appbar.dart';
 import 'package:vip_picnic/view/widget/my_button.dart';
@@ -73,7 +75,51 @@ class AddNewPost extends StatelessWidget {
                             )
                           : Obx(() {
                               return GestureDetector(
-                                onTap: () => homeController.pickImages(context),
+                                onTap: () => showModalBottomSheet(
+                                  context: context,
+                                  builder: (context) {
+                                    return Container(
+                                      height: 180,
+                                      decoration: BoxDecoration(
+                                        color: kPrimaryColor,
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                                        children: [
+                                          ListTile(
+                                            onTap: () {
+                                              homeController.pickImages(context);
+                                            },
+                                            leading: Image.asset(
+                                              Assets.imagesGallery,
+                                              color: kGreyColor,
+                                              height: 35,
+                                            ),
+                                            title: MyText(
+                                              text: 'Image',
+                                              size: 20,
+                                            ),
+                                          ),
+                                          ListTile(
+                                            onTap: () => homeController.pickVideo(context),
+                                            // ImageSource.gallery
+                                            leading: Image.asset(
+                                              Assets.imagesFilm,
+                                              height: 35,
+                                              color: kGreyColor,
+                                            ),
+                                            title: MyText(
+                                              text: 'Video',
+                                              size: 20,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                  isScrollControlled: true,
+                                ),
                                 child: homeController.selectedImages.isNotEmpty
                                     ? Stack(
                                         children: [
@@ -110,12 +156,113 @@ class AddNewPost extends StatelessWidget {
                                           ),
                                         ],
                                       )
-                                    : Image.asset(
-                                        Assets.imagesUploadPicture,
-                                        height: 108.9,
-                                        fit: BoxFit.cover,
-                                      ),
+                                    : homeController.selectedVideos.isNotEmpty
+                                        ? Stack(
+                                            alignment: Alignment.center,
+                                            children: [
+                                              Container(
+                                                height: Get.height,
+                                                width: Get.width,
+                                                child: ClipRRect(
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  child: Image.file(
+                                                    File(
+                                                      homeController.selectedVideosThumbnails[0],
+                                                    ),
+                                                    height: Get.height,
+                                                    width: Get.width,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ),
+                                              ),
+                                              AnimatedOpacity(
+                                                opacity: 1.0,
+                                                duration: Duration(
+                                                  milliseconds: 500,
+                                                ),
+                                                child: Container(
+                                                  height: 55,
+                                                  width: 55,
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: kBlackColor.withOpacity(0.5),
+                                                  ),
+                                                  child: Material(
+                                                    color: Colors.transparent,
+                                                    child: InkWell(
+                                                      onTap: () {
+                                                        Get.to(() => PostVideoPreview(
+                                                              videoFile: homeController.selectedVideos[0],
+                                                            ));
+                                                      },
+                                                      borderRadius: BorderRadius.circular(100),
+                                                      splashColor: kPrimaryColor.withOpacity(0.1),
+                                                      highlightColor: kPrimaryColor.withOpacity(0.1),
+                                                      child: Center(
+                                                        child: Image.asset(
+                                                          Assets.imagesPlay,
+                                                          height: 23,
+                                                          color: kPrimaryColor,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              Positioned(
+                                                top: 10,
+                                                right: 10,
+                                                child: GestureDetector(
+                                                  onTap: () => homeController.removeVideo(0),
+                                                  child: Container(
+                                                    height: 30,
+                                                    width: 30,
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.red,
+                                                      borderRadius: BorderRadius.circular(6),
+                                                    ),
+                                                    child: Icon(
+                                                      Icons.close,
+                                                      size: 20,
+                                                      color: kPrimaryColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        : Image.asset(
+                                            Assets.imagesUploadPicture,
+                                            height: 108.9,
+                                            fit: BoxFit.cover,
+                                          ),
+                                // Positioned(
+                                //   top: 10,
+                                //   right: 10,
+                                //   child: GestureDetector(
+                                //     onTap: () => homeController.removeImage(0),
+                                //     child: Container(
+                                //       height: 30,
+                                //       width: 30,
+                                //       decoration: BoxDecoration(
+                                //         color: Colors.red,
+                                //         borderRadius: BorderRadius.circular(6),
+                                //       ),
+                                //       child: Icon(
+                                //         Icons.close,
+                                //         size: 20,
+                                //         color: kPrimaryColor,
+                                //       ),
+                                //     ),
+                                //   ),
+                                // ),
                               );
+                              //           : Image.asset(
+                              //               Assets.imagesUploadPicture,
+                              //               height: 108.9,
+                              //               fit: BoxFit.cover,
+                              //             ),
+                              // );
                             }),
                     ),
                   ),
@@ -162,6 +309,75 @@ class AddNewPost extends StatelessWidget {
                                           right: 5,
                                           child: GestureDetector(
                                             onTap: () => homeController.removeImage(index),
+                                            child: Container(
+                                              height: 20,
+                                              width: 20,
+                                              decoration: BoxDecoration(
+                                                color: Colors.red,
+                                                borderRadius: BorderRadius.circular(6),
+                                              ),
+                                              child: Icon(
+                                                Icons.close,
+                                                size: 15,
+                                                color: kPrimaryColor,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                    ],
+                  );
+                }),
+                SizedBox(
+                  height: 20,
+                ),
+                Obx(() {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      homeController.selectedVideosThumbnails.isEmpty
+                          ? SizedBox()
+                          : Container(
+                              margin: EdgeInsets.only(
+                                top: 20,
+                              ),
+                              height: 100,
+                              child: ListView.builder(
+                                physics: BouncingScrollPhysics(),
+                                shrinkWrap: true,
+                                itemCount: homeController.selectedVideosThumbnails.length,
+                                scrollDirection: Axis.horizontal,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 7,
+                                ),
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 7,
+                                    ),
+                                    child: Stack(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: Image.file(
+                                            File(
+                                              homeController.selectedVideosThumbnails[index],
+                                            ),
+                                            height: 100,
+                                            width: 100,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 5,
+                                          right: 5,
+                                          child: GestureDetector(
+                                            onTap: () => homeController.removeVideo(index),
                                             child: Container(
                                               height: 20,
                                               width: 20,
@@ -505,7 +721,8 @@ class AddNewPost extends StatelessWidget {
             homeController.taggedPeople.addIf(!homeController.taggedPeople.asMap().containsValue(id), id);
             homeController.taggedPeopleToken
                 .addIf(!homeController.taggedPeopleToken.asMap().containsValue(userToken), userToken);
-            selectedUsers.addIf(!selectedUsers.containsKey(id), id, {
+            selectedUsers.addIf(
+                !selectedUsers.containsKey(id), id, {
               "id": id,
               "name": name,
               "email": email,
