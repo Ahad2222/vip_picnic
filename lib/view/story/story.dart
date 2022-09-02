@@ -8,6 +8,7 @@ import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/model/story_model/story_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
+import 'package:vip_picnic/view/story/edit_story.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 
@@ -32,6 +33,7 @@ class _StoryState extends State<Story> {
   List<StoryItem> storyItems = [];
   StoryModel storyModel = StoryModel();
   bool isLoading = false;
+  int index = 0;
 
   @override
   void initState() {
@@ -51,6 +53,12 @@ class _StoryState extends State<Story> {
       log("before the loop ${value.docs.length}");
       value.docs.forEach((element) {
         log("inside the loop");
+        //+Types:
+        //+ Image
+        //+ Video
+        //+ Caption
+        //+ ImageWithCaption
+        //+ VideoWithCaption
         storyModel = StoryModel.fromJson(element.data());
         if (storyModel.mediaType == "Image") {
           storyItems.add(
@@ -74,6 +82,30 @@ class _StoryState extends State<Story> {
             duration: const Duration(seconds: 4),
           ));
           log("storyItems in ImageWithCaption: $storyItems");
+        } else if (storyModel.mediaType == "Video") {
+          log(":in image with caption");
+          storyItems.add(
+            StoryItem.pageVideo(
+              storyModel.storyVideo ?? "https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4",
+              controller: controller!,
+              // caption: storyModel.storyText ?? "",
+              imageFit: BoxFit.cover,
+              duration: Duration(seconds: storyModel.videoDuration ?? 0),
+            ),
+          );
+          log("storyItems in Video: $storyItems");
+        } else if (storyModel.mediaType == "VideoWithCaption") {
+          log(":in image with caption");
+          storyItems.add(
+            StoryItem.pageVideo(
+              storyModel.storyVideo ?? "https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4",
+              controller: controller!,
+              caption: storyModel.storyText ?? "",
+              imageFit: BoxFit.cover,
+              duration: Duration(seconds: storyModel.videoDuration ?? 0),
+            ),
+          );
+          log("storyItems in VideoWithCaption: $storyItems");
         } else {
           storyItems.add(
             StoryItem.text(
@@ -124,9 +156,13 @@ class _StoryState extends State<Story> {
                   storyItems: storyItems,
                   controller: controller!,
                   // pass controller here too
-                  repeat: true,
+                  repeat: false,
                   // should the stories be slid forever
-                  onStoryShow: (s) {},
+                  onStoryShow: (s) {
+                    log("index before: $index");
+                    index++;
+                    log("index is: $index");
+                  },
                   onComplete: () => Get.back(),
                   onVerticalSwipeComplete: (direction) {
                     if (direction == Direction.down) {
@@ -268,6 +304,22 @@ class _StoryState extends State<Story> {
           spacing: 15,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
+            if (widget.storyPersonId == auth.currentUser?.uid)
+              GestureDetector(
+                onTap: () {
+                  //+ go to page where we list the story docs
+                  Get.off(() => EditStory());
+                },
+                child: SizedBox(
+                  height: 60,
+                  width: 40,
+                  child: const Icon(
+                    Icons.mode_edit_outline_outlined,
+                    size: 20,
+                    color: kPrimaryColor,
+                  ),
+                ),
+              ),
             GestureDetector(
               onTap: () => Get.back(),
               child: const Icon(

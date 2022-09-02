@@ -1,12 +1,11 @@
 const functions = require("firebase-functions");
 // The Firebase Admin SDK to access Firestore.
-const admin = require('firebase-admin');
-const { getFirestore } = require('firebase-admin/firestore');
+const admin = require("firebase-admin");
+const { getFirestore } = require("firebase-admin/firestore");
 const { log } = require("firebase-functions/logger");
-// import { getFirestore } from 'firebase-admin/firestore'; 
+// import { getFirestore } from 'firebase-admin/firestore';
 admin.initializeApp();
 admin.firestore().settings({ ignoreUndefinedProperties: true });
-
 
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
@@ -61,7 +60,6 @@ async function TextChatsNotiSingle(
 }
 
 async function TextGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) {
-
   // var senName = snap.data().sendByName;
   var groupName = "";
   var groupImage = "";
@@ -82,7 +80,6 @@ async function TextGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) {
       groupName = snapshot.data().groupName;
       groupImage = snapshot.data().groupImage;
 
-
       functions.logger.log(`userList: ${userList} before deletion`);
       removeItemOnce(userList, senderId);
       functions.logger.log(`userList: ${userList} after deletion`);
@@ -90,8 +87,10 @@ async function TextGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) {
       for (const index in userList) {
         await admin
           .firestore()
-          .collection("Accounts").doc(userList[index])
-          .get().then((snap) => {
+          .collection("Accounts")
+          .doc(userList[index])
+          .get()
+          .then((snap) => {
             tokenList.push(snap.data().fcmToken);
             functions.logger.log(`list is now: ${tokenList}`);
           });
@@ -115,7 +114,9 @@ async function TextGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) {
       },
     })
     .then((value) => {
-      functions.logger.log("Notifications for text  sent to the Group Receivers");
+      functions.logger.log(
+        "Notifications for text  sent to the Group Receivers"
+      );
     })
     .catch((e) => {
       functions.logger.log(e.toString());
@@ -128,7 +129,8 @@ async function AudioChatsNotiSingle(
   url,
   senderName,
   recName,
-  chatRoomId) {
+  chatRoomId
+) {
   functions.logger.log("Single Token function is executed");
   functions.logger.log("ChatRoomID is ");
   functions.logger.log(chatRoomId);
@@ -157,11 +159,15 @@ async function AudioChatsNotiSingle(
     });
 }
 
-async function AudioGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) {
+async function AudioGroupChatsNotiSingle(
+  msg,
+  senderId,
+  senderName,
+  chatRoomId
+) {
   functions.logger.log("Single Token function is executed");
   functions.logger.log("ChatRoomID is ");
   functions.logger.log(chatRoomId);
-
 
   var groupName = "";
   var groupImage = "";
@@ -185,8 +191,10 @@ async function AudioGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) 
       for (const index in userList) {
         await admin
           .firestore()
-          .collection("Accounts").doc(userList[index])
-          .get().then((snap) => {
+          .collection("Accounts")
+          .doc(userList[index])
+          .get()
+          .then((snap) => {
             tokenList.push(snap.data().fcmToken);
             functions.logger.log(`list is now: ${tokenList}`);
           });
@@ -215,10 +223,14 @@ async function AudioGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) 
     .catch((e) => {
       functions.logger.log(e.toString());
     });
-
 }
 
-async function VideoGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) {
+async function VideoGroupChatsNotiSingle(
+  msg,
+  senderId,
+  senderName,
+  chatRoomId
+) {
   functions.logger.log("Single Token function is executed");
   functions.logger.log("ChatRoomID is ");
   functions.logger.log(chatRoomId);
@@ -242,18 +254,18 @@ async function VideoGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) 
       removeItemOnce(userList, senderId);
       functions.logger.log(`userList: ${userList} after deletion`);
 
-
       for (const index in userList) {
         await admin
           .firestore()
-          .collection("Accounts").doc(userList[index])
-          .get().then((snap) => {
+          .collection("Accounts")
+          .doc(userList[index])
+          .get()
+          .then((snap) => {
             tokenList.push(snap.data().fcmToken);
             functions.logger.log(`list is now: ${tokenList}`);
           });
       }
     });
-
 
   await admin
     .messaging()
@@ -273,16 +285,24 @@ async function VideoGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) 
       },
     })
     .then((value) => {
-      functions.logger.log("Notifications for video  sent to the Group Receivers");
+      functions.logger.log(
+        "Notifications for video  sent to the Group Receivers"
+      );
     })
     .catch((e) => {
       functions.logger.log(e.toString());
     });
-
-
 }
 
-async function VideoChatsNotiSingle(token_o, msg, profileImageUrl, generalImageUrl, senderName, recName, chatRoomId) {
+async function VideoChatsNotiSingle(
+  token_o,
+  msg,
+  profileImageUrl,
+  generalImageUrl,
+  senderName,
+  recName,
+  chatRoomId
+) {
   functions.logger.log("Single Token function is executed");
   functions.logger.log("ChatRoomID is ");
   functions.logger.log(chatRoomId);
@@ -313,7 +333,15 @@ async function VideoChatsNotiSingle(token_o, msg, profileImageUrl, generalImageU
 }
 //When chat is of type image,  profile image and general image will be sent
 // in the payload
-async function ImageChatsNotiSingle(token_o, msg, profileImageUrl, generalImageUrl, senderName, recName, chatRoomId) {
+async function ImageChatsNotiSingle(
+  token_o,
+  msg,
+  profileImageUrl,
+  generalImageUrl,
+  senderName,
+  recName,
+  chatRoomId
+) {
   functions.logger.log("Single Token function is executed");
   functions.logger.log("ChatRoomID is ");
   functions.logger.log(chatRoomId);
@@ -343,7 +371,12 @@ async function ImageChatsNotiSingle(token_o, msg, profileImageUrl, generalImageU
     });
 }
 
-async function ImageGroupChatsNotiSingle(generalImage, senderId, senderName, chatRoomId) {
+async function ImageGroupChatsNotiSingle(
+  generalImage,
+  senderId,
+  senderName,
+  chatRoomId
+) {
   functions.logger.log("Single Token function is executed");
   functions.logger.log("ChatRoomID is ");
   functions.logger.log(chatRoomId);
@@ -370,8 +403,10 @@ async function ImageGroupChatsNotiSingle(generalImage, senderId, senderName, cha
       for (const index in userList) {
         await admin
           .firestore()
-          .collection("Accounts").doc(userList[index])
-          .get().then((snap) => {
+          .collection("Accounts")
+          .doc(userList[index])
+          .get()
+          .then((snap) => {
             tokenList.push(snap.data().fcmToken);
             functions.logger.log(`list is now: ${tokenList}`);
           });
@@ -401,7 +436,6 @@ async function ImageGroupChatsNotiSingle(generalImage, senderId, senderName, cha
     .catch((e) => {
       functions.logger.log(e.toString());
     });
-
 }
 
 //+ ------------------------------------ --------notification for group chat----------------------------------------------------------------
@@ -417,12 +451,10 @@ exports.notifyReceiverForGroupChat = functions.firestore
     var groupImage = "";
     var userList = [];
 
-
     var message = snap.data().message;
     var chatRoomId = context.params.documentId;
 
     var generalImage = "";
-
 
     functions.logger.info("Message By the Sender is:");
     functions.logger.info(message);
@@ -431,28 +463,29 @@ exports.notifyReceiverForGroupChat = functions.firestore
       functions.logger.info("In Chat function: type is Image");
       generalImage = snap.data().message;
 
-      await ImageGroupChatsNotiSingle(generalImage, senderId, senderName, chatRoomId);
-
-    }
-    else if (snap.data().type == "text") {
+      await ImageGroupChatsNotiSingle(
+        generalImage,
+        senderId,
+        senderName,
+        chatRoomId
+      );
+    } else if (snap.data().type == "text") {
       //getting image and token of receiver from the firestore through admin sdk
       functions.logger.info("In Chat function: type is text");
 
       await TextGroupChatsNotiSingle(message, senderId, senderName, chatRoomId);
-
-    }
-    else if (snap.data().type == "audio") {
+    } else if (snap.data().type == "audio") {
       functions.logger.info("In Chat function: type is audio");
       //getting image and token of receiver from the firestore through admin sdk
       AudioGroupChatsNotiSingle(message, senderId, senderName, chatRoomId);
-
     } else if (snap.data().type == "video") {
-
       functions.logger.info("In Chat function: type is video");
 
       const bucket = admin.storage().bucket();
       functions.logger.log(`bucket is: ${bucket.name}`);
-      functions.logger.log(`chatDocumentId is: ${context.params.chatDocumentId}`);
+      functions.logger.log(
+        `chatDocumentId is: ${context.params.chatDocumentId}`
+      );
 
       const fileName = `${context.params.chatDocumentId}.mp4`;
       functions.logger.log(`fileName is: ${fileName}`);
@@ -463,13 +496,28 @@ exports.notifyReceiverForGroupChat = functions.firestore
       functions.logger.log(`uploadUrl is: ${uploadUrl}`);
       console.log(uploadUrl);
 
-      admin.firestore().collection(`/GroupChatRoom/${chatRoomId}/messages`).doc(context.params.chatDocumentId).set({
-        uploadUrl: uploadUrl
-      }, { merge: true }).catch((e) => {
-        functions.logger.log(`error in setting the uploadUrl is:${e.toString()}`);
-      });
+      admin
+        .firestore()
+        .collection(`/GroupChatRoom/${chatRoomId}/messages`)
+        .doc(context.params.chatDocumentId)
+        .set(
+          {
+            uploadUrl: uploadUrl,
+          },
+          { merge: true }
+        )
+        .catch((e) => {
+          functions.logger.log(
+            `error in setting the uploadUrl is:${e.toString()}`
+          );
+        });
 
-      await VideoGroupChatsNotiSingle(message, senderId, senderName, chatRoomId);
+      await VideoGroupChatsNotiSingle(
+        message,
+        senderId,
+        senderName,
+        chatRoomId
+      );
       //getting image and token of receiver from the firestore through admin sdk
       // await admin
       //   .firestore()
@@ -492,8 +540,7 @@ exports.notifyReceiverForGroupChat = functions.firestore
       //   recName,
       //   chatRoomId
       // );
-    }
-    else {
+    } else {
       functions.logger.info("In Chat function: type is Else block");
       //getting image and token of receiver from the firestore through admin sdk
 
@@ -512,7 +559,6 @@ exports.notifyReceiverForChat = functions.firestore
     var recName = snap.data().receivedByName;
     var senName = snap.data().sendByName;
     var sendByImage = snap.data().sendByImage;
-
 
     var message = snap.data().message;
     var chatRoomId = context.params.documentId;
@@ -549,8 +595,7 @@ exports.notifyReceiverForChat = functions.firestore
         recName,
         chatRoomId
       );
-    }
-    else if (snap.data().type == "text") {
+    } else if (snap.data().type == "text") {
       //getting image and token of receiver from the firestore through admin sdk
       functions.logger.info("In Chat function: type is text");
       await admin
@@ -574,8 +619,7 @@ exports.notifyReceiverForChat = functions.firestore
         recName,
         chatRoomId
       );
-    }
-    else if (snap.data().type == "audio") {
+    } else if (snap.data().type == "audio") {
       functions.logger.info("In Chat function: type is audio");
       //getting image and token of receiver from the firestore through admin sdk
       await admin
@@ -604,7 +648,9 @@ exports.notifyReceiverForChat = functions.firestore
 
       const bucket = admin.storage().bucket();
       functions.logger.log(`bucket is: ${bucket.name}`);
-      functions.logger.log(`chatDocumentId is: ${context.params.chatDocumentId}`);
+      functions.logger.log(
+        `chatDocumentId is: ${context.params.chatDocumentId}`
+      );
 
       const fileName = `${context.params.chatDocumentId}.mp4`;
       functions.logger.log(`fileName is: ${fileName}`);
@@ -615,14 +661,23 @@ exports.notifyReceiverForChat = functions.firestore
       functions.logger.log(`uploadUrl is: ${uploadUrl}`);
       console.log(uploadUrl);
 
-      await admin.firestore().collection(`/ChatRoom/${chatRoomId}/messages`).doc(context.params.chatDocumentId).set({
-        uploadUrl: uploadUrl
-      }, { merge: true }).catch((e) => {
-        functions.logger.log(`error in setting the uploadUrl is:${e.toString()}`);
-      });
+      await admin
+        .firestore()
+        .collection(`/ChatRoom/${chatRoomId}/messages`)
+        .doc(context.params.chatDocumentId)
+        .set(
+          {
+            uploadUrl: uploadUrl,
+          },
+          { merge: true }
+        )
+        .catch((e) => {
+          functions.logger.log(
+            `error in setting the uploadUrl is:${e.toString()}`
+          );
+        });
 
       var thumbnailUrl = snap.data().thumbnail;
-
 
       await admin
         .firestore()
@@ -668,8 +723,7 @@ exports.notifyReceiverForChat = functions.firestore
       //   recName,
       //   chatRoomId
       // );
-    }
-    else {
+    } else {
       functions.logger.info("In Chat function: type is Else block");
       //getting image and token of receiver from the firestore through admin sdk
       await admin
@@ -696,8 +750,6 @@ exports.notifyReceiverForChat = functions.firestore
     }
   });
 
-
-
 //   exports.newStorageFile = functions.storage.object().onFinalize(async (object) => {
 //     const filePath = object.name;
 //     functions.logger.log("filePath:")
@@ -721,7 +773,6 @@ exports.notifyReceiverForChat = functions.firestore
 exports.liking = functions.firestore
   .document("/Accounts/{documentId}/iFollowed/{iFollowedDoc}")
   .onCreate(async (snap, context) => {
-
     //IFollowedModel myProfileForFollowed = IFollowedModel(
     //followedId: userDetailsModel.uID,
     //followedName: userDetailsModel.fullName,
@@ -762,7 +813,6 @@ exports.liking = functions.firestore
         functions.logger.log(e.toString());
       });
 
-
     await admin
       .firestore()
       .collection("Accounts")
@@ -779,7 +829,6 @@ exports.liking = functions.firestore
     functions.logger.log("FollowerID is: ");
     functions.logger.log(followerId);
 
-
     await admin
       .firestore()
       .collection("Accounts")
@@ -792,7 +841,6 @@ exports.liking = functions.firestore
         followerImageUrl: followerImageUrl,
         followedAt: followedAt,
       });
-
 
     //Sending notification to Followed One
 
@@ -847,14 +895,12 @@ exports.liking = functions.firestore
 exports.postLikedNotification = functions.firestore
   .document("/Posts/{documentId}")
   .onUpdate(async (change, context) => {
-
     const newData = change.after.data();
     const oldData = change.before.data();
 
     var likesList = newData.likeIDs;
     var posterId = newData.uID;
     var postId = newData.postID;
-
 
     var posterFcmToken;
     // var time = snap.data().time;
@@ -877,7 +923,6 @@ exports.postLikedNotification = functions.firestore
         .catch((e) => {
           functions.logger.log(e.toString());
         });
-
 
       await admin
         .firestore()
@@ -941,7 +986,6 @@ exports.postLikedNotification = functions.firestore
 exports.postCommentedNotification = functions.firestore
   .document("/Posts/{documentId}/comments/{commentId}")
   .onCreate(async (snap, context) => {
-
     var newData;
     const commentData = snap.data();
     var postId = commentData.postID;
@@ -950,7 +994,8 @@ exports.postCommentedNotification = functions.firestore
       .firestore()
       .collection("Posts")
       .doc(postId)
-      .get().then(async (snapshot) => {
+      .get()
+      .then(async (snapshot) => {
         newData = snapshot.data();
       });
 
@@ -975,7 +1020,6 @@ exports.postCommentedNotification = functions.firestore
       .catch((e) => {
         functions.logger.log(e.toString());
       });
-
 
     await admin
       .firestore()
@@ -1039,7 +1083,6 @@ exports.postCommentedNotification = functions.firestore
 exports.notifyInvitedAboutGroupInvite = functions.firestore
   .document("/GroupChatInvitations/{documentId}")
   .onCreate(async (snap, context) => {
-
     //"groupId": groupChatModel.groupId ?? "",
     //"groupName": groupChatModel.groupName ?? "",
     //"groupImage": groupChatModel.groupImage ?? "",
@@ -1099,7 +1142,9 @@ exports.notifyInvitedAboutGroupInvite = functions.firestore
         },
       })
       .then((value) => {
-        functions.logger.log("Notifications sent to the invited person for group invite");
+        functions.logger.log(
+          "Notifications sent to the invited person for group invite"
+        );
       })
       .catch((e) => {
         functions.logger.log(e.toString());
@@ -1119,12 +1164,10 @@ exports.notifyInvitedAboutGroupInvite = functions.firestore
     // }
   });
 
-
 //+------------------------------------------------------Notification for Tag Posts ---------------------------------------
 exports.taggedPeopleNotification = functions.firestore
   .document("/Posts/{documentId}")
   .onCreate(async (snap, context) => {
-
     const tagPeopleTokenList = snap.data().taggedPeopleToken;
     const posterName = snap.data().postBy;
     const postId = snap.data().postID;
@@ -1134,18 +1177,20 @@ exports.taggedPeopleNotification = functions.firestore
     const videosIds = snap.data().videoIds;
     const uploadUrls = [];
 
-
     for (const index in videosIds) {
-
       functions.logger.info("In Chat function: type is video");
       const bucket = admin.storage().bucket();
       functions.logger.log(`bucket is: ${bucket.name}`);
-      functions.logger.log(`single videoId at index: ${index} is: ${videosIds[index]}`);
+      functions.logger.log(
+        `single videoId at index: ${index} is: ${videosIds[index]}`
+      );
 
       const fileName = `${videosIds[index]}.mp4`;
       functions.logger.log(`fileName is: ${fileName}`);
 
-      const videoFile = bucket.file(`postVideos/${context.params.documentId}/${fileName}`);
+      const videoFile = bucket.file(
+        `postVideos/${context.params.documentId}/${fileName}`
+      );
       const resumableUpload = await videoFile.createResumableUpload();
       functions.logger.log(`resumableUpload is: ${resumableUpload}`);
 
@@ -1155,13 +1200,23 @@ exports.taggedPeopleNotification = functions.firestore
       uploadUrls.push(uploadUrl);
     }
 
-    await admin.firestore().collection(`Posts`).doc(context.params.documentId).set({
-      videoIds: [],
-      taggedPeopleToken: [],
-      uploadUrls: uploadUrls
-    }, { merge: true }).catch((e) => {
-      functions.logger.log(`error in setting the uploadUrl is:${e.toString()}`);
-    });
+    await admin
+      .firestore()
+      .collection(`Posts`)
+      .doc(context.params.documentId)
+      .set(
+        {
+          videoIds: [],
+          taggedPeopleToken: [],
+          uploadUrls: uploadUrls,
+        },
+        { merge: true }
+      )
+      .catch((e) => {
+        functions.logger.log(
+          `error in setting the uploadUrl is:${e.toString()}`
+        );
+      });
 
     //Sending notification to Post Poster
     if (tagPeopleTokenList.length > 0) {
@@ -1184,9 +1239,7 @@ exports.taggedPeopleNotification = functions.firestore
           },
         })
         .then((value) => {
-          functions.logger.log(
-            "Notification for tag post send to tag people "
-          );
+          functions.logger.log("Notification for tag post send to tag people ");
         })
         .catch((e) => {
           functions.logger.log(e.toString());
@@ -1206,17 +1259,14 @@ exports.taggedPeopleNotification = functions.firestore
           });
         // console.log(`A JavaScript type is: ${type}`)
       }
-
     }
   });
-
 
 //+------------------------------------------------------Notification for taggedPeopleNotificationOnUpdate ------------------
 
 exports.taggedPeopleNotificationOnUpdate = functions.firestore
   .document("/Posts/{documentId}")
   .onUpdate(async (change, context) => {
-
     const tagPeopleTokenList = change.after.data().taggedPeopleToken;
     const posterName = change.after.data().postBy;
     const postId = change.after.data().postID;
@@ -1230,18 +1280,20 @@ exports.taggedPeopleNotificationOnUpdate = functions.firestore
     //Sending notification to Post Poster
 
     if (videosIds.length > 0) {
-
       for (const index in videosIds) {
-
         functions.logger.info("In Chat function: type is video");
         const bucket = admin.storage().bucket();
         functions.logger.log(`bucket is: ${bucket.name}`);
-        functions.logger.log(`single videoId at index: ${index} is: ${videosIds[index]}`);
+        functions.logger.log(
+          `single videoId at index: ${index} is: ${videosIds[index]}`
+        );
 
         const fileName = `${videosIds[index]}.mp4`;
         functions.logger.log(`fileName is: ${fileName}`);
 
-        const videoFile = bucket.file(`postVideos/${context.params.documentId}/${fileName}`);
+        const videoFile = bucket.file(
+          `postVideos/${context.params.documentId}/${fileName}`
+        );
         const resumableUpload = await videoFile.createResumableUpload();
         functions.logger.log(`resumableUpload is: ${resumableUpload}`);
 
@@ -1251,15 +1303,24 @@ exports.taggedPeopleNotificationOnUpdate = functions.firestore
         uploadUrls.push(uploadUrl);
       }
 
-      await admin.firestore().collection(`Posts`).doc(context.params.documentId).set({
-        videoIds: [],
-        taggedPeopleToken: [],
-        uploadUrls: uploadUrls
-      }, { merge: true }).catch((e) => {
-        functions.logger.log(`error in setting the uploadUrl is:${e.toString()}`);
-      });
+      await admin
+        .firestore()
+        .collection(`Posts`)
+        .doc(context.params.documentId)
+        .set(
+          {
+            videoIds: [],
+            taggedPeopleToken: [],
+            uploadUrls: uploadUrls,
+          },
+          { merge: true }
+        )
+        .catch((e) => {
+          functions.logger.log(
+            `error in setting the uploadUrl is:${e.toString()}`
+          );
+        });
     }
-
 
     if (tagPeopleTokenList > 0) {
       await admin
@@ -1304,8 +1365,6 @@ exports.taggedPeopleNotificationOnUpdate = functions.firestore
     // });
     //   console.log(`A JavaScript type is: ${type}`)
     // }
-
-
   });
 
 //+------------------------------------------------------Notification for deletingCommentsOnPostDeletion --------------------
@@ -1317,15 +1376,62 @@ exports.deletingCommentsOnPostDeletion = functions.firestore
 
     functions.logger.log("Post deleted and also deleting comments: " + postId);
     const fs = getFirestore();
-    await fs.recursiveDelete(admin.firestore().collection(`/Posts/${postId}/comments`)).catch((e) => {
-      functions.logger.log(e.toString());
-    });
+    await fs
+      .recursiveDelete(
+        admin.firestore().collection(`/Posts/${postId}/comments`)
+      )
+      .catch((e) => {
+        functions.logger.log(e.toString());
+      });
   });
 
+exports.storyVideoUpload = functions.firestore
+  .document("/Stories/{documentId}")
+  .onCreate(async (snap, context) => {
+    
+    var storyId = context.params.documentId;
+    var storyPersonId = snap.data().storyPersonId;
+    var videoId = context.params.documentId;
 
+    var mediaType = snap.data().mediaType;
+    var uploadUrl = "";
 
+    if(mediaType == "Video" || mediaType == "VideoWithCaption"){
 
+      functions.logger.info("In Story function: type is video");
+        const bucket = admin.storage().bucket();
+        functions.logger.log(`bucket is: ${bucket.name}`);
 
+        const fileName = `${videoId}.mp4`;
+        functions.logger.log(`fileName is: ${fileName}`);
 
+        const videoFile = bucket.file(
+          `storyVideos/${storyPersonId}/${fileName}`
+        );
+        const resumableUpload = await videoFile.createResumableUpload();
+        functions.logger.log(`resumableUpload is: ${resumableUpload}`);
 
+        uploadUrl = resumableUpload[0];
+        functions.logger.log(`single uploadUrl is: ${uploadUrl}`);
+        console.log(uploadUrl);
+      
 
+      await admin
+        .firestore()
+        .collection(`Stories`)
+        .doc(context.params.documentId)
+        .set(
+          {
+            uploadUrl: uploadUrl,
+          },
+          { merge: true }
+        )
+        .catch((e) => {
+          functions.logger.log(
+            `error in setting the uploadUrl is:${e.toString()}`
+          );
+        });
+    
+    }
+
+  });

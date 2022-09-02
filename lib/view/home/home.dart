@@ -180,7 +180,7 @@ class Home extends StatelessWidget {
                                     return ListView.builder(
                                       shrinkWrap: true,
                                       scrollDirection: Axis.horizontal,
-                                      itemCount: snapshot.data!.docs.length,
+                                      itemCount: snapshot.data!.docs.length~/snapshot.data!.docs.length,
                                       padding: const EdgeInsets.only(
                                         right: 8,
                                       ),
@@ -205,30 +205,6 @@ class Home extends StatelessWidget {
                                         );
                                       },
                                     );
-                                    // ListView.builder(
-                                    //   shrinkWrap: true,
-                                    //   physics: BouncingScrollPhysics(),
-                                    //   padding: EdgeInsets.symmetric(
-                                    //     vertical: 30,
-                                    //   ),
-                                    //   itemCount: snapshot.data!.docs.length,
-                                    //   itemBuilder: (context, index) {
-                                    //     AddPostModel addPostModel =
-                                    //     AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
-                                    //     return PostWidget(
-                                    //       postDocModel: addPostModel,
-                                    //       postID: addPostModel.postID,
-                                    //       isLikeByMe: addPostModel.likeIDs!.asMap().containsValue(auth.currentUser!.uid),
-                                    //       profileImage: addPostModel.profileImage,
-                                    //       name: addPostModel.postBy,
-                                    //       postedTime: addPostModel.createdAt,
-                                    //       title: addPostModel.postTitle,
-                                    //       likeCount: addPostModel.likeIDs!.length,
-                                    //       isMyPost: false,
-                                    //       postImage: addPostModel.postImages!,
-                                    //     );
-                                    //   },
-                                    // );
                                   } else {
                                     return const SizedBox();
                                   }

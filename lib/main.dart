@@ -339,6 +339,7 @@ Future<void> backgroundHandler() async {
         log("uploadedVideoIdList: $uploadedVideoIdList");
         bool isChatRoom = uploadedVideoIdList.asMap().containsValue("chatRooms");
         bool isPostVideo = uploadedVideoIdList.asMap().containsValue("postVideos");
+        bool isStoryVideo = uploadedVideoIdList.asMap().containsValue("storyVideos");
         bool isGroupChatRoom = uploadedVideoIdList.asMap().containsValue("groupChatRooms");
         log("isChatRoom: $isChatRoom \n and isPostVideo: $isPostVideo \n and isGroupChatRoom: $isGroupChatRoom");
 
@@ -386,6 +387,18 @@ Future<void> backgroundHandler() async {
           String url = await ref.getDownloadURL();
           FirebaseFirestore.instance.collection("Posts").doc(postId).update({
             "postVideos": FieldValue.arrayUnion([url])
+          });
+          uploader.clearUploads();
+        }else if (isStoryVideo) {
+          // String storyId = uploadedVideoIdList[2];
+          String storyId = uploadedVideoIdList[3].split(".")[0];
+          String fileName = uploadedVideoIdList[3].split(".")[0];
+          log("storyId in upload result:  $storyId");
+          log("fileName in upload result:  $fileName");
+          var ref = FirebaseStorage.instance.ref().child("storyVideos/${auth.currentUser?.uid}").child("$fileName.mp4");
+          String url = await ref.getDownloadURL();
+          FirebaseFirestore.instance.collection(storyCollection).doc(storyId).update({
+            "storyVideo": url,
           });
           uploader.clearUploads();
         }
