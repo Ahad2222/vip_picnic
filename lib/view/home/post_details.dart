@@ -997,8 +997,8 @@ class CommentsTiles extends StatelessWidget {
                         await ffstore.collection(postsCollection).doc(postDocId).collection(commentsCollection)
                             .doc(commentDocId).update({"commentText": commentController.text.trim()});
                       } : () {
-                        isBeingEdited.value = true;
                         commentController.text = comment ?? "";
+                        isBeingEdited.value = true;
                       },
                       child: isBeingEdited.value
                           ? Image.asset(
