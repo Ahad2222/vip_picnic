@@ -15,3 +15,4 @@ String iFollowedCollection = "iFollowed";
 
 //+ underlying collections or sub-collections
 String messagesCollection = "messages";
+String commentsCollection = "comments";

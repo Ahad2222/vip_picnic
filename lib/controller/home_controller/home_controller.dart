@@ -42,12 +42,12 @@ class HomeController extends GetxController {
   List<String> videoIds = [];
   final pageController = PageController();
   RxInt currentPost = 0.obs;
-  RxBool isEditComment = false.obs;
+  // RxBool isEditComment = false.obs;
 
-  void editComment() {
-    isEditComment.value = !isEditComment.value;
-    update();
-  }
+  // void editComment() {
+  //   isEditComment.value = !isEditComment.value;
+  //   update();
+  // }
 
   void getCurrentPostIndex(int index) {
     currentPost.value = index;
