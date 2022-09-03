@@ -25,6 +25,7 @@ class HomeController extends GetxController {
   late final TextEditingController descriptionCon;
   late final TextEditingController tagCon;
   late final TextEditingController locationCon;
+  late final TextEditingController editCommentCon;
 
   List<String> imagesToUpload = [];
   DateTime createdAt = DateTime.now();
@@ -41,6 +42,12 @@ class HomeController extends GetxController {
   List<String> videoIds = [];
   final pageController = PageController();
   RxInt currentPost = 0.obs;
+  RxBool isEditComment = false.obs;
+
+  void editComment() {
+    isEditComment.value = !isEditComment.value;
+    update();
+  }
 
   void getCurrentPostIndex(int index) {
     currentPost.value = index;
@@ -67,7 +74,8 @@ class HomeController extends GetxController {
 
   Future pickVideo(BuildContext context) async {
     try {
-      XFile? videoFile = await ImagePicker().pickVideo(source: ImageSource.gallery);
+      XFile? videoFile =
+          await ImagePicker().pickVideo(source: ImageSource.gallery);
       String videoPath = videoFile?.path ?? "";
 
       if (videoFile != null) {
@@ -126,7 +134,9 @@ class HomeController extends GetxController {
         return loading();
       },
     );
-    if (selectedImages.isNotEmpty || selectedVideos.isNotEmpty || descriptionCon.text.isNotEmpty) {
+    if (selectedImages.isNotEmpty ||
+        selectedVideos.isNotEmpty ||
+        descriptionCon.text.isNotEmpty) {
       var postID = Uuid().v1();
       try {
         await uploadAllImages();
@@ -156,24 +166,35 @@ class HomeController extends GetxController {
         await posts.doc(postID).set(addPostModel.toJson()).then(
           (value) async {
             log('Data set to FIREBASE!');
-            StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? postDocStream;
-            postDocStream = await ffstore.collection(postsCollection).doc(postID).snapshots().listen((event) async {
+            StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>?
+                postDocStream;
+            postDocStream = await ffstore
+                .collection(postsCollection)
+                .doc(postID)
+                .snapshots()
+                .listen((event) async {
               log("inside the postDoc stream");
-              bool containsUploadUrl = event.data()?.containsKey("uploadUrls") ?? false;
+              bool containsUploadUrl =
+                  event.data()?.containsKey("uploadUrls") ?? false;
               if (containsUploadUrl) {
                 log("inside containsUploadUrl");
                 // final taskId =
-                List<String> uploadUrls = List<String>.from(event.data()?["uploadUrls"].map((x) => x));
+                List<String> uploadUrls = List<String>.from(
+                    event.data()?["uploadUrls"].map((x) => x));
 
                 for (int i = 0; i < selectedVideos.length; i++) {
                   log("inside loop where we are enqueuing uploads");
                   await FlutterUploader().enqueue(
                     RawUpload(
-                      url: uploadUrls[i], // required: url to upload to
-                      path: selectedVideos[i].path, // required: list of files that you want to upload
-                      method: UploadMethod.PUT, // HTTP method  (POST or PUT or PATCH)
+                      url: uploadUrls[i],
+                      // required: url to upload to
+                      path: selectedVideos[i].path,
+                      // required: list of files that you want to upload
+                      method: UploadMethod.PUT,
+                      // HTTP method  (POST or PUT or PATCH)
                       // headers: {"apikey": "api_123456", "userkey": "userkey_123456"},
-                      tag: 'post video uploading', // custom tag which is returned in result/progress
+                      tag:
+                          'post video uploading', // custom tag which is returned in result/progress
                     ),
                   );
                 }
@@ -227,8 +248,8 @@ class HomeController extends GetxController {
 
   Future uploadSingleImage(XFile image) async {
     Reference ref = await fstorage.ref().child(
-      'postImages/images/${DateTime.now().toString()}',
-    );
+          'postImages/images/${DateTime.now().toString()}',
+        );
     await ref.putFile(
       File(image.path),
     );
@@ -237,18 +258,20 @@ class HomeController extends GetxController {
 
   Future uploadAllVideos() async {
     for (int i = 0; i < selectedVideos.length; i++) {
-      var thumbnailRef = await fstorage.ref().child('postImages/images/${DateTime.now().toString()}');
+      var thumbnailRef = await fstorage
+          .ref()
+          .child('postImages/images/${DateTime.now().toString()}');
       String videoId = Uuid().v1();
       videoIds.add(videoId);
-      await thumbnailRef.putFile(File(selectedVideosThumbnails[i] ?? "")).then((p0) async {
+      await thumbnailRef
+          .putFile(File(selectedVideosThumbnails[i] ?? ""))
+          .then((p0) async {
         await p0.ref.getDownloadURL().then((value) {
           thumbnailsUrls.add(value);
         });
       });
     }
   }
-
-
 
   void removeImage(int index) {
     selectedImages.removeAt(index);
@@ -268,6 +291,7 @@ class HomeController extends GetxController {
     descriptionCon = TextEditingController();
     tagCon = TextEditingController();
     locationCon = TextEditingController();
+    editCommentCon = TextEditingController();
   }
 
   @override

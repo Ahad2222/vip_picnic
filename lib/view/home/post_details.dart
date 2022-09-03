@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/constant/constant_variables.dart';
+import 'package:vip_picnic/controller/home_controller/home_controller.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/model/comment_model/comment_model.dart';
 import 'package:vip_picnic/model/home_model/add_post_model.dart';
@@ -46,7 +47,11 @@ class _PostDetailsState extends State<PostDetails> {
   void initState() {
     // TODO: implement initState
     addPostModel.value = widget.postDocModel!;
-    postDataListener = ffstore.collection(postsCollection).doc(widget.postDocModel!.postID).snapshots().listen((event) {
+    postDataListener = ffstore
+        .collection(postsCollection)
+        .doc(widget.postDocModel!.postID)
+        .snapshots()
+        .listen((event) {
       addPostModel.value = AddPostModel.fromJson(event.data() ?? {});
       log("inside stream and addPostModel: ${addPostModel.toJson()}");
     });
@@ -69,7 +74,8 @@ class _PostDetailsState extends State<PostDetails> {
         children: [
           NestedScrollView(
             physics: BouncingScrollPhysics(),
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
               return [
                 SliverStack(
                   children: [
@@ -119,7 +125,8 @@ class _PostDetailsState extends State<PostDetails> {
                                 onSelected: (value) {
                                   if (value == 0) {
                                     log("onTap edit post clicked");
-                                    Get.to(() => EditPost(postModel: addPostModel.value));
+                                    Get.to(() => EditPost(
+                                        postModel: addPostModel.value));
                                   } else if (value == 1) {
                                     showDialog(
                                       context: context,
@@ -131,31 +138,52 @@ class _PostDetailsState extends State<PostDetails> {
                                           onCancel: () => Get.back(),
                                           onConfirm: () async {
                                             try {
-                                              List<String> imageUrlsList = widget.postDocModel?.postImages ?? [];
-                                              List<String> videoUrlsList = widget.postDocModel?.postVideos ?? [];
+                                              List<String> imageUrlsList =
+                                                  widget.postDocModel
+                                                          ?.postImages ??
+                                                      [];
+                                              List<String> videoUrlsList =
+                                                  widget.postDocModel
+                                                          ?.postVideos ??
+                                                      [];
                                               List<String> videoThumbnailsList =
-                                                  widget.postDocModel?.thumbnailsUrls ?? [];
+                                                  widget.postDocModel
+                                                          ?.thumbnailsUrls ??
+                                                      [];
                                               Get.back();
                                               Get.back();
                                               // Get.back();
                                               Get.dialog(
                                                 loading(),
                                               );
-                                              await posts.doc(addPostModel.value.postID).delete();
+                                              await posts
+                                                  .doc(
+                                                      addPostModel.value.postID)
+                                                  .delete();
                                               Get.back();
                                               // await posts.doc(addPostModel.value.postID).collection("comments").delete();
                                               // log("before starting image deletion: ${DateTime.now()}");
                                               imageUrlsList.forEach(
                                                 (element) async {
                                                   // log("inside foreach before image deletion: ${DateTime.now()}");
-                                                  await fstorage.refFromURL(element).delete();
+                                                  await fstorage
+                                                      .refFromURL(element)
+                                                      .delete();
                                                   // log("inside foreach after image deletion: ${DateTime.now()}");
                                                 },
                                               );
 
-                                              for (int i = 0; i < videoUrlsList.length; i++) {
-                                                await fstorage.refFromURL(videoUrlsList[i]).delete();
-                                                await fstorage.refFromURL(videoThumbnailsList[i]).delete();
+                                              for (int i = 0;
+                                                  i < videoUrlsList.length;
+                                                  i++) {
+                                                await fstorage
+                                                    .refFromURL(
+                                                        videoUrlsList[i])
+                                                    .delete();
+                                                await fstorage
+                                                    .refFromURL(
+                                                        videoThumbnailsList[i])
+                                                    .delete();
                                               }
 
                                               // log("after foreach after deleting all images: ${DateTime.now()}");
@@ -163,7 +191,8 @@ class _PostDetailsState extends State<PostDetails> {
                                               print(e);
                                               showMsg(
                                                 context: context,
-                                                msg: "Something went wrong during post deletion. Please try again.",
+                                                msg:
+                                                    "Something went wrong during post deletion. Please try again.",
                                               );
                                             }
                                           },
@@ -238,21 +267,35 @@ class _PostDetailsState extends State<PostDetails> {
                                     ),
                                   )
                                 : PageView.builder(
-                                    onPageChanged: (index) => homeController.getCurrentPostIndex(index),
-                                    itemCount: (widget.postDocModel?.postImages?.length ?? 0) +
-                                        (widget.postDocModel?.postVideos?.length ?? 0),
+                                    onPageChanged: (index) => homeController
+                                        .getCurrentPostIndex(index),
+                                    itemCount: (widget.postDocModel?.postImages
+                                                ?.length ??
+                                            0) +
+                                        (widget.postDocModel?.postVideos
+                                                ?.length ??
+                                            0),
                                     physics: BouncingScrollPhysics(),
                                     itemBuilder: (context, index) {
-                                      if ((widget.postDocModel?.postImages?.length ?? 0) > 0 &&
-                                          index < (widget.postDocModel?.postImages?.length ?? 0)) {
+                                      if ((widget.postDocModel?.postImages
+                                                      ?.length ??
+                                                  0) >
+                                              0 &&
+                                          index <
+                                              (widget.postDocModel?.postImages
+                                                      ?.length ??
+                                                  0)) {
                                         return GestureDetector(
                                           onTap: () => Get.to(
                                             () => PostImagePreview(
-                                              imageUrl: widget.postDocModel!.postImages![index],
+                                              imageUrl: widget.postDocModel!
+                                                  .postImages![index],
                                             ),
                                           ),
                                           child: Image.network(
-                                            widget.postDocModel?.postImages![index] ?? "",
+                                            widget.postDocModel
+                                                    ?.postImages![index] ??
+                                                "",
                                             height: height(context, 1.0),
                                             width: width(context, 1.0),
                                             fit: BoxFit.cover,
@@ -263,7 +306,8 @@ class _PostDetailsState extends State<PostDetails> {
                                             ) {
                                               return const Text('Error');
                                             },
-                                            loadingBuilder: (context, child, loadingProgress) {
+                                            loadingBuilder: (context, child,
+                                                loadingProgress) {
                                               if (loadingProgress == null) {
                                                 return child;
                                               } else {
@@ -277,14 +321,22 @@ class _PostDetailsState extends State<PostDetails> {
                                           alignment: Alignment.center,
                                           children: [
                                             Padding(
-                                              padding: const EdgeInsets.symmetric(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
                                                 horizontal: 15,
                                               ),
                                               child: ClipRRect(
-                                                borderRadius: BorderRadius.circular(16),
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
                                                 child: Image.network(
-                                                  widget.postDocModel?.thumbnailsUrls![
-                                                          index - (widget.postDocModel?.postImages?.length ?? 0)] ??
+                                                  widget.postDocModel
+                                                              ?.thumbnailsUrls![
+                                                          index -
+                                                              (widget
+                                                                      .postDocModel
+                                                                      ?.postImages
+                                                                      ?.length ??
+                                                                  0)] ??
                                                       "",
                                                   height: Get.height,
                                                   fit: BoxFit.cover,
@@ -295,8 +347,10 @@ class _PostDetailsState extends State<PostDetails> {
                                                   ) {
                                                     return const Text(' ');
                                                   },
-                                                  loadingBuilder: (context, child, loadingProgress) {
-                                                    if (loadingProgress == null) {
+                                                  loadingBuilder: (context,
+                                                      child, loadingProgress) {
+                                                    if (loadingProgress ==
+                                                        null) {
                                                       return child;
                                                     } else {
                                                       return loading();
@@ -341,20 +395,33 @@ class _PostDetailsState extends State<PostDetails> {
                                                 width: 55,
                                                 decoration: BoxDecoration(
                                                   shape: BoxShape.circle,
-                                                  color: kBlackColor.withOpacity(0.5),
+                                                  color: kBlackColor
+                                                      .withOpacity(0.5),
                                                 ),
                                                 child: Material(
                                                   color: Colors.transparent,
                                                   child: InkWell(
                                                     onTap: () {
                                                       Get.to(() => VideoPreview(
-                                                            videoUrl: widget.postDocModel?.postVideos![
-                                                                index - (widget.postDocModel?.postImages?.length ?? 0)],
+                                                            videoUrl: widget
+                                                                    .postDocModel
+                                                                    ?.postVideos![
+                                                                index -
+                                                                    (widget
+                                                                            .postDocModel
+                                                                            ?.postImages
+                                                                            ?.length ??
+                                                                        0)],
                                                           ));
                                                     },
-                                                    borderRadius: BorderRadius.circular(100),
-                                                    splashColor: kPrimaryColor.withOpacity(0.1),
-                                                    highlightColor: kPrimaryColor.withOpacity(0.1),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            100),
+                                                    splashColor: kPrimaryColor
+                                                        .withOpacity(0.1),
+                                                    highlightColor:
+                                                        kPrimaryColor
+                                                            .withOpacity(0.1),
                                                     child: Center(
                                                       child: Image.asset(
                                                         Assets.imagesPlay,
@@ -372,10 +439,15 @@ class _PostDetailsState extends State<PostDetails> {
                                     },
                                   ),
                             (widget.postDocModel?.postImages?.length ?? 0) +
-                                            (widget.postDocModel?.postVideos?.length ?? 0) ==
+                                            (widget.postDocModel?.postVideos
+                                                    ?.length ??
+                                                0) ==
                                         1 ||
-                                    (widget.postDocModel?.postImages?.length ?? 0) +
-                                            (widget.postDocModel?.postVideos?.length ?? 0) ==
+                                    (widget.postDocModel?.postImages?.length ??
+                                                0) +
+                                            (widget.postDocModel?.postVideos
+                                                    ?.length ??
+                                                0) ==
                                         0
                                 ? SizedBox()
                                 : Obx(
@@ -387,12 +459,15 @@ class _PostDetailsState extends State<PostDetails> {
                                           height: 35,
                                           width: 46,
                                           decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(50),
-                                            color: kSecondaryColor.withOpacity(0.5),
+                                            borderRadius:
+                                                BorderRadius.circular(50),
+                                            color: kSecondaryColor
+                                                .withOpacity(0.5),
                                           ),
                                           child: Center(
                                             child: MyText(
-                                              text: '${homeController.currentPost.value + 1}/'
+                                              text:
+                                                  '${homeController.currentPost.value + 1}/'
                                                   '${(widget.postDocModel?.postImages?.length ?? 0) + (widget.postDocModel?.postVideos?.length ?? 0)}',
                                               size: 15,
                                               weight: FontWeight.w600,
@@ -418,7 +493,8 @@ class _PostDetailsState extends State<PostDetails> {
                         margin: EdgeInsets.only(
                           top: 390,
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 30, vertical: 20),
                         decoration: BoxDecoration(
                           color: kPrimaryColor,
                           boxShadow: [
@@ -567,21 +643,35 @@ class _PostDetailsState extends State<PostDetails> {
                               children: [
                                 GestureDetector(
                                   onTap: () async {
-                                    await ffstore.collection(postsCollection).doc(widget.postDocModel!.postID).update({
-                                      "likeCount": FieldValue.increment(widget.isLikeByMe! ? -1 : 1),
-                                      "likeIDs":
-                                          !addPostModel.value.likeIDs!.asMap().containsValue(auth.currentUser!.uid)
-                                              ? FieldValue.arrayUnion([auth.currentUser!.uid])
-                                              : FieldValue.arrayRemove([auth.currentUser!.uid]),
+                                    await ffstore
+                                        .collection(postsCollection)
+                                        .doc(widget.postDocModel!.postID)
+                                        .update({
+                                      "likeCount": FieldValue.increment(
+                                          widget.isLikeByMe! ? -1 : 1),
+                                      "likeIDs": !addPostModel.value.likeIDs!
+                                              .asMap()
+                                              .containsValue(
+                                                  auth.currentUser!.uid)
+                                          ? FieldValue.arrayUnion(
+                                              [auth.currentUser!.uid])
+                                          : FieldValue.arrayRemove(
+                                              [auth.currentUser!.uid]),
                                     });
                                   },
                                   child: Obx(() {
                                     return Image.asset(
-                                      addPostModel.value.likeIDs!.asMap().containsValue(auth.currentUser!.uid)
+                                      addPostModel.value.likeIDs!
+                                              .asMap()
+                                              .containsValue(
+                                                  auth.currentUser!.uid)
                                           ? Assets.imagesHeartFull
                                           : Assets.imagesHeartEmpty,
                                       height: 24.0,
-                                      color: addPostModel.value.likeIDs!.asMap().containsValue(auth.currentUser!.uid)
+                                      color: addPostModel.value.likeIDs!
+                                              .asMap()
+                                              .containsValue(
+                                                  auth.currentUser!.uid)
                                           ? Color(0xffe31b23)
                                           : kDarkBlueColor.withOpacity(0.60),
                                     );
@@ -605,7 +695,8 @@ class _PostDetailsState extends State<PostDetails> {
                                   height: 23.76,
                                   color: kDarkBlueColor.withOpacity(0.60),
                                 ),
-                                StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                                StreamBuilder<
+                                    QuerySnapshot<Map<String, dynamic>>>(
                                   stream: ffstore
                                       .collection(postsCollection)
                                       .doc(widget.postDocModel!.postID)
@@ -617,34 +708,41 @@ class _PostDetailsState extends State<PostDetails> {
                                   ) {
                                     int previousCount = 0;
                                     log("inside stream-builder");
-                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
                                       log("inside stream-builder in waiting state");
                                       return MyText(
                                         text: '$previousCount',
                                         size: 18,
                                         color: kDarkBlueColor.withOpacity(0.60),
                                       );
-                                    } else if (snapshot.connectionState == ConnectionState.active ||
-                                        snapshot.connectionState == ConnectionState.done) {
+                                    } else if (snapshot.connectionState ==
+                                            ConnectionState.active ||
+                                        snapshot.connectionState ==
+                                            ConnectionState.done) {
                                       if (snapshot.hasError) {
                                         return MyText(
                                           text: '0',
                                           size: 18,
-                                          color: kDarkBlueColor.withOpacity(0.60),
+                                          color:
+                                              kDarkBlueColor.withOpacity(0.60),
                                         );
                                       } else if (snapshot.hasData) {
                                         if (snapshot.data!.docs.length > 0) {
-                                          previousCount = snapshot.data!.docs.length;
+                                          previousCount =
+                                              snapshot.data!.docs.length;
                                           return MyText(
                                             text: snapshot.data!.docs.length,
                                             size: 18,
-                                            color: kDarkBlueColor.withOpacity(0.60),
+                                            color: kDarkBlueColor
+                                                .withOpacity(0.60),
                                           );
                                         } else {
                                           return MyText(
                                             text: '0',
                                             size: 18,
-                                            color: kDarkBlueColor.withOpacity(0.60),
+                                            color: kDarkBlueColor
+                                                .withOpacity(0.60),
                                           );
                                         }
                                       } else {
@@ -653,7 +751,8 @@ class _PostDetailsState extends State<PostDetails> {
                                         return MyText(
                                           text: '0',
                                           size: 18,
-                                          color: kDarkBlueColor.withOpacity(0.60),
+                                          color:
+                                              kDarkBlueColor.withOpacity(0.60),
                                         );
                                       }
                                     } else {
@@ -711,7 +810,8 @@ class _PostDetailsState extends State<PostDetails> {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         log("inside stream-builder in waiting state");
                         return const Center(child: Text('Loading...'));
-                      } else if (snapshot.connectionState == ConnectionState.active ||
+                      } else if (snapshot.connectionState ==
+                              ConnectionState.active ||
                           snapshot.connectionState == ConnectionState.done) {
                         if (snapshot.hasError) {
                           return const Center(child: Text('No Comments Yet'));
@@ -726,8 +826,9 @@ class _PostDetailsState extends State<PostDetails> {
                               ),
                               itemCount: snapshot.data!.docs.length,
                               itemBuilder: (context, index) {
-                                CommentModel cmdl =
-                                    CommentModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                                CommentModel cmdl = CommentModel.fromJson(
+                                    snapshot.data!.docs[index].data()
+                                        as Map<String, dynamic>);
                                 return CommentsTiles(
                                   profileImage: cmdl.commenterImage,
                                   name: cmdl.commenterName,
@@ -852,7 +953,10 @@ class _PostDetailsState extends State<PostDetails> {
                 commenterID: auth.currentUser!.uid,
                 commenterImage: userDetailsModel.profileImageUrl ?? "",
                 commenterName: userDetailsModel.fullName ?? "",
-                createdAt: DateFormat.yMEd().add_jms().format(DateTime.now()).toString(),
+                createdAt: DateFormat.yMEd()
+                    .add_jms()
+                    .format(DateTime.now())
+                    .toString(),
                 createdAtMilliSeconds: DateTime.now().millisecondsSinceEpoch,
                 likeCount: 0,
                 likeIDs: [],
@@ -888,77 +992,106 @@ class CommentsTiles extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(
-        bottom: 0,
-      ),
+    return Padding(
+      padding: MediaQuery.of(context).viewInsets,
       child: Column(
         children: [
           Material(
             color: Colors.transparent,
-            child: ListTile(
-              //+open other user profile from here
-              onTap: () {},
-              leading: Container(
-                height: 44.45,
-                width: 44.45,
-                padding: EdgeInsets.all(3),
-                decoration: BoxDecoration(
-                  color: kPrimaryColor,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: kBlackColor.withOpacity(0.16),
-                      blurRadius: 6,
-                      offset: Offset(0, 0),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(100),
-                    child: Image.network(
-                      profileImage!,
-                      height: height(context, 1.0),
-                      width: width(context, 1.0),
-                      fit: BoxFit.cover,
+            child: Obx(() {
+              return ListTile(
+                //+open other user profile from here
+                onTap: () {},
+                leading: Container(
+                  height: 44.45,
+                  width: 44.45,
+                  padding: EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    color: kPrimaryColor,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: kBlackColor.withOpacity(0.16),
+                        blurRadius: 6,
+                        offset: Offset(0, 0),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(100),
+                      child: Image.network(
+                        profileImage!,
+                        height: height(context, 1.0),
+                        width: width(context, 1.0),
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              title: MyText(
-                text: '$name',
-                size: 16,
-                weight: FontWeight.w600,
-                color: kSecondaryColor,
-              ),
-              subtitle: MyText(
-                text: '$comment',
-                size: 14,
-                color: kSecondaryColor,
-                paddingTop: 4,
-              ),
-              trailing: Wrap(
-                spacing: 13,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  // GestureDetector(
-                  //   onTap: () {},
-                  //   child: Image.asset(
-                  //     Assets.imagesComment,
-                  //     height: 20.86,
-                  //   ),
-                  // ),
-                  // GestureDetector(
-                  //   onTap: () {},
-                  //   child: Image.asset(
-                  //     Assets.imagesHeart,
-                  //     height: 18.34,
-                  //   ),
-                  // ),
-                ],
-              ),
-            ),
+                title: MyText(
+                  text: '$name',
+                  size: 16,
+                  weight: FontWeight.w600,
+                  color: kSecondaryColor,
+                ),
+                subtitle: HomeController.instance.isEditComment.value
+                    ? TextField(
+                        cursorColor: kSecondaryColor,
+                        cursorWidth: 1.0,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: kSecondaryColor,
+                        ),
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.zero,
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: kSecondaryColor,
+                              width: 1.0,
+                            ),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: kSecondaryColor,
+                              width: 1.0,
+                            ),
+                          ),
+                        ),
+                      )
+                    : MyText(
+                        text: '$comment',
+                        size: 14,
+                        color: kSecondaryColor,
+                        paddingTop: 4,
+                      ),
+                trailing: Wrap(
+                  spacing: 13,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () => HomeController.instance.editComment(),
+                      child: HomeController.instance.isEditComment.value
+                          ? Image.asset(
+                              Assets.imagesSend,
+                              height: 30,
+                            )
+                          : Image.asset(
+                              Assets.imagesEditIcon,
+                              height: 18,
+                            ),
+                    ),
+                    GestureDetector(
+                      onTap: () {},
+                      child: Image.asset(
+                        Assets.imagesDeleteMsg,
+                        height: 20,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
           ),
         ],
       ),
