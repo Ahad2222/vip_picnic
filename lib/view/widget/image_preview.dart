@@ -20,7 +20,7 @@ class ImagePreview extends StatelessWidget {
         child: Image.network(
           imageUrl!,
           scale: 0.7,
-          fit: BoxFit.cover,
+          fit: BoxFit.contain,
           width: Get.width,
           height: Get.height,
         ),

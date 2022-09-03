@@ -16,28 +16,26 @@ class PostImagePreview extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          Expanded(
-            child: InteractiveViewer(
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                height: Get.height,
-                width: Get.width,
-                errorBuilder: (
-                  BuildContext context,
-                  Object exception,
-                  StackTrace? stackTrace,
-                ) {
-                  return const Text(' ');
-                },
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) {
-                    return child;
-                  } else {
-                    return loading();
-                  }
-                },
-              ),
+          InteractiveViewer(
+            child: Image.network(
+              imageUrl,
+              fit: BoxFit.contain,
+              height: Get.height,
+              width: Get.width,
+              errorBuilder: (
+                BuildContext context,
+                Object exception,
+                StackTrace? stackTrace,
+              ) {
+                return const Text(' ');
+              },
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) {
+                  return child;
+                } else {
+                  return loading();
+                }
+              },
             ),
           ),
           Positioned(
