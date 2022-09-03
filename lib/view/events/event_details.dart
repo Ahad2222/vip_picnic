@@ -4,10 +4,21 @@ import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/view/widget/curved_header.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
+import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/my_button.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 
 class EventDetails extends StatelessWidget {
+  EventDetails({
+    this.imageUrl,
+    this.eventTheme,
+    this.des,
+  });
+
+  String? imageUrl;
+  String? eventTheme;
+  String? des;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,57 +46,36 @@ class EventDetails extends StatelessWidget {
                     ),
                   ),
                   title: MyText(
-                    text: 'Picnic Kids',
+                    text: eventTheme,
                     size: 19,
                     color: kPrimaryColor,
                   ),
-                  actions: [
-                    Center(
-                      child: Container(
-                        margin: EdgeInsets.only(
-                          right: 15,
-                        ),
-                        height: 35,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 15,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(50),
-                          color: kDarkBlueColor.withOpacity(0.50),
-                        ),
-                        child: Center(
-                          child: MyText(
-                            size: 15,
-                            weight: FontWeight.w600,
-                            color: kPrimaryColor,
-                            text: '1/4',
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
                   flexibleSpace: FlexibleSpaceBar(
-                    background: PageView.builder(
-                      itemCount: 3,
-                      physics: BouncingScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        return Stack(
-                          children: [
-                            Image.asset(
-                              Assets.imagesRoamcticePicnic,
-                              height: height(context, 1.0),
-                              width: width(context, 1.0),
-                              fit: BoxFit.cover,
-                            ),
-                            Image.asset(
-                              Assets.imagesGradientEffectTwo,
-                              height: height(context, 1.0),
-                              width: width(context, 1.0),
-                              fit: BoxFit.cover,
-                            ),
-                          ],
-                        );
-                      },
+                    background: Stack(
+                      children: [
+                        Image.network(
+                          imageUrl.toString(),
+                          height: height(context, 1.0),
+                          width: width(context, 1.0),
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) {
+                              return child;
+                            } else {
+                              return loading();
+                            }
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return loading();
+                          },
+                        ),
+                        Image.asset(
+                          Assets.imagesGradientEffectTwo,
+                          height: height(context, 1.0),
+                          width: width(context, 1.0),
+                          fit: BoxFit.cover,
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -110,10 +100,8 @@ class EventDetails extends StatelessWidget {
                   ),
                   MyText(
                     paddingTop: 10,
-                    text:
-                        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Bibendum est ultricies integer quis. Iaculis urna id volutpat lacus laoreet. Mauris vitae ultricies leo',
+                    text: des,
                     size: 14,
-                    maxLines: 5,
                     overFlow: TextOverflow.ellipsis,
                     color: kSecondaryColor,
                     paddingBottom: 20,

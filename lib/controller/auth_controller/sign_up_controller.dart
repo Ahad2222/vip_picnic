@@ -27,6 +27,8 @@ class SignupController extends GetxController {
   late final TextEditingController stateCon;
   late final TextEditingController zipCon;
   late final TextEditingController addressCon;
+  late final TextEditingController otpCon;
+  String? countryCode = '';
   String? profileImage = '';
   String? accountType = 'Private';
   RxInt? selectedAccountTypeIndex = 0.obs;
@@ -62,7 +64,9 @@ class SignupController extends GetxController {
   }
 
   Future uploadPhoto() async {
-    Reference ref = await FirebaseStorage.instance.ref().child('Images/Profile Images/${DateTime.now().toString()}');
+    Reference ref = await FirebaseStorage.instance
+        .ref()
+        .child('Images/Profile Images/${DateTime.now().toString()}');
     await ref.putFile(pickedImage!);
     await ref.getDownloadURL().then((value) {
       log('Profile Image URL $value');
@@ -111,7 +115,7 @@ class SignupController extends GetxController {
             email: emailCon.text.trim(),
             uID: auth.currentUser!.uid,
             password: passCon.text.trim(),
-            phone: phoneCon.text.trim(),
+            phone: '+'+countryCode! + phoneCon.text.trim(),
             city: cityCon.text.trim(),
             state: stateCon.text.trim(),
             zip: zipCon.text.trim(),
@@ -124,14 +128,19 @@ class SignupController extends GetxController {
             userSearchParameters: userSearchParameters,
             createdAt: DateFormat.yMEd().add_jms().format(createdAt).toString(),
           );
-          await accounts.doc(auth.currentUser!.uid).set(userDetailsModel.toJson());
+          await accounts
+              .doc(auth.currentUser!.uid)
+              .set(userDetailsModel.toJson());
         }).then(
           (value) async {
             await UserSimplePreference.setUserData(userDetailsModel);
             if (auth.currentUser != null) {
               String? token = await fcm.getToken() ?? userDetailsModel.fcmToken;
               try {
-                ffstore.collection(accountsCollection).doc(auth.currentUser?.uid).update({
+                ffstore
+                    .collection(accountsCollection)
+                    .doc(auth.currentUser?.uid)
+                    .update({
                   "fcmToken": token,
                   "fcmCreatedAt": DateTime.now().toIso8601String(),
                 });
@@ -141,7 +150,10 @@ class SignupController extends GetxController {
               }
               fcm.onTokenRefresh.listen((streamedToken) {
                 try {
-                  ffstore.collection(accountsCollection).doc(auth.currentUser?.uid).update({
+                  ffstore
+                      .collection(accountsCollection)
+                      .doc(auth.currentUser?.uid)
+                      .update({
                     "fcmToken": streamedToken,
                     "fcmCreatedAt": DateTime.now().toIso8601String(),
                   });

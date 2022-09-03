@@ -5,11 +5,20 @@ import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/view/widget/curved_header.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
+import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/my_button.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:vip_picnic/view/widget/my_textfields.dart';
 
 class CustomizeEvent extends StatelessWidget {
+  CustomizeEvent({
+    this.imageUrl,
+    this.des,
+  });
+
+  String? imageUrl;
+  String? des;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,11 +54,21 @@ class CustomizeEvent extends StatelessWidget {
                   flexibleSpace: FlexibleSpaceBar(
                     background: Stack(
                       children: [
-                        Image.asset(
-                          Assets.imagesCustomize,
+                        Image.network(
+                          imageUrl.toString(),
                           height: height(context, 1.0),
                           width: width(context, 1.0),
                           fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) {
+                              return child;
+                            } else {
+                              return loading();
+                            }
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return loading();
+                          },
                         ),
                         Image.asset(
                           Assets.imagesGradientEffectTwo,
@@ -61,13 +80,21 @@ class CustomizeEvent extends StatelessWidget {
                     ),
                   ),
                 ),
-                curvedHeader(),
+                curvedHeader(paddingTop: 300),
               ],
             ),
           ];
         },
         body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            MyText(
+              text: 'Customize your event',
+              size: 19,
+              weight: FontWeight.w600,
+              paddingBottom: 20,
+              paddingLeft: 30,
+            ),
             Expanded(
               child: ListView(
                 padding: EdgeInsets.symmetric(
@@ -75,62 +102,6 @@ class CustomizeEvent extends StatelessWidget {
                 ),
                 physics: BouncingScrollPhysics(),
                 children: [
-                  MyText(
-                    text: 'How it works?',
-                    size: 19,
-                    weight: FontWeight.w600,
-                    paddingBottom: 10,
-                  ),
-                  RichText(
-                    text: TextSpan(
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: kSecondaryColor,
-                        decoration: TextDecoration.none,
-                        fontFamily: GoogleFonts.openSans().fontFamily,
-                      ),
-                      children: [
-                        TextSpan(
-                          text: 'Book and Payment? ',
-                          style: TextStyle(
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                        TextSpan(
-                          text:
-                              ' Book at least 15 days in advance, with a 50% deposit (transfer) and the remainder on the day of the event.',
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  RichText(
-                    text: TextSpan(
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: kSecondaryColor,
-                        decoration: TextDecoration.none,
-                        fontFamily: GoogleFonts.openSans().fontFamily,
-                      ),
-                      children: [
-                        TextSpan(
-                          text: 'Don\'t found something?',
-                          style: TextStyle(
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                        TextSpan(
-                          text:
-                          ' If you want something that is not on our list, write in the "message field" and we will be happy to make your wish come true.',
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
                   ETextField(
                     labelText: 'Event type:',
                     isReadOnly: true,
@@ -376,13 +347,77 @@ class CustomizeEvent extends StatelessWidget {
                   SizedBox(
                     height: 20,
                   ),
+                  MyText(
+                    text: 'How it works?',
+                    size: 19,
+                    weight: FontWeight.w600,
+                    paddingBottom: 10,
+                  ),
+                  MyText(
+                    paddingTop: 10,
+                    text: des,
+                    size: 14,
+                    overFlow: TextOverflow.ellipsis,
+                    color: kSecondaryColor,
+                    paddingBottom: 20,
+                  ),
+                  RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: kSecondaryColor,
+                        decoration: TextDecoration.none,
+                        fontFamily: GoogleFonts.openSans().fontFamily,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: 'Book and Payment? ',
+                          style: TextStyle(
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                        TextSpan(
+                          text:
+                              'Book at least 15 days in advance, with a 50% deposit (transfer) and the remainder on the day of the event.',
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: kSecondaryColor,
+                        decoration: TextDecoration.none,
+                        fontFamily: GoogleFonts.openSans().fontFamily,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: 'Don\'t found something?',
+                          style: TextStyle(
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                        TextSpan(
+                          text:
+                              ' If you want something that is not on our list, write in the "message field" and we will be happy to make your wish come true.',
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
                 ],
               ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 30,
-                vertical: 20,
+                vertical: 15,
               ),
               child: MyButton(
                 buttonText: 'get free quotations',
@@ -394,52 +429,56 @@ class CustomizeEvent extends StatelessWidget {
       ),
     );
   }
+
   Widget howItWorkBottomSheet(
-      BuildContext context, {
-        String? title,
-        Widget? selectedField,
-        double? height = 200,
-        VoidCallback? onSave,
-      }) {
-    return Container(
-      height: height,
-      padding: EdgeInsets.symmetric(
-        horizontal: 30,
-      ),
-      decoration: BoxDecoration(
-        color: kPrimaryColor,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(28),
-          topRight: Radius.circular(28),
+    BuildContext context, {
+    String? title,
+    Widget? selectedField,
+    double? height = 200,
+    VoidCallback? onSave,
+  }) {
+    return Padding(
+      padding: MediaQuery.of(context).viewInsets,
+      child: Container(
+        height: height,
+        padding: EdgeInsets.symmetric(
+          horizontal: 30,
         ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(),
-              MyText(
-                text: '$title',
-                size: 19,
-                color: kSecondaryColor,
-              ),
-              GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Image.asset(
-                  Assets.imagesRoundedClose,
-                  height: 22.44,
+        decoration: BoxDecoration(
+          color: kPrimaryColor,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(28),
+            topRight: Radius.circular(28),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(),
+                MyText(
+                  text: '$title',
+                  size: 19,
+                  color: kSecondaryColor,
                 ),
-              ),
-            ],
-          ),
-          selectedField!,
-          MyButton(
-            onTap: onSave,
-            buttonText: 'Apply',
-          ),
-        ],
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Image.asset(
+                    Assets.imagesRoundedClose,
+                    height: 22.44,
+                  ),
+                ),
+              ],
+            ),
+            selectedField!,
+            MyButton(
+              onTap: onSave,
+              buttonText: 'Apply',
+            ),
+          ],
+        ),
       ),
     );
   }

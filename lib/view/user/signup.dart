@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/controller/auth_controller/sign_up_controller.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/utils/validators.dart';
+import 'package:vip_picnic/view/user/verification/verification_code.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/my_appbar.dart';
 import 'package:vip_picnic/view/widget/my_button.dart';
@@ -67,15 +69,24 @@ class Signup extends StatelessWidget {
                         log("spaceCounter is: ${spaceCounter} and ");
                         log("adding ${valueList[spaceCounter]} in if value.contains(' ')");
                         signupController.userSearchParameters.addIf(
-                            !signupController.userSearchParameters.asMap().containsValue(valueList[spaceCounter].toLowerCase()),
+                            !signupController.userSearchParameters
+                                .asMap()
+                                .containsValue(
+                                    valueList[spaceCounter].toLowerCase()),
                             valueList[spaceCounter].toLowerCase());
                         signupController.userSearchParameters.addIf(
-                            !signupController.userSearchParameters.asMap().containsValue(value.toLowerCase()), value.toLowerCase());
+                            !signupController.userSearchParameters
+                                .asMap()
+                                .containsValue(value.toLowerCase()),
+                            value.toLowerCase());
                         log("searchTerms in if value.contains(' ') is: ${signupController.userSearchParameters}");
                       } else {
                         log("in else of onChange means there's no space.");
                         signupController.userSearchParameters.addIf(
-                            !signupController.userSearchParameters.asMap().containsValue(value.toLowerCase()), value.toLowerCase());
+                            !signupController.userSearchParameters
+                                .asMap()
+                                .containsValue(value.toLowerCase()),
+                            value.toLowerCase());
                       }
                       log("added $value to array: ${signupController.userSearchParameters}");
                     },
@@ -92,12 +103,74 @@ class Signup extends StatelessWidget {
                   SizedBox(
                     height: 15,
                   ),
-                  ETextField(
+                  IntlPhoneField(
+                    flagsButtonMargin: EdgeInsets.only(left: 15),
+                    dropdownTextStyle: TextStyle(
+                      fontSize: 16,
+                      color: kGreyColor,
+                    ),
+                    dropdownIcon: Icon(
+                      Icons.arrow_drop_down,
+                      color: kSecondaryColor,
+                    ),
+                    dropdownIconPosition: IconPosition.trailing,
+                    textInputAction: TextInputAction.next,
                     controller: signupController.phoneCon,
-                    validator: (value) => phoneValidator(value!),
-                    labelText: 'phone'.tr + ':',
+                    validator: (value) => phoneValidator(value.toString()),
                     keyboardType: TextInputType.number,
+                    cursorColor: kSecondaryColor,
+                    cursorWidth: 1.0,
+                    initialCountryCode: 'US',
+                    onChanged: (phone) {
+                      print(phone.completeNumber);
+                    },
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: kGreyColor,
+                    ),
+                    decoration: InputDecoration(
+                      counterText: '',
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 15,
+                      ),
+                      fillColor: kPrimaryColor,
+                      filled: true,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50),
+                        borderSide: BorderSide(
+                          color: kBorderColor,
+                          width: 1.0,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50),
+                        borderSide: BorderSide(
+                          color: kBorderColor,
+                          width: 1.0,
+                        ),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 1.0,
+                        ),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50),
+                        borderSide: BorderSide(
+                          color: Colors.red,
+                          width: 1.0,
+                        ),
+                      ),
+                    ),
                   ),
+                  // ETextField(
+                  //   controller: signupController.phoneCon,
+                  //   validator: (value) => phoneValidator(value!),
+                  //   labelText: 'phone'.tr + ':',
+                  //   keyboardType: TextInputType.number,
+                  // ),
                   SizedBox(
                     height: 15,
                   ),
@@ -163,7 +236,8 @@ class Signup extends StatelessWidget {
                               child: Material(
                                 color: Colors.transparent,
                                 child: InkWell(
-                                  onTap: () => signupController.signupAccountType(
+                                  onTap: () =>
+                                      signupController.signupAccountType(
                                     index == 0 ? 'Private' : 'Business',
                                     index,
                                   ),
@@ -174,7 +248,10 @@ class Signup extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(100),
                                   child: Obx(() {
                                     return Center(
-                                      child: signupController.selectedAccountTypeIndex!.value == index
+                                      child: signupController
+                                                  .selectedAccountTypeIndex!
+                                                  .value ==
+                                              index
                                           ? Icon(
                                               Icons.check,
                                               size: 18,
@@ -210,11 +287,10 @@ class Signup extends StatelessWidget {
                 vertical: 20,
               ),
               child: MyButton(
-                // onTap: () => Navigator.pushNamed(
-                //   context,
-                //   AppLinks.verifyEmail,
-                // ),
-                onTap: () => signupController.signup(context),
+                onTap: () => Get.to(
+                  () => VerificationCode(),
+                ),
+                // onTap: () => signupController.signup(context),
                 buttonText: 'continue'.tr,
               ),
             ),
