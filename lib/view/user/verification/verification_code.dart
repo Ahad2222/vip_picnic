@@ -3,17 +3,23 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:twilio_phone_verify/twilio_phone_verify.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/view/widget/headings.dart';
 import 'package:vip_picnic/view/widget/my_button.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 
 class VerificationCode extends StatefulWidget {
-  const VerificationCode({Key? key}) : super(key: key);
+  VerificationCode({Key? key})
+      : super(
+          key: key,
+        );
 
-  // final String phoneNumber;
-  //
-  // PinCodeVerificationScreen(this.phoneNumber);
+  TwilioPhoneVerify twilioPhoneVerify = TwilioPhoneVerify(
+    accountSid: 'ACe7ff8685329fb62c96ee40d17deffe00',
+    authToken: '42bacca0111e521105408398d219098a',
+    serviceSid: 'VA093232b2fe0d1fc2fc7e7d818ec2b8e9',
+  );
 
   @override
   _VerificationCodeState createState() => _VerificationCodeState();
@@ -188,9 +194,7 @@ class _VerificationCodeState extends State<VerificationCode> {
               //   context,
               //   AppLinks.createPassword,
               // ),
-              onTap: () {
-
-              },
+              onTap: () {},
               buttonText: 'verify',
             ),
             MyText(

@@ -13,5 +13,5 @@ ThemeData lightTheme = ThemeData(
   ),
   colorScheme: ColorScheme.fromSwatch().copyWith(
     secondary: kSecondaryColor.withOpacity(0.05),
-  ),
+  ), textSelectionTheme: TextSelectionThemeData(cursorColor: kSecondaryColor),
 );

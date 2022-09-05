@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:twilio_phone_verify/twilio_phone_verify.dart';
 import 'package:vip_picnic/controller/auth_controller/email_auth_controller.dart';
 import 'package:vip_picnic/controller/auth_controller/facebook_auth_controller.dart';
 import 'package:vip_picnic/controller/auth_controller/forgot_password_controller.dart';
@@ -41,3 +42,7 @@ GroupChatController groupChatController = GroupChatController.instance;
 UserDetailsModel userDetailsModel = UserDetailsModel.instance;
 AddPostModel addPostModel = AddPostModel.instance;
 //MODELS INSTANCES
+
+
+//Twilio
+TwilioPhoneVerify? twilioPhoneVerify;

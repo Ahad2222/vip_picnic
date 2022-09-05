@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:intl_phone_field/country_picker_dialog.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/controller/auth_controller/sign_up_controller.dart';
@@ -105,6 +106,37 @@ class Signup extends StatelessWidget {
                   ),
                   IntlPhoneField(
                     flagsButtonMargin: EdgeInsets.only(left: 15),
+                    pickerDialogStyle: PickerDialogStyle(
+                      listTilePadding: EdgeInsets.zero,
+                      countryCodeStyle: TextStyle(
+                        fontSize: 12,
+                        color: kSecondaryColor,
+                      ),
+                      countryNameStyle: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: kSecondaryColor,
+                      ),
+                      searchFieldInputDecoration: InputDecoration(
+                        hintText: 'Search Country',
+                        hintStyle: TextStyle(
+                          fontSize: 12,
+                          color: kSecondaryColor,
+                        ),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                            color: kBorderColor,
+                            width: 1.0,
+                          ),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                            color: kBorderColor,
+                            width: 1.0,
+                          ),
+                        ),
+                      ),
+                    ),
                     dropdownTextStyle: TextStyle(
                       fontSize: 16,
                       color: kGreyColor,

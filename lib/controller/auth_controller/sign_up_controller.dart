@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:twilio_phone_verify/twilio_phone_verify.dart';
 import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/get_storage_data/get_storage_data.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
@@ -14,6 +15,7 @@ import 'package:vip_picnic/utils/collections.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/main.dart';
 import 'package:vip_picnic/view/bottom_nav_bar/bottom_nav_bar.dart';
+import 'package:vip_picnic/view/user/verification/verification_code.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/snack_bar.dart';
 
@@ -38,6 +40,54 @@ class SignupController extends GetxController {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   File? pickedImage;
+
+  TwilioPhoneVerify twilioPhoneVerify = TwilioPhoneVerify(
+    accountSid: 'ACe7ff8685329fb62c96ee40d17deffe00',
+    authToken: '42bacca0111e521105408398d219098a',
+    serviceSid: 'VA093232b2fe0d1fc2fc7e7d818ec2b8e9',
+  );
+
+  Future sendOTP(BuildContext context) async {
+    final isValid = formKey.currentState!.validate();
+    if (!isValid) {
+      return;
+    } else if (accountType!.isEmpty) {
+      showMsg(
+        msg: 'Please select account type!',
+        bgColor: Colors.red,
+        context: context,
+      );
+    } else if (pickedImage == null) {
+      showMsg(
+        msg: 'Please upload a photo!',
+        bgColor: Colors.red,
+        context: context,
+      );
+    } else {
+      formKey.currentState!.save();
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return loading();
+        },
+      );
+      var twilioResponse = await twilioPhoneVerify.sendSmsCode(
+        phoneCon.text.trim(),
+      );
+      if (twilioResponse.successful!) {
+        Get.to(
+          () => VerificationCode(),
+        );
+      } else {
+        showMsg(
+          bgColor: Colors.red,
+          context: context,
+          msg: 'Something went wrong!',
+        );
+      }
+    }
+  }
 
   Future pickImage(
     BuildContext context,
@@ -76,117 +126,92 @@ class SignupController extends GetxController {
   }
 
   Future signup(BuildContext context) async {
-    final isValid = formKey.currentState!.validate();
-    if (!isValid) {
-      return;
-    } else if (accountType!.isEmpty) {
-      showMsg(
-        msg: 'Please select account type!',
-        bgColor: Colors.red,
-        context: context,
-      );
-    } else if (pickedImage == null) {
-      showMsg(
-        msg: 'Please upload a photo!',
-        bgColor: Colors.red,
-        context: context,
-      );
-    } else {
-      formKey.currentState!.save();
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return loading();
-        },
-      );
-      try {
-        await uploadPhoto();
-        await auth
-            .createUserWithEmailAndPassword(
+    try {
+      await uploadPhoto();
+      await auth
+          .createUserWithEmailAndPassword(
+        email: emailCon.text.trim(),
+        password: passCon.text.trim(),
+      )
+          .then((value) async {
+        String? token = await fcm.getToken();
+        userDetailsModel = UserDetailsModel(
+          profileImageUrl: profileImage,
+          fullName: fullNameCon.text.trim(),
           email: emailCon.text.trim(),
+          uID: auth.currentUser!.uid,
           password: passCon.text.trim(),
-        )
-            .then((value) async {
-          String? token = await fcm.getToken();
-          userDetailsModel = UserDetailsModel(
-            profileImageUrl: profileImage,
-            fullName: fullNameCon.text.trim(),
-            email: emailCon.text.trim(),
-            uID: auth.currentUser!.uid,
-            password: passCon.text.trim(),
-            phone: '+'+countryCode! + phoneCon.text.trim(),
-            city: cityCon.text.trim(),
-            state: stateCon.text.trim(),
-            zip: zipCon.text.trim(),
-            address: addressCon.text.trim(),
-            accountType: accountType,
-            fcmCreatedAt: DateTime.now(),
-            fcmToken: token,
-            iFollowed: [],
-            TheyFollowed: [],
-            userSearchParameters: userSearchParameters,
-            createdAt: DateFormat.yMEd().add_jms().format(createdAt).toString(),
-          );
-          await accounts
-              .doc(auth.currentUser!.uid)
-              .set(userDetailsModel.toJson());
-        }).then(
-          (value) async {
-            await UserSimplePreference.setUserData(userDetailsModel);
-            if (auth.currentUser != null) {
-              String? token = await fcm.getToken() ?? userDetailsModel.fcmToken;
+          phone: '+' + countryCode! + phoneCon.text.trim(),
+          city: cityCon.text.trim(),
+          state: stateCon.text.trim(),
+          zip: zipCon.text.trim(),
+          address: addressCon.text.trim(),
+          accountType: accountType,
+          fcmCreatedAt: DateTime.now(),
+          fcmToken: token,
+          iFollowed: [],
+          TheyFollowed: [],
+          userSearchParameters: userSearchParameters,
+          createdAt: DateFormat.yMEd().add_jms().format(createdAt).toString(),
+        );
+        await accounts
+            .doc(auth.currentUser!.uid)
+            .set(userDetailsModel.toJson());
+      }).then(
+        (value) async {
+          await UserSimplePreference.setUserData(userDetailsModel);
+          if (auth.currentUser != null) {
+            String? token = await fcm.getToken() ?? userDetailsModel.fcmToken;
+            try {
+              ffstore
+                  .collection(accountsCollection)
+                  .doc(auth.currentUser?.uid)
+                  .update({
+                "fcmToken": token,
+                "fcmCreatedAt": DateTime.now().toIso8601String(),
+              });
+            } catch (e) {
+              print(e);
+              log("error in updating fcmToken in my own collection $e");
+            }
+            fcm.onTokenRefresh.listen((streamedToken) {
               try {
                 ffstore
                     .collection(accountsCollection)
                     .doc(auth.currentUser?.uid)
                     .update({
-                  "fcmToken": token,
+                  "fcmToken": streamedToken,
                   "fcmCreatedAt": DateTime.now().toIso8601String(),
                 });
               } catch (e) {
                 print(e);
-                log("error in updating fcmToken in my own collection $e");
+                log("error in updating fcmToken in my own collection on change $e");
               }
-              fcm.onTokenRefresh.listen((streamedToken) {
-                try {
-                  ffstore
-                      .collection(accountsCollection)
-                      .doc(auth.currentUser?.uid)
-                      .update({
-                    "fcmToken": streamedToken,
-                    "fcmCreatedAt": DateTime.now().toIso8601String(),
-                  });
-                } catch (e) {
-                  print(e);
-                  log("error in updating fcmToken in my own collection on change $e");
-                }
-              });
-            }
-            profileImage = '';
-            fullNameCon.clear();
-            phoneCon.clear();
-            emailCon.clear();
-            passCon.clear();
-            cityCon.clear();
-            stateCon.clear();
-            zipCon.clear();
-            addressCon.clear();
-            accountType = '';
-            Get.offAll(
-              () => BottomNavBar(),
-            );
-            navigatorKey.currentState!.popUntil((route) => route.isCurrent);
-          },
-        );
-      } on FirebaseAuthException catch (e) {
-        showMsg(
-          msg: e.message.toString(),
-          bgColor: Colors.red,
-          context: context,
-        );
-        navigatorKey.currentState!.pop();
-      }
+            });
+          }
+          profileImage = '';
+          fullNameCon.clear();
+          phoneCon.clear();
+          emailCon.clear();
+          passCon.clear();
+          cityCon.clear();
+          stateCon.clear();
+          zipCon.clear();
+          addressCon.clear();
+          accountType = '';
+          Get.offAll(
+            () => BottomNavBar(),
+          );
+          navigatorKey.currentState!.popUntil((route) => route.isCurrent);
+        },
+      );
+    } on FirebaseAuthException catch (e) {
+      showMsg(
+        msg: e.message.toString(),
+        bgColor: Colors.red,
+        context: context,
+      );
+      navigatorKey.currentState!.pop();
     }
   }
 
