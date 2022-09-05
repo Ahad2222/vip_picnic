@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/constant/constant_variables.dart';
@@ -13,6 +14,7 @@ import 'package:vip_picnic/model/comment_model/comment_model.dart';
 import 'package:vip_picnic/model/home_model/add_post_model.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/collections.dart';
+import 'package:vip_picnic/utils/dynamic_link_handler.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/home/edit_post.dart';
 import 'package:vip_picnic/view/home/post_image_preview.dart';
@@ -671,21 +673,37 @@ class _PostDetailsState extends State<PostDetails> {
                                 ),
                               ],
                             ),
-                            Wrap(
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              spacing: 10.0,
-                              children: [
-                                Image.asset(
-                                  Assets.imagesShare,
-                                  height: 25.23,
-                                  color: kDarkBlueColor.withOpacity(0.60),
-                                ),
-                                // MyText(
-                                //   text: '04',
-                                //   size: 18,
-                                //   color: kDarkBlueColor.withOpacity(0.60),
-                                // ),
-                              ],
+                            GestureDetector(
+                              onTap: () async {
+                                String shareLink = await DynamicLinkHandler.buildDynamicLinkForPost(
+                                  postImageUrl: widget.postDocModel?.postImages![0] ??
+                                      "https://www.freeiconspng.com/uploads/no-image-icon-15.png",
+                                  postId: widget.postDocModel!.postID ?? "",
+                                  postTitle: widget.postDocModel!.postTitle ?? "No Title",
+                                  short: true,
+                                );
+                                log("fetched shareLink: $shareLink");
+                                ShareResult sr = await Share.shareWithResult(shareLink);
+                                log("ShareResult is: ${sr.status} sr.status == ShareResultStatus.success: ${sr.status == ShareResultStatus.success}");
+                                log("ShareResult is: ${sr.status} sr.status == ShareResultStatus.dismissed: ${sr.status == ShareResultStatus.dismissed}");
+                                log("ShareResult.raw is: ${sr.raw}");
+                              },
+                              child: Wrap(
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                spacing: 10.0,
+                                children: [
+                                  Image.asset(
+                                    Assets.imagesShare,
+                                    height: 25.23,
+                                    color: kDarkBlueColor.withOpacity(0.60),
+                                  ),
+                                  // MyText(
+                                  //   text: '04',
+                                  //   size: 18,
+                                  //   color: kDarkBlueColor.withOpacity(0.60),
+                                  // ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -986,7 +1004,8 @@ class CommentsTiles extends StatelessWidget {
                         color: kSecondaryColor,
                         paddingTop: 4,
                       ),
-                trailing: Wrap(
+                trailing: commenterId == auth.currentUser?.uid
+                    ? Wrap(
                   spacing: 13,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
@@ -1020,7 +1039,8 @@ class CommentsTiles extends StatelessWidget {
                       ),
                     ),
                   ],
-                ),
+                )
+                    : SizedBox(),
               );
             }),
           ),

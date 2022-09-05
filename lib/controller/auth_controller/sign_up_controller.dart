@@ -76,9 +76,7 @@ class SignupController extends GetxController {
         phoneCon.text.trim(),
       );
       if (twilioResponse.successful!) {
-        Get.to(
-          () => VerificationCode(),
-        );
+        Get.to(() => VerificationCode());
       } else {
         showMsg(
           bgColor: Colors.red,
@@ -114,9 +112,7 @@ class SignupController extends GetxController {
   }
 
   Future uploadPhoto() async {
-    Reference ref = await FirebaseStorage.instance
-        .ref()
-        .child('Images/Profile Images/${DateTime.now().toString()}');
+    Reference ref = await FirebaseStorage.instance.ref().child('Images/Profile Images/${DateTime.now().toString()}');
     await ref.putFile(pickedImage!);
     await ref.getDownloadURL().then((value) {
       log('Profile Image URL $value');
@@ -154,19 +150,14 @@ class SignupController extends GetxController {
           userSearchParameters: userSearchParameters,
           createdAt: DateFormat.yMEd().add_jms().format(createdAt).toString(),
         );
-        await accounts
-            .doc(auth.currentUser!.uid)
-            .set(userDetailsModel.toJson());
+        await accounts.doc(auth.currentUser!.uid).set(userDetailsModel.toJson());
       }).then(
         (value) async {
           await UserSimplePreference.setUserData(userDetailsModel);
           if (auth.currentUser != null) {
             String? token = await fcm.getToken() ?? userDetailsModel.fcmToken;
             try {
-              ffstore
-                  .collection(accountsCollection)
-                  .doc(auth.currentUser?.uid)
-                  .update({
+              ffstore.collection(accountsCollection).doc(auth.currentUser?.uid).update({
                 "fcmToken": token,
                 "fcmCreatedAt": DateTime.now().toIso8601String(),
               });
@@ -176,10 +167,7 @@ class SignupController extends GetxController {
             }
             fcm.onTokenRefresh.listen((streamedToken) {
               try {
-                ffstore
-                    .collection(accountsCollection)
-                    .doc(auth.currentUser?.uid)
-                    .update({
+                ffstore.collection(accountsCollection).doc(auth.currentUser?.uid).update({
                   "fcmToken": streamedToken,
                   "fcmCreatedAt": DateTime.now().toIso8601String(),
                 });
