@@ -34,12 +34,13 @@ class _CustomizeEventState extends State<CustomizeEvent> {
     eventController.nameCon.text = userDetailsModel.fullName!;
     eventController.emailCon.text = userDetailsModel.email!;
     eventController.phoneCon.text = userDetailsModel.phone!;
+    eventController.selectEventDate(eventController.eventDate);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: NestedScrollView(
         physics: BouncingScrollPhysics(),
         headerSliverBuilder: (
@@ -121,8 +122,7 @@ class _CustomizeEventState extends State<CustomizeEvent> {
                       heading: 'Pack Type',
                       items: eventController.vipPackages,
                       value: eventController.selectedVipPackage.value,
-                      onChanged: (value) =>
-                          eventController.selectPackage(value),
+                      onChanged: (value) => eventController.selectPackage(value),
                     );
                   }),
                   Obx(() {
@@ -130,8 +130,7 @@ class _CustomizeEventState extends State<CustomizeEvent> {
                       heading: 'Event Type',
                       items: eventController.eventType,
                       value: eventController.selectedEventType.value,
-                      onChanged: (value) =>
-                          eventController.selectEventType(value),
+                      onChanged: (value) => eventController.selectEventType(value),
                     );
                   }),
                   Obx(() {
@@ -139,8 +138,7 @@ class _CustomizeEventState extends State<CustomizeEvent> {
                       heading: 'Number of Persons',
                       items: eventController.noOfPersons,
                       value: eventController.selectedNoOfPeoples.value,
-                      onChanged: (value) =>
-                          eventController.selectNoOfPeoples(value),
+                      onChanged: (value) => eventController.selectNoOfPeoples(value),
                     );
                   }),
                   Obx(() {
@@ -148,8 +146,7 @@ class _CustomizeEventState extends State<CustomizeEvent> {
                       heading: 'Food Preference',
                       items: eventController.foodPref,
                       value: eventController.selectedFoodPref.value,
-                      onChanged: (value) =>
-                          eventController.selectFoodPref(value),
+                      onChanged: (value) => eventController.selectFoodPref(value),
                     );
                   }),
                   Obx(() {
@@ -157,8 +154,7 @@ class _CustomizeEventState extends State<CustomizeEvent> {
                       heading: 'Drinks Preference',
                       items: eventController.drinkPref,
                       value: eventController.selectedDrinkPref.value,
-                      onChanged: (value) =>
-                          eventController.selectDrinkPref(value),
+                      onChanged: (value) => eventController.selectDrinkPref(value),
                     );
                   }),
                   Obx(() {
@@ -166,8 +162,7 @@ class _CustomizeEventState extends State<CustomizeEvent> {
                       heading: 'Start Time',
                       items: eventController.startTime,
                       value: eventController.selectedStartTime.value,
-                      onChanged: (value) =>
-                          eventController.selectStartTime(value),
+                      onChanged: (value) => eventController.selectStartTime(value),
                     );
                   }),
                   Obx(() {
@@ -175,8 +170,7 @@ class _CustomizeEventState extends State<CustomizeEvent> {
                       heading: 'Duration',
                       items: eventController.duration,
                       value: eventController.selectedDuration.value,
-                      onChanged: (value) =>
-                          eventController.selectDuration(value),
+                      onChanged: (value) => eventController.selectDuration(value),
                     );
                   }),
                   MyText(
@@ -226,8 +220,7 @@ class _CustomizeEventState extends State<CustomizeEvent> {
                                       child: Container(
                                         height: 300,
                                         child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.stretch,
+                                          crossAxisAlignment: CrossAxisAlignment.stretch,
                                           children: [
                                             MyText(
                                               paddingLeft: 15,
@@ -240,44 +233,32 @@ class _CustomizeEventState extends State<CustomizeEvent> {
                                             Expanded(
                                               child: CupertinoTheme(
                                                 data: CupertinoThemeData(
-                                                  textTheme:
-                                                      CupertinoTextThemeData(
-                                                    dateTimePickerTextStyle:
-                                                        TextStyle(
+                                                  textTheme: CupertinoTextThemeData(
+                                                    dateTimePickerTextStyle: TextStyle(
                                                       fontSize: 14,
                                                       color: kBlackColor,
                                                     ),
                                                   ),
-                                                  scaffoldBackgroundColor:
-                                                      Colors.transparent,
+                                                  scaffoldBackgroundColor: Colors.transparent,
                                                   primaryColor: Colors.red,
                                                 ),
                                                 child: CupertinoDatePicker(
-                                                  initialDateTime:
-                                                      eventController.eventDate,
-                                                  mode: CupertinoDatePickerMode
-                                                      .date,
-                                                  backgroundColor:
-                                                      kPrimaryColor,
-                                                  minimumYear: 1900,
-                                                  maximumYear:
-                                                      DateTime.now().year,
-                                                  onDateTimeChanged: (value) =>
-                                                      eventController
-                                                          .selectEventDate(
-                                                              value),
-                                                ),
+                                                    initialDateTime: eventController.eventDate,
+                                                    mode: CupertinoDatePickerMode.date,
+                                                    backgroundColor: kPrimaryColor,
+                                                    minimumYear: 1900,
+                                                    maximumYear: DateTime.now().year,
+                                                    onDateTimeChanged: (value) =>
+                                                        eventController.selectEventDate(value)),
                                               ),
                                             ),
                                             Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
+                                              padding: const EdgeInsets.symmetric(
                                                 horizontal: 15,
                                                 vertical: 10,
                                               ),
                                               child: MyButton(
-                                                onTap: () =>
-                                                    Navigator.pop(context),
+                                                onTap: () => Navigator.pop(context),
                                                 buttonText: 'Done',
                                               ),
                                             ),
@@ -323,8 +304,7 @@ class _CustomizeEventState extends State<CustomizeEvent> {
                   heading('Addons'),
                   Obx(() {
                     return AddOnsTiles(
-                      productImage:
-                          'https://www.vippicnic.com/img/addons/flowers.jpg',
+                      productImage: 'https://www.vippicnic.com/img/addons/flowers.jpg',
                       productName: 'Flowers',
                       price: '120',
                       perPrice: 'set',
@@ -335,21 +315,18 @@ class _CustomizeEventState extends State<CustomizeEvent> {
                   }),
                   Obx(() {
                     return AddOnsTiles(
-                      productImage:
-                          'https://www.vippicnic.com/img/addons/champagne.PNG',
+                      productImage: 'https://www.vippicnic.com/img/addons/champagne.PNG',
                       productName: 'Champagne',
                       price: '70',
                       perPrice: 'Bottle',
                       quantity: eventController.champagne.value,
                       onIncrease: () => eventController.addAddons('Champagne'),
-                      onDecrease: () =>
-                          eventController.removeAddons('Champagne'),
+                      onDecrease: () => eventController.removeAddons('Champagne'),
                     );
                   }),
                   Obx(() {
                     return AddOnsTiles(
-                      productImage:
-                          'https://www.vippicnic.com/img/addons/wine.PNG',
+                      productImage: 'https://www.vippicnic.com/img/addons/wine.PNG',
                       productName: 'Wine',
                       price: '45',
                       perPrice: 'Bottle',
@@ -360,8 +337,7 @@ class _CustomizeEventState extends State<CustomizeEvent> {
                   }),
                   Obx(() {
                     return AddOnsTiles(
-                      productImage:
-                          'https://www.vippicnic.com/img/addons/cake.PNG',
+                      productImage: 'https://www.vippicnic.com/img/addons/cake.PNG',
                       productName: 'Cake',
                       price: '150',
                       perPrice: 'Piece',
@@ -372,8 +348,7 @@ class _CustomizeEventState extends State<CustomizeEvent> {
                   }),
                   Obx(() {
                     return AddOnsTiles(
-                      productImage:
-                          'https://www.vippicnic.com/img/addons/candles.PNG',
+                      productImage: 'https://www.vippicnic.com/img/addons/candles.PNG',
                       productName: 'Candles',
                       price: '30',
                       perPrice: 'Set',
@@ -442,6 +417,7 @@ class _CustomizeEventState extends State<CustomizeEvent> {
                     isEditAble: false,
                     textSize: 12,
                     labelSize: 14,
+                    keyboardType: TextInputType.number,
                   ),
                   SizedBox(
                     height: 15,

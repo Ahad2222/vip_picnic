@@ -13,6 +13,7 @@ import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/utils/collections.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/user/social_login.dart';
+import 'package:vip_picnic/view/user/verification/edit_profile_verification_code.dart';
 import 'package:vip_picnic/view/widget/edit_bottom_sheet.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
@@ -439,7 +440,7 @@ class _EditProfileState extends State<EditProfile> {
                 builder: (context) {
                   return bottomSheetForEdit(
                     context,
-                    title: 'Phone',
+                    title: 'Phone with country code +1',
                     selectedField: ETextField(
                       labelText: 'Phone:',
                       keyboardType: TextInputType.phone,
@@ -447,6 +448,8 @@ class _EditProfileState extends State<EditProfile> {
                     ),
                     onSave: () async {
                       Get.dialog(loading());
+                      //+ below code would be commented out when the navigation from this bottom sheet
+                      //+ to the otp verification page is fixed.
                       try {
                         await myDoc.update({"phone": phoneController.text});
                         Get.back();
@@ -465,6 +468,48 @@ class _EditProfileState extends State<EditProfile> {
                           context: context,
                         );
                       }
+                      //+ below code is for number verification but is commented due to navigation from bottomsheet issue.
+                      /**/
+                      // try {
+                      //   if(phoneController.text.trim().startsWith("+")){
+                      //     showDialog(
+                      //       context: context,
+                      //       barrierDismissible: false,
+                      //       builder: (context) {
+                      //         return loading();
+                      //       },
+                      //     );
+                      //     var twilioResponse = await twilioPhoneVerify.sendSmsCode(phoneController.text.trim());
+                      //     if (twilioResponse.successful!) {
+                      //       Get.back();
+                      //       Get.back();
+                      //       Get.to(() => EditProfileVerificationCode(phoneNum: phoneController.text.trim(),), preventDuplicates:false);
+                      //     } else {
+                      //       Get.back();
+                      //       log("error is: ${twilioResponse.errorMessage}");
+                      //       showMsg(
+                      //         bgColor: Colors.red,
+                      //         context: context,
+                      //         msg: 'Something went wrong!',
+                      //       );
+                      //     }
+                      //   }
+                      //
+                      //   Get.back();
+                      //   showMsg(
+                      //     msg: "Successfully updated phone number.",
+                      //     context: context,
+                      //   );
+                      // } catch (e) {
+                      //   log("error in phome updating: $e");
+                      //   Get.back();
+                      //   Get.back();
+                      //   showMsg(
+                      //     msg: "Something went wrong. Please try again.",
+                      //     bgColor: Colors.red,
+                      //     context: context,
+                      //   );
+                      // }
                     },
                   );
                 },

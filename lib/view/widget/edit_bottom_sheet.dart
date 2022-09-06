@@ -31,10 +31,12 @@ Widget bottomSheetForEdit(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(),
-              MyText(
-                text: 'Edit ${title}',
-                size: 19,
-                color: kSecondaryColor,
+              Expanded(
+                child: MyText(
+                  text: 'Edit ${title}',
+                  size: 19,
+                  color: kSecondaryColor,
+                ),
               ),
               GestureDetector(
                 onTap: () => Navigator.pop(context),

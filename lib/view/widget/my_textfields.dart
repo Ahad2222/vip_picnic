@@ -120,6 +120,7 @@ class ETextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       textInputAction: TextInputAction.next,
+      // onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
       autovalidateMode: autoValidateMode,
       initialValue: initialValue,
       readOnly: isReadOnly!,

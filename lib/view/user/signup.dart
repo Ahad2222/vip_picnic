@@ -26,7 +26,7 @@ class Signup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       appBar: myAppBar(
         title: 'register'.tr,
         onTap: () => Get.back(),
@@ -147,13 +147,14 @@ class Signup extends StatelessWidget {
                     ),
                     dropdownIconPosition: IconPosition.trailing,
                     textInputAction: TextInputAction.next,
-                    controller: signupController.phoneCon,
+                    // controller: signupController.phoneCon,
                     validator: (value) => phoneValidator(value.toString()),
                     keyboardType: TextInputType.number,
                     cursorColor: kSecondaryColor,
                     cursorWidth: 1.0,
                     initialCountryCode: 'US',
                     onChanged: (phone) {
+                      signupController.phoneCon.text = phone.completeNumber;
                       print(phone.completeNumber);
                     },
                     style: TextStyle(
@@ -319,9 +320,7 @@ class Signup extends StatelessWidget {
                 vertical: 20,
               ),
               child: MyButton(
-                onTap: () => Get.to(
-                  () => VerificationCode(),
-                ),
+                onTap: () => signupController.sendOTP(context),
                 // onTap: () => signupController.signup(context),
                 buttonText: 'continue'.tr,
               ),

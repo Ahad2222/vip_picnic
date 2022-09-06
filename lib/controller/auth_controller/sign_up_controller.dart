@@ -29,7 +29,7 @@ class SignupController extends GetxController {
   late final TextEditingController stateCon;
   late final TextEditingController zipCon;
   late final TextEditingController addressCon;
-  late final TextEditingController otpCon;
+  final TextEditingController otpCon = TextEditingController();
   String? countryCode = '';
   String? profileImage = '';
   String? accountType = 'Private';
@@ -72,12 +72,13 @@ class SignupController extends GetxController {
           return loading();
         },
       );
-      var twilioResponse = await twilioPhoneVerify.sendSmsCode(
-        phoneCon.text.trim(),
-      );
+      var twilioResponse = await twilioPhoneVerify.sendSmsCode(phoneCon.text.trim());
       if (twilioResponse.successful!) {
+        Get.back();
         Get.to(() => VerificationCode());
       } else {
+        Get.back();
+        log("error is: ${twilioResponse.errorMessage}");
         showMsg(
           bgColor: Colors.red,
           context: context,
@@ -87,10 +88,7 @@ class SignupController extends GetxController {
     }
   }
 
-  Future pickImage(
-    BuildContext context,
-    ImageSource source,
-  ) async {
+  Future pickImage(BuildContext context, ImageSource source) async {
     try {
       final img = await ImagePicker().pickImage(
         source: source,
@@ -137,7 +135,7 @@ class SignupController extends GetxController {
           email: emailCon.text.trim(),
           uID: auth.currentUser!.uid,
           password: passCon.text.trim(),
-          phone: '+' + countryCode! + phoneCon.text.trim(),
+          phone: phoneCon.text.trim(),
           city: cityCon.text.trim(),
           state: stateCon.text.trim(),
           zip: zipCon.text.trim(),

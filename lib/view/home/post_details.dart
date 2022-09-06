@@ -925,53 +925,78 @@ class CommentsTiles extends StatelessWidget {
             child: Obx(() {
               return ListTile(
                 //+open other user profile from here
-                onTap: () async {
-                  // UserDetailsModel otherUser = UserDetailsModel();
-                  // loading();
-                  try {
-                    await ffstore.collection(accountsCollection).doc(commenterId).get().then(
-                      (value) {
-                        UserDetailsModel otherUser = UserDetailsModel.fromJson(value.data() ?? {});
-                        Get.to(() => OtherUserProfile(otherUserModel: otherUser));
-                      },
-                    );
-                  } catch (e) {
-                    print(e);
-                  }
-                  // navigatorKey.currentState!.pop();
-                },
-                leading: Container(
-                  height: 44.45,
-                  width: 44.45,
-                  padding: EdgeInsets.all(3),
-                  decoration: BoxDecoration(
-                    color: kPrimaryColor,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: kBlackColor.withOpacity(0.16),
-                        blurRadius: 6,
-                        offset: Offset(0, 0),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(100),
-                      child: Image.network(
-                        profileImage!,
-                        height: height(context, 1.0),
-                        width: width(context, 1.0),
-                        fit: BoxFit.cover,
+                leading: GestureDetector(
+                  onTap: () async {
+                    // UserDetailsModel otherUser = UserDetailsModel();
+                    Get.dialog(loading());
+                    try {
+                      await ffstore.collection(accountsCollection).doc(commenterId).get().then(
+                            (value) {
+                          UserDetailsModel otherUser = UserDetailsModel.fromJson(value.data() ?? {});
+                          Get.back();
+                          Get.to(() => OtherUserProfile(otherUserModel: otherUser));
+                        },
+                      );
+                    } catch (e) {
+                      Get.back();
+                      showMsg(context: context, msg: "Something went wrong. Please try again.");
+                      print(e);
+                    }
+                    // navigatorKey.currentState!.pop();
+                  },
+                  child: Container(
+                    height: 44.45,
+                    width: 44.45,
+                    padding: EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      color: kPrimaryColor,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: kBlackColor.withOpacity(0.16),
+                          blurRadius: 6,
+                          offset: Offset(0, 0),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(100),
+                        child: Image.network(
+                          profileImage!,
+                          height: height(context, 1.0),
+                          width: width(context, 1.0),
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),
                 ),
-                title: MyText(
-                  text: '$name',
-                  size: 16,
-                  weight: FontWeight.w600,
-                  color: kSecondaryColor,
+                title: GestureDetector(
+                  onTap: () async {
+                    // UserDetailsModel otherUser = UserDetailsModel();
+                    Get.dialog(loading());
+                    try {
+                      await ffstore.collection(accountsCollection).doc(commenterId).get().then(
+                            (value) {
+                          UserDetailsModel otherUser = UserDetailsModel.fromJson(value.data() ?? {});
+                          Get.back();
+                          Get.to(() => OtherUserProfile(otherUserModel: otherUser));
+                        },
+                      );
+                    } catch (e) {
+                      Get.back();
+                      showMsg(context: context, msg: "Something went wrong. Please try again.");
+                      print(e);
+                    }
+                    // navigatorKey.currentState!.pop();
+                  },
+                  child: MyText(
+                    text: '$name',
+                    size: 16,
+                    weight: FontWeight.w600,
+                    color: kSecondaryColor,
+                  ),
                 ),
                 subtitle: isBeingEdited.value
                     ? TextField(

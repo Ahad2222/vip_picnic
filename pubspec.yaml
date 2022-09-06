@@ -59,7 +59,7 @@ dependencies:
   intl_phone_field: ^3.1.0
   flutter_slidable:
   twilio_phone_verify: ^2.0.0
-  dropdown_button2: ^1.7.2
+  dropdown_button2: ^1.4.0
 #  flutter_uploader: ^1.2.1
 #  emoji_picker_flutter: ^1.3.1
 

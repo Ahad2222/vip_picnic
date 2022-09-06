@@ -9,6 +9,7 @@ import 'package:vip_picnic/controller/auth_controller/forgot_password_controller
 import 'package:vip_picnic/controller/auth_controller/google_auth_controller.dart';
 import 'package:vip_picnic/controller/auth_controller/sign_up_controller.dart';
 import 'package:vip_picnic/controller/chat_controller/chat_controller.dart';
+import 'package:vip_picnic/controller/email_controller/email_controller.dart';
 import 'package:vip_picnic/controller/event_controller/event_controller.dart';
 import 'package:vip_picnic/controller/group_chat_controller/group_chat_controller.dart';
 import 'package:vip_picnic/controller/home_controller/home_controller.dart';
@@ -38,6 +39,7 @@ ChooseLanguageController languageController = ChooseLanguageController.instance;
 ChatController chatController = ChatController.instance;
 GroupChatController groupChatController = GroupChatController.instance;
 EventController eventController = EventController.instance;
+EmailController emailController = EmailController.instance;
 //GETX CONTROLLER INSTANCES
 
 //MODELS INSTANCES
@@ -47,4 +49,8 @@ AddPostModel addPostModel = AddPostModel.instance;
 
 
 //Twilio
-TwilioPhoneVerify? twilioPhoneVerify;
+TwilioPhoneVerify twilioPhoneVerify = TwilioPhoneVerify(
+  accountSid: 'ACe7ff8685329fb62c96ee40d17deffe00',
+  authToken: '42bacca0111e521105408398d219098a',
+  serviceSid: 'VA093232b2fe0d1fc2fc7e7d818ec2b8e9',
+);

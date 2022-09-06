@@ -179,10 +179,37 @@ class EventController extends GetxController {
         );
 
         String id = Uuid().v1();
-        await FirebaseFirestore.instance
-            .collection('Events')
-            .doc(id)
-            .set(eventModel.toJson());
+        String emailOutput = await emailController.sendEmail(
+          name: eventModel.bookerName,
+          email: eventModel.bookerEmail,
+          subject: "${eventModel.eventType}",
+          message:
+            "Requester Email: ${userDetailsModel.email!}, \n"
+            "Requester Name: ${userDetailsModel.fullName!}, \n"
+            "Booker Name: ${nameCon.text.trim()}, \n"
+            "Booker Email: ${emailCon.text.trim()}, \n"
+            "Booker Phone: ${phoneCon.text.trim()}, \n"
+            "City: ${cityCon.text.trim()}, \n"
+            "State: ${stateCon.text.trim()}, \n"
+            "Zip: ${zipCon.text.trim()}, \n"
+            "Address: ${addressCon.text.trim()}, \n"
+            "Event Type: ${selectedEventType.value}, \n"
+            "Package Type: ${selectedVipPackage.value}, \n"
+            "No. of People Attending: ${selectedNoOfPeoples.value}, \n"
+            "Food Preference: ${selectedFoodPref.value}, \n"
+            "Drinking Preference: ${selectedDrinkPref.value}, \n"
+            "Event Date: ${selectedEventDate.value}, \n"
+            "Start Time: ${selectedStartTime.value}, \n"
+            "Duration: ${selectedDuration.value}, \n"
+            "Details: ${detailsCon.text.trim()}, \n"
+            "Flowers: ${followers.value}, \n"
+            "Champagne: ${champagne.value}, \n"
+            "Wine: ${wine.value}, \n"
+            "Cake: ${cake.value}, \n"
+            "Candles: ${candles.value} \n",
+        );
+        await FirebaseFirestore.instance.collection('Events').doc(id).set(eventModel.toJson());
+        Navigator.pop(context);
         Navigator.pop(context);
         showMsg(
           bgColor: kGreenColor,

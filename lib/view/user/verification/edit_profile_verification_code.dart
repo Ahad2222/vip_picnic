@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:twilio_phone_verify/twilio_phone_verify.dart';
 import 'package:vip_picnic/constant/color.dart';
+import 'package:vip_picnic/utils/collections.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/widget/headings.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
@@ -14,24 +15,17 @@ import 'package:vip_picnic/view/widget/my_button.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:vip_picnic/view/widget/snack_bar.dart';
 
-class VerificationCode extends StatefulWidget {
-  VerificationCode({Key? key})
-      : super(
-          key: key,
-        );
-
-  TwilioPhoneVerify twilioPhoneVerify = TwilioPhoneVerify(
-    accountSid: 'ACe7ff8685329fb62c96ee40d17deffe00',
-    authToken: '42bacca0111e521105408398d219098a',
-    serviceSid: 'VA093232b2fe0d1fc2fc7e7d818ec2b8e9',
-  );
+class EditProfileVerificationCode extends StatefulWidget {
+  final String phoneNum;
+  EditProfileVerificationCode({Key? key, required this.phoneNum}) : super(key: key);
 
   @override
-  _VerificationCodeState createState() => _VerificationCodeState();
+  _EditProfileVerificationCodeState createState() => _EditProfileVerificationCodeState();
 }
 
-class _VerificationCodeState extends State<VerificationCode> {
-  TextEditingController textEditingController = TextEditingController();
+class _EditProfileVerificationCodeState extends State<EditProfileVerificationCode> {
+  TextEditingController otpCon = TextEditingController();
+  String phoneNum = "";
   bool? cont;
 
   // ..text = "123456";
@@ -46,6 +40,7 @@ class _VerificationCodeState extends State<VerificationCode> {
   @override
   void initState() {
     errorController = StreamController<ErrorAnimationType>();
+
     super.initState();
   }
 
@@ -104,7 +99,7 @@ class _VerificationCodeState extends State<VerificationCode> {
                     text: 'We have sent the verification code to\n',
                   ),
                   TextSpan(
-                    text: signupController.phoneCon.text.trim(),
+                    text: widget.phoneNum,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: kBlackColor),
                   ),
                 ],
@@ -192,21 +187,20 @@ class _VerificationCodeState extends State<VerificationCode> {
               height: 20,
             ),
             MyButton(
-              // onTap: () => Navigator.pushNamed(
-              //   context,
-              //   AppLinks.createPassword,
-              // ),
               onTap: () async {
                 Get.dialog(loading());
                 try {
-                  if (signupController.otpCon.text.trim() != "" && signupController.otpCon.text.trim().length < 6) {
+                  if (otpCon.text.trim() != "" && otpCon.text.trim().length < 6) {
+                    Get.back();
                     showMsg(context: context, msg: "Please Enter a valid 6-digit OTP.", bgColor: Colors.red);
                   } else {
                     TwilioResponse verifyResponse = await twilioPhoneVerify.verifySmsCode(
-                        phone: signupController.phoneCon.text.trim(), code: signupController.otpCon.text.trim());
+                        phone: phoneNum, code: otpCon.text.trim());
                     if (verifyResponse.successful!) {
-                      showMsg(context: context, msg: "OTP Verified. Signing you up.", bgColor: Colors.green);
-                      signupController.signup(context);
+                      showMsg(context: context, msg: "OTP Verified. Updating your new number.", bgColor: Colors.green);
+                      await accounts.doc(auth.currentUser?.uid ?? "").update({"phone": phoneNum});
+                      Get.back();
+                      Get.back();
                     } else {
                       Get.back();
                       showMsg(
@@ -233,7 +227,7 @@ class _VerificationCodeState extends State<VerificationCode> {
                     return loading();
                   },
                 );
-                TwilioResponse twilioResponse = await twilioPhoneVerify.sendSmsCode(signupController.phoneCon.text.trim());
+                TwilioResponse twilioResponse = await twilioPhoneVerify.sendSmsCode(phoneNum);
                 if (twilioResponse.successful!) {
                   Get.back();
                 } else {
