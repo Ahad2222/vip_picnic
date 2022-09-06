@@ -1,6 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
+import 'package:vip_picnic/constant/color.dart';
+import 'package:vip_picnic/model/event_model/event_model.dart';
+import 'package:vip_picnic/utils/instances.dart';
+import 'package:vip_picnic/view/widget/loading.dart';
+import 'package:vip_picnic/view/widget/snack_bar.dart';
 
 class EventController extends GetxController {
   static EventController instance = Get.find<EventController>();
@@ -83,11 +91,114 @@ class EventController extends GetxController {
   RxInt cake = 0.obs;
   RxInt candles = 0.obs;
 
-  late TextEditingController detailsCon;
-  late TextEditingController cityCon;
-  late TextEditingController stateCon;
-  late TextEditingController zipCon;
-  late TextEditingController addressCon;
+  TextEditingController nameCon = TextEditingController();
+  TextEditingController emailCon = TextEditingController();
+  TextEditingController phoneCon = TextEditingController();
+  TextEditingController detailsCon = TextEditingController();
+  TextEditingController cityCon = TextEditingController();
+  TextEditingController stateCon = TextEditingController();
+  TextEditingController zipCon = TextEditingController();
+  TextEditingController addressCon = TextEditingController();
+
+  Future uploadData(BuildContext context) async {
+    if (nameCon.text == '') {
+      showMsg(
+        bgColor: Colors.red,
+        context: context,
+        msg: 'Name cannot be empty!',
+      );
+    } else if (emailCon.text == '') {
+      showMsg(
+        bgColor: Colors.red,
+        context: context,
+        msg: 'Email cannot be empty!',
+      );
+    } else if (phoneCon.text == '') {
+      showMsg(
+        bgColor: Colors.red,
+        context: context,
+        msg: 'Phone cannot be empty!',
+      );
+    } else if (cityCon.text == '') {
+      showMsg(
+        bgColor: Colors.red,
+        context: context,
+        msg: 'City cannot be empty!',
+      );
+    } else if (stateCon.text == '') {
+      showMsg(
+        bgColor: Colors.red,
+        context: context,
+        msg: 'State cannot be empty!',
+      );
+    } else if (zipCon.text == '') {
+      showMsg(
+        bgColor: Colors.red,
+        context: context,
+        msg: 'Zipcode cannot be empty!',
+      );
+    } else if (addressCon.text == '') {
+      showMsg(
+        bgColor: Colors.red,
+        context: context,
+        msg: 'Address cannot be empty!',
+      );
+    } else {
+      try {
+        showDialog(
+          context: context,
+          builder: (_) {
+            return loading();
+          },
+        );
+        EventModel eventModel = EventModel(
+          userID: userDetailsModel.uID!,
+          userEmail: userDetailsModel.email!,
+          userName: userDetailsModel.fullName!,
+          packType: selectedVipPackage.value,
+          eventType: selectedEventType.value,
+          noOfPersons: selectedNoOfPeoples.value,
+          foodPref: selectedFoodPref.value,
+          drinkPref: selectedDrinkPref.value,
+          startTime: selectedStartTime.value,
+          duration: selectedDuration.value,
+          eventDate: selectedEventDate.value,
+          details: detailsCon.text.trim(),
+          flowers: followers.value,
+          champagne: champagne.value,
+          wine: wine.value,
+          cake: cake.value,
+          candles: candles.value,
+          bookerName: nameCon.text.trim(),
+          bookerEmail: emailCon.text.trim(),
+          bookerPhone: phoneCon.text.trim(),
+          city: cityCon.text.trim(),
+          state: stateCon.text.trim(),
+          zip: zipCon.text.trim(),
+          address: addressCon.text.trim(),
+        );
+
+        String id = Uuid().v1();
+        await FirebaseFirestore.instance
+            .collection('Events')
+            .doc(id)
+            .set(eventModel.toJson());
+        Navigator.pop(context);
+        showMsg(
+          bgColor: kGreenColor,
+          context: context,
+          msg: 'Successfully Submitted!',
+        );
+      } on FirebaseException catch (ex) {
+        Navigator.pop(context);
+        showMsg(
+          bgColor: Colors.red,
+          context: context,
+          msg: ex.message.toString(),
+        );
+      }
+    }
+  }
 
   void selectPackage(String value) {
     selectedVipPackage.value = value;

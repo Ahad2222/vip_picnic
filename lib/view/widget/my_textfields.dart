@@ -102,6 +102,8 @@ class ETextField extends StatelessWidget {
     this.autoValidateMode,
     this.keyboardType,
     this.onEditTap,
+    this.labelSize = 19.0,
+    this.textSize = 16.0,
   }) : super(key: key);
 
   String? labelText, initialValue;
@@ -112,6 +114,7 @@ class ETextField extends StatelessWidget {
   AutovalidateMode? autoValidateMode;
   VoidCallback? onEditTap;
   TextInputType? keyboardType;
+  double? labelSize,textSize;
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +132,7 @@ class ETextField extends StatelessWidget {
       cursorColor: kSecondaryColor,
       cursorWidth: 1.0,
       style: TextStyle(
-        fontSize: 16,
+        fontSize: textSize,
         color: kGreyColor,
       ),
       decoration: InputDecoration(
@@ -145,7 +148,7 @@ class ETextField extends StatelessWidget {
               paddingLeft: 15,
               paddingRight: 10,
               text: labelText,
-              size: 19,
+              size: labelSize,
               color: kGreyColor,
             ),
           ],

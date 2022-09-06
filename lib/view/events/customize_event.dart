@@ -15,12 +15,26 @@ import 'package:vip_picnic/view/widget/my_button.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:vip_picnic/view/widget/my_textfields.dart';
 
-class CustomizeEvent extends StatelessWidget {
+class CustomizeEvent extends StatefulWidget {
   CustomizeEvent({this.imageUrl, this.des, this.eventTheme});
 
   String? imageUrl;
   String? des;
   String? eventTheme;
+
+  @override
+  State<CustomizeEvent> createState() => _CustomizeEventState();
+}
+
+class _CustomizeEventState extends State<CustomizeEvent> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    eventController.nameCon.text = userDetailsModel.fullName!;
+    eventController.emailCon.text = userDetailsModel.email!;
+    eventController.phoneCon.text = userDetailsModel.phone!;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +67,7 @@ class CustomizeEvent extends StatelessWidget {
                     ),
                   ),
                   title: MyText(
-                    text: eventTheme,
+                    text: widget.eventTheme,
                     size: 19,
                     color: kPrimaryColor,
                   ),
@@ -61,7 +75,7 @@ class CustomizeEvent extends StatelessWidget {
                     background: Stack(
                       children: [
                         Image.network(
-                          imageUrl.toString(),
+                          widget.imageUrl.toString(),
                           height: height(context, 1.0),
                           width: width(context, 1.0),
                           fit: BoxFit.cover,
@@ -335,327 +349,113 @@ class CustomizeEvent extends StatelessWidget {
                   Obx(() {
                     return AddOnsTiles(
                       productImage:
-                          'https://www.vippicnic.com/img/addons/flowers.jpg',
-                      productName: 'Flowers',
-                      price: '120',
-                      perPrice: 'set',
-                      quantity: eventController.followers.value,
-                      onIncrease: () => eventController.addAddons('Flowers'),
-                      onDecrease: () => eventController.removeAddons('Flowers'),
+                          'https://www.vippicnic.com/img/addons/wine.PNG',
+                      productName: 'Wine',
+                      price: '45',
+                      perPrice: 'Bottle',
+                      quantity: eventController.wine.value,
+                      onIncrease: () => eventController.addAddons('Wine'),
+                      onDecrease: () => eventController.removeAddons('Wine'),
+                    );
+                  }),
+                  Obx(() {
+                    return AddOnsTiles(
+                      productImage:
+                          'https://www.vippicnic.com/img/addons/cake.PNG',
+                      productName: 'Cake',
+                      price: '150',
+                      perPrice: 'Piece',
+                      quantity: eventController.cake.value,
+                      onIncrease: () => eventController.addAddons('Cake'),
+                      onDecrease: () => eventController.removeAddons('Cake'),
+                    );
+                  }),
+                  Obx(() {
+                    return AddOnsTiles(
+                      productImage:
+                          'https://www.vippicnic.com/img/addons/candles.PNG',
+                      productName: 'Candles',
+                      price: '30',
+                      perPrice: 'Set',
+                      quantity: eventController.candles.value,
+                      onIncrease: () => eventController.addAddons('Candles'),
+                      onDecrease: () => eventController.removeAddons('Candles'),
                     );
                   }),
                   SizedBox(
-                    height: 200,
+                    height: 10,
                   ),
-                  // ETextField(
-                  //   labelText: 'Event type:',
-                  //   isReadOnly: true,
-                  //   isEditAble: true,
-                  //   onEditTap: () {
-                  //     showModalBottomSheet(
-                  //       backgroundColor: Colors.transparent,
-                  //       elevation: 0,
-                  //       context: context,
-                  //       builder: (context) {
-                  //         return howItWorkBottomSheet(
-                  //           context,
-                  //           title: 'Event type',
-                  //           selectedField: ETextField(
-                  //             labelText: 'Event type:',
-                  //           ),
-                  //           onSave: () {},
-                  //         );
-                  //       },
-                  //       isScrollControlled: true,
-                  //     );
-                  //   },
-                  // ),
-                  // SizedBox(
-                  //   height: 15,
-                  // ),
-                  // ETextField(
-                  //   labelText: 'Event theme:',
-                  //   isReadOnly: true,
-                  //   isEditAble: true,
-                  //   onEditTap: () {
-                  //     showModalBottomSheet(
-                  //       backgroundColor: Colors.transparent,
-                  //       elevation: 0,
-                  //       context: context,
-                  //       builder: (context) {
-                  //         return howItWorkBottomSheet(
-                  //           context,
-                  //           title: 'Event theme',
-                  //           selectedField: ETextField(
-                  //             labelText: 'Event theme:',
-                  //           ),
-                  //           onSave: () {},
-                  //         );
-                  //       },
-                  //       isScrollControlled: true,
-                  //     );
-                  //   },
-                  // ),
-                  // SizedBox(
-                  //   height: 15,
-                  // ),
-                  // ETextField(
-                  //   labelText: 'N° People:',
-                  //   isReadOnly: true,
-                  //   isEditAble: true,
-                  //   onEditTap: () {
-                  //     showModalBottomSheet(
-                  //       backgroundColor: Colors.transparent,
-                  //       elevation: 0,
-                  //       context: context,
-                  //       builder: (context) {
-                  //         return howItWorkBottomSheet(
-                  //           context,
-                  //           title: 'N° People',
-                  //           selectedField: Column(
-                  //             children: [
-                  //               ETextField(
-                  //                 labelText: 'Adults:',
-                  //               ),
-                  //               SizedBox(
-                  //                 height: 15,
-                  //               ),
-                  //               ETextField(
-                  //                 labelText: 'Kids:',
-                  //               ),
-                  //             ],
-                  //           ),
-                  //           height: 250,
-                  //           onSave: () {},
-                  //         );
-                  //       },
-                  //       isScrollControlled: true,
-                  //     );
-                  //   },
-                  // ),
-                  // SizedBox(
-                  //   height: 15,
-                  // ),
-                  // ETextField(
-                  //   labelText: 'Drinks:',
-                  //   isReadOnly: true,
-                  //   isEditAble: true,
-                  //   onEditTap: () {
-                  //     showModalBottomSheet(
-                  //       backgroundColor: Colors.transparent,
-                  //       elevation: 0,
-                  //       context: context,
-                  //       builder: (context) {
-                  //         return howItWorkBottomSheet(
-                  //           context,
-                  //           title: 'Drinks',
-                  //           selectedField: ETextField(
-                  //             labelText: 'Drinks:',
-                  //           ),
-                  //           onSave: () {},
-                  //         );
-                  //       },
-                  //       isScrollControlled: true,
-                  //     );
-                  //   },
-                  // ),
-                  // SizedBox(
-                  //   height: 15,
-                  // ),
-                  // ETextField(
-                  //   labelText: 'Food:',
-                  //   isReadOnly: true,
-                  //   isEditAble: true,
-                  //   onEditTap: () {
-                  //     showModalBottomSheet(
-                  //       backgroundColor: Colors.transparent,
-                  //       elevation: 0,
-                  //       context: context,
-                  //       builder: (context) {
-                  //         return howItWorkBottomSheet(
-                  //           context,
-                  //           title: 'Food',
-                  //           selectedField: ETextField(
-                  //             labelText: 'Food:',
-                  //           ),
-                  //           onSave: () {},
-                  //         );
-                  //       },
-                  //       isScrollControlled: true,
-                  //     );
-                  //   },
-                  // ),
-                  // SizedBox(
-                  //   height: 15,
-                  // ),
-                  // ETextField(
-                  //   labelText: 'Add-Ons:',
-                  //   isReadOnly: true,
-                  //   isEditAble: true,
-                  //   onEditTap: () {
-                  //     showModalBottomSheet(
-                  //       backgroundColor: Colors.transparent,
-                  //       elevation: 0,
-                  //       context: context,
-                  //       builder: (context) {
-                  //         return howItWorkBottomSheet(
-                  //           context,
-                  //           title: 'Add-Ons',
-                  //           selectedField: ETextField(
-                  //             labelText: 'Add-Ons:',
-                  //           ),
-                  //           onSave: () {},
-                  //         );
-                  //       },
-                  //       isScrollControlled: true,
-                  //     );
-                  //   },
-                  // ),
-                  // SizedBox(
-                  //   height: 15,
-                  // ),
-                  // ETextField(
-                  //   labelText: 'Location:',
-                  //   isReadOnly: true,
-                  //   isEditAble: true,
-                  //   onEditTap: () {
-                  //     showModalBottomSheet(
-                  //       backgroundColor: Colors.transparent,
-                  //       elevation: 0,
-                  //       context: context,
-                  //       builder: (context) {
-                  //         return howItWorkBottomSheet(
-                  //           context,
-                  //           title: 'Location',
-                  //           selectedField: ETextField(
-                  //             labelText: 'Location:',
-                  //           ),
-                  //           onSave: () {},
-                  //         );
-                  //       },
-                  //       isScrollControlled: true,
-                  //     );
-                  //   },
-                  // ),
-                  // SizedBox(
-                  //   height: 15,
-                  // ),
-                  // ETextField(
-                  //   labelText: 'Date:',
-                  //   isReadOnly: true,
-                  //   isEditAble: true,
-                  //   onEditTap: () {
-                  //     showModalBottomSheet(
-                  //       backgroundColor: Colors.transparent,
-                  //       elevation: 0,
-                  //       context: context,
-                  //       builder: (context) {
-                  //         return howItWorkBottomSheet(
-                  //           context,
-                  //           title: 'Date',
-                  //           selectedField: ETextField(
-                  //             labelText: 'Date:',
-                  //           ),
-                  //           onSave: () {},
-                  //         );
-                  //       },
-                  //       isScrollControlled: true,
-                  //     );
-                  //   },
-                  // ),
-                  // SizedBox(
-                  //   height: 15,
-                  // ),
-                  // ETextField(
-                  //   labelText: 'Hour:',
-                  //   isReadOnly: true,
-                  //   isEditAble: true,
-                  //   onEditTap: () {
-                  //     showModalBottomSheet(
-                  //       backgroundColor: Colors.transparent,
-                  //       elevation: 0,
-                  //       context: context,
-                  //       builder: (context) {
-                  //         return howItWorkBottomSheet(
-                  //           context,
-                  //           title: 'Hour',
-                  //           selectedField: ETextField(
-                  //             labelText: 'Hour:',
-                  //           ),
-                  //           onSave: () {},
-                  //         );
-                  //       },
-                  //       isScrollControlled: true,
-                  //     );
-                  //   },
-                  // ),
-                  // SizedBox(
-                  //   height: 20,
-                  // ),
-                  // MyText(
-                  //   text: 'How it works?',
-                  //   size: 19,
-                  //   weight: FontWeight.w600,
-                  //   paddingBottom: 10,
-                  // ),
-                  // MyText(
-                  //   paddingTop: 10,
-                  //   text: des,
-                  //   size: 14,
-                  //   overFlow: TextOverflow.ellipsis,
-                  //   color: kSecondaryColor,
-                  //   paddingBottom: 20,
-                  // ),
-                  // RichText(
-                  //   text: TextSpan(
-                  //     style: TextStyle(
-                  //       fontSize: 14,
-                  //       color: kSecondaryColor,
-                  //       decoration: TextDecoration.none,
-                  //       fontFamily: GoogleFonts.openSans().fontFamily,
-                  //     ),
-                  //     children: [
-                  //       TextSpan(
-                  //         text: 'Book and Payment? ',
-                  //         style: TextStyle(
-                  //           decoration: TextDecoration.underline,
-                  //         ),
-                  //       ),
-                  //       TextSpan(
-                  //         text:
-                  //             'Book at least 15 days in advance, with a 50% deposit (transfer) and the remainder on the day of the event.',
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  // SizedBox(
-                  //   height: 20,
-                  // ),
-                  // RichText(
-                  //   text: TextSpan(
-                  //     style: TextStyle(
-                  //       fontSize: 14,
-                  //       color: kSecondaryColor,
-                  //       decoration: TextDecoration.none,
-                  //       fontFamily: GoogleFonts.openSans().fontFamily,
-                  //     ),
-                  //     children: [
-                  //       TextSpan(
-                  //         text: 'Don\'t found something?',
-                  //         style: TextStyle(
-                  //           decoration: TextDecoration.underline,
-                  //         ),
-                  //       ),
-                  //       TextSpan(
-                  //         text:
-                  //             ' If you want something that is not on our list, write in the "message field" and we will be happy to make your wish come true.',
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  // SizedBox(
-                  //   height: 20,
-                  // ),
+                  heading('Personal Info'),
+                  ETextField(
+                    controller: eventController.nameCon,
+                    labelText: 'Your Name:',
+                    isEditAble: false,
+                    textSize: 12,
+                    labelSize: 14,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 15,
+                    ),
+                    child: ETextField(
+                      controller: eventController.emailCon,
+                      labelText: 'Email:',
+                      isEditAble: false,
+                      textSize: 12,
+                      labelSize: 14,
+                    ),
+                  ),
+                  ETextField(
+                    controller: eventController.phoneCon,
+                    labelText: 'Phone:',
+                    isEditAble: false,
+                    textSize: 12,
+                    labelSize: 14,
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  heading('Event Location'),
+                  ETextField(
+                    controller: eventController.cityCon,
+                    labelText: 'City:',
+                    isEditAble: false,
+                    textSize: 12,
+                    labelSize: 14,
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  ETextField(
+                    controller: eventController.stateCon,
+                    labelText: 'State:',
+                    isEditAble: false,
+                    textSize: 12,
+                    labelSize: 14,
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  ETextField(
+                    controller: eventController.zipCon,
+                    labelText: 'Zip:',
+                    isEditAble: false,
+                    textSize: 12,
+                    labelSize: 14,
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  ETextField(
+                    controller: eventController.addressCon,
+                    labelText: 'Address:',
+                    isEditAble: false,
+                    textSize: 12,
+                    labelSize: 14,
+                  ),
+                  SizedBox(
+                    height: 50,
+                  ),
                 ],
               ),
             ),
@@ -666,7 +466,7 @@ class CustomizeEvent extends StatelessWidget {
               ),
               child: MyButton(
                 buttonText: 'get free quotations',
-                onTap: () {},
+                onTap: () => eventController.uploadData(context),
               ),
             ),
           ],
@@ -737,6 +537,315 @@ class CustomizeEvent extends StatelessWidget {
     );
   }
 }
+// ETextField(
+//   labelText: 'Event type:',
+//   isReadOnly: true,
+//   isEditAble: true,
+//   onEditTap: () {
+//     showModalBottomSheet(
+//       backgroundColor: Colors.transparent,
+//       elevation: 0,
+//       context: context,
+//       builder: (context) {
+//         return howItWorkBottomSheet(
+//           context,
+//           title: 'Event type',
+//           selectedField: ETextField(
+//             labelText: 'Event type:',
+//           ),
+//           onSave: () {},
+//         );
+//       },
+//       isScrollControlled: true,
+//     );
+//   },
+// ),
+// SizedBox(
+//   height: 15,
+// ),
+// ETextField(
+//   labelText: 'Event theme:',
+//   isReadOnly: true,
+//   isEditAble: true,
+//   onEditTap: () {
+//     showModalBottomSheet(
+//       backgroundColor: Colors.transparent,
+//       elevation: 0,
+//       context: context,
+//       builder: (context) {
+//         return howItWorkBottomSheet(
+//           context,
+//           title: 'Event theme',
+//           selectedField: ETextField(
+//             labelText: 'Event theme:',
+//           ),
+//           onSave: () {},
+//         );
+//       },
+//       isScrollControlled: true,
+//     );
+//   },
+// ),
+// SizedBox(
+//   height: 15,
+// ),
+// ETextField(
+//   labelText: 'N° People:',
+//   isReadOnly: true,
+//   isEditAble: true,
+//   onEditTap: () {
+//     showModalBottomSheet(
+//       backgroundColor: Colors.transparent,
+//       elevation: 0,
+//       context: context,
+//       builder: (context) {
+//         return howItWorkBottomSheet(
+//           context,
+//           title: 'N° People',
+//           selectedField: Column(
+//             children: [
+//               ETextField(
+//                 labelText: 'Adults:',
+//               ),
+//               SizedBox(
+//                 height: 15,
+//               ),
+//               ETextField(
+//                 labelText: 'Kids:',
+//               ),
+//             ],
+//           ),
+//           height: 250,
+//           onSave: () {},
+//         );
+//       },
+//       isScrollControlled: true,
+//     );
+//   },
+// ),
+// SizedBox(
+//   height: 15,
+// ),
+// ETextField(
+//   labelText: 'Drinks:',
+//   isReadOnly: true,
+//   isEditAble: true,
+//   onEditTap: () {
+//     showModalBottomSheet(
+//       backgroundColor: Colors.transparent,
+//       elevation: 0,
+//       context: context,
+//       builder: (context) {
+//         return howItWorkBottomSheet(
+//           context,
+//           title: 'Drinks',
+//           selectedField: ETextField(
+//             labelText: 'Drinks:',
+//           ),
+//           onSave: () {},
+//         );
+//       },
+//       isScrollControlled: true,
+//     );
+//   },
+// ),
+// SizedBox(
+//   height: 15,
+// ),
+// ETextField(
+//   labelText: 'Food:',
+//   isReadOnly: true,
+//   isEditAble: true,
+//   onEditTap: () {
+//     showModalBottomSheet(
+//       backgroundColor: Colors.transparent,
+//       elevation: 0,
+//       context: context,
+//       builder: (context) {
+//         return howItWorkBottomSheet(
+//           context,
+//           title: 'Food',
+//           selectedField: ETextField(
+//             labelText: 'Food:',
+//           ),
+//           onSave: () {},
+//         );
+//       },
+//       isScrollControlled: true,
+//     );
+//   },
+// ),
+// SizedBox(
+//   height: 15,
+// ),
+// ETextField(
+//   labelText: 'Add-Ons:',
+//   isReadOnly: true,
+//   isEditAble: true,
+//   onEditTap: () {
+//     showModalBottomSheet(
+//       backgroundColor: Colors.transparent,
+//       elevation: 0,
+//       context: context,
+//       builder: (context) {
+//         return howItWorkBottomSheet(
+//           context,
+//           title: 'Add-Ons',
+//           selectedField: ETextField(
+//             labelText: 'Add-Ons:',
+//           ),
+//           onSave: () {},
+//         );
+//       },
+//       isScrollControlled: true,
+//     );
+//   },
+// ),
+// SizedBox(
+//   height: 15,
+// ),
+// ETextField(
+//   labelText: 'Location:',
+//   isReadOnly: true,
+//   isEditAble: true,
+//   onEditTap: () {
+//     showModalBottomSheet(
+//       backgroundColor: Colors.transparent,
+//       elevation: 0,
+//       context: context,
+//       builder: (context) {
+//         return howItWorkBottomSheet(
+//           context,
+//           title: 'Location',
+//           selectedField: ETextField(
+//             labelText: 'Location:',
+//           ),
+//           onSave: () {},
+//         );
+//       },
+//       isScrollControlled: true,
+//     );
+//   },
+// ),
+// SizedBox(
+//   height: 15,
+// ),
+// ETextField(
+//   labelText: 'Date:',
+//   isReadOnly: true,
+//   isEditAble: true,
+//   onEditTap: () {
+//     showModalBottomSheet(
+//       backgroundColor: Colors.transparent,
+//       elevation: 0,
+//       context: context,
+//       builder: (context) {
+//         return howItWorkBottomSheet(
+//           context,
+//           title: 'Date',
+//           selectedField: ETextField(
+//             labelText: 'Date:',
+//           ),
+//           onSave: () {},
+//         );
+//       },
+//       isScrollControlled: true,
+//     );
+//   },
+// ),
+// SizedBox(
+//   height: 15,
+// ),
+// ETextField(
+//   labelText: 'Hour:',
+//   isReadOnly: true,
+//   isEditAble: true,
+//   onEditTap: () {
+//     showModalBottomSheet(
+//       backgroundColor: Colors.transparent,
+//       elevation: 0,
+//       context: context,
+//       builder: (context) {
+//         return howItWorkBottomSheet(
+//           context,
+//           title: 'Hour',
+//           selectedField: ETextField(
+//             labelText: 'Hour:',
+//           ),
+//           onSave: () {},
+//         );
+//       },
+//       isScrollControlled: true,
+//     );
+//   },
+// ),
+// SizedBox(
+//   height: 20,
+// ),
+// MyText(
+//   text: 'How it works?',
+//   size: 19,
+//   weight: FontWeight.w600,
+//   paddingBottom: 10,
+// ),
+// MyText(
+//   paddingTop: 10,
+//   text: des,
+//   size: 14,
+//   overFlow: TextOverflow.ellipsis,
+//   color: kSecondaryColor,
+//   paddingBottom: 20,
+// ),
+// RichText(
+//   text: TextSpan(
+//     style: TextStyle(
+//       fontSize: 14,
+//       color: kSecondaryColor,
+//       decoration: TextDecoration.none,
+//       fontFamily: GoogleFonts.openSans().fontFamily,
+//     ),
+//     children: [
+//       TextSpan(
+//         text: 'Book and Payment? ',
+//         style: TextStyle(
+//           decoration: TextDecoration.underline,
+//         ),
+//       ),
+//       TextSpan(
+//         text:
+//             'Book at least 15 days in advance, with a 50% deposit (transfer) and the remainder on the day of the event.',
+//       ),
+//     ],
+//   ),
+// ),
+// SizedBox(
+//   height: 20,
+// ),
+// RichText(
+//   text: TextSpan(
+//     style: TextStyle(
+//       fontSize: 14,
+//       color: kSecondaryColor,
+//       decoration: TextDecoration.none,
+//       fontFamily: GoogleFonts.openSans().fontFamily,
+//     ),
+//     children: [
+//       TextSpan(
+//         text: 'Don\'t found something?',
+//         style: TextStyle(
+//           decoration: TextDecoration.underline,
+//         ),
+//       ),
+//       TextSpan(
+//         text:
+//             ' If you want something that is not on our list, write in the "message field" and we will be happy to make your wish come true.',
+//       ),
+//     ],
+//   ),
+// ),
+// SizedBox(
+//   height: 20,
+// ),
 
 class AddOnsTiles extends StatelessWidget {
   AddOnsTiles({
