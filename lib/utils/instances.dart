@@ -9,6 +9,7 @@ import 'package:vip_picnic/controller/auth_controller/forgot_password_controller
 import 'package:vip_picnic/controller/auth_controller/google_auth_controller.dart';
 import 'package:vip_picnic/controller/auth_controller/sign_up_controller.dart';
 import 'package:vip_picnic/controller/chat_controller/chat_controller.dart';
+import 'package:vip_picnic/controller/event_controller/event_controller.dart';
 import 'package:vip_picnic/controller/group_chat_controller/group_chat_controller.dart';
 import 'package:vip_picnic/controller/home_controller/home_controller.dart';
 import 'package:vip_picnic/controller/splash_screen_controller/splash_screen_controller.dart';
@@ -36,6 +37,7 @@ HomeController homeController = HomeController.instance;
 ChooseLanguageController languageController = ChooseLanguageController.instance;
 ChatController chatController = ChatController.instance;
 GroupChatController groupChatController = GroupChatController.instance;
+EventController eventController = EventController.instance;
 //GETX CONTROLLER INSTANCES
 
 //MODELS INSTANCES

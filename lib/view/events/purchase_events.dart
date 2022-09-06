@@ -15,59 +15,69 @@ class PurchaseEvents extends StatelessWidget {
     {
       'eventType': 'Picnic Kids',
       'thumbnail': 'https://www.vippicnic.com/img/packs/picnic.jpg',
-      'des': 'How about celebrating your little one\'s birthday in a different and original way ? Your guests will be delighted with the originality of your party, what are you waiting for… to make the reservation of their dreams, the children will not forget how beautiful their birthday party has been. We at vip picnic take care of all the details.',
+      'des':
+          'How about celebrating your little one\'s birthday in a different and original way ? Your guests will be delighted with the originality of your party, what are you waiting for… to make the reservation of their dreams, the children will not forget how beautiful their birthday party has been. We at vip picnic take care of all the details.',
     },
     {
       'eventType': 'Baby Shower',
       'thumbnail': 'https://www.vippicnic.com/img/packs/baby.jpg',
-      'des': 'If you are pregnant and you are looking for ideas to celebrate a baby shower abroad, we present this beautiful setup to you. And what to say about that exact moment at sunset where the light has those magical golden colors. if you dream about your baby shower project! VIP PICNIC team will bring all your dreams to reality.',
+      'des':
+          'If you are pregnant and you are looking for ideas to celebrate a baby shower abroad, we present this beautiful setup to you. And what to say about that exact moment at sunset where the light has those magical golden colors. if you dream about your baby shower project! VIP PICNIC team will bring all your dreams to reality.',
     },
     {
       'eventType': 'Communion',
       'thumbnail': 'https://www.vippicnic.com/img/packs/communion.jpg',
-      'des': 'Do you want an elegant, different, unique and made-to-measure first communion ? Welcome! You are at Vip picnic the Paradise of events. Our Communions are magical. Emotions flow, hosts and guests have fun, beyond time. We help you make that day perfect and that the guests do not forget how beautiful it was. In our corner you will find from the smallest to the last detail.',
+      'des':
+          'Do you want an elegant, different, unique and made-to-measure first communion ? Welcome! You are at Vip picnic the Paradise of events. Our Communions are magical. Emotions flow, hosts and guests have fun, beyond time. We help you make that day perfect and that the guests do not forget how beautiful it was. In our corner you will find from the smallest to the last detail.',
     },
     {
       'eventType': 'Wedding',
       'thumbnail':
           'https://www.vippicnic.com/img/packs/06_25__loc_7666588.jpeg',
-      'des': 'Who doesn\'t want an unforgettable and unique wedding party? Nowadays we don\'t need to invest in a party for many guests, nor in grand scenery or sophistication, what counts is authenticity, that the party has the face of the newlyweds. Innovate and personalize your wedding day as much as possible with a unique and wonderful outdoor picnic.',
+      'des':
+          'Who doesn\'t want an unforgettable and unique wedding party? Nowadays we don\'t need to invest in a party for many guests, nor in grand scenery or sophistication, what counts is authenticity, that the party has the face of the newlyweds. Innovate and personalize your wedding day as much as possible with a unique and wonderful outdoor picnic.',
     },
     {
       'eventType': 'Birthday Party',
       'thumbnail':
           'https://www.vippicnic.com/img/packs/06_25__loc_9343192.jpeg',
-      'des': 'We want your celebration to be a amazing experience, a small work of art of good taste. Exclusive ideas sculpted and decorated with dedication to make this day one of the most surprising of your life, for you and for your people. Do you have something to celebrate? Do not hesitate to contact us, we are experts in organizing party’s and picnics.',
+      'des':
+          'We want your celebration to be a amazing experience, a small work of art of good taste. Exclusive ideas sculpted and decorated with dedication to make this day one of the most surprising of your life, for you and for your people. Do you have something to celebrate? Do not hesitate to contact us, we are experts in organizing party’s and picnics.',
     },
     {
       'eventType': 'Gender Reveal',
       'thumbnail':
           'https://www.vippicnic.com/img/packs/06_25__loc_7563604.jpeg',
-      'des': 'Can you imagine super special event for a baby gender reveal, we are so happy to make our clients dreams come true and to be able to create such beautiful things for everyone who contacts us! Our picnics are always a different and creative surprise. Boy or girl ?',
+      'des':
+          'Can you imagine super special event for a baby gender reveal, we are so happy to make our clients dreams come true and to be able to create such beautiful things for everyone who contacts us! Our picnics are always a different and creative surprise. Boy or girl ?',
     },
     {
       'eventType': 'Proposal Marriage',
       'thumbnail':
           'https://www.vippicnic.com/img/packs/06_25__loc_7447790.jpeg',
-      'des': 'We are specialists in the field of carrying out your project party event the way you want it. together we can brainstorm about your amazing ideas to make your dreams come true, nothing is too crazy for us! to realize your dream party. Make your reservation now.',
+      'des':
+          'We are specialists in the field of carrying out your project party event the way you want it. together we can brainstorm about your amazing ideas to make your dreams come true, nothing is too crazy for us! to realize your dream party. Make your reservation now.',
     },
     {
       'eventType': 'Romantic Picnic',
       'thumbnail':
           'https://www.vippicnic.com/img/packs/06_25__loc_6146656.jpeg',
-      'des': 'What do you think of a beach picnic together with your loved one ? your partner would be amazed how you organized everything so romantic, book this unforgettable experience now to enjoy together from this amazing moment.',
+      'des':
+          'What do you think of a beach picnic together with your loved one ? your partner would be amazed how you organized everything so romantic, book this unforgettable experience now to enjoy together from this amazing moment.',
     },
     {
       'eventType': 'Mother\'s Day',
       'thumbnail':
           'https://www.vippicnic.com/img/packs/06_25__loc_1899010.jpeg',
-      'des': 'What do you think of a beach picnic together with your loved one ? your partner would be amazed how you organized everything so romantic, book this unforgettable experience now to enjoy together from this amazing moment.',
+      'des':
+          'What do you think of a beach picnic together with your loved one ? your partner would be amazed how you organized everything so romantic, book this unforgettable experience now to enjoy together from this amazing moment.',
     },
     {
       'eventType': 'Customize',
       'thumbnail':
           'https://www.vippicnic.com/img/packs/06_25__loc_6971336.jpeg',
-      'des': 'We are specialists in the field of carrying out your project party event the way you want it. together we can brainstorm about your amazing ideas to make your dreams come true, nothing is too crazy for us! to realize your dream party. Make your reservation now.',
+      'des':
+          'We are specialists in the field of carrying out your project party event the way you want it. together we can brainstorm about your amazing ideas to make your dreams come true, nothing is too crazy for us! to realize your dream party. Make your reservation now.',
     },
   ];
 
@@ -110,26 +120,16 @@ class PurchaseEvents extends StatelessWidget {
     int index,
   ) {
     return GestureDetector(
-      onTap: index == events.length - 1
-          ? () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => CustomizeEvent(
-                    imageUrl: eventData['thumbnail'],
-                    des: eventData['des'],
-                  ),
-                ),
-              )
-          : () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EventDetails(
-                    imageUrl: eventData['thumbnail'],
-                    eventTheme: eventData['eventType'],
-                    des: eventData['des'],
-                  ),
-                ),
-              ),
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CustomizeEvent(
+            imageUrl: eventData['thumbnail'],
+            eventTheme: eventData['eventType'],
+            des: eventData['des'],
+          ),
+        ),
+      ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Stack(

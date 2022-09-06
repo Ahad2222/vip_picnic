@@ -24,6 +24,7 @@ import 'package:vip_picnic/controller/auth_controller/forgot_password_controller
 import 'package:vip_picnic/controller/auth_controller/google_auth_controller.dart';
 import 'package:vip_picnic/controller/auth_controller/sign_up_controller.dart';
 import 'package:vip_picnic/controller/chat_controller/chat_controller.dart';
+import 'package:vip_picnic/controller/event_controller/event_controller.dart';
 import 'package:vip_picnic/controller/group_chat_controller/group_chat_controller.dart';
 import 'package:vip_picnic/controller/home_controller/home_controller.dart';
 import 'package:vip_picnic/controller/splash_screen_controller/splash_screen_controller.dart';
@@ -42,7 +43,8 @@ import 'package:http/http.dart' as http;
 import 'package:vip_picnic/view/widget/loading.dart';
 
 AndroidNotificationChannel? channel;
-FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(
@@ -309,7 +311,8 @@ Future<void> backgroundHandler() async {
             android: AndroidNotificationDetails(
               'FlutterUploader.Example',
               'FlutterUploader',
-              channelDescription: 'Vibrate and show Flutter Uploader notification',
+              channelDescription:
+                  'Vibrate and show Flutter Uploader notification',
               progress: progress.progress ?? 0,
               icon: 'ic_upload',
               enableVibration: false,
@@ -335,12 +338,17 @@ Future<void> backgroundHandler() async {
       });
       // log("result.status: ${result.status}");
       if (result.status?.description == "Completed") {
-        List<String> uploadedVideoIdList = jsonDecode(result.response ?? "{" ":" "}")['id'].split("/");
+        List<String> uploadedVideoIdList =
+            jsonDecode(result.response ?? "{" ":" "}")['id'].split("/");
         log("uploadedVideoIdList: $uploadedVideoIdList");
-        bool isChatRoom = uploadedVideoIdList.asMap().containsValue("chatRooms");
-        bool isPostVideo = uploadedVideoIdList.asMap().containsValue("postVideos");
-        bool isStoryVideo = uploadedVideoIdList.asMap().containsValue("storyVideos");
-        bool isGroupChatRoom = uploadedVideoIdList.asMap().containsValue("groupChatRooms");
+        bool isChatRoom =
+            uploadedVideoIdList.asMap().containsValue("chatRooms");
+        bool isPostVideo =
+            uploadedVideoIdList.asMap().containsValue("postVideos");
+        bool isStoryVideo =
+            uploadedVideoIdList.asMap().containsValue("storyVideos");
+        bool isGroupChatRoom =
+            uploadedVideoIdList.asMap().containsValue("groupChatRooms");
         log("isChatRoom: $isChatRoom \n and isPostVideo: $isPostVideo \n and isGroupChatRoom: $isGroupChatRoom");
 
         if (isChatRoom) {
@@ -352,7 +360,10 @@ Future<void> backgroundHandler() async {
           log("result.status?.description is: ${result.status?.description ?? ""}");
           log("result.taskId is: ${result.taskId}");
           try {
-            var ref = FirebaseStorage.instance.ref().child("chatRooms/${chatRoomId}").child("$fileName.mp4");
+            var ref = FirebaseStorage.instance
+                .ref()
+                .child("chatRooms/${chatRoomId}")
+                .child("$fileName.mp4");
             String url = await ref.getDownloadURL();
             await FirebaseFirestore.instance
                 .collection("ChatRoom")
@@ -369,7 +380,10 @@ Future<void> backgroundHandler() async {
           String fileName = uploadedVideoIdList[3].split(".")[0];
           log("groupId in upload result:  $groupId");
           log("fileName in upload result:  $fileName");
-          var ref = FirebaseStorage.instance.ref().child("groupChatRooms/${groupId}").child("$fileName.mp4");
+          var ref = FirebaseStorage.instance
+              .ref()
+              .child("groupChatRooms/${groupId}")
+              .child("$fileName.mp4");
           String url = await ref.getDownloadURL();
           FirebaseFirestore.instance
               .collection("GroupChatRoom")
@@ -383,21 +397,30 @@ Future<void> backgroundHandler() async {
           String fileName = uploadedVideoIdList[3].split(".")[0];
           log("postId in upload result:  $postId");
           log("fileName in upload result:  $fileName");
-          var ref = FirebaseStorage.instance.ref().child("postVideos/${postId}").child("$fileName.mp4");
+          var ref = FirebaseStorage.instance
+              .ref()
+              .child("postVideos/${postId}")
+              .child("$fileName.mp4");
           String url = await ref.getDownloadURL();
           FirebaseFirestore.instance.collection("Posts").doc(postId).update({
             "postVideos": FieldValue.arrayUnion([url])
           });
           uploader.clearUploads();
-        }else if (isStoryVideo) {
+        } else if (isStoryVideo) {
           // String storyId = uploadedVideoIdList[2];
           String storyId = uploadedVideoIdList[3].split(".")[0];
           String fileName = uploadedVideoIdList[3].split(".")[0];
           log("storyId in upload result:  $storyId");
           log("fileName in upload result:  $fileName");
-          var ref = FirebaseStorage.instance.ref().child("storyVideos/${auth.currentUser?.uid}").child("$fileName.mp4");
+          var ref = FirebaseStorage.instance
+              .ref()
+              .child("storyVideos/${auth.currentUser?.uid}")
+              .child("$fileName.mp4");
           String url = await ref.getDownloadURL();
-          FirebaseFirestore.instance.collection(storyCollection).doc(storyId).update({
+          FirebaseFirestore.instance
+              .collection(storyCollection)
+              .doc(storyId)
+              .update({
             "storyVideo": url,
           });
           uploader.clearUploads();
@@ -431,10 +454,13 @@ Future<void> backgroundHandler() async {
           android: AndroidNotificationDetails(
             'FlutterUploader.Example',
             'FlutterUploader',
-            channelDescription: 'Vibrate and show Flutter Uploader notification',
+            channelDescription:
+                'Vibrate and show Flutter Uploader notification',
             icon: 'ic_upload',
             enableVibration: !successful,
-            importance: result.status == UploadTaskStatus.failed ? Importance.high : Importance.min,
+            importance: result.status == UploadTaskStatus.failed
+                ? Importance.high
+                : Importance.min,
           ),
           iOS: IOSNotificationDetails(
             presentAlert: true,
@@ -495,7 +521,8 @@ Future<void> main() async {
   flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   await flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(channel!);
 
   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
@@ -531,6 +558,7 @@ Future<void> main() async {
   Get.put(ChatController());
   Get.put(GroupChatController());
   Get.put(FacebookAuthController());
+  Get.put(EventController());
   runApp(MyApp());
 }
 
@@ -570,7 +598,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
               print("ChatRoom Id is: ${chatRoomId}");
               //We have chatRoomId here and we need to navigate to the ChatRoomScreen having same Id
-              await ffstore.collection("ChatRoom").doc(chatRoomId).get().then((value) {
+              await ffstore
+                  .collection("ChatRoom")
+                  .doc(chatRoomId)
+                  .get()
+                  .then((value) {
                 Get.to(() => ChatScreen(docs: value.data(), isArchived: false));
               });
             } else if (screenName == 'profileScreen') {
@@ -585,7 +617,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 type = payloadDecoded['type'];
                 if (type == 'followerFollowed') {
                   UserDetailsModel? umdl;
-                  await ffstore.collection(accountsCollection).doc(payloadDecoded['id']).get().then((value) {
+                  await ffstore
+                      .collection(accountsCollection)
+                      .doc(payloadDecoded['id'])
+                      .get()
+                      .then((value) {
                     umdl = UserDetailsModel.fromJson(value.data() ?? {});
                   });
                   Get.to(() => OtherUserProfile(
@@ -606,11 +642,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               print("ChatRoom Id is: ${groupId}");
               //We have chatRoomId here and we need to navigate to the ChatRoomScreen having same Id
               loading();
-              await ffstore.collection(groupChatCollection).doc(groupId).update({
+              await ffstore
+                  .collection(groupChatCollection)
+                  .doc(groupId)
+                  .update({
                 "notDeletedFor": FieldValue.arrayUnion([auth.currentUser?.uid]),
                 "users": FieldValue.arrayUnion([auth.currentUser?.uid]),
               });
-              await groupChatController.getAGroupChatRoomInfo(groupId).then((value) {
+              await groupChatController
+                  .getAGroupChatRoomInfo(groupId)
+                  .then((value) {
                 Get.back();
                 Get.to(() => GroupChat(docs: value.data()));
               });
@@ -618,8 +659,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               print("Screen is postScreen");
               String postId = 'Nothing';
               postId = payloadDecoded["postId"];
-              await ffstore.collection(postsCollection).doc(postId).get().then((value) {
-                AddPostModel addPostModel = AddPostModel.fromJson(value.data() ?? {});
+              await ffstore
+                  .collection(postsCollection)
+                  .doc(postId)
+                  .get()
+                  .then((value) {
+                AddPostModel addPostModel =
+                    AddPostModel.fromJson(value.data() ?? {});
                 Get.to(() => PostDetails(
                       isLikeByMe: false,
                       postDocModel: addPostModel,
@@ -636,7 +682,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     }
   }
 
-  void onDidReceiveLocalNotification(int? id, String? title, String? body, String? payload) async {
+  void onDidReceiveLocalNotification(
+      int? id, String? title, String? body, String? payload) async {
     // display a diaprint with the notification details, tap ok to go to another page
     showDialog(
       context: context,
@@ -704,7 +751,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   chatRoomId = message.data['chatRoomId'];
                 }
                 //We have chatRoomId here and we need to navigate to the ChatRoomScreen having same Id
-                await ffstore.collection("ChatRoom").doc(chatRoomId).get().then((value) async {
+                await ffstore
+                    .collection("ChatRoom")
+                    .doc(chatRoomId)
+                    .get()
+                    .then((value) async {
                   if (value.exists) {
                     print("ChatRoom Doc " + value.toString());
                     print("Navigating from onMessagePop to the ChatRoom 2");
@@ -715,12 +766,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         "Screen": screenName,
                       });
                       if (Platform.isIOS) {
-                        Future.delayed(Duration(seconds: 4), () => Get.to(() => ChatScreen(docs: value.data())));
+                        Future.delayed(Duration(seconds: 4),
+                            () => Get.to(() => ChatScreen(docs: value.data())));
                       } else {
                         Get.to(() => ChatScreen(docs: value.data()));
                       }
                     } catch (e) {
-                      await ffstore.collection("Error in InitialMessage").doc().set({'Error': e.toString()});
+                      await ffstore
+                          .collection("Error in InitialMessage")
+                          .doc()
+                          .set({'Error': e.toString()});
                     }
                     // }
                   } else {
@@ -736,7 +791,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   type = message.data['type'];
                   if (type == 'followerFollowed') {
                     UserDetailsModel? umdl;
-                    await ffstore.collection(accountsCollection).doc(message.data['id']).get().then((value) {
+                    await ffstore
+                        .collection(accountsCollection)
+                        .doc(message.data['id'])
+                        .get()
+                        .then((value) {
                       umdl = UserDetailsModel.fromJson(value.data() ?? {});
                     });
                     Get.to(() => OtherUserProfile(otherUserModel: umdl));
@@ -754,11 +813,17 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 print("ChatRoom Id is: ${groupId}");
                 //We have chatRoomId here and we need to navigate to the ChatRoomScreen having same Id
                 loading();
-                await ffstore.collection(groupChatCollection).doc(groupId).update({
-                  "notDeletedFor": FieldValue.arrayUnion([auth.currentUser?.uid]),
+                await ffstore
+                    .collection(groupChatCollection)
+                    .doc(groupId)
+                    .update({
+                  "notDeletedFor":
+                      FieldValue.arrayUnion([auth.currentUser?.uid]),
                   "users": FieldValue.arrayUnion([auth.currentUser?.uid]),
                 });
-                await groupChatController.getAGroupChatRoomInfo(groupId).then((value) {
+                await groupChatController
+                    .getAGroupChatRoomInfo(groupId)
+                    .then((value) {
                   Get.back();
                   Get.to(() => GroupChat(docs: value.data()));
                 });
@@ -766,9 +831,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 print("Screen is postScreen");
                 String postId = 'Nothing';
                 postId = message.data["postId"];
-                await ffstore.collection(postsCollection).doc(postId).get().then((value) {
-                  AddPostModel addPostModel = AddPostModel.fromJson(value.data() ?? {});
-                  Get.to(() => PostDetails(isLikeByMe: false, postDocModel: addPostModel));
+                await ffstore
+                    .collection(postsCollection)
+                    .doc(postId)
+                    .get()
+                    .then((value) {
+                  AddPostModel addPostModel =
+                      AddPostModel.fromJson(value.data() ?? {});
+                  Get.to(() => PostDetails(
+                      isLikeByMe: false, postDocModel: addPostModel));
                 });
               } else {
                 print("Screen is in Else method of getInitialMessage");
@@ -828,14 +899,17 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             log("message.notification.data: ${message.notification != null ? message.notification?.body : "notification was null"}");
             log("message.notification.data: ${message.notification != null ? message.notification?.android : "notification was null"}");
             if (message.notification != null && message.notification != {}) {
-              String? longData = message.notification != null ? message.notification?.body : "";
+              String? longData = message.notification != null
+                  ? message.notification?.body
+                  : "";
               if (screenName == 'chatScreen' ||
                   screenName == 'profileScreen' ||
                   screenName == 'groupChatScreen' ||
                   screenName == "postScreen") {
                 //Handling forground notification on chat notification
                 imagePresent = message.data.containsKey('imageUrl');
-                generalImagePresent = message.data.containsKey('generalImageUrl');
+                generalImagePresent =
+                    message.data.containsKey('generalImageUrl');
                 if (imagePresent) {
                   imgUrl = message.data['imageUrl'];
                 }
@@ -843,22 +917,27 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   generalImageUrl = message.data['generalImageUrl'];
                 }
                 //PictureConfig
-                final largeIconPath = await _downloadAndSaveFile('${imgUrl}', 'largeIcon');
-                final String bigPicturePath = await _downloadAndSaveFile('${generalImageUrl}', 'bigPicture');
+                final largeIconPath =
+                    await _downloadAndSaveFile('${imgUrl}', 'largeIcon');
+                final String bigPicturePath = await _downloadAndSaveFile(
+                    '${generalImageUrl}', 'bigPicture');
 
-                final BigPictureStyleInformation bigPictureStyleInformation = BigPictureStyleInformation(
-                    FilePathAndroidBitmap(bigPicturePath),
-                    hideExpandedLargeIcon: true,
-                    contentTitle: '<b>${message.notification?.title}</b>',
-                    htmlFormatContentTitle: true,
-                    summaryText: '${message.notification?.body}',
-                    htmlFormatSummaryText: true);
+                final BigPictureStyleInformation bigPictureStyleInformation =
+                    BigPictureStyleInformation(
+                        FilePathAndroidBitmap(bigPicturePath),
+                        hideExpandedLargeIcon: true,
+                        contentTitle: '<b>${message.notification?.title}</b>',
+                        htmlFormatContentTitle: true,
+                        summaryText: '${message.notification?.body}',
+                        htmlFormatSummaryText: true);
 
-                final bigTextStyleInformation = BigTextStyleInformation(longData!);
+                final bigTextStyleInformation =
+                    BigTextStyleInformation(longData!);
 
                 print("Things take time");
 
-                final AndroidNotificationDetails androidPlatformChannelSpecifics =
+                final AndroidNotificationDetails
+                    androidPlatformChannelSpecifics =
                     AndroidNotificationDetails('vipPicnic', 'vip',
                         channelDescription: 'Vibrate and show notification',
                         importance: Importance.max,
@@ -873,21 +952,30 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         ledOnMs: 1000,
                         ledOffMs: 500);
 
-                const AndroidInitializationSettings initializationSettingsAndroid =
+                const AndroidInitializationSettings
+                    initializationSettingsAndroid =
                     AndroidInitializationSettings('launcher_icon');
                 final IOSInitializationSettings initializationSettingsIOS =
-                    IOSInitializationSettings(onDidReceiveLocalNotification: onDidReceiveLocalNotification);
+                    IOSInitializationSettings(
+                        onDidReceiveLocalNotification:
+                            onDidReceiveLocalNotification);
 
                 final InitializationSettings initializationSettings =
-                    InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
-                await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+                    InitializationSettings(
+                        android: initializationSettingsAndroid,
+                        iOS: initializationSettingsIOS);
+                await flutterLocalNotificationsPlugin.initialize(
+                    initializationSettings,
                     onSelectNotification: selectNotification);
 
                 //We need to configure for the ios as well
                 final NotificationDetails platformChannelSpecifics =
-                    NotificationDetails(android: androidPlatformChannelSpecifics);
-                print("message.notification?.title  + ${message.notification?.title}");
-                print("message.notification?.body ${message.notification?.body}");
+                    NotificationDetails(
+                        android: androidPlatformChannelSpecifics);
+                print(
+                    "message.notification?.title  + ${message.notification?.title}");
+                print(
+                    "message.notification?.body ${message.notification?.body}");
                 print("messageId: ${message.messageId}");
 
                 flutterLocalNotificationsPlugin.show(
@@ -949,9 +1037,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               }
 
               print("ChatRoom Id is: ${chatRoomId}");
-              print("Navigating from onMessagePop to the ChatRoom in onMessageOpenedApp");
+              print(
+                  "Navigating from onMessagePop to the ChatRoom in onMessageOpenedApp");
               //We have chatRoomId here and we need to navigate to the ChatRoomScreen having same Id
-              await ffstore.collection("ChatRoom").doc(chatRoomId).get().then((value) async {
+              await ffstore
+                  .collection("ChatRoom")
+                  .doc(chatRoomId)
+                  .get()
+                  .then((value) async {
                 if (value.exists) {
                   print("ChatRoom Doc " + value.toString());
                   print("Navigating from onMessagePop to the ChatRoom 2");
@@ -971,7 +1064,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 type = message.data['type'];
                 if (type == 'followerFollowed') {
                   UserDetailsModel? umdl;
-                  await ffstore.collection(accountsCollection).doc(message.data['id']).get().then((value) {
+                  await ffstore
+                      .collection(accountsCollection)
+                      .doc(message.data['id'])
+                      .get()
+                      .then((value) {
                     umdl = UserDetailsModel.fromJson(value.data() ?? {});
                   });
                   Get.to(() => OtherUserProfile(otherUserModel: umdl));
@@ -983,9 +1080,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               print("Screen is postScreen");
               String postId = 'Nothing';
               postId = message.data["postId"];
-              await ffstore.collection(postsCollection).doc(postId).get().then((value) {
-                AddPostModel addPostModel = AddPostModel.fromJson(value.data() ?? {});
-                Get.to(() => PostDetails(isLikeByMe: false, postDocModel: addPostModel));
+              await ffstore
+                  .collection(postsCollection)
+                  .doc(postId)
+                  .get()
+                  .then((value) {
+                AddPostModel addPostModel =
+                    AddPostModel.fromJson(value.data() ?? {});
+                Get.to(() =>
+                    PostDetails(isLikeByMe: false, postDocModel: addPostModel));
               });
             } else {
               print("Screen is in Else");

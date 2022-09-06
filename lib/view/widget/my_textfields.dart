@@ -307,6 +307,7 @@ class SimpleTextField extends StatelessWidget {
     this.haveSuffix = false,
     this.suffix,
     this.maxLines = 1,
+    this.textSize = 19.0,
   }) : super(key: key);
 
   String? hintText, initialValue;
@@ -316,6 +317,7 @@ class SimpleTextField extends StatelessWidget {
   FormFieldValidator<String>? validator;
   bool? haveSuffix;
   Widget? suffix;
+  double textSize;
 
   @override
   Widget build(BuildContext context) {
@@ -329,7 +331,7 @@ class SimpleTextField extends StatelessWidget {
       cursorColor: kSecondaryColor,
       cursorWidth: 1.0,
       style: TextStyle(
-        fontSize: 19,
+        fontSize: textSize,
         color: kBlackColor.withOpacity(0.40),
       ),
       decoration: InputDecoration(
@@ -342,7 +344,7 @@ class SimpleTextField extends StatelessWidget {
         filled: true,
         hintText: '$hintText',
         hintStyle: TextStyle(
-          fontSize: 19,
+          fontSize: textSize,
           color: kBlackColor.withOpacity(0.40),
         ),
         enabledBorder: OutlineInputBorder(

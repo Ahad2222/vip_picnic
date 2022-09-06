@@ -19,6 +19,7 @@ class Assets {
   static const String imagesClose = 'assets/images/close.png';
   static const String imagesComment = 'assets/images/comment.png';
   static const String imagesCustomize = 'assets/images/customize.png';
+  static const String imagesDatePicker = 'assets/images/date_picker.png';
   static const String imagesDeleteMsg = 'assets/images/delete_msg.png';
   static const String imagesDisable = 'assets/images/disable.png';
   static const String imagesDummyImage = 'assets/images/dummy_image.png';
