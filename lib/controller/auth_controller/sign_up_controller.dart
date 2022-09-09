@@ -134,7 +134,6 @@ class SignupController extends GetxController {
           fullName: fullNameCon.text.trim(),
           email: emailCon.text.trim(),
           uID: auth.currentUser!.uid,
-          password: passCon.text.trim(),
           phone: phoneCon.text.trim(),
           city: cityCon.text.trim(),
           state: stateCon.text.trim(),

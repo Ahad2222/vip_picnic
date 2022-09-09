@@ -39,7 +39,7 @@ class Notifications extends StatelessWidget {
             .orderBy("createdAt", descending: true)
             .snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          log("inside stream-builder");
+          //log("inside stream-builder");
           if (snapshot.connectionState == ConnectionState.waiting) {
             log("inside stream-builder in waiting state");
             return Center(child: noPostYet());

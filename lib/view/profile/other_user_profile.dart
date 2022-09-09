@@ -246,7 +246,7 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
             BuildContext context,
             AsyncSnapshot<QuerySnapshot> snapshot,
           ) {
-            log("inside stream-builder");
+            //log("inside stream-builder");
             if (snapshot.connectionState == ConnectionState.waiting) {
               log("inside stream-builder in waiting state");
               return noPostYet();

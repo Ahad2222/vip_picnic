@@ -1541,7 +1541,7 @@ class _EditPostState extends State<EditPost> {
                         BuildContext context,
                         AsyncSnapshot<QuerySnapshot> snapshot,
                       ) {
-                        log("inside stream-builder");
+                        //log("inside stream-builder");
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           log("inside stream-builder in waiting state");
                           return Center(child: CircularProgressIndicator());
@@ -1596,7 +1596,7 @@ class _EditPostState extends State<EditPost> {
                     //     BuildContext context,
                     //     AsyncSnapshot<QuerySnapshot> snapshot,
                     //   ) {
-                    //     log("inside stream-builder");
+                    //     //log("inside stream-builder");
                     //     if (snapshot.connectionState == ConnectionState.waiting) {
                     //       log("inside stream-builder in waiting state");
                     //       return Center(child: CircularProgressIndicator());
@@ -1701,7 +1701,7 @@ class _EditPostState extends State<EditPost> {
                 //     BuildContext context,
                 //     AsyncSnapshot<QuerySnapshot> snapshot,
                 //   ) {
-                //     log("inside stream-builder");
+                //     //log("inside stream-builder");
                 //     if (snapshot.connectionState == ConnectionState.waiting) {
                 //       log("inside stream-builder in waiting state");
                 //       return Center(child: CircularProgressIndicator());

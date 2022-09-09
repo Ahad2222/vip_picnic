@@ -71,7 +71,7 @@ class _FollowingState extends State<Following> {
             BuildContext context,
             AsyncSnapshot<DocumentSnapshot> snapshot,
             ) {
-          // log("inside stream-builder");
+          // //log("inside stream-builder");
           // log(userDetailsModel.profileImageUrl!);
           if (snapshot.connectionState == ConnectionState.waiting) {
             // log("inside stream-builder in waiting state");
@@ -94,7 +94,7 @@ class _FollowingState extends State<Following> {
                       BuildContext context,
                       AsyncSnapshot<QuerySnapshot> snapshot,
                       ) {
-                    log("inside stream-builder");
+                    //log("inside stream-builder");
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       log("inside stream-builder in waiting state");
                       return Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(kTertiaryColor)));

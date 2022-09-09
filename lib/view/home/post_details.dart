@@ -449,7 +449,7 @@ class _PostDetailsState extends State<PostDetails> {
                             //       AsyncSnapshot<DocumentSnapshot> snapshot,
                             //       ) {
                             //     int? previousCount = 0;
-                            //     log("inside stream-builder");
+                            //     //log("inside stream-builder");
                             //     if (snapshot.connectionState == ConnectionState.waiting) {
                             //       log("inside stream-builder in waiting state");
                             //       return MyText(
@@ -621,7 +621,7 @@ class _PostDetailsState extends State<PostDetails> {
                                     AsyncSnapshot<QuerySnapshot> snapshot,
                                   ) {
                                     int previousCount = 0;
-                                    log("inside stream-builder");
+                                    //log("inside stream-builder");
                                     if (snapshot.connectionState == ConnectionState.waiting) {
                                       log("inside stream-builder in waiting state");
                                       return MyText(
@@ -675,15 +675,22 @@ class _PostDetailsState extends State<PostDetails> {
                             ),
                             GestureDetector(
                               onTap: () async {
+                                Get.dialog(loading());
                                 String shareLink = await DynamicLinkHandler.buildDynamicLinkForPost(
-                                  postImageUrl: widget.postDocModel?.postImages![0] ??
-                                      "https://www.freeiconspng.com/uploads/no-image-icon-15.png",
+                                  postImageUrl: (widget.postDocModel?.postImages?.length ?? 0) != 0
+                                      ? widget.postDocModel?.postImages![0] ??
+                                          "https://www.freeiconspng.com/uploads/no-image-icon-15.png"
+                                      : (widget.postDocModel?.thumbnailsUrls?.length ?? 0) != 0
+                                          ? widget.postDocModel?.thumbnailsUrls![0] ??
+                                              "https://www.freeiconspng.com/uploads/no-image-icon-15.png"
+                                          : "https://www.freeiconspng.com/uploads/no-image-icon-15.png",
                                   postId: widget.postDocModel!.postID ?? "",
                                   postTitle: widget.postDocModel!.postTitle ?? "No Title",
                                   short: true,
                                 );
                                 log("fetched shareLink: $shareLink");
                                 ShareResult sr = await Share.shareWithResult(shareLink);
+                                Get.back();
                                 log("ShareResult is: ${sr.status} sr.status == ShareResultStatus.success: ${sr.status == ShareResultStatus.success}");
                                 log("ShareResult is: ${sr.status} sr.status == ShareResultStatus.dismissed: ${sr.status == ShareResultStatus.dismissed}");
                                 log("ShareResult.raw is: ${sr.raw}");
@@ -728,7 +735,7 @@ class _PostDetailsState extends State<PostDetails> {
                       BuildContext context,
                       AsyncSnapshot<QuerySnapshot> snapshot,
                     ) {
-                      log("inside stream-builder");
+                      //log("inside stream-builder");
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         log("inside stream-builder in waiting state");
                         return const Center(child: Text('Loading...'));
@@ -931,7 +938,7 @@ class CommentsTiles extends StatelessWidget {
                     Get.dialog(loading());
                     try {
                       await ffstore.collection(accountsCollection).doc(commenterId).get().then(
-                            (value) {
+                        (value) {
                           UserDetailsModel otherUser = UserDetailsModel.fromJson(value.data() ?? {});
                           Get.back();
                           Get.to(() => OtherUserProfile(otherUserModel: otherUser));
@@ -978,7 +985,7 @@ class CommentsTiles extends StatelessWidget {
                     Get.dialog(loading());
                     try {
                       await ffstore.collection(accountsCollection).doc(commenterId).get().then(
-                            (value) {
+                        (value) {
                           UserDetailsModel otherUser = UserDetailsModel.fromJson(value.data() ?? {});
                           Get.back();
                           Get.to(() => OtherUserProfile(otherUserModel: otherUser));
@@ -1031,40 +1038,50 @@ class CommentsTiles extends StatelessWidget {
                       ),
                 trailing: commenterId == auth.currentUser?.uid
                     ? Wrap(
-                  spacing: 13,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: isBeingEdited.value
-                          ?  () async {
-                        isBeingEdited.value = false;
-                        await ffstore.collection(postsCollection).doc(postDocId).collection(commentsCollection)
-                            .doc(commentDocId).update({"commentText": commentController.text.trim()});
-                      } : () {
-                        commentController.text = comment ?? "";
-                        isBeingEdited.value = true;
-                      },
-                      child: isBeingEdited.value
-                          ? Image.asset(
-                              Assets.imagesSend,
-                              height: 30,
-                            )
-                          : Image.asset(
-                              Assets.imagesEditIcon,
-                              height: 18,
+                        spacing: 13,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          GestureDetector(
+                            onTap: isBeingEdited.value
+                                ? () async {
+                                    isBeingEdited.value = false;
+                                    await ffstore
+                                        .collection(postsCollection)
+                                        .doc(postDocId)
+                                        .collection(commentsCollection)
+                                        .doc(commentDocId)
+                                        .update({"commentText": commentController.text.trim()});
+                                  }
+                                : () {
+                                    commentController.text = comment ?? "";
+                                    isBeingEdited.value = true;
+                                  },
+                            child: isBeingEdited.value
+                                ? Image.asset(
+                                    Assets.imagesSend,
+                                    height: 30,
+                                  )
+                                : Image.asset(
+                                    Assets.imagesEditIcon,
+                                    height: 18,
+                                  ),
+                          ),
+                          GestureDetector(
+                            onTap: () async {
+                              await ffstore
+                                  .collection(postsCollection)
+                                  .doc(postDocId)
+                                  .collection(commentsCollection)
+                                  .doc(commentDocId)
+                                  .delete();
+                            },
+                            child: Image.asset(
+                              Assets.imagesDeleteMsg,
+                              height: 20,
                             ),
-                    ),
-                    GestureDetector(
-                      onTap: () async {
-                        await ffstore.collection(postsCollection).doc(postDocId).collection(commentsCollection).doc(commentDocId).delete();
-                      },
-                      child: Image.asset(
-                        Assets.imagesDeleteMsg,
-                        height: 20,
-                      ),
-                    ),
-                  ],
-                )
+                          ),
+                        ],
+                      )
                     : SizedBox(),
               );
             }),

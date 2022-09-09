@@ -11,11 +11,11 @@ import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/model/home_model/add_post_model.dart';
 import 'package:vip_picnic/model/story_model/story_model.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
+import 'package:vip_picnic/utils/collections.dart';
 import 'package:vip_picnic/utils/dynamic_link_handler.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/home/add_new_post.dart';
 import 'package:vip_picnic/view/home/post_details.dart';
-import 'package:vip_picnic/view/home/post_video_preview_from_file.dart';
 import 'package:vip_picnic/view/profile/other_user_profile.dart';
 import 'package:vip_picnic/view/profile/profile.dart';
 import 'package:vip_picnic/view/search_friends/search_friends.dart';
@@ -27,8 +27,101 @@ import 'package:vip_picnic/view/widget/my_text.dart';
 import 'package:vip_picnic/view/widget/my_textfields.dart';
 import 'package:vip_picnic/view/widget/video_preview.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
   bool hasMyStory = false;
+  List<String> followsListToBeChunked = [];
+  RxList<Stream<List<AddPostModel>>> chunckSizePostsStreamList = List<Stream<List<AddPostModel>>>.from([]).obs;
+  RxList<Stream<List<StoryModel>>> chunckSizeStoriesStreamList = List<Stream<List<StoryModel>>>.from([]).obs;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    accounts.doc(auth.currentUser?.uid).snapshots().listen((event) {
+      if (event.data() != null) {
+        userDetailsModel = UserDetailsModel.fromJson(event.data() as Map<String, dynamic>);
+        log("inside user data");
+        followsListToBeChunked = [];
+        followsListToBeChunked.addAll(userDetailsModel.iFollowed!);
+        log("followsListToBeChunked = ${followsListToBeChunked}");
+        chunckSizePostsStreamList.value = chunckSizePostsStream();
+        log("chunckSizePostsStreamList.value returned : ${chunckSizePostsStreamList}");
+        chunckSizeStoriesStreamList.value = chunckSizeStoriesStream();
+        log("chunckSizePostsStreamList.value returned : ${chunckSizePostsStreamList}");
+      }
+    });
+
+    super.initState();
+  }
+
+  List<Stream<List<AddPostModel>>> chunckSizePostsStream() {
+    log("chunckSizePostsStream called");
+    final List<List<String>> followersChunks = chunkSizeCollection(followsListToBeChunked);
+    List<Stream<List<AddPostModel>>> streams = List<Stream<List<AddPostModel>>>.from([]);
+    log("followersChunks: $followersChunks");
+    followersChunks.forEach((chunck) => streams.add(ffstore
+        .collection(postsCollection)
+        .where("uID", whereIn: chunck)
+        .orderBy("createdAtMilliSeconds", descending: true)
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.docs.map((document) => AddPostModel.fromJson(document.data())).toList(growable: false))));
+    log("outside followersChunks before returning");
+    log("sttreams:  $streams");
+    return streams;
+  }
+
+  List<Stream<List<StoryModel>>> chunckSizeStoriesStream() {
+    log("chunckSizeStoriesStream called");
+    final List<List<String>> followersStoryChunks = chunkSizeCollection(followsListToBeChunked);
+    List<Stream<List<StoryModel>>> streams = List<Stream<List<StoryModel>>>.from([]);
+    log("followersChunks: $followersStoryChunks");
+    followersStoryChunks.forEach((chunck) => streams.add(ffstore
+        .collection("Stories")
+        .where("storyPersonId", whereIn: chunck)
+        .where("createdAt", isGreaterThan: DateTime.now().subtract(Duration(minutes: 1440)).millisecondsSinceEpoch)
+        .orderBy("createdAt", descending: true)
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.docs.map((document) => StoryModel.fromJson(document.data())).toList(growable: false))));
+    log("outside followersChunks before returning");
+    log("sttreams:  $streams");
+    return streams;
+  }
+
+  List<List<String>> chunkSizeCollection(List<String> followedList) {
+    int counter = 0;
+    int ongoingCounter = 0;
+    bool isLessThanTen = false;
+    List<List<String>> returnAbleChunkedList = [];
+    List<String> midList = [];
+    log("in followedlist");
+    followedList.forEach((element) {
+      if (counter == 0) {
+        int difference = followedList.length - ongoingCounter;
+        if (difference < 10) {
+          // log("in difference if: $difference");
+          isLessThanTen = true;
+        }
+      }
+      midList.add(element);
+      counter++;
+      ongoingCounter++;
+      if (counter == 10 || (isLessThanTen && ongoingCounter == followedList.length)) {
+        returnAbleChunkedList.add(midList.toList());
+        log("returnAbleChunkedList in counter 10 after adding new val is: $returnAbleChunkedList");
+        midList.clear();
+        counter = 0;
+      }
+    });
+    log("returnAbleChunkedList: $returnAbleChunkedList before return");
+    return returnAbleChunkedList;
+  }
+
   @override
   Widget build(BuildContext context) {
     log('${userDetailsModel.profileImageUrl!} Main BUILD');
@@ -113,287 +206,113 @@ class Home extends StatelessWidget {
           ),
         ),
       ),
-      //+ USE this part for the post and put a streambuilder here
-      body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-        stream: ffstore.collection(accountsCollection).doc(auth.currentUser!.uid).snapshots(),
-        builder: (
-          BuildContext context,
-          AsyncSnapshot<DocumentSnapshot> snapshot,
-        ) {
-          // log("inside stream-builder");
-          log(userDetailsModel.profileImageUrl!);
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            // log("inside stream-builder in waiting state");
-            return noPostYet();
-          } else if (snapshot.connectionState == ConnectionState.active ||
-              snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasError) {
-              return const Text('Some unknown error occurred');
-            } else if (snapshot.hasData) {
-              // log("inside hasData and ${snapshot.data!.docs}");
-              if (snapshot.data!.exists) {
-                userDetailsModel = UserDetailsModel.fromJson(snapshot.data!.data() as Map<String, dynamic>);
-                var followedListToBeChecked =
-                    userDetailsModel.iFollowed!.length > 0 ? userDetailsModel.iFollowed : ["something"];
-                // followedListToBeChecked?.add(auth.currentUser?.uid ?? "");
-                return ListView(
-                  shrinkWrap: true,
-                  physics: BouncingScrollPhysics(),
-                  padding: EdgeInsets.symmetric(
-                    vertical: 20,
-                  ),
-                  children: [
-                    SizedBox(
-                      height: 80,
-                      child: ListView(
-                        shrinkWrap: true,
-                        scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
-                        children: [
-                          addStoryButton(context),
-                          StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                            stream: ffstore
-                                .collection("Stories")
-                                .where("storyPersonId", isEqualTo: auth.currentUser?.uid)
-                                .where("createdAt",
-                                    isGreaterThan:
-                                        DateTime.now().subtract(Duration(minutes: 1440)).millisecondsSinceEpoch)
-                                .orderBy("createdAt", descending: true)
-                                .snapshots(),
-                            builder: (
-                              BuildContext context,
-                              AsyncSnapshot<QuerySnapshot> snapshot,
-                            ) {
-                              // List<String> storyUser = [];
-                              // log("inside stream-builder");
-                              if (snapshot.connectionState == ConnectionState.waiting) {
-                                // log("inside stream-builder in waiting state");
-                                return const SizedBox();
-                              } else if (snapshot.connectionState == ConnectionState.active ||
-                                  snapshot.connectionState == ConnectionState.done) {
-                                if (snapshot.hasError) {
-                                  return const SizedBox();
-                                } else if (snapshot.hasData) {
-                                  // log("inside hasData and ${snapshot.data!.docs}");
-                                  if (snapshot.data!.docs.length > 0) {
-                                    hasMyStory = true;
-                                    return ListView.builder(
-                                      shrinkWrap: true,
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: snapshot.data!.docs.length~/snapshot.data!.docs.length,
-                                      padding: const EdgeInsets.only(
-                                        right: 8,
-                                      ),
-                                      physics: const BouncingScrollPhysics(),
-                                      itemBuilder: (context, index) {
-                                        StoryModel storyModel = StoryModel.fromJson(
-                                            snapshot.data!.docs[index].data() as Map<String, dynamic>);
-                                        return GestureDetector(
-                                          onTap: () => Get.to(
-                                            () => Story(
-                                              profileImage: storyModel.storyPersonImage,
-                                              name: storyModel.storyPersonName,
-                                              storyPersonId: storyModel.storyPersonId,
-                                            ),
-                                          ),
-                                          child: stories(
-                                            context,
-                                            storyModel.storyPersonImage ?? "",
-                                            storyModel.storyPersonId ?? "",
-                                            storyModel.storyPersonName,
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  } else {
-                                    return const SizedBox();
-                                  }
-                                } else {
-                                  // log("in else of hasData done and: ${snapshot.connectionState} and"
-                                  //     " snapshot.hasData: ${snapshot.hasData}");
-                                  return const SizedBox();
-                                }
+      //+ USE this part for the post and put a stream builder here
+      body: Container(
+        height: Get.height,
+        width: Get.width,
+        color: Colors.black,
+        child: Column(
+          children: [
+            Container(
+              height: 100,
+              width: Get.width,
+              child: Obx(() {
+                return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: chunckSizeStoriesStreamList.length,
+                  itemBuilder: (context, index) {
+                    return StreamBuilder<List<StoryModel>>(
+                      stream: chunckSizeStoriesStreamList[index],
+                      builder: (context, AsyncSnapshot<List<StoryModel>> snapshot) {
+                        List<String> storyUser = [];
+                        return Container(
+                          height: Get.height,
+                          width: Get.width,
+                          color: Colors.blue,
+                          child: ListView.builder(
+                            itemCount: snapshot.data?.length ?? 0,
+                            itemBuilder: (BuildContext context, int index) {
+                              log("snapshot.data?.length: ${snapshot.data![index].storyPersonName}");
+                              StoryModel storyModel = snapshot.data![index];
+                              if (!storyUser.asMap().containsValue(storyModel.storyPersonId)) {
+                                storyUser.add(storyModel.storyPersonId ?? "");
+                                return GestureDetector(
+                                  onTap: () => Get.to(
+                                        () => Story(
+                                      profileImage: storyModel.storyPersonImage,
+                                      name: storyModel.storyPersonName,
+                                      storyPersonId: storyModel.storyPersonId,
+                                    ),
+                                  ),
+                                  child: stories(
+                                    context,
+                                    storyModel.storyPersonImage ?? "",
+                                    storyModel.storyPersonId ?? "",
+                                    storyModel.storyPersonName,
+                                  ),
+                                );
                               } else {
-                                // log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
                                 return const SizedBox();
                               }
+                              //   Container(
+                              //   height: 200,
+                              //   width: Get.width,
+                              //   color: Colors.pink,
+                              // );
                             },
                           ),
-                          // if (hasMyStory) Container(height: 20, width: 5, color: Colors.red),
-                          StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                            stream: ffstore
-                                .collection("Stories")
-                                .where("storyPersonId", whereIn: followedListToBeChecked)
-                                .where("createdAt",
-                                    isGreaterThan:
-                                        DateTime.now().subtract(Duration(minutes: 1440)).millisecondsSinceEpoch)
-                                .orderBy("createdAt", descending: true)
-                                .snapshots(),
-                            builder: (
-                              BuildContext context,
-                              AsyncSnapshot<QuerySnapshot> snapshot,
-                            ) {
-                              List<String> storyUser = [];
-                              // log("inside stream-builder");
-                              if (snapshot.connectionState == ConnectionState.waiting) {
-                                // log("inside stream-builder in waiting state");
-                                return const SizedBox();
-                              } else if (snapshot.connectionState == ConnectionState.active ||
-                                  snapshot.connectionState == ConnectionState.done) {
-                                if (snapshot.hasError) {
-                                  return const SizedBox();
-                                } else if (snapshot.hasData) {
-                                  // log("inside hasData and ${snapshot.data!.docs}");
-                                  if (snapshot.data!.docs.length > 0) {
-                                    return ListView.builder(
-                                      shrinkWrap: true,
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: snapshot.data!.docs.length,
-                                      padding: const EdgeInsets.only(
-                                        right: 8,
-                                      ),
-                                      physics: const BouncingScrollPhysics(),
-                                      itemBuilder: (context, index) {
-                                        StoryModel storyModel = StoryModel.fromJson(
-                                            snapshot.data!.docs[index].data() as Map<String, dynamic>);
-                                        if (!storyUser.asMap().containsValue(storyModel.storyPersonId)) {
-                                          storyUser.add(storyModel.storyPersonId ?? "");
-                                          return GestureDetector(
-                                            onTap: () => Get.to(
-                                              () => Story(
-                                                profileImage: storyModel.storyPersonImage,
-                                                name: storyModel.storyPersonName,
-                                                storyPersonId: storyModel.storyPersonId,
-                                              ),
-                                            ),
-                                            child: stories(
-                                              context,
-                                              storyModel.storyPersonImage ?? "",
-                                              storyModel.storyPersonId ?? "",
-                                              storyModel.storyPersonName,
-                                            ),
-                                          );
-                                        } else {
-                                          return const SizedBox();
-                                        }
-                                      },
-                                    );
-                                    // ListView.builder(
-                                    //   shrinkWrap: true,
-                                    //   physics: BouncingScrollPhysics(),
-                                    //   padding: EdgeInsets.symmetric(
-                                    //     vertical: 30,
-                                    //   ),
-                                    //   itemCount: snapshot.data!.docs.length,
-                                    //   itemBuilder: (context, index) {
-                                    //     AddPostModel addPostModel =
-                                    //     AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
-                                    //     return PostWidget(
-                                    //       postDocModel: addPostModel,
-                                    //       postID: addPostModel.postID,
-                                    //       isLikeByMe: addPostModel.likeIDs!.asMap().containsValue(auth.currentUser!.uid),
-                                    //       profileImage: addPostModel.profileImage,
-                                    //       name: addPostModel.postBy,
-                                    //       postedTime: addPostModel.createdAt,
-                                    //       title: addPostModel.postTitle,
-                                    //       likeCount: addPostModel.likeIDs!.length,
-                                    //       isMyPost: false,
-                                    //       postImage: addPostModel.postImages!,
-                                    //     );
-                                    //   },
-                                    // );
-                                  } else {
-                                    return const SizedBox();
-                                  }
-                                } else {
-                                  // log("in else of hasData done and: ${snapshot.connectionState} and"
-                                  //     " snapshot.hasData: ${snapshot.hasData}");
-                                  return const SizedBox();
-                                }
-                              } else {
-                                // log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
-                                return const SizedBox();
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    /**/ //+ starting stream builder
-                    StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                      stream: ffstore
-                          .collection(postsCollection)
-                          .where("uID", whereIn: followedListToBeChecked)
-                          .orderBy("createdAtMilliSeconds", descending: true)
-                          .snapshots(),
-                      builder: (
-                        BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot,
-                      ) {
-                        // log("inside stream-builder");
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          // log("inside stream-builder in waiting state");
-                          return noPostYet();
-                        } else if (snapshot.connectionState == ConnectionState.active ||
-                            snapshot.connectionState == ConnectionState.done) {
-                          if (snapshot.hasError) {
-                            return const Text('Some unknown error occurred');
-                          } else if (snapshot.hasData) {
-                            // log("inside hasData and ${snapshot.data!.docs}");
-                            if (snapshot.data!.docs.length > 0) {
-                              return ListView.builder(
-                                shrinkWrap: true,
-                                physics: BouncingScrollPhysics(),
-                                padding: EdgeInsets.symmetric(
-                                  vertical: 30,
-                                ),
-                                itemCount: snapshot.data!.docs.length,
-                                itemBuilder: (context, index) {
-                                  AddPostModel addPostModel =
-                                      AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
-                                  return PostWidget(
-                                    postDocModel: addPostModel,
-                                    postID: addPostModel.postID,
-                                    isLikeByMe: addPostModel.likeIDs!.asMap().containsValue(auth.currentUser!.uid),
-                                    profileImage: addPostModel.profileImage,
-                                    name: addPostModel.postBy,
-                                    postedTime: addPostModel.createdAt,
-                                    title: addPostModel.postTitle,
-                                    likeCount: addPostModel.likeIDs!.length,
-                                    isMyPost: false,
-                                    postImage: addPostModel.postImages!,
-                                  );
-                                },
-                              );
-                            } else {
-                              return noPostYet();
-                            }
-                          } else {
-                            // log("in else of hasData done and: ${snapshot.connectionState} and"
-                            //     " snapshot.hasData: ${snapshot.hasData}");
-                            return noPostYet();
-                          }
-                        } else {
-                          // log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
-                          return noPostYet();
-                        }
+                        );
                       },
-                    ),
-                  ],
+                    );
+                  },
                 );
-              } else {
-                return noPostYet();
-              }
-            } else {
-              // log("in else of hasData done and: ${snapshot.connectionState} and"
-              //     " snapshot.hasData: ${snapshot.hasData}");
-              return noPostYet();
-            }
-          } else {
-            log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
-            return Center(child: Text('Some Error occurred while fetching the posts'));
-          }
-        },
+              }),
+            ),
+            Expanded(
+              child: Obx(() {
+                return ListView.builder(
+                  itemCount: chunckSizePostsStreamList.length,
+                  itemBuilder: (context, index) {
+                    return StreamBuilder<List<AddPostModel>>(
+                      stream: chunckSizePostsStreamList[index],
+                      builder: (context, AsyncSnapshot<List<AddPostModel>> snapshot) {
+                        return Container(
+                          height: Get.height,
+                          width: Get.width,
+                          color: Colors.blue,
+                          child: ListView.builder(
+                            itemCount: snapshot.data?.length ?? 0,
+                            itemBuilder: (BuildContext context, int index) {
+                              log("snapshot.data?.length: ${snapshot.data![index].postBy}");
+                              AddPostModel addPostModel = snapshot.data![index];
+                              return PostWidget(
+                                postDocModel: addPostModel,
+                                postID: addPostModel.postID,
+                                isLikeByMe: addPostModel.likeIDs!.asMap().containsValue(auth.currentUser!.uid),
+                                profileImage: addPostModel.profileImage,
+                                name: addPostModel.postBy,
+                                postedTime: addPostModel.createdAt,
+                                title: addPostModel.postTitle,
+                                likeCount: addPostModel.likeIDs!.length,
+                                isMyPost: false,
+                                postImage: addPostModel.postImages!,
+                              );
+                              //   Container(
+                              //   height: 200,
+                              //   width: Get.width,
+                              //   color: Colors.pink,
+                              // );
+                            },
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: '',
@@ -1033,7 +952,7 @@ class _PostWidgetState extends State<PostWidget> {
                           AsyncSnapshot<QuerySnapshot> snapshot,
                         ) {
                           int previousCount = snapshot.data != null ? snapshot.data!.docs.length : 0;
-                          log("inside stream-builder");
+                          //log("inside stream-builder");
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             log("inside stream-builder in waiting state");
                             return MyText(
@@ -1088,15 +1007,23 @@ class _PostWidgetState extends State<PostWidget> {
                   ),
                   GestureDetector(
                     onTap: () async {
+                      Get.dialog(loading());
+                      log("after log in sharing");
                       String shareLink = await DynamicLinkHandler.buildDynamicLinkForPost(
-                        postImageUrl: widget.postDocModel?.postImages![0] ??
-                            "https://www.freeiconspng.com/uploads/no-image-icon-15.png",
+                        postImageUrl: (widget.postDocModel?.postImages?.length ?? 0) != 0
+                            ? widget.postDocModel?.postImages![0] ??
+                                "https://www.freeiconspng.com/uploads/no-image-icon-15.png"
+                            : (widget.postDocModel?.thumbnailsUrls?.length ?? 0) != 0
+                                ? widget.postDocModel?.thumbnailsUrls![0] ??
+                                    "https://www.freeiconspng.com/uploads/no-image-icon-15.png"
+                                : "https://www.freeiconspng.com/uploads/no-image-icon-15.png",
                         postId: widget.postDocModel!.postID ?? "",
                         postTitle: widget.postDocModel!.postTitle ?? "No Title",
                         short: true,
                       );
                       log("fetched shareLink: $shareLink");
                       ShareResult sr = await Share.shareWithResult(shareLink);
+                      Get.back();
                       log("ShareResult is: ${sr.status} sr.status == ShareResultStatus.success: ${sr.status == ShareResultStatus.success}");
                       log("ShareResult is: ${sr.status} sr.status == ShareResultStatus.dismissed: ${sr.status == ShareResultStatus.dismissed}");
                       log("ShareResult.raw is: ${sr.raw}");
