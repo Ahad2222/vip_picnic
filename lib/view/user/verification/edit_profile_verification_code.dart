@@ -25,7 +25,6 @@ class EditProfileVerificationCode extends StatefulWidget {
 
 class _EditProfileVerificationCodeState extends State<EditProfileVerificationCode> {
   TextEditingController otpCon = TextEditingController();
-  String phoneNum = "";
   bool? cont;
 
   // ..text = "123456";
@@ -154,7 +153,7 @@ class _EditProfileVerificationCodeState extends State<EditProfileVerificationCod
                   animationDuration: const Duration(milliseconds: 300),
                   enableActiveFill: false,
                   errorAnimationController: errorController,
-                  controller: signupController.otpCon,
+                  controller: otpCon,
                   keyboardType: TextInputType.number,
                   onCompleted: (v) {
                     if (kDebugMode) {
@@ -188,17 +187,19 @@ class _EditProfileVerificationCodeState extends State<EditProfileVerificationCod
             ),
             MyButton(
               onTap: () async {
+                log(otpCon.text.toString());
                 Get.dialog(loading());
                 try {
-                  if (otpCon.text.trim() != "" && otpCon.text.trim().length < 6) {
+                  if (otpCon.text.trim() != ""  && otpCon.text.trim().length < 6) {
                     Get.back();
                     showMsg(context: context, msg: "Please Enter a valid 6-digit OTP.", bgColor: Colors.red);
                   } else {
                     TwilioResponse verifyResponse = await twilioPhoneVerify.verifySmsCode(
-                        phone: phoneNum, code: otpCon.text.trim());
+                        phone: widget.phoneNum, code: otpCon.text.trim());
+                    log(verifyResponse.successful.toString());
                     if (verifyResponse.successful!) {
                       showMsg(context: context, msg: "OTP Verified. Updating your new number.", bgColor: Colors.green);
-                      await accounts.doc(auth.currentUser?.uid ?? "").update({"phone": phoneNum});
+                      await accounts.doc(auth.currentUser?.uid ?? "").update({"phone": widget.phoneNum});
                       Get.back();
                       Get.back();
                     } else {
@@ -227,7 +228,7 @@ class _EditProfileVerificationCodeState extends State<EditProfileVerificationCod
                     return loading();
                   },
                 );
-                TwilioResponse twilioResponse = await twilioPhoneVerify.sendSmsCode(phoneNum);
+                TwilioResponse twilioResponse = await twilioPhoneVerify.sendSmsCode(widget.phoneNum);
                 if (twilioResponse.successful!) {
                   Get.back();
                 } else {
