@@ -522,10 +522,10 @@ class _EditProfileState extends State<EditProfile> {
                             );
                           }
                         }
-                        showMsg(
-                          msg: "Successfully updated phone number.",
-                          context: context,
-                        );
+                        // showMsg(
+                        //   msg: "Successfully updated phone number.",
+                        //   context: context,
+                        // );
                       } catch (e) {
                         log("error in phome updating: $e");
                         Get.back();
