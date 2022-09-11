@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:twilio_phone_verify/twilio_phone_verify.dart';
+import 'package:vip_picnic/controller/auth_controller/apple_auth_controller.dart';
 import 'package:vip_picnic/controller/auth_controller/email_auth_controller.dart';
 import 'package:vip_picnic/controller/auth_controller/facebook_auth_controller.dart';
 import 'package:vip_picnic/controller/auth_controller/forgot_password_controller.dart';
@@ -31,6 +32,7 @@ SplashScreenController splashScreenController = SplashScreenController.instance;
 EmailAuthController emailAuthController = EmailAuthController.instance;
 GoogleAuthController googleAuthController = GoogleAuthController.instance;
 FacebookAuthController facebookAuthController = FacebookAuthController.instance;
+AppleAuthController appleAuthController = AppleAuthController.instance;
 SignupController signupController = SignupController.instance;
 ForgotPasswordController forgotPasswordController =
     ForgotPasswordController.instance;

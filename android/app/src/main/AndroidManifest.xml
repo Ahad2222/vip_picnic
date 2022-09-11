@@ -91,5 +91,20 @@
            <!-- changes this number to configure connection timeout for the upload http request -->
            <meta-data android:name="com.bluechilli.flutteruploader.UPLOAD_CONNECTION_TIMEOUT_IN_SECONDS" android:value="3600" />
        </provider>
+
+       <!-- Set up the Sign in with Apple activity, such that it's callable from the browser-redirect -->
+       <activity
+           android:name="com.aboutyou.dart_packages.sign_in_with_apple.SignInWithAppleCallback"
+           android:exported="true"
+           >
+           <intent-filter>
+               <action android:name="android.intent.action.VIEW" />
+               <category android:name="android.intent.category.DEFAULT" />
+               <category android:name="android.intent.category.BROWSABLE" />
+
+               <data android:scheme="signinwithapple" />
+               <data android:path="callback" />
+           </intent-filter>
+       </activity>
     </application>
 </manifest>

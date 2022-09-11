@@ -186,6 +186,75 @@ class ChatController extends GetxController {
     }
   }
 
+  messageReceivedStreamActivator(myId){
+    ffstore
+        .collection('ChatRoom')
+        .where('users', arrayContains: myId)
+        .snapshots()
+        .map((QuerySnapshot querySnap) {
+      List<ChatHeadModel> myChats = [];
+      // log('stream inside the myChatHeadsList Snapshot and querySnap.docs.length = ${querySnap.docs.length} and chatHeads.length = ${chatHeads.value.length}:');
+      querySnap.docs.forEach((doc) {
+        // log("querySnap.docs.length = ${querySnap.docs.length} and doc: $doc");
+        if (doc["notDeletedFor"].asMap().containsValue(myId)) {
+          // log("activeChatCount changed");
+          ffstore
+              .collection("ChatRoom")
+              .doc(doc['chatRoomId'])
+              .collection("messages")
+              .where("isReceived", isEqualTo: false)
+              .where("receivedById", isEqualTo: myId)
+              .get()
+              .then((value) {
+            value.docs.forEach((element) {
+              element.reference.update({'isReceived': true});
+            });
+          });
+          myChats.add(ChatHeadModel.fromDocumentSnapshot(doc));
+        }
+      });
+    });
+
+    // ffstore
+    //     .collection('ChatRoom')
+    //     .where('users', arrayContains: myId)
+    //     .snapshots()
+    //     .map((QuerySnapshot querySnap) {
+    //   List<ChatHeadModel> myChats = [];
+    //   // log('stream inside the myChatHeadsList Snapshot and querySnap.docs.length = ${querySnap.docs.length} and chatHeads.length = ${chatHeads.value.length}:');
+    //   querySnap.docs.forEach((doc) {
+    //     // log("querySnap.docs.length = ${querySnap.docs.length} and doc: $doc");
+    //     if (doc["notInActiveFor"].asMap().containsValue(myId) && doc["notDeletedFor"].asMap().containsValue(myId)) {
+    //       // log("activeChatCount changed");
+    //       activeChatCount++;
+    //       // log("activeChatCount changed: $activeChatCount");
+    //
+    //       // log("stream in chatHeads if(doc[notInActiveFor].asMap().containsValue(myId) "
+    //       //             //     "&& doc[notDeletedFor].asMap().containsValue(myId)) myInActiveChatHeadsList inside "
+    //       //             //     "if querySnap.docs is: ${doc.data()}");
+    //       //             // log("inside querySnap of chatHeads, myId is: $myId");
+    //       /**/
+    //       // Map<String, dynamic> tm = doc.data();
+    //       // if(tm['user1Model']['id'] == myId || tm['user2Model']['id'] == myId){
+    //       // log('stream inside if querySnap.docs is: ${doc.data()}');
+    //       ffstore
+    //           .collection("ChatRoom")
+    //           .doc(doc['chatRoomId'])
+    //           .collection("chats")
+    //           .where("isReceived", isEqualTo: false)
+    //           .where("receivedById", isEqualTo: myId)
+    //           .get()
+    //           .then((value) {
+    //         value.docs.forEach((element) {
+    //           element.reference.update({'isReceived': true});
+    //         });
+    //       });
+    //       myChats.add(ChatHeadModel.fromDocumentSnapshot(doc));
+    //     }
+    //   });
+    // });
+  }
+
   getChatRoomId(String userID, String anotherUserID) {
     print("inside getChatRoomId a = $userID & b = $anotherUserID");
     var chatRoomId;

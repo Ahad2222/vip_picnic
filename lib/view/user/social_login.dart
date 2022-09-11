@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
@@ -42,11 +43,26 @@ class SocialLogin extends StatelessWidget {
                 facebookAuthController.facebookSignIn(context);
               },
             ),
-            // socialLoginButton(
-            //   Assets.imagesApple,
-            //   'apple ID',
-            //   () {},
-            // ),
+            socialLoginButton(
+              Assets.imagesApple,
+              'apple ID',
+              () {},
+            ),
+          SignInWithAppleButton(
+            onPressed: () async {
+              final credential = await SignInWithApple.getAppleIDCredential(
+                scopes: [
+                  AppleIDAuthorizationScopes.email,
+                  AppleIDAuthorizationScopes.fullName,
+                ],
+              );
+
+              print(credential);
+
+              // Now send the credential (especially `credential.authorizationCode`) to your server to create a session
+              // after they have been validated with Apple (see `Integration` section for more information on how to do this)
+            },
+          ),
             MyButton(
               buttonText: 'login'.tr.toUpperCase() +
                   ' with'.tr.toUpperCase() +
