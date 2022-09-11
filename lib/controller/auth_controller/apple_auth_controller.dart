@@ -71,6 +71,13 @@ class AppleAuthController extends GetxController {
         nonce: nonce,
       );
       print("apple cred email is: ${appleCredential.email}");
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return loading();
+        },
+      );
       if(appleCredential.email != null){
         //this means that he signed up for the very first time.
         await UserSimplePreference.setIsAppleSignedInBefore(true);
@@ -162,13 +169,6 @@ class AppleAuthController extends GetxController {
       //     log("credential.user?.metadata are: ${userCredential.user?.metadata} \n");
           /**/
           if (userCredential.user != {} && userCredential.user != null) {
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (context) {
-                return loading();
-              },
-            );
             try {
               await ffstore.collection(deactivatedCollection).doc(auth.currentUser?.uid).get().then((value) async {
                 if (!value.exists) {
@@ -288,7 +288,7 @@ class AppleAuthController extends GetxController {
               });
             }
           } else {
-            // Get.back();
+            Get.back();
             showMsg(
               context: context,
               msg: "Something went wrong. Please try again",
@@ -310,7 +310,7 @@ class AppleAuthController extends GetxController {
 
 
     } on FirebaseAuthException catch (e) {
-      // Get.back();
+      Get.back();
       showMsg(
         context: context,
         msg: e.message,
