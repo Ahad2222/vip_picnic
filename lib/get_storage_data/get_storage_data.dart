@@ -5,6 +5,9 @@ import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 class UserSimplePreference {
   static final pref = GetStorage();
 
+  static const _keyIsAppleSignedUpBefore = 'isAppleSignedUpBefore';
+  static const _keyAppleName = 'appleName';
+  static const _keyAppleEmail = 'appleEmail';
   static const _keyProfileImageUrl = 'profileImageUrl';
   static const _keyFullName = 'fullName';
   static const _keyEmail = 'email';
@@ -20,6 +23,31 @@ class UserSimplePreference {
   static const _keyLanguageIndex = 'languageIndex';
   static const _keyUserData = 'userData';
   static const _videoMessageDocsIdsList = 'videoMessageDocsIdsList';
+
+
+  static Future setIsAppleSignedInBefore(bool isAppleSignedInBefore) async {
+    pref.write(_keyIsAppleSignedUpBefore, isAppleSignedInBefore);
+  }
+
+  static Future getIsAppleSignedInBeforel() async {
+    await pref.read(_keyIsAppleSignedUpBefore);
+  }
+
+  static Future setAppleName(String? appleName) async {
+    pref.write(_keyAppleName, appleName);
+  }
+
+  static Future getAppleName() async {
+    await pref.read(_keyAppleName);
+  }
+
+  static Future setAppleEmail(String? appleEmail) async {
+    pref.write(_keyAppleName, appleEmail);
+  }
+
+  static Future getAppleEmail() async {
+    await pref.read(_keyAppleName);
+  }
 
 
   static Future setUserData(UserDetailsModel obj) async {

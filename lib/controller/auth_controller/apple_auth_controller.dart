@@ -37,7 +37,6 @@ class AppleAuthController extends GetxController {
     return List.generate(length, (_) => charset[random.nextInt(charset.length)])
         .join();
   }
-
   /// Returns the sha256 hash of [input] in hex notation.
   String sha256ofString(String input) {
     final bytes = utf8.encode(input);
@@ -45,17 +44,17 @@ class AppleAuthController extends GetxController {
     return digest.toString();
   }
 
-
   Future appleSignIn(BuildContext context) async {
+    String userName = "";
+    String userEmail = "";
     try {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return loading();
-        },
-      );
-
+      // showDialog(
+      //   context: context,
+      //   barrierDismissible: false,
+      //   builder: (context) {
+      //     return loading();
+      //   },
+      // );
       // To prevent replay attacks with the credential returned from Apple, we
       // include a nonce in the credential request. When signing in with
       // Firebase, the nonce in the id token returned by Apple, is expected to
@@ -71,7 +70,27 @@ class AppleAuthController extends GetxController {
         ],
         nonce: nonce,
       );
+      print("apple cred email is: ${appleCredential.email}");
+      if(appleCredential.email != null){
+        //this means that he signed up for the very first time.
+        await UserSimplePreference.setIsAppleSignedInBefore(true);
+        userName = "${appleCredential.givenName ?? ""} ${appleCredential.familyName ?? ""}";
+        await UserSimplePreference.setAppleName("${appleCredential.givenName ?? ""} ${appleCredential.familyName ?? ""}");
+        userEmail = appleCredential.email ?? "";
+        await UserSimplePreference.setAppleEmail(appleCredential.email ?? "");
+      }else{
+        await UserSimplePreference.getIsAppleSignedInBeforel();
+        userName = await UserSimplePreference.getAppleName() ?? "";
+        userEmail = await UserSimplePreference.getAppleEmail() ?? "";
+      }
+      print("apple cred email is: ${appleCredential.familyName}");
+      print("apple cred email is: ${appleCredential.givenName}");
+      print("apple cred email is: ${appleCredential}");
+      print("fetched name is: ${userName}");
+      print("fetched email is: ${userEmail}");
 
+      //lutter: apple cred email is:
+      // AuthorizationAppleID(000702.0373124daad548d8b2d8f2c5d7b2aea8.0717, Faiz, Yab, yabi.faiz@gmail.com, null)
       // Create an `OAuthCredential` from the credential returned by Apple.
       final oauthCredential = OAuthProvider("apple.com").credential(
         idToken: appleCredential.identityToken,
@@ -81,13 +100,36 @@ class AppleAuthController extends GetxController {
       // Sign in the user with Firebase. If the nonce we generated earlier does
       // not match the nonce in `appleCredential.identityToken`, sign in will fail.
 
+      List<String> signInMethodsForFaceEmail = await auth.fetchSignInMethodsForEmail(userEmail);
+      print("signInMethodsForFaceEmail: ${signInMethodsForFaceEmail}");
+      bool isNewUser = signInMethodsForFaceEmail.isEmpty;
+      print("isNewUser: ${isNewUser}");
+
       UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(oauthCredential);
 
-      dev.log("credential.user are: ${userCredential.user} \n");
-      dev.log("credential.user.toString are: ${userCredential.user.toString()} \n");
-      dev.log("credential.user?.providerData are: ${userCredential.user?.providerData} \n");
-      dev.log("credential.user?.metadata are: ${userCredential.user?.metadata} \n");
-      dev.log("credential.user?.metadata are: ${userCredential.user?.metadata} \n");
+      //credential.user are: User(
+      // displayName: null,
+      // email: b8gkcj669y@privaterelay.appleid.com,
+      // emailVerified: true,
+      // isAnonymous: false,
+      // metadata: UserMetadata(
+      // creationTime: 2022-09-11 13:31:59.362,
+      // lastSignInTime: 2022-09-11 13:39:11.205),
+      // phoneNumber: null,
+      // photoURL: null,
+      // providerData,
+      // [UserInfo(
+      //   displayName: null,
+      //   email: b8gkcj669y@privaterelay.appleid.com,
+      //   phoneNumber: null,
+      //   photoURL: null,
+      //   providerId: apple.com,
+      //   uid: 000702.0373124daad548d8b2d8f2c5d7b2aea8.0717)], refreshToken: , tenantId: null, uid: zGTVFteb3aUTuhfPktKirwqaqvg2)
+      print("credential.user are: ${userCredential.user} \n");
+      print("credential.user.toString are: ${userCredential.user.toString()} \n");
+      print("credential.user?.providerData are: ${userCredential.user?.providerData} \n");
+      print("credential.user?.metadata are: ${userCredential.user?.metadata} \n");
+      print("credential.user?.metadata are: ${userCredential.user?.metadata} \n");
 
       // final LoginResult result = await FacebookAuth.instance.login(loginBehavior: LoginBehavior.webOnly); // by default we request the email and the public profile
       // // if (result.status == LoginStatus.success) {
@@ -100,15 +142,14 @@ class AppleAuthController extends GetxController {
       //       "\n accessToken.lastRefresh: ${accessToken.lastRefresh}"
       //       "\n accessToken.toJson: ${accessToken.toJson()}"
       //       "");
+      /**/
       //   if (accessToken.token != "") {
       //
       //     final userData = await FacebookAuth.instance.getUserData();
       //     FacebookUserDataModel facebookUserDataModel = FacebookUserDataModel.fromJson(userData);
       //     log("userData from faceBook: ${facebookUserDataModel.toJson()} ");
-      //     List<String> signInMethodsForFaceEmail = await auth.fetchSignInMethodsForEmail(facebookUserDataModel.email ?? "");
-      //     log("signInMethodsForFaceEmail: ${signInMethodsForFaceEmail}");
-      //     bool isNewUser = signInMethodsForFaceEmail.isEmpty;
-      //     log("isNewUser: ${isNewUser}");
+
+          print("auth.currentUser?.uid: ${auth.currentUser?.uid}");
       //
       //     final OAuthCredential facebookAuthCredential = FacebookAuthProvider.credential(accessToken.token);
       //
@@ -120,125 +161,142 @@ class AppleAuthController extends GetxController {
       //     log("credential.user?.metadata are: ${userCredential.user?.metadata} \n");
       //     log("credential.user?.metadata are: ${userCredential.user?.metadata} \n");
           /**/
-          // if (userData != {} && userCredential.user != null) {
-          //   try {
-          //     await ffstore.collection(deactivatedCollection).doc(auth.currentUser?.uid).get().then((value) async {
-          //       if (!value.exists) {
-          //         if (isNewUser) {
-          //           int emailLength = userCredential.user?.email?.length ?? 0;
-          //           String email = userCredential.user?.email ?? "";
-          //           for (int i = 0; i < emailLength; i++) {
-          //             if (email[i] != " ") {
-          //               userSearchParameters.add(email[i]);
-          //               var wordUntil = email.substring(0, i + 1);
-          //               log("wordUntil: $wordUntil");
-          //               userSearchParameters.add(wordUntil);
-          //             }
-          //           }
-          //           String? token = await fcm.getToken();
-          //           userDetailsModel = UserDetailsModel(
-          //             uID: userCredential.user!.uid,
-          //             profileImageUrl: userCredential.user!.photoURL,
-          //             fullName: userCredential.user!.displayName,
-          //             email: userCredential.user!.email,
-          //             accountType: 'Private',
-          //             iFollowed: [],
-          //             TheyFollowed: [],
-          //             userSearchParameters: userSearchParameters,
-          //             fcmToken: token,
-          //             fcmCreatedAt: DateTime.now(),
-          //             address: "",
-          //             city: "",
-          //             password: "",
-          //             phone: "",
-          //             state: "",
-          //             zip: "",
-          //             createdAt: DateFormat.yMEd().add_jms().format(createdAt).toString(),
-          //           );
-          //           await accounts.doc(userCredential.user!.uid).set(
-          //             userDetailsModel.toJson(),
-          //           );
-          //           await UserSimplePreference.setUserData(userDetailsModel);
-          //           if (auth.currentUser != null) {
-          //             String? token = await fcm.getToken() ?? userDetailsModel.fcmToken;
-          //             try {
-          //               ffstore.collection(accountsCollection).doc(auth.currentUser?.uid).update({
-          //                 "fcmToken": token,
-          //                 "fcmCreatedAt": DateTime.now().toIso8601String(),
-          //               });
-          //             } catch (e) {
-          //               print(e);
-          //               log("error in updating fcmToken in my own collection $e");
-          //             }
-          //             fcm.onTokenRefresh.listen((streamedToken) {
-          //               try {
-          //                 ffstore.collection(accountsCollection).doc(auth.currentUser?.uid).update({
-          //                   "fcmToken": streamedToken,
-          //                   "fcmCreatedAt": DateTime.now().toIso8601String(),
-          //                 });
-          //               } catch (e) {
-          //                 print(e);
-          //                 log("error in updating fcmToken in my own collection on change $e");
-          //               }
-          //             });
-          //           }
-          //           Get.offAll(
-          //                 () => BottomNavBar(),
-          //           );
-          //           navigatorKey.currentState!.popUntil((route) => route.isCurrent);
-          //         } else {
-          //           await accounts.doc(userCredential.user!.uid).get().then(
-          //                 (value) async {
-          //               userDetailsModel = UserDetailsModel.fromJson(
-          //                 value.data() as Map<String, dynamic>,
-          //               );
-          //             },
-          //           );
-          //           await UserSimplePreference.setUserData(userDetailsModel);
-          //           if (auth.currentUser != null) {
-          //             String? token = await fcm.getToken() ?? userDetailsModel.fcmToken;
-          //             try {
-          //               ffstore.collection(accountsCollection).doc(auth.currentUser?.uid).update({
-          //                 "fcmToken": token,
-          //                 "fcmCreatedAt": DateTime.now().toIso8601String(),
-          //               });
-          //             } catch (e) {
-          //               print(e);
-          //               log("error in updating fcmToken in my own collection $e");
-          //             }
-          //             fcm.onTokenRefresh.listen((streamedToken) {
-          //               try {
-          //                 ffstore.collection(accountsCollection).doc(auth.currentUser?.uid).update({
-          //                   "fcmToken": streamedToken,
-          //                   "fcmCreatedAt": DateTime.now().toIso8601String(),
-          //                 });
-          //               } catch (e) {
-          //                 print(e);
-          //                 log("error in updating fcmToken in my own collection on change $e");
-          //               }
-          //             });
-          //           }
-          //           Get.offAll(
-          //                 () => BottomNavBar(),
-          //           );
-          //         }
-          //       } else {
-          //         await FacebookAuth.instance.logOut();
-          //         showMsg(context: context, msg: "Your account is deactivated. Please contact support to activate it again.");
-          //         Future.delayed(Duration(seconds: 2), () {
-          //           Get.offAll(() => SocialLogin());
-          //         });
-          //       }
-          //     });
-          //   } catch (e) {
-          //     log("Error in checking whether the account is deactivated or not is: $e");
-          //     await FacebookAuth.instance.logOut();
-          //     showMsg(context: context, msg: "Something went wrong during de-activation. Please try again.");
-          //     Future.delayed(Duration(seconds: 2), () {
-          //       Get.offAll(() => SocialLogin());
-          //     });
-          //   }
-          // }
+          if (userCredential.user != {} && userCredential.user != null) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) {
+                return loading();
+              },
+            );
+            try {
+              await ffstore.collection(deactivatedCollection).doc(auth.currentUser?.uid).get().then((value) async {
+                if (!value.exists) {
+                  if (isNewUser) {
+                    int emailLength = userEmail.length ?? 0;
+                    String email = userEmail ?? "";
+                    for (int i = 0; i < emailLength; i++) {
+                      if (email[i] != " ") {
+                        userSearchParameters.add(email[i]);
+                        var wordUntil = email.substring(0, i + 1);
+                        print("wordUntil: $wordUntil");
+                        userSearchParameters.add(wordUntil);
+                      }
+                    }
+                    String? token = await fcm.getToken();
+                    userDetailsModel = UserDetailsModel(
+                      uID: userCredential.user?.uid ?? "",
+                      profileImageUrl: userCredential.user?.photoURL ?? "",
+                      fullName: userName ?? "",
+                      email: (userEmail != "") ? userEmail : userCredential.user?.email,
+                      accountType: 'Private',
+                      iFollowed: [],
+                      TheyFollowed: [],
+                      userSearchParameters: userSearchParameters,
+                      fcmToken: token,
+                      fcmCreatedAt: DateTime.now(),
+                      address: "",
+                      city: "",
+                      password: "",
+                      phone: "",
+                      state: "",
+                      zip: "",
+                      createdAt: DateFormat.yMEd().add_jms().format(createdAt).toString(),
+                    );
+                    await accounts.doc(userCredential.user!.uid).set(
+                      userDetailsModel.toJson(),
+                    );
+                    await UserSimplePreference.setUserData(userDetailsModel);
+                    if (auth.currentUser != null) {
+                      String? token = await fcm.getToken() ?? userDetailsModel.fcmToken;
+                      try {
+                        ffstore.collection(accountsCollection).doc(auth.currentUser?.uid).update({
+                          "fcmToken": token,
+                          "fcmCreatedAt": DateTime.now().toIso8601String(),
+                        });
+                      } catch (e) {
+                        print(e);
+                        print("error in updating fcmToken in my own collection $e");
+                      }
+                      fcm.onTokenRefresh.listen((streamedToken) {
+                        try {
+                          ffstore.collection(accountsCollection).doc(auth.currentUser?.uid).update({
+                            "fcmToken": streamedToken,
+                            "fcmCreatedAt": DateTime.now().toIso8601String(),
+                          });
+                        } catch (e) {
+                          print(e);
+                          print("error in updating fcmToken in my own collection on change $e");
+                        }
+                      });
+                    }
+                    Get.offAll(
+                          () => BottomNavBar(),
+                    );
+                    navigatorKey.currentState!.popUntil((route) => route.isCurrent);
+                  } else {
+                    await accounts.doc(userCredential.user!.uid).get().then(
+                          (value) async {
+                        userDetailsModel = UserDetailsModel.fromJson(
+                          value.data() as Map<String, dynamic>,
+                        );
+                      },
+                    );
+                    await UserSimplePreference.setUserData(userDetailsModel);
+                    if (auth.currentUser != null) {
+                      String? token = await fcm.getToken() ?? userDetailsModel.fcmToken;
+                      try {
+                        ffstore.collection(accountsCollection).doc(auth.currentUser?.uid).update({
+                          "fcmToken": token,
+                          "fcmCreatedAt": DateTime.now().toIso8601String(),
+                        });
+                      } catch (e) {
+                        print(e);
+                        print("error in updating fcmToken in my own collection $e");
+                      }
+                      fcm.onTokenRefresh.listen((streamedToken) {
+                        try {
+                          ffstore.collection(accountsCollection).doc(auth.currentUser?.uid).update({
+                            "fcmToken": streamedToken,
+                            "fcmCreatedAt": DateTime.now().toIso8601String(),
+                          });
+                        } catch (e) {
+                          print(e);
+                          print("error in updating fcmToken in my own collection on change $e");
+                        }
+                      });
+                    }
+                    Get.offAll(
+                          () => BottomNavBar(),
+                    );
+                  }
+                } else {
+                  await FacebookAuth.instance.logOut();
+                  showMsg(context: context, msg: "Your account is deactivated. Please contact support to activate it again.");
+                  Future.delayed(Duration(seconds: 2), () {
+                    Get.offAll(() => SocialLogin());
+                  });
+                }
+              });
+            } catch (e) {
+              Get.back();
+              print("Error in checking whether the account is deactivated or not is: $e");
+              await FacebookAuth.instance.logOut();
+              showMsg(context: context, msg: "Something went wrong during de-activation. Please try again.");
+              Future.delayed(Duration(seconds: 2), () {
+                Get.offAll(() => SocialLogin());
+              });
+            }
+          } else {
+            // Get.back();
+            showMsg(
+              context: context,
+              msg: "Something went wrong. Please try again",
+              bgColor: Colors.red,
+            );
+            // print(result.status);
+            // print(result.message);
+          }
       /**/
         // }
       // } else {
@@ -252,6 +310,7 @@ class AppleAuthController extends GetxController {
 
 
     } on FirebaseAuthException catch (e) {
+      // Get.back();
       showMsg(
         context: context,
         msg: e.message,

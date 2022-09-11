@@ -36,12 +36,12 @@ class FacebookAuthController extends GetxController {
         },
       );
 
-      final LoginResult result = await FacebookAuth.instance.login(loginBehavior: LoginBehavior.webOnly); // by default we request the email and the public profile
+      final LoginResult result = await FacebookAuth.instance.login(loginBehavior: LoginBehavior.deviceAuth); // by default we request the email and the public profile
       // or FacebookAuth.i.login()
       if (result.status == LoginStatus.success) {
         // you are logged
         final AccessToken accessToken = result.accessToken!;
-        log("accessToken.token: ${accessToken.token} and "
+        print("accessToken.token: ${accessToken.token} and "
             "\n accessToken.grantedPermissions: ${accessToken.grantedPermissions}"
             "\n accessToken.applicationId: ${accessToken.applicationId}"
             "\n accessToken.expires: ${accessToken.expires}"
@@ -54,12 +54,13 @@ class FacebookAuthController extends GetxController {
           //   idToken: gAuth.idToken,
           // );
           final userData = await FacebookAuth.instance.getUserData();
-          FacebookUserDataModel facebookUserDataModel = FacebookUserDataModel.fromJson(userData);
-          log("userData from faceBook: ${facebookUserDataModel.toJson()} ");
-          List<String> signInMethodsForFaceEmail = await auth.fetchSignInMethodsForEmail(facebookUserDataModel.email ?? "");
-          log("signInMethodsForFaceEmail: ${signInMethodsForFaceEmail}");
+          print("userdata is: $userData");
+          // FacebookUserDataModel facebookUserDataModel = FacebookUserDataModel.fromJson(userData);
+          // log("userData from faceBook: ${facebookUserDataModel.toJson()} ");
+          List<String> signInMethodsForFaceEmail = await auth.fetchSignInMethodsForEmail(userData["email"] ?? "");
+          print("signInMethodsForFaceEmail: ${signInMethodsForFaceEmail}");
           bool isNewUser = signInMethodsForFaceEmail.isEmpty;
-          log("isNewUser: ${isNewUser}");
+          print("isNewUser: ${isNewUser}");
 
           // log("auth. from faceBook: ${auth.currentUser?.} ");
 
@@ -69,16 +70,16 @@ class FacebookAuthController extends GetxController {
           // Once signed in, return the UserCredential
           UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
 
-          log("credential.user are: ${userCredential.user} \n");
-          log("credential.user.toString are: ${userCredential.user.toString()} \n");
-          log("credential.user?.providerData are: ${userCredential.user?.providerData} \n");
-          log("credential.user?.metadata are: ${userCredential.user?.metadata} \n");
-          log("credential.user?.metadata are: ${userCredential.user?.metadata} \n");
+          print("credential.user are: ${userCredential.user} \n");
+          print("credential.user.toString are: ${userCredential.user.toString()} \n");
+          print("credential.user?.providerData are: ${userCredential.user?.providerData} \n");
+          print("credential.user?.metadata are: ${userCredential.user?.metadata} \n");
+          print("credential.user?.metadata are: ${userCredential.user?.metadata} \n");
 
           // or FacebookAuth.i.getUserData()
 
           if (userData != {} && userCredential.user != null) {
-            try {
+            // try {
               await ffstore.collection(deactivatedCollection).doc(auth.currentUser?.uid).get().then((value) async {
                 if (!value.exists) {
                   if (isNewUser) {
@@ -187,14 +188,15 @@ class FacebookAuthController extends GetxController {
                   });
                 }
               });
-            } catch (e) {
-              log("Error in checking whether the account is deactivated or not is: $e");
-              await FacebookAuth.instance.logOut();
-              showMsg(context: context, msg: "Something went wrong during de-activation. Please try again.");
-              Future.delayed(Duration(seconds: 2), () {
-                Get.offAll(() => SocialLogin());
-              });
-            }
+            // } catch (e) {
+            //   log("Error in checking whether the account is deactivated or not is: $e");
+            //   print("Error in checking whether the account is deactivated or not is: $e");
+            //   await FacebookAuth.instance.logOut();
+            //   showMsg(context: context, msg: "face error: $e.");
+            //   Future.delayed(Duration(seconds: 2), () {
+            //     Get.offAll(() => SocialLogin());
+            //   });
+            // }
           }
         }
       } else {

@@ -51,7 +51,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
           topRight: Radius.circular(28),
         ),
         child: SizedBox(
-          height: 76,
+          height: 110,
           child: BottomNavigationBar(
             elevation: 3,
             type: BottomNavigationBarType.fixed,

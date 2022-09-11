@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -43,26 +45,39 @@ class SocialLogin extends StatelessWidget {
                 facebookAuthController.facebookSignIn(context);
               },
             ),
-            socialLoginButton(
+            Platform.isIOS
+                ? socialLoginButton(
               Assets.imagesApple,
               'apple ID',
-              () {},
-            ),
-          SignInWithAppleButton(
-            onPressed: () async {
-              final credential = await SignInWithApple.getAppleIDCredential(
-                scopes: [
-                  AppleIDAuthorizationScopes.email,
-                  AppleIDAuthorizationScopes.fullName,
-                ],
-              );
+              () {
+                appleAuthController.appleSignIn(context);
+              },
+            ) : SizedBox(),
 
-              print(credential);
-
-              // Now send the credential (especially `credential.authorizationCode`) to your server to create a session
-              // after they have been validated with Apple (see `Integration` section for more information on how to do this)
-            },
-          ),
+            // SignInWithAppleButton(
+            //   text: 'login'.tr.toUpperCase() +
+            //       ' with'.tr.toUpperCase() +
+            //       ' apple ID'.toUpperCase(),
+            //   style: SignInWithAppleButtonStyle.white,
+            //   height: 47,
+            //   iconAlignment: IconAlignment.left,
+            //   borderRadius: BorderRadius.all(Radius.circular(20.0)),
+            //   onPressed: () async {
+            //     final AuthorizationCredentialAppleID credential = await SignInWithApple.getAppleIDCredential(
+            //       scopes: [
+            //         AppleIDAuthorizationScopes.email,
+            //         AppleIDAuthorizationScopes.fullName,
+            //       ],
+            //     );
+            //     print(credential);
+            //
+            //     // Now send the credential (especially `credential.authorizationCode`) to your server to create a session
+            //     // after they have been validated with Apple (see `Integration` section for more information on how to do this)
+            //   },
+            // ),
+            // SizedBox(
+            //   height: 20,
+            // ),
             MyButton(
               buttonText: 'login'.tr.toUpperCase() +
                   ' with'.tr.toUpperCase() +

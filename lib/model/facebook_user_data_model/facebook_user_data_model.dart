@@ -24,7 +24,7 @@ class FacebookUserDataModel {
   factory FacebookUserDataModel.fromJson(Map<String, dynamic> json) => FacebookUserDataModel(
     name: json["name"],
     email: json["email"],
-    picture: Picture.fromJson(json["picture"]),
+    picture: Picture.fromJson(json.containsKey("picture") ? json["picture"] : {}),
     id: json["id"],
   );
 
@@ -44,7 +44,7 @@ class Picture {
   Data? data;
 
   factory Picture.fromJson(Map<String, dynamic> json) => Picture(
-    data: Data.fromJson(json["data"]),
+    data: Data.fromJson(json.containsKey("data") ? json["data"] : {}),
   );
 
   Map<String, dynamic> toJson() => {
@@ -66,10 +66,10 @@ class Data {
   int? width;
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
-    height: json["height"],
-    isSilhouette: json["is_silhouette"],
-    url: json["url"],
-    width: json["width"],
+    height: json.containsKey("height") ? json["height"] : 0,
+    isSilhouette: json.containsKey("height") ? json["is_silhouette"] : false,
+    url: json.containsKey("url") ? json["url"] : "",
+    width: json.containsKey("url") ? json["width"] : 0,
   );
 
   Map<String, dynamic> toJson() => {
