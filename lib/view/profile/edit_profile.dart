@@ -48,34 +48,25 @@ class _EditProfileState extends State<EditProfile> {
   @override
   void initState() {
     // TODO: implement initState
-    nameController.text =
-        (userDetailsModel.fullName != null && userDetailsModel.fullName != "")
-            ? (userDetailsModel.fullName ?? "")
-            : "Enter name";
-    emailController.text =
-        (userDetailsModel.email != null && userDetailsModel.email != "")
-            ? (userDetailsModel.email ?? "")
-            : "Enter email";
-    phoneController.text =
-        (userDetailsModel.phone != null && userDetailsModel.phone != "")
-            ? (userDetailsModel.phone ?? "")
-            : "Enter phone no.";
-    addressController.text =
-        (userDetailsModel.address != null && userDetailsModel.address != "")
-            ? (userDetailsModel.address ?? "")
-            : "Enter address";
+    nameController.text = (userDetailsModel.fullName != null && userDetailsModel.fullName != "")
+        ? (userDetailsModel.fullName ?? "")
+        : "Enter name";
+    emailController.text = (userDetailsModel.email != null && userDetailsModel.email != "")
+        ? (userDetailsModel.email ?? "")
+        : "Enter email";
+    phoneController.text = (userDetailsModel.phone != null && userDetailsModel.phone != "")
+        ? (userDetailsModel.phone ?? "")
+        : "Enter phone no.";
+    addressController.text = (userDetailsModel.address != null && userDetailsModel.address != "")
+        ? (userDetailsModel.address ?? "")
+        : "Enter address";
     cityController.text =
-        (userDetailsModel.city != null && userDetailsModel.city != "")
-            ? (userDetailsModel.city ?? "")
-            : "Enter city";
-    stateController.text =
-        (userDetailsModel.state != null && userDetailsModel.state != "")
-            ? (userDetailsModel.state ?? "")
-            : "Enter state";
+        (userDetailsModel.city != null && userDetailsModel.city != "") ? (userDetailsModel.city ?? "") : "Enter city";
+    stateController.text = (userDetailsModel.state != null && userDetailsModel.state != "")
+        ? (userDetailsModel.state ?? "")
+        : "Enter state";
     zipController.text =
-        (userDetailsModel.zip != null && userDetailsModel.zip != "")
-            ? (userDetailsModel.zip ?? "")
-            : "Enter zip";
+        (userDetailsModel.zip != null && userDetailsModel.zip != "") ? (userDetailsModel.zip ?? "") : "Enter zip";
     passwordController.text = "123456";
     super.initState();
     setState(() {});
@@ -216,10 +207,8 @@ class _EditProfileState extends State<EditProfile> {
           // ),
 
           FutureBuilder<List<String>>(
-            future:
-                auth.fetchSignInMethodsForEmail(userDetailsModel.email ?? ""),
-            builder:
-                (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
+            future: auth.fetchSignInMethodsForEmail(userDetailsModel.email ?? ""),
+            builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return ETextField(
                   labelText: 'Email:',
@@ -283,8 +272,7 @@ class _EditProfileState extends State<EditProfile> {
                     // initialValue: 'Current Email',
                     controller: emailController,
                     isReadOnly: true,
-                    isEditAble:
-                        signInMethodsList.contains("password") ? true : false,
+                    isEditAble: signInMethodsList.contains("password") ? true : false,
                     onEditTap: () {
                       showModalBottomSheet(
                         backgroundColor: Colors.transparent,
@@ -301,14 +289,10 @@ class _EditProfileState extends State<EditProfile> {
                             ),
                             onSave: () async {
                               Get.dialog(loading());
-                              AuthCredential credential =
-                                  EmailAuthProvider.credential(
-                                      email: userDetailsModel.email ?? "",
-                                      password: currentPasswordController.text);
+                              AuthCredential credential = EmailAuthProvider.credential(
+                                  email: userDetailsModel.email ?? "", password: currentPasswordController.text);
                               try {
-                                await auth.currentUser
-                                    ?.reauthenticateWithCredential(credential)
-                                    .then((value) {
+                                await auth.currentUser?.reauthenticateWithCredential(credential).then((value) {
                                   Get.back();
                                   Get.back();
                                   showModalBottomSheet(
@@ -325,21 +309,19 @@ class _EditProfileState extends State<EditProfile> {
                                           ),
                                           onSave: () async {
                                             Get.dialog(loading());
-                                            await FirebaseAuth
-                                                .instance.currentUser
-                                                ?.updateEmail(
-                                                    newEmailController.text)
+                                            await FirebaseAuth.instance.currentUser
+                                                ?.updateEmail(newEmailController.text.trim())
                                                 .then((value) async {
+                                              await accounts
+                                                  .doc(auth.currentUser?.uid)
+                                                  .update({"email": newEmailController.text.trim()});
                                               Get.back();
                                               showMsg(
-                                                msg:
-                                                    "Email changed successfully. Please sign-in again.",
+                                                msg: "Email changed successfully. Please sign-in again.",
                                                 bgColor: Colors.red,
                                                 context: context,
                                               );
-                                              Future.delayed(
-                                                  Duration(seconds: 1),
-                                                  () async {
+                                              Future.delayed(Duration(seconds: 1), () async {
                                                 await auth.signOut();
                                                 Get.offAll(() => SocialLogin());
                                               });
@@ -366,8 +348,7 @@ class _EditProfileState extends State<EditProfile> {
                                 newEmailController.clear();
                                 log("error in re-authentication is: $e");
                                 showMsg(
-                                  msg:
-                                      "Something went wrong. Please try again in a few minutes.",
+                                  msg: "Something went wrong. Please try again in a few minutes.",
                                   bgColor: Colors.red,
                                   context: context,
                                 );
@@ -502,8 +483,7 @@ class _EditProfileState extends State<EditProfile> {
                               return loading();
                             },
                           );
-                          var twilioResponse = await twilioPhoneVerify
-                              .sendSmsCode(phoneController.text.trim());
+                          var twilioResponse = await twilioPhoneVerify.sendSmsCode(phoneController.text.trim());
                           if (twilioResponse.successful!) {
                             Get.back();
                             Get.back();
@@ -744,8 +724,7 @@ class _EditProfileState extends State<EditProfile> {
             height: 15,
           ),
           FutureBuilder<List<String>>(
-            future:
-                auth.fetchSignInMethodsForEmail(userDetailsModel.email ?? ""),
+            future: auth.fetchSignInMethodsForEmail(userDetailsModel.email ?? ""),
             builder: (
               BuildContext context,
               AsyncSnapshot<List<String>> snapshot,
@@ -782,15 +761,10 @@ class _EditProfileState extends State<EditProfile> {
                               ),
                               onSave: () async {
                                 Get.dialog(loading());
-                                AuthCredential credential =
-                                    EmailAuthProvider.credential(
-                                        email: userDetailsModel.email ?? "",
-                                        password:
-                                            currentPasswordController.text);
+                                AuthCredential credential = EmailAuthProvider.credential(
+                                    email: userDetailsModel.email ?? "", password: currentPasswordController.text);
                                 try {
-                                  await auth.currentUser
-                                      ?.reauthenticateWithCredential(credential)
-                                      .then((value) {
+                                  await auth.currentUser?.reauthenticateWithCredential(credential).then((value) {
                                     Get.back();
                                     Get.back();
                                     showModalBottomSheet(
@@ -808,25 +782,18 @@ class _EditProfileState extends State<EditProfile> {
                                             ),
                                             onSave: () async {
                                               Get.dialog(loading());
-                                              await FirebaseAuth
-                                                  .instance.currentUser
-                                                  ?.updatePassword(
-                                                      newPasswordController
-                                                          .text)
+                                              await FirebaseAuth.instance.currentUser
+                                                  ?.updatePassword(newPasswordController.text)
                                                   .then((value) async {
                                                 Get.back();
                                                 showMsg(
-                                                  msg:
-                                                      "Password changed successfully. Please sign-in again.",
+                                                  msg: "Password changed successfully. Please sign-in again.",
                                                   bgColor: Colors.red,
                                                   context: context,
                                                 );
-                                                Future.delayed(
-                                                    Duration(seconds: 1),
-                                                    () async {
+                                                Future.delayed(Duration(seconds: 1), () async {
                                                   await auth.signOut();
-                                                  Get.offAll(
-                                                      () => SocialLogin());
+                                                  Get.offAll(() => SocialLogin());
                                                 });
                                               });
                                             },
@@ -851,8 +818,7 @@ class _EditProfileState extends State<EditProfile> {
                                   newPasswordController.clear();
                                   log("error in re-authentication is: $e");
                                   showMsg(
-                                    msg:
-                                        "Something went wrong. Please try again in a few minutes.",
+                                    msg: "Something went wrong. Please try again in a few minutes.",
                                     bgColor: Colors.red,
                                     context: context,
                                   );
@@ -917,8 +883,7 @@ class _EditProfileState extends State<EditProfile> {
               Container(),
               Expanded(
                 child: MyText(
-                  text:
-                      'Please enter current password to re-authenticate as this is a security sensitive operation',
+                  text: 'Please enter current password to re-authenticate as this is a security sensitive operation',
                   size: 14,
                   color: kSecondaryColor,
                   maxLines: 3,
@@ -1019,21 +984,33 @@ class _EditProfileState extends State<EditProfile> {
                 child: Obx(() {
                   return ClipRRect(
                     borderRadius: BorderRadius.circular(100),
-                    child: pickedImagePath.value == "" &&
-                            userDetailsModel.profileImageUrl == ""
+                    child: pickedImagePath.value == "" && userDetailsModel.profileImageUrl == ""
                         ? Image.asset(
                             Assets.imagesProfileAvatar,
                             height: height(context, 1.0),
                             width: width(context, 1.0),
                             fit: BoxFit.cover,
                           )
-                        : userDetailsModel.profileImageUrl != "" &&
-                                pickedImagePath.value == ""
+                        : userDetailsModel.profileImageUrl != "" && pickedImagePath.value == ""
                             ? Image.network(
                                 userDetailsModel.profileImageUrl!,
                                 height: height(context, 1.0),
                                 width: width(context, 1.0),
                                 fit: BoxFit.cover,
+                      errorBuilder: (
+                          BuildContext context,
+                          Object exception,
+                          StackTrace? stackTrace,
+                          ) {
+                        return const Text(' ');
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) {
+                          return child;
+                        } else {
+                          return loading();
+                        }
+                      },
                               )
                             : Image.file(
                                 pickedImage!,
@@ -1097,16 +1074,12 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Future uploadPhoto() async {
-    Reference ref = await FirebaseStorage.instance
-        .ref()
-        .child('Images/Profile Images/${DateTime.now().toString()}');
+    Reference ref = await FirebaseStorage.instance.ref().child('Images/Profile Images/${DateTime.now().toString()}');
     await ref.putFile(pickedImage!);
     await ref.getDownloadURL().then((value) async {
       log('Profile Image URL $value');
       pickedImageUrl = value;
-      await accounts
-          .doc(auth.currentUser?.uid ?? "")
-          .update({"profileImageUrl": pickedImageUrl}).then((value) {
+      await accounts.doc(auth.currentUser?.uid ?? "").update({"profileImageUrl": pickedImageUrl}).then((value) {
         showMsg(context: context, msg: "Profile image updated successfully.");
       });
     });

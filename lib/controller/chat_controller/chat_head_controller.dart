@@ -2,9 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
 class ChatHeadController extends GetxController {
+  static ChatHeadController instance = Get.find<ChatHeadController>();
   bool showSearch = false;
 
-  int currentTab = 0;
+  RxInt currentTab = 0.obs;
+
+  TextEditingController chatHeadSearchController = TextEditingController();
+  RxString chatHeadSearchTextObs = "".obs;
 
   List<String> tabs = [
     'Chat',
@@ -16,7 +20,7 @@ class ChatHeadController extends GetxController {
   ];
 
   void selectedTab(int index){
-    currentTab = index;
+    currentTab.value = index;
     update();
   }
 

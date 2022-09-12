@@ -15,6 +15,14 @@ class GroupChatController extends GetxController {
   RxString userSearchText = "".obs;
   RxString messageControllerText = "".obs;
 
+  RxBool isDeleting = false.obs;
+  RxList deleteMsgIdList = [].obs;
+  RxList deleteLeftMsgIdList = [].obs;
+  RxList deleteAudioIdList = [].obs;
+  RxList deleteAudioLinksList = [].obs;
+  RxList deleteImageLinksList = [].obs;
+  RxList deleteImageIdsList = [].obs;
+
   createGroupChatRoomAndStartConversation({
     required String groupName,
     required String groupImage,
@@ -29,7 +37,7 @@ class GroupChatController extends GetxController {
 
     for (int i = 0; i < groupName.length; i++) {
       if (groupName[i] != " ") {
-        searchParameters.add(groupName[i]);
+        searchParameters.add(groupName[i].toLowerCase());
         var wordUntil = groupName.substring(0, i);
         log("wordUntil: $wordUntil");
         searchParameters.add(wordUntil);

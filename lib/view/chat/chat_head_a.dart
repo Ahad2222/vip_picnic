@@ -16,7 +16,9 @@ import 'package:vip_picnic/view/chat/group_chat/g_chat_screen.dart';
 import 'package:vip_picnic/view/chat/simple_chat_screen.dart';
 import 'package:vip_picnic/view/widget/custom_popup.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
+import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
+import 'package:vip_picnic/view/widget/my_textfields.dart';
 import 'package:vip_picnic/view/widget/snack_bar.dart';
 
 class ChatHead extends StatefulWidget {
@@ -26,16 +28,18 @@ class ChatHead extends StatefulWidget {
 
 class _ChatHeadState extends State<ChatHead> {
   bool showSearch = false;
-  int currentTab = 0;
+  // int currentTab = 0;
 
   void selectedTab(int index) {
     setState(() {
-      currentTab = index;
+      chatHeadController.currentTab.value = index;
     });
   }
 
   void showSearchBar() {
     setState(() {
+      chatHeadController.chatHeadSearchTextObs.value == "";
+      chatHeadController.chatHeadSearchController.clear();
       showSearch = !showSearch;
     });
   }
@@ -66,11 +70,18 @@ class _ChatHeadState extends State<ChatHead> {
             ),
           ),
         ),
-        title: MyText(
-          text: 'messages'.tr,
-          size: 20,
-          color: kSecondaryColor,
-        ),
+        title: showSearch
+            ? SearchBar(
+                controller: chatHeadController.chatHeadSearchController,
+                onChanged: (value) {
+                  chatHeadController.chatHeadSearchTextObs.value = value;
+                },
+              )
+            : MyText(
+                text: 'messages'.tr,
+                size: 20,
+                color: kSecondaryColor,
+              ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(
@@ -78,7 +89,9 @@ class _ChatHeadState extends State<ChatHead> {
             ),
             child: Center(
               child: GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  showSearchBar();
+                },
                 child: Image.asset(
                   Assets.imagesSearchWithBg,
                   height: 35,
@@ -109,8 +122,7 @@ class _ChatHeadState extends State<ChatHead> {
                     ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(50),
-                      color:
-                          currentTab == index ? kSecondaryColor : kPrimaryColor,
+                      color: chatHeadController.currentTab.value == index ? kSecondaryColor : kPrimaryColor,
                     ),
                     child: InkWell(
                       onTap: () => selectedTab(index),
@@ -118,9 +130,7 @@ class _ChatHeadState extends State<ChatHead> {
                         child: MyText(
                           text: index == 0 ? 'chat'.tr : 'group'.tr,
                           size: 16,
-                          color: currentTab == index
-                              ? kPrimaryColor
-                              : kSecondaryColor,
+                          color: chatHeadController.currentTab.value == index ? kPrimaryColor : kSecondaryColor,
                         ),
                       ),
                     ),
@@ -130,13 +140,13 @@ class _ChatHeadState extends State<ChatHead> {
             ),
           ),
           Expanded(
-            child: currentTab == 0 ? SimpleChatHeads() : GroupChatHeads(),
+            child: chatHeadController.currentTab.value == 0 ? SimpleChatHeads() : GroupChatHeads(),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: "NewChatButton",
-        onPressed: currentTab == 0
+        onPressed: chatHeadController.currentTab.value == 0
             ? () => Get.to(
                   () => CreateNewChat(),
                 )
@@ -159,78 +169,205 @@ class _ChatHeadState extends State<ChatHead> {
 class SimpleChatHeads extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: ffstore
-          .collection(chatRoomCollection)
-          // .where("users", arrayContains: userDetailsModel.uID)
-          .where("notDeletedFor", arrayContains: userDetailsModel.uID)
-          .orderBy('lastMessageAt', descending: true)
-          .snapshots(),
-      builder: (
-        BuildContext context,
-        AsyncSnapshot<QuerySnapshot> snapshot,
-      ) {
-        //log("inside stream-builder");
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          log("inside stream-builder in waiting state");
-          return SizedBox();
-        } else if (snapshot.connectionState == ConnectionState.active ||
-            snapshot.connectionState == ConnectionState.done) {
-          if (snapshot.hasError) {
-            return const Text('Some unknown error occurred');
-          } else if (snapshot.hasData) {
-            // log("inside hasData and ${snapshot.data!.docs}");
-            if (snapshot.data!.docs.length > 0) {
-              return ListView.builder(
-                shrinkWrap: true,
-                padding: EdgeInsets.symmetric(
-                  horizontal: 15,
-                ),
-                physics: BouncingScrollPhysics(),
-                itemCount: snapshot.data!.docs.length,
-                itemBuilder: (context, index) {
-                  ChatHeadModel data = ChatHeadModel();
-                  data = ChatHeadModel.fromDocumentSnapshot(
-                      snapshot.data!.docs[index]);
-                  return chatHeadTiles(
-                    context,
-                    profileImage: data.user1Id != userDetailsModel.uID
-                        ? data.user1Model!.profileImageUrl
-                        : data.user2Model!.profileImageUrl,
-                    name: data.user1Id != userDetailsModel.uID
-                        ? data.user1Model!.fullName
-                        : data.user2Model!.fullName,
-                    msg: data.lastMessage,
-                    time: data.lastMessageAt,
-                    docs: snapshot.data!.docs[index].data()
-                        as Map<String, dynamic>,
-                    chatRoomId: data.chatRoomId,
+    return Obx(() {
+      if (chatHeadController.chatHeadSearchTextObs.value != "") {
+        if (chatHeadController.currentTab.value == 0) {
+          return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            stream: ffstore
+                .collection(chatRoomCollection)
+                // .where("users", arrayContains: userDetailsModel.uID)
+                .where("notDeletedFor", arrayContains: userDetailsModel.uID)
+                .orderBy('lastMessageAt', descending: true)
+                .snapshots(),
+            builder: (
+              BuildContext context,
+              AsyncSnapshot<QuerySnapshot> snapshot,
+            ) {
+              //log("inside stream-builder");
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                log("inside stream-builder in waiting state");
+                return SizedBox();
+              } else if (snapshot.connectionState == ConnectionState.active ||
+                  snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.hasError) {
+                  return const Text('Some unknown error occurred');
+                } else if (snapshot.hasData) {
+                  // log("inside hasData and ${snapshot.data!.docs}");
+                  if (snapshot.data!.docs.length > 0) {
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 15,
+                      ),
+                      physics: BouncingScrollPhysics(),
+                      itemCount: snapshot.data!.docs.length,
+                      itemBuilder: (context, index) {
+                        ChatHeadModel data = ChatHeadModel();
+                        data = ChatHeadModel.fromDocumentSnapshot(snapshot.data!.docs[index]);
+                        bool? isItSearchedChatHead = data.searchParameters
+                            ?.contains(chatHeadController.chatHeadSearchTextObs.value.toLowerCase());
+                        if (isItSearchedChatHead ?? false) {
+                          return chatHeadTiles(
+                            context,
+                            profileImage: data.user1Id != userDetailsModel.uID
+                                ? data.user1Model!.profileImageUrl
+                                : data.user2Model!.profileImageUrl,
+                            name: data.user1Id != userDetailsModel.uID
+                                ? data.user1Model!.fullName
+                                : data.user2Model!.fullName,
+                            msg: data.lastMessage,
+                            time: data.lastMessageAt,
+                            docs: snapshot.data!.docs[index].data() as Map<String, dynamic>,
+                            chatRoomId: data.chatRoomId,
+                          );
+                        } else {
+                          return SizedBox();
+                        }
+                      },
+                    );
+                  } else {
+                    return SizedBox();
+                  }
+                } else {
+                  log("in else of hasData done and: ${snapshot.connectionState} and"
+                      " snapshot.hasData: ${snapshot.hasData}");
+                  return SizedBox();
+                }
+              } else {
+                log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+                return SizedBox();
+              }
+            },
+          );
+        }
+        return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: ffstore
+              .collection(groupChatCollection)
+              // .where("users", arrayContains: userDetailsModel.uID)
+              .where("notDeletedFor", arrayContains: userDetailsModel.uID)
+              .orderBy('lastMessageAt', descending: true)
+              .snapshots(),
+          builder: (
+            BuildContext context,
+            AsyncSnapshot<QuerySnapshot> snapshot,
+          ) {
+            //log("inside stream-builder");
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              log("inside stream-builder in waiting state");
+              return SizedBox();
+            } else if (snapshot.connectionState == ConnectionState.active ||
+                snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.hasError) {
+                return const Text('Some unknown error occurred');
+              } else if (snapshot.hasData) {
+                // log("inside hasData and ${snapshot.data!.docs}");
+                if (snapshot.data!.docs.length > 0) {
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 15,
+                    ),
+                    physics: BouncingScrollPhysics(),
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (context, index) {
+                      GroupChatHeadModel data = GroupChatHeadModel();
+                      data = GroupChatHeadModel.fromDocumentSnapshot(snapshot.data!.docs[index]);
+                      bool? isItSearchedChatHead =
+                          data.searchParameters?.contains(chatHeadController.chatHeadSearchTextObs.value.toLowerCase());
+                      if (isItSearchedChatHead ?? false) {
+                        return groupChatHeadsTiles(
+                          context,
+                          groupId: data.groupId,
+                          groupPhoto: data.groupImage,
+                          name: data.groupName,
+                          totalMembers: data.users?.length,
+                          time: data.lastMessageAt,
+                        );
+                      } else {
+                        return SizedBox();
+                      }
+                    },
                   );
-                },
-              );
+                } else {
+                  return SizedBox();
+                }
+              } else {
+                log("in else of hasData done and: ${snapshot.connectionState} and"
+                    " snapshot.hasData: ${snapshot.hasData}");
+                return SizedBox();
+              }
             } else {
+              log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+              return SizedBox();
+            }
+          },
+        );
+      }
+      return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: ffstore
+            .collection(chatRoomCollection)
+            // .where("users", arrayContains: userDetailsModel.uID)
+            .where("notDeletedFor", arrayContains: userDetailsModel.uID)
+            .orderBy('lastMessageAt', descending: true)
+            .snapshots(),
+        builder: (
+          BuildContext context,
+          AsyncSnapshot<QuerySnapshot> snapshot,
+        ) {
+          //log("inside stream-builder");
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            log("inside stream-builder in waiting state");
+            return SizedBox();
+          } else if (snapshot.connectionState == ConnectionState.active ||
+              snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError) {
+              return const Text('Some unknown error occurred');
+            } else if (snapshot.hasData) {
+              // log("inside hasData and ${snapshot.data!.docs}");
+              if (snapshot.data!.docs.length > 0) {
+                return ListView.builder(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 15,
+                  ),
+                  physics: BouncingScrollPhysics(),
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: (context, index) {
+                    ChatHeadModel data = ChatHeadModel();
+                    data = ChatHeadModel.fromDocumentSnapshot(snapshot.data!.docs[index]);
+                    return chatHeadTiles(
+                      context,
+                      profileImage: data.user1Id != userDetailsModel.uID
+                          ? data.user1Model!.profileImageUrl
+                          : data.user2Model!.profileImageUrl,
+                      name:
+                          data.user1Id != userDetailsModel.uID ? data.user1Model!.fullName : data.user2Model!.fullName,
+                      msg: data.lastMessage,
+                      time: data.lastMessageAt,
+                      docs: snapshot.data!.docs[index].data() as Map<String, dynamic>,
+                      chatRoomId: data.chatRoomId,
+                    );
+                  },
+                );
+              } else {
+                return SizedBox();
+              }
+            } else {
+              log("in else of hasData done and: ${snapshot.connectionState} and"
+                  " snapshot.hasData: ${snapshot.hasData}");
               return SizedBox();
             }
           } else {
-            log("in else of hasData done and: ${snapshot.connectionState} and"
-                " snapshot.hasData: ${snapshot.hasData}");
+            log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
             return SizedBox();
           }
-        } else {
-          log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
-          return SizedBox();
-        }
-      },
-    );
+        },
+      );
+    });
   }
 
   Widget chatHeadTiles(BuildContext context,
-      {String? profileImage,
-      name,
-      msg,
-      time,
-      chatRoomId,
-      Map<String, dynamic>? docs}) {
+      {String? profileImage, name, msg, time, chatRoomId, Map<String, dynamic>? docs}) {
     return Padding(
       padding: const EdgeInsets.only(
         bottom: 10,
@@ -251,20 +388,17 @@ class SimpleChatHeads extends StatelessWidget {
                         builder: (_) {
                           return CustomPopup(
                             heading: 'Are you Sure?',
-                            description:
-                                'This can\'t be undone. Are you sure you want to delete this chat?',
+                            description: 'This can\'t be undone. Are you sure you want to delete this chat?',
                             onCancel: () => Get.back(),
                             onConfirm: () async {
                               try {
                                 Get.back();
-                                await chatController.deleteAChatRoom(
-                                    chatRoomId: chatRoomId);
+                                await chatController.deleteAChatRoom(chatRoomId: chatRoomId);
                               } catch (e) {
                                 print(e);
                                 showMsg(
                                     context: context,
-                                    msg:
-                                        "Something went wrong during chat deletion. Please try again.");
+                                    msg: "Something went wrong during chat deletion. Please try again.");
                                 log("error in chat deletion $e");
                               }
                             },
@@ -363,6 +497,20 @@ class SimpleChatHeads extends StatelessWidget {
                       height: height(context, 1.0),
                       width: width(context, 1.0),
                       fit: BoxFit.cover,
+                      errorBuilder: (
+                          BuildContext context,
+                          Object exception,
+                          StackTrace? stackTrace,
+                          ) {
+                        return const Text(' ');
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) {
+                          return child;
+                        } else {
+                          return loading();
+                        }
+                      },
                     ),
                   ),
                 ),
@@ -386,8 +534,7 @@ class SimpleChatHeads extends StatelessWidget {
                 children: [
                   MyText(
                     paddingTop: 5,
-                    text:
-                        "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[0]}"
+                    text: "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[0]}"
                         ":"
                         "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[1]}",
                     weight: FontWeight.w300,
@@ -395,6 +542,157 @@ class SimpleChatHeads extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget groupChatHeadsTiles(
+    BuildContext context, {
+    String? groupId,
+    String? groupPhoto,
+    name,
+    totalMembers,
+    time,
+  }) {
+    return Slidable(
+      endActionPane: ActionPane(
+        extentRatio: 0.3,
+        motion: const ScrollMotion(),
+        children: [
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                GestureDetector(
+                  onTap: () async {
+                    showDialog(
+                      context: context,
+                      builder: (_) {
+                        return CustomPopup(
+                          heading: 'Are you Sure?',
+                          description: 'This can\'t be undone. Are you sure you want to delete this chat?',
+                          onCancel: () => Get.back(),
+                          onConfirm: () async {
+                            try {
+                              Get.back();
+                              await chatController.deleteAGroupChatRoom(groupId: groupId);
+                            } catch (e) {
+                              print(e);
+                              showMsg(
+                                  context: context,
+                                  msg: "Something went wrong during chat deletion. Please try again.");
+                              log("error in chat deletion $e");
+                            }
+                          },
+                        );
+                      },
+                    );
+                  },
+                  child: Container(
+                    height: 51,
+                    width: 62,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.red.withOpacity(0.1),
+                    ),
+                    child: Center(
+                      child: Image.asset(
+                        Assets.imagesDeleteMsg,
+                        height: 24,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      child: Container(
+        margin: EdgeInsets.only(
+          bottom: 10,
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Color(0xffF5F5F6),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: ListTile(
+            onTap: () async {
+              log("clicked on group chat head");
+              try {
+                await groupChatController.getAGroupChatRoomInfo(groupId!).then((value) => Get.to(() => GroupChat(
+                      docs: value.data(),
+                    )));
+              } catch (e) {
+                log("error in getting the group chat info is: $e");
+                showMsg(context: context, msg: "Please make sure you are connected to internet");
+              }
+              //     Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (_) => GroupChat(),
+              //   ),
+              // ),
+            },
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 15,
+              vertical: 10,
+            ),
+            leading: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                '$groupPhoto',
+                height: 56,
+                width: 56,
+                fit: BoxFit.cover,
+                errorBuilder: (
+                    BuildContext context,
+                    Object exception,
+                    StackTrace? stackTrace,
+                    ) {
+                  return const Text(' ');
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  } else {
+                    return loading();
+                  }
+                },
+              ),
+            ),
+            title: MyText(
+              text: '$name',
+              size: 14,
+              weight: FontWeight.w600,
+              color: kSecondaryColor,
+            ),
+            subtitle: MyText(
+              paddingTop: 8,
+              text: '$totalMembers members',
+              size: 14,
+              weight: FontWeight.w300,
+              color: kSecondaryColor,
+              maxLines: 1,
+              overFlow: TextOverflow.ellipsis,
+            ),
+            trailing: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                MyText(
+                  paddingBottom: 5,
+                  text: "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[0]}"
+                      ":"
+                      "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[1]}",
+                  weight: FontWeight.w300,
+                  color: kSecondaryColor,
+                ),
+              ],
             ),
           ),
         ),
@@ -437,8 +735,7 @@ class GroupChatHeads extends StatelessWidget {
                 itemCount: snapshot.data!.docs.length,
                 itemBuilder: (context, index) {
                   GroupChatHeadModel data = GroupChatHeadModel();
-                  data = GroupChatHeadModel.fromDocumentSnapshot(
-                      snapshot.data!.docs[index]);
+                  data = GroupChatHeadModel.fromDocumentSnapshot(snapshot.data!.docs[index]);
                   return groupChatHeadsTiles(
                     context,
                     groupId: data.groupId,
@@ -502,20 +799,17 @@ class GroupChatHeads extends StatelessWidget {
                       builder: (_) {
                         return CustomPopup(
                           heading: 'Are you Sure?',
-                          description:
-                              'This can\'t be undone. Are you sure you want to delete this chat?',
+                          description: 'This can\'t be undone. Are you sure you want to delete this chat?',
                           onCancel: () => Get.back(),
                           onConfirm: () async {
                             try {
                               Get.back();
-                              await chatController.deleteAGroupChatRoom(
-                                  groupId: groupId);
+                              await chatController.deleteAGroupChatRoom(groupId: groupId);
                             } catch (e) {
                               print(e);
                               showMsg(
                                   context: context,
-                                  msg:
-                                  "Something went wrong during chat deletion. Please try again.");
+                                  msg: "Something went wrong during chat deletion. Please try again.");
                               log("error in chat deletion $e");
                             }
                           },
@@ -557,16 +851,12 @@ class GroupChatHeads extends StatelessWidget {
             onTap: () async {
               log("clicked on group chat head");
               try {
-                await groupChatController
-                    .getAGroupChatRoomInfo(groupId!)
-                    .then((value) => Get.to(() => GroupChat(
-                          docs: value.data(),
-                        )));
+                await groupChatController.getAGroupChatRoomInfo(groupId!).then((value) => Get.to(() => GroupChat(
+                      docs: value.data(),
+                    )));
               } catch (e) {
                 log("error in getting the group chat info is: $e");
-                showMsg(
-                    context: context,
-                    msg: "Please make sure you are connected to internet");
+                showMsg(context: context, msg: "Please make sure you are connected to internet");
               }
               //     Navigator.push(
               //   context,
@@ -586,6 +876,20 @@ class GroupChatHeads extends StatelessWidget {
                 height: 56,
                 width: 56,
                 fit: BoxFit.cover,
+                errorBuilder: (
+                    BuildContext context,
+                    Object exception,
+                    StackTrace? stackTrace,
+                    ) {
+                  return const Text(' ');
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  } else {
+                    return loading();
+                  }
+                },
               ),
             ),
             title: MyText(
@@ -608,8 +912,7 @@ class GroupChatHeads extends StatelessWidget {
               children: [
                 MyText(
                   paddingBottom: 5,
-                  text:
-                      "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[0]}"
+                  text: "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[0]}"
                       ":"
                       "${DateTime.fromMillisecondsSinceEpoch(time).toString().split(" ")[1].split(":")[1]}",
                   weight: FontWeight.w300,

@@ -206,7 +206,74 @@ class Profile extends StatelessWidget {
                                   }
                                 },
                               )
-                            : Center(child: Text("${postModel.postTitle}")),
+                            : postModel.postVideos!.isNotEmpty
+                            ? Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(
+                                bottom: 5,
+                              ),
+                              height: 150,
+                              width: 150,
+                              padding: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: kPrimaryColor,
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: kBlackColor.withOpacity(0.16),
+                                    blurRadius: 6,
+                                    offset: Offset(0, 0),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: Image.network(
+                                    postModel.thumbnailsUrls![0],
+                                    height: 150,
+                                    width: 150,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (
+                                        BuildContext context,
+                                        Object exception,
+                                        StackTrace? stackTrace,
+                                        ) {
+                                      return const Text(' ');
+                                    },
+                                    loadingBuilder: (context, child, loadingProgress) {
+                                      if (loadingProgress == null) {
+                                        return child;
+                                      } else {
+                                        return loading();
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              height: 40,
+                              width: 40,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: kBlackColor.withOpacity(0.5),
+                              ),
+                              child: Center(
+                                child: Image.asset(
+                                  Assets.imagesPlay,
+                                  height: 18,
+                                  color: kPrimaryColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                            : Center(
+                          child: Text("${postModel.postTitle}"),
+                        ),
                       );
                     },
                   );

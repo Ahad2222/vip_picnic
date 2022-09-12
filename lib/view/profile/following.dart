@@ -12,6 +12,7 @@ import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/profile/other_user_profile.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
+import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 
 class Following extends StatefulWidget {
@@ -219,6 +220,20 @@ class SearchTiles extends StatelessWidget {
                       height: height(context, 1.0),
                       width: width(context, 1.0),
                       fit: BoxFit.cover,
+                      errorBuilder: (
+                          BuildContext context,
+                          Object exception,
+                          StackTrace? stackTrace,
+                          ) {
+                        return const Text(' ');
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) {
+                          return child;
+                        } else {
+                          return loading();
+                        }
+                      },
                     ),
                   ),
                 ),

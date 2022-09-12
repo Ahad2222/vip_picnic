@@ -92,9 +92,11 @@ class SendInvitations extends StatelessWidget {
                             UserDetailsModel umdl = UserDetailsModel.fromJson(
                                 snapshot.data!.docs[index].data()
                                     as Map<String, dynamic>);
+                            log("auth.currentUser?.uid: ${auth.currentUser?.uid} && umdl.uID: ${umdl.uID}");
                             return Obx(() {
                               if (selectedId.value == umdl.uID ||
                                   umdl.uID == auth.currentUser?.uid) {
+                                log("in sized box if");
                                 return SizedBox();
                               }
                               return contactTiles(
@@ -263,6 +265,20 @@ class SendInvitations extends StatelessWidget {
                   height: Get.height,
                   width: Get.width,
                   fit: BoxFit.cover,
+                  errorBuilder: (
+                      BuildContext context,
+                      Object exception,
+                      StackTrace? stackTrace,
+                      ) {
+                    return const Text(' ');
+                  },
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) {
+                      return child;
+                    } else {
+                      return loading();
+                    }
+                  },
                 ),
               ),
             ),

@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:vip_picnic/view/widget/loading.dart';
 
 class ImagePreview extends StatelessWidget {
   ImagePreview({
@@ -23,6 +24,20 @@ class ImagePreview extends StatelessWidget {
           fit: BoxFit.contain,
           width: Get.width,
           height: Get.height,
+          errorBuilder: (
+              BuildContext context,
+              Object exception,
+              StackTrace? stackTrace,
+              ) {
+            return const Text(' ');
+          },
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) {
+              return child;
+            } else {
+              return loading();
+            }
+          },
         ),
       ),
     );

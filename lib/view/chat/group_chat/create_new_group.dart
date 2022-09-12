@@ -12,6 +12,7 @@ import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
+import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/my_appbar.dart';
 import 'package:vip_picnic/view/widget/my_button.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
@@ -420,6 +421,20 @@ class CreateNewGroup extends StatelessWidget {
                   height: Get.height,
                   width: Get.width,
                   fit: BoxFit.cover,
+                  errorBuilder: (
+                      BuildContext context,
+                      Object exception,
+                      StackTrace? stackTrace,
+                      ) {
+                    return const Text(' ');
+                  },
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) {
+                      return child;
+                    } else {
+                      return loading();
+                    }
+                  },
                 ),
               ),
             ),

@@ -74,6 +74,7 @@ class PostNewStory extends StatelessWidget {
       Get.back();
 
       if (image != null) {
+        selectedImages.clear();
         selectedImages.insert(0, image);
       } else {
         return [].obs;
@@ -110,7 +111,9 @@ class PostNewStory extends StatelessWidget {
           // specify the height of the thumbnail, let the width auto-scaled to keep the source aspect ratio
           quality: 100,
         );
+        selectedVideos.clear();
         selectedVideos.insert(0, videoFile);
+        selectedVideosThumbnails.clear();
         selectedVideosThumbnails.insert(0, thumbnailFile);
       } else {
         return [].obs;
@@ -126,6 +129,7 @@ class PostNewStory extends StatelessWidget {
 
   Future<List<String>> uploadAnImage() async {
     // for (int i = 0; i < selectedImages.length; i++) {
+    imagesToUpload.clear();
     imagesToUpload.insert(0, (await uploadSingleImage(selectedImages[0])));
     // }
     return imagesToUpload;
@@ -142,6 +146,7 @@ class PostNewStory extends StatelessWidget {
   Future uploadAVideo() async {
     var thumbnailRef = await fstorage.ref().child('storyImages/${userDetailsModel.uID}/${DateTime.now().toString()}');
     String videoId = Uuid().v1();
+    videoIds.clear();
     videoIds.insert(0, videoId);
     await thumbnailRef.putFile(File(selectedVideosThumbnails[0] ?? "")).then((p0) async {
       await p0.ref.getDownloadURL().then((value) {

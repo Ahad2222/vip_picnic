@@ -25,6 +25,7 @@ import 'package:vip_picnic/controller/auth_controller/forgot_password_controller
 import 'package:vip_picnic/controller/auth_controller/google_auth_controller.dart';
 import 'package:vip_picnic/controller/auth_controller/sign_up_controller.dart';
 import 'package:vip_picnic/controller/chat_controller/chat_controller.dart';
+import 'package:vip_picnic/controller/chat_controller/chat_head_controller.dart';
 import 'package:vip_picnic/controller/email_controller/email_controller.dart';
 import 'package:vip_picnic/controller/event_controller/event_controller.dart';
 import 'package:vip_picnic/controller/group_chat_controller/group_chat_controller.dart';
@@ -377,7 +378,8 @@ Future<void> backgroundHandler() async {
           } catch (e) {
             log("error in upload thingy $e");
           }
-        } else if (isGroupChatRoom) {
+        }
+        else if (isGroupChatRoom) {
           String groupId = uploadedVideoIdList[2];
           String fileName = uploadedVideoIdList[3].split(".")[0];
           log("groupId in upload result:  $groupId");
@@ -551,6 +553,7 @@ Future<void> main() async {
 
   await GetStorage.init();
   Get.put(ChatController());
+  Get.put(GroupChatController());
   Get.put(SplashScreenController());
   Get.put(EmailAuthController());
   Get.put(GoogleAuthController());
@@ -560,7 +563,7 @@ Future<void> main() async {
   Get.put(ForgotPasswordController());
   Get.put(HomeController());
   Get.put(ChooseLanguageController());
-  Get.put(GroupChatController());
+  Get.put(ChatHeadController());
   Get.put(EventController());
   Get.put(EmailController());
   runApp(MyApp());
@@ -1080,7 +1083,27 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   print("Type is missed");
                 }
               }
-            } else if (screenName == "postScreen") {
+            }else if (screenName == 'groupChatScreen') {
+              print("Screen is Group Chat");
+              String groupId = 'Nothing';
+              groupId = message.data["groupId"];
+              print("ChatRoom Id is: ${groupId}");
+              //We have chatRoomId here and we need to navigate to the ChatRoomScreen having same Id
+              loading();
+              await ffstore
+                  .collection(groupChatCollection)
+                  .doc(groupId)
+                  .update({
+                "notDeletedFor": FieldValue.arrayUnion([auth.currentUser?.uid]),
+                "users": FieldValue.arrayUnion([auth.currentUser?.uid]),
+              });
+              await groupChatController
+                  .getAGroupChatRoomInfo(groupId)
+                  .then((value) {
+                Get.back();
+                Get.to(() => GroupChat(docs: value.data()));
+              });
+            }  else if (screenName == "postScreen") {
               print("Screen is postScreen");
               String postId = 'Nothing';
               postId = message.data["postId"];

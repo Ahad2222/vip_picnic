@@ -31,11 +31,7 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    ffstore
-        .collection(accountsCollection)
-        .doc(auth.currentUser!.uid)
-        .snapshots()
-        .listen((event) {
+    ffstore.collection(accountsCollection).doc(auth.currentUser!.uid).snapshots().listen((event) {
       userDetailsModel.value = UserDetailsModel.fromJson(event.data() ?? {});
     });
   }
@@ -128,77 +124,62 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                       children: [
                         Obx(() {
                           return profileButtons(
-                            buttonText: userDetailsModel.value.iFollowed != null ? !userDetailsModel.value.iFollowed!
-                                    .asMap()
-                                    .containsValue(widget.otherUserModel!.uID)
-                                ? 'follow'.tr
-                                : 'Unfollow'.tr
+                            buttonText: userDetailsModel.value.iFollowed != null
+                                ? !userDetailsModel.value.iFollowed!.asMap().containsValue(widget.otherUserModel!.uID)
+                                    ? 'follow'.tr
+                                    : 'Unfollow'.tr
                                 : "follow",
-                            onTap: userDetailsModel.value.iFollowed != null ? !userDetailsModel.value.iFollowed!
-                                    .asMap()
-                                    .containsValue(widget.otherUserModel!.uID)
-                                ? () async {
-                                    await ffstore
-                                        .collection(accountsCollection)
-                                        .doc(auth.currentUser!.uid)
-                                        .update({
-                                      "iFollowed": FieldValue.arrayUnion(
-                                          [widget.otherUserModel!.uID]),
-                                    });
-                                    await ffstore
-                                        .collection(accountsCollection)
-                                        .doc(widget.otherUserModel!.uID)
-                                        .update({
-                                      "TheyFollowed": FieldValue.arrayUnion(
-                                          [auth.currentUser!.uid]),
-                                    });
-                                    IFollowedModel iFollowedProfile =
-                                        IFollowedModel(
-                                      followedId: widget.otherUserModel!.uID,
-                                      followedName:
-                                          widget.otherUserModel!.fullName,
-                                      followedImage: widget
-                                          .otherUserModel!.profileImageUrl,
-                                      followedAt:
-                                          DateTime.now().millisecondsSinceEpoch,
-                                    );
+                            onTap: userDetailsModel.value.iFollowed != null
+                                ? !userDetailsModel.value.iFollowed!.asMap().containsValue(widget.otherUserModel!.uID)
+                                    ? () async {
+                                        await ffstore.collection(accountsCollection).doc(auth.currentUser!.uid).update({
+                                          "iFollowed": FieldValue.arrayUnion([widget.otherUserModel!.uID]),
+                                        });
+                                        await ffstore
+                                            .collection(accountsCollection)
+                                            .doc(widget.otherUserModel!.uID)
+                                            .update({
+                                          "TheyFollowed": FieldValue.arrayUnion([auth.currentUser!.uid]),
+                                        });
+                                        IFollowedModel iFollowedProfile = IFollowedModel(
+                                          followedId: widget.otherUserModel!.uID,
+                                          followedName: widget.otherUserModel!.fullName,
+                                          followedImage: widget.otherUserModel!.profileImageUrl,
+                                          followedAt: DateTime.now().millisecondsSinceEpoch,
+                                        );
 
-                                    await ffstore
-                                        .collection(accountsCollection)
-                                        .doc(auth.currentUser!.uid)
-                                        .collection("iFollowed")
-                                        .doc(widget.otherUserModel!.uID)
-                                        .set(iFollowedProfile.toJson());
-                                  }
-                                : () async {
-                                    //+unfollow code goes here
-                                    await ffstore
-                                        .collection(accountsCollection)
-                                        .doc(auth.currentUser!.uid)
-                                        .update({
-                                      "iFollowed": FieldValue.arrayRemove(
-                                          [widget.otherUserModel!.uID]),
-                                    });
-                                    await ffstore
-                                        .collection(accountsCollection)
-                                        .doc(widget.otherUserModel!.uID)
-                                        .update({
-                                      "TheyFollowed": FieldValue.arrayRemove(
-                                          [auth.currentUser!.uid]),
-                                    });
-                                    await ffstore
-                                        .collection(accountsCollection)
-                                        .doc(auth.currentUser!.uid)
-                                        .collection("iFollowed")
-                                        .doc(widget.otherUserModel!.uID)
-                                        .delete();
-                                    await ffstore
-                                        .collection(accountsCollection)
-                                        .doc(widget.otherUserModel!.uID)
-                                        .collection("TheyFollowed")
-                                        .doc(userDetailsModel.value.uID)
-                                        .delete();
-                                  } : null,
+                                        await ffstore
+                                            .collection(accountsCollection)
+                                            .doc(auth.currentUser!.uid)
+                                            .collection("iFollowed")
+                                            .doc(widget.otherUserModel!.uID)
+                                            .set(iFollowedProfile.toJson());
+                                      }
+                                    : () async {
+                                        //+unfollow code goes here
+                                        await ffstore.collection(accountsCollection).doc(auth.currentUser!.uid).update({
+                                          "iFollowed": FieldValue.arrayRemove([widget.otherUserModel!.uID]),
+                                        });
+                                        await ffstore
+                                            .collection(accountsCollection)
+                                            .doc(widget.otherUserModel!.uID)
+                                            .update({
+                                          "TheyFollowed": FieldValue.arrayRemove([auth.currentUser!.uid]),
+                                        });
+                                        await ffstore
+                                            .collection(accountsCollection)
+                                            .doc(auth.currentUser!.uid)
+                                            .collection("iFollowed")
+                                            .doc(widget.otherUserModel!.uID)
+                                            .delete();
+                                        await ffstore
+                                            .collection(accountsCollection)
+                                            .doc(widget.otherUserModel!.uID)
+                                            .collection("TheyFollowed")
+                                            .doc(userDetailsModel.value.uID)
+                                            .delete();
+                                      }
+                                : null,
                           );
                         }),
                         SizedBox(
@@ -213,11 +194,9 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                                 .doc(widget.otherUserModel!.uID)
                                 .get()
                                 .then((value) {
-                              umdl =
-                                  UserDetailsModel.fromJson(value.data() ?? {});
+                              umdl = UserDetailsModel.fromJson(value.data() ?? {});
                             });
-                            await chatController
-                                .createChatRoomAndStartConversation(
+                            await chatController.createChatRoomAndStartConversation(
                               user1Model: userDetailsModel.value,
                               user2Model: umdl,
                             );
@@ -226,8 +205,7 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                       ],
                     ),
                     bioBox(
-                      bio:
-                          'Musician since 2018, available to new events. Love plant and planet 🌱',
+                      bio: 'Musician since 2018, available to new events. Love plant and planet 🌱',
                     ),
                   ],
                 ),
@@ -272,32 +250,100 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                     itemCount: snapshot.data?.docs.length,
                     itemBuilder: (context, index) {
                       AddPostModel postModel =
-                      AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                          AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
                       return GestureDetector(
                         onTap: () {
                           Get.to(() => PostDetails(isLikeByMe: false, postDocModel: postModel));
                         },
-                        child: Image.network(
-                          (snapshot.data!.docs[index].data()
-                              as Map<String, dynamic>)["postImages"][0],
-                          height: height(context, 1.0),
-                          width: width(context, 1.0),
-                          fit: BoxFit.cover,
-                          errorBuilder: (
-                            BuildContext context,
-                            Object exception,
-                            StackTrace? stackTrace,
-                          ) {
-                            return const Text(' ');
-                          },
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) {
-                              return child;
-                            } else {
-                              return loading();
-                            }
-                          },
-                        ),
+                        child: postModel.postImages!.isNotEmpty
+                            ? Image.network(
+                                postModel.postImages![0],
+                                height: height(context, 1.0),
+                                width: width(context, 1.0),
+                                fit: BoxFit.cover,
+                                errorBuilder: (
+                                  BuildContext context,
+                                  Object exception,
+                                  StackTrace? stackTrace,
+                                ) {
+                                  return const Text(' ');
+                                },
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    return child;
+                                  } else {
+                                    return loading();
+                                  }
+                                },
+                              )
+                            : postModel.postVideos!.isNotEmpty
+                                ? Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      Container(
+                                        margin: EdgeInsets.only(
+                                          bottom: 5,
+                                        ),
+                                        height: 150,
+                                        width: 150,
+                                        padding: EdgeInsets.all(5),
+                                        decoration: BoxDecoration(
+                                          color: kPrimaryColor,
+                                          borderRadius: BorderRadius.circular(8),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: kBlackColor.withOpacity(0.16),
+                                              blurRadius: 6,
+                                              offset: Offset(0, 0),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Center(
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(6),
+                                            child: Image.network(
+                                              postModel.thumbnailsUrls![0],
+                                              height: 150,
+                                              width: 150,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (
+                                                  BuildContext context,
+                                                  Object exception,
+                                                  StackTrace? stackTrace,
+                                                  ) {
+                                                return const Text(' ');
+                                              },
+                                              loadingBuilder: (context, child, loadingProgress) {
+                                                if (loadingProgress == null) {
+                                                  return child;
+                                                } else {
+                                                  return loading();
+                                                }
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                        height: 40,
+                                        width: 40,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: kBlackColor.withOpacity(0.5),
+                                        ),
+                                        child: Center(
+                                          child: Image.asset(
+                                            Assets.imagesPlay,
+                                            height: 18,
+                                            color: kPrimaryColor,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : Center(
+                                    child: Text("${postModel.postTitle}"),
+                                  ),
                       );
                     },
                   );

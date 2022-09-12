@@ -10,6 +10,7 @@ import 'package:vip_picnic/model/story_model/story_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/story/edit_story.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
+import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
 
 // ignore: must_be_immutable
@@ -280,6 +281,20 @@ class _StoryState extends State<Story> {
               height: 40,
               width: 40,
               fit: BoxFit.cover,
+              errorBuilder: (
+                  BuildContext context,
+                  Object exception,
+                  StackTrace? stackTrace,
+                  ) {
+                return const Text(' ');
+              },
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) {
+                  return child;
+                } else {
+                  return loading();
+                }
+              },
             ),
           ),
         ),

@@ -591,6 +591,20 @@ class _EditPostState extends State<EditPost> {
                                       height: Get.height,
                                       width: Get.width,
                                       fit: BoxFit.cover,
+                                      errorBuilder: (
+                                          BuildContext context,
+                                          Object exception,
+                                          StackTrace? stackTrace,
+                                          ) {
+                                        return const Text(' ');
+                                      },
+                                      loadingBuilder: (context, child, loadingProgress) {
+                                        if (loadingProgress == null) {
+                                          return child;
+                                        } else {
+                                          return loading();
+                                        }
+                                      },
                                     ),
                                   );
                                 }),
@@ -689,6 +703,20 @@ class _EditPostState extends State<EditPost> {
                                       height: Get.height,
                                       width: Get.width,
                                       fit: BoxFit.cover,
+                                      errorBuilder: (
+                                          BuildContext context,
+                                          Object exception,
+                                          StackTrace? stackTrace,
+                                          ) {
+                                        return const Text(' ');
+                                      },
+                                      loadingBuilder: (context, child, loadingProgress) {
+                                        if (loadingProgress == null) {
+                                          return child;
+                                        } else {
+                                          return loading();
+                                        }
+                                      },
                                     ),
                                   ),
                                 ),
@@ -945,6 +973,20 @@ class _EditPostState extends State<EditPost> {
                                         height: 100,
                                         width: 100,
                                         fit: BoxFit.cover,
+                                        errorBuilder: (
+                                            BuildContext context,
+                                            Object exception,
+                                            StackTrace? stackTrace,
+                                            ) {
+                                          return const Text(' ');
+                                        },
+                                        loadingBuilder: (context, child, loadingProgress) {
+                                          if (loadingProgress == null) {
+                                            return child;
+                                          } else {
+                                            return loading();
+                                          }
+                                        },
                                       ),
                                     ),
                                     Positioned(
@@ -1146,6 +1188,20 @@ class _EditPostState extends State<EditPost> {
                                           height: 100,
                                           width: 100,
                                           fit: BoxFit.cover,
+                                          errorBuilder: (
+                                              BuildContext context,
+                                              Object exception,
+                                              StackTrace? stackTrace,
+                                              ) {
+                                            return const Text(' ');
+                                          },
+                                          loadingBuilder: (context, child, loadingProgress) {
+                                            if (loadingProgress == null) {
+                                              return child;
+                                            } else {
+                                              return loading();
+                                            }
+                                          },
                                         ),
                                       ),
                                     ),
@@ -1833,6 +1889,20 @@ class _EditPostState extends State<EditPost> {
                   height: Get.height,
                   width: Get.width,
                   fit: BoxFit.cover,
+                  errorBuilder: (
+                      BuildContext context,
+                      Object exception,
+                      StackTrace? stackTrace,
+                      ) {
+                    return const Text(' ');
+                  },
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) {
+                      return child;
+                    } else {
+                      return loading();
+                    }
+                  },
                 ),
               ),
             ),

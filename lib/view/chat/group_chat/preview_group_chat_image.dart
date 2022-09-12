@@ -129,6 +129,7 @@ class _PreviewGroupChatImageScreenState extends State<PreviewGroupChatImageScree
                 'isRead': false,
                 'isReadBy': [],
                 "isReceived": false,
+                'isReceivedBy': [],
               };
               groupChatController.addConversationMessage(
                   widget.chatRoomId!, time, "image", messageMap, imageUrl);

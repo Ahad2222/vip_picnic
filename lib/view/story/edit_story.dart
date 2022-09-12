@@ -294,6 +294,20 @@ class SearchTiles extends StatelessWidget {
                       height: height(context, 1.0),
                       width: width(context, 1.0),
                       fit: BoxFit.cover,
+                      errorBuilder: (
+                          BuildContext context,
+                          Object exception,
+                          StackTrace? stackTrace,
+                          ) {
+                        return const Text(' ');
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) {
+                          return child;
+                        } else {
+                          return loading();
+                        }
+                      },
                     ),
                   ),
                 ),

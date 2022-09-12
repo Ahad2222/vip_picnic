@@ -293,7 +293,7 @@ class ChatController extends GetxController {
 
       for (int i = 0; i < anotherUserName.length; i++) {
         if (anotherUserName[i] != " ") {
-          searchParameters.add(anotherUserName[i]);
+          searchParameters.add(anotherUserName[i].toLowerCase());
           var wordUntil = anotherUserName.substring(0, i);
           log("wordUntil: $wordUntil");
           searchParameters.add(wordUntil);
@@ -302,7 +302,7 @@ class ChatController extends GetxController {
 
       for (int i = 0; i < myName.length; i++) {
         if (myName[i] != " ") {
-          searchParameters.add(myName[i]);
+          searchParameters.add(myName[i].toLowerCase());
           var wordUntil = myName.substring(0, i);
           log("wordUntil: $wordUntil");
           searchParameters.add(wordUntil);

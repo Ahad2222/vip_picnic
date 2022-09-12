@@ -8,6 +8,8 @@ class GroupChatRoomModel {
     this.groupDescription = "",
     this.users,
     this.groupAdmins,
+    // this.isReceivedBy,
+    // this.isReadBy,
     this.notDeletedFor,
     this.searchParameters,
     this.createdAt = 0,
@@ -47,6 +49,8 @@ class GroupChatRoomModel {
   List<String>? users;
   List<String>? groupAdmins;
   List<String>? notDeletedFor;
+  // List<String>? isReceivedBy;
+  // List<String>? isReadBy;
   List<String>? searchParameters;
 
 
@@ -66,6 +70,8 @@ class GroupChatRoomModel {
     lastMessageType = doc["lastMessageType"];
     users = List<String>.from(doc["users"]);
     notDeletedFor = List<String>.from(doc["notDeletedFor"]);
+    // isReceivedBy = List<String>.from(doc["isReceivedBy"]);
+    // isReadBy = List<String>.from(doc["isReadBy"]);
     groupAdmins = List<String>.from(doc["groupAdmins"]);
     searchParameters = List<String>.from(doc["searchParameters"]);
   }
@@ -85,6 +91,8 @@ class GroupChatRoomModel {
     lastMessageType: doc["lastMessageType"],
     users: List<String>.from(doc["users"]),
     notDeletedFor: List<String>.from(doc["notDeletedFor"]),
+    // isReceivedBy: List<String>.from(doc["isReceivedBy"]),
+    // isReadBy: List<String>.from(doc["isReadBy"]),
     groupAdmins: List<String>.from(doc["groupAdmins"]),
     searchParameters: List<String>.from(doc["searchParameters"]),
   );
@@ -104,6 +112,8 @@ class GroupChatRoomModel {
   "lastMessageType": lastMessageType,
   "users": users != null ? List<String>.from(users!.map((x) => x)) : [],
   "notDeletedFor": notDeletedFor != null ? List<String>.from(notDeletedFor!.map((x) => x)) : [],
+  // "isReceivedBy": isReceivedBy != null ? List<String>.from(isReceivedBy!.map((x) => x)) : [],
+  // "isReadBy": isReadBy != null ? List<String>.from(isReadBy!.map((x) => x)) : [],
   "groupAdmins": groupAdmins != null ? List<String>.from(groupAdmins!.map((x) => x)) : [],
   "searchParameters": groupAdmins != null ? List<String>.from(searchParameters!.map((x) => x)) : [],
   };

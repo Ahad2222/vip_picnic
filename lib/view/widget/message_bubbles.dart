@@ -191,6 +191,13 @@ class LeftMessageBubble extends StatelessWidget {
                                     height: 150,
                                     width: 150,
                                     fit: BoxFit.cover,
+                                    errorBuilder: (
+                                        BuildContext context,
+                                        Object exception,
+                                        StackTrace? stackTrace,
+                                        ) {
+                                      return const Text(' ');
+                                    },
                                     loadingBuilder: (context, child, loadingProgress) {
                                       if (loadingProgress == null) {
                                         return child;
@@ -342,6 +349,13 @@ class LeftMessageBubble extends StatelessWidget {
                                             height: 150,
                                             width: 150,
                                             fit: BoxFit.cover,
+                                            errorBuilder: (
+                                                BuildContext context,
+                                                Object exception,
+                                                StackTrace? stackTrace,
+                                                ) {
+                                              return const Text(' ');
+                                            },
                                             loadingBuilder: (context, child, loadingProgress) {
                                               if (loadingProgress == null) {
                                                 return child;
@@ -667,6 +681,13 @@ class RightMessageBubble extends StatelessWidget {
                                     height: 150,
                                     width: 150,
                                     fit: BoxFit.cover,
+                                    errorBuilder: (
+                                        BuildContext context,
+                                        Object exception,
+                                        StackTrace? stackTrace,
+                                        ) {
+                                      return const Text(' ');
+                                    },
                                     loadingBuilder: (context, child, loadingProgress) {
                                       if (loadingProgress == null) {
                                         return child;
@@ -687,6 +708,15 @@ class RightMessageBubble extends StatelessWidget {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
+                                    MyText(
+                                      paddingLeft: 10,
+                                      paddingRight: 5,
+                                      text: '$time',
+                                      paddingTop: 15,
+                                      align: TextAlign.end,
+                                      size: 10,
+                                      color: kPrimaryColor,
+                                    ),
                                     (!isRead && !isReceived)
                                         ? Padding(
                                             padding: const EdgeInsets.only(left: 4.0, right: 10),
@@ -804,7 +834,7 @@ class RightMessageBubble extends StatelessWidget {
                                   children: [
                                     Container(
                                       margin: EdgeInsets.only(
-                                        bottom: 15,
+                                        bottom: 5,
                                       ),
                                       height: 150,
                                       width: 150,
@@ -828,6 +858,13 @@ class RightMessageBubble extends StatelessWidget {
                                             height: 150,
                                             width: 150,
                                             fit: BoxFit.cover,
+                                            errorBuilder: (
+                                                BuildContext context,
+                                                Object exception,
+                                                StackTrace? stackTrace,
+                                                ) {
+                                              return const Text(' ');
+                                            },
                                             loadingBuilder: (context, child, loadingProgress) {
                                               if (loadingProgress == null) {
                                                 return child;
@@ -851,6 +888,47 @@ class RightMessageBubble extends StatelessWidget {
                                           Assets.imagesPlay,
                                           height: 18,
                                           color: kPrimaryColor,
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      bottom: 12,
+                                      right: 3,
+                                      child: Container(
+                                        width: 150,
+                                        height: 10,
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            MyText(
+                                              paddingLeft: 10,
+                                              paddingRight: 5,
+                                              text: '$time',
+                                              paddingTop: 15,
+                                              align: TextAlign.end,
+                                              size: 10,
+                                              color: kPrimaryColor,
+                                            ),
+                                            (!isRead && !isReceived)
+                                                ? Padding(
+                                              padding: const EdgeInsets.only(left: 4.0, right: 10),
+                                              child: Image.asset(
+                                                "assets/images/tick.png",
+                                                width: 14,
+                                                height: 10,
+                                                color: Colors.grey,
+                                              ),
+                                            )
+                                                : Padding(
+                                              padding: const EdgeInsets.only(left: 4.0, right: 10),
+                                              child: Image.asset(
+                                                "assets/images/read.png",
+                                                width: 14,
+                                                height: 14,
+                                                color: (isReceived && !isRead) ? Colors.grey : Colors.blue,
+                                              ),
+                                            )
+                                          ],
                                         ),
                                       ),
                                     ),
