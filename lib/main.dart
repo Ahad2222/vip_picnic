@@ -550,6 +550,7 @@ Future<void> main() async {
   debugPrint('User granted permission: ${settings.authorizationStatus}');
 
   await GetStorage.init();
+  Get.put(ChatController());
   Get.put(SplashScreenController());
   Get.put(EmailAuthController());
   Get.put(GoogleAuthController());
@@ -559,7 +560,6 @@ Future<void> main() async {
   Get.put(ForgotPasswordController());
   Get.put(HomeController());
   Get.put(ChooseLanguageController());
-  Get.put(ChatController());
   Get.put(GroupChatController());
   Get.put(EventController());
   Get.put(EmailController());

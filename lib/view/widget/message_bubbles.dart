@@ -2,6 +2,7 @@
 
 import 'dart:developer';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
@@ -23,6 +24,7 @@ class LeftMessageBubble extends StatelessWidget {
       : super(key: key);
 
   String? id, msg, time, receiveImage, type, thumbnail;
+  // bool isRead = false, isReceived = false;
   RxBool isSelected = false.obs;
 
   @override
@@ -98,8 +100,7 @@ class LeftMessageBubble extends StatelessWidget {
                 "and id is: ${id} and list is: ${chatController.deleteMsgIdList} and "
                 "\n chatController.deleteMsgIdList.asMap().containsValue(id): "
                 "${chatController.deleteMsgIdList.asMap().containsValue(id)}");
-          }
-          else {
+          } else {
             // isSelected.value = !isSelected.value;
             if (!isSelected.value) {
               isSelected.value = true;
@@ -138,7 +139,6 @@ class LeftMessageBubble extends StatelessWidget {
             }
             log("deleting on LongPress right now so onLongPress is  is not gonna work");
           }
-
         }
       },
       // : null,
@@ -163,42 +163,68 @@ class LeftMessageBubble extends StatelessWidget {
                             ),
                           ),
                         ),
-                        child: Container(
-                          margin: EdgeInsets.only(
-                            bottom: 15,
-                          ),
-                          height: 150,
-                          width: 150,
-                          padding: EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                            color: kPrimaryColor,
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [
-                              BoxShadow(
-                                color: kBlackColor.withOpacity(0.16),
-                                blurRadius: 6,
-                                offset: Offset(0, 0),
+                        child: Stack(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(
+                                bottom: 15,
                               ),
-                            ],
-                          ),
-                          child: Center(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(6),
-                              child: Image.network(
-                                '$msg',
-                                height: 150,
-                                width: 150,
-                                fit: BoxFit.cover,
-                                loadingBuilder: (context, child, loadingProgress) {
-                                  if (loadingProgress == null) {
-                                    return child;
-                                  } else {
-                                    return loading();
-                                  }
-                                },
+                              height: 150,
+                              width: 150,
+                              padding: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: kPrimaryColor,
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: kBlackColor.withOpacity(0.16),
+                                    blurRadius: 6,
+                                    offset: Offset(0, 0),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: Image.network(
+                                    '$msg',
+                                    height: 150,
+                                    width: 150,
+                                    fit: BoxFit.cover,
+                                    loadingBuilder: (context, child, loadingProgress) {
+                                      if (loadingProgress == null) {
+                                        return child;
+                                      } else {
+                                        return loading();
+                                      }
+                                    },
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                            Positioned(
+                              bottom: 2,
+                              left: 20,
+                              child: Container(
+                                width: 150,
+                                height: 10,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    MyText(
+                                      paddingLeft: 30,
+                                      paddingRight: 15,
+                                      text: '$time',
+                                      paddingTop: 15,
+                                      align: TextAlign.end,
+                                      size: 10,
+                                      color: kSecondaryColor,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -342,6 +368,28 @@ class LeftMessageBubble extends StatelessWidget {
                                         ),
                                       ),
                                     ),
+                                    Positioned(
+                                      bottom: 2,
+                                      left: 20,
+                                      child: Container(
+                                        width: 150,
+                                        height: 10,
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            MyText(
+                                              paddingLeft: 30,
+                                              paddingRight: 15,
+                                              text: '$time',
+                                              paddingTop: 15,
+                                              align: TextAlign.end,
+                                              size: 10,
+                                              color: kSecondaryColor,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -383,14 +431,39 @@ class LeftMessageBubble extends StatelessWidget {
                                     text: '$msg',
                                     color: kSecondaryColor,
                                   ),
-                                  MyText(
-                                    paddingLeft: 30,
-                                    paddingRight: 13,
-                                    text: '$time',
-                                    paddingTop: 15,
-                                    align: TextAlign.end,
-                                    size: 10,
-                                    color: kSecondaryColor,
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      MyText(
+                                        paddingLeft: 30,
+                                        paddingRight: 15,
+                                        text: '$time',
+                                        paddingTop: 15,
+                                        align: TextAlign.end,
+                                        size: 10,
+                                        color: kSecondaryColor,
+                                      ),
+                                      // (!isRead && !isReceived)
+                                      //     ? Padding(
+                                      //   padding: const EdgeInsets.only(left: 2.0, right: 15, bottom: 3),
+                                      //   child: Image.asset(
+                                      //     "assets/images/tick.png",
+                                      //     width: 14,
+                                      //     height: 10,
+                                      //     color: Colors.grey,
+                                      //   ),
+                                      // )
+                                      //     : Padding(
+                                      //   padding: const EdgeInsets.only(left: 2.0, right: 15, bottom: 3),
+                                      //   child: Image.asset(
+                                      //     "assets/images/read.png",
+                                      //     width: 14,
+                                      //     height: 14,
+                                      //     color: (isReceived && !isRead) ? Colors.grey : Colors.blue,
+                                      //   ),
+                                      // )
+                                    ],
                                   ),
                                 ],
                               ),
@@ -408,11 +481,20 @@ class LeftMessageBubble extends StatelessWidget {
 // ignore: must_be_immutable
 class RightMessageBubble extends StatelessWidget {
   RightMessageBubble(
-      {Key? key, this.id, this.msg, this.thumbnail = "", this.sendByMe = true, this.time, this.receiveImage, this.type})
+      {Key? key,
+      this.id,
+      this.msg,
+      this.thumbnail = "",
+      this.sendByMe = true,
+      this.time,
+      this.receiveImage,
+      this.type,
+      this.isRead = false,
+      this.isReceived = false})
       : super(key: key);
 
   String? id, msg, time, receiveImage, type, thumbnail;
-  bool sendByMe;
+  bool sendByMe, isRead = false, isReceived = false;
   RxBool isSelected = false.obs;
 
   @override
@@ -423,12 +505,11 @@ class RightMessageBubble extends StatelessWidget {
               if (chatController.isDeleting.value) {
                 if (type == "video" && msg == "Video being uploaded") {
                   log("in cannot interrupt else");
-                showMsg(
-                  context: context,
-                  msg: "You cannot interrupt an uploading video. "
-                      "You may choose to delete it for everyone, after it is uploaded.",
-                );
-
+                  showMsg(
+                    context: context,
+                    msg: "You cannot interrupt an uploading video. "
+                        "You may choose to delete it for everyone, after it is uploaded.",
+                  );
                 } else {
                   if (!isSelected.value) {
                     isSelected.value = true;
@@ -482,7 +563,6 @@ class RightMessageBubble extends StatelessWidget {
                     context: context,
                     msg: "You cannot interrupt an uploading video. "
                         "You may choose to delete it for everyone, after it is uploaded.");
-
               } else {
                 if (!chatController.isDeleting.value) {
                   isSelected.value = true;
@@ -559,42 +639,78 @@ class RightMessageBubble extends StatelessWidget {
                             ),
                           ),
                         ),
-                        child: Container(
-                          margin: EdgeInsets.only(
-                            bottom: 15,
-                          ),
-                          height: 150,
-                          width: 150,
-                          padding: EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                            color: kPrimaryColor,
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [
-                              BoxShadow(
-                                color: kBlackColor.withOpacity(0.16),
-                                blurRadius: 6,
-                                offset: Offset(0, 0),
+                        child: Stack(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(
+                                bottom: 5,
                               ),
-                            ],
-                          ),
-                          child: Center(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(6),
-                              child: Image.network(
-                                '$msg',
-                                height: 150,
-                                width: 150,
-                                fit: BoxFit.cover,
-                                loadingBuilder: (context, child, loadingProgress) {
-                                  if (loadingProgress == null) {
-                                    return child;
-                                  } else {
-                                    return loading();
-                                  }
-                                },
+                              height: 150,
+                              width: 150,
+                              padding: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: kPrimaryColor,
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: kBlackColor.withOpacity(0.16),
+                                    blurRadius: 6,
+                                    offset: Offset(0, 0),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: Image.network(
+                                    '$msg',
+                                    height: 150,
+                                    width: 150,
+                                    fit: BoxFit.cover,
+                                    loadingBuilder: (context, child, loadingProgress) {
+                                      if (loadingProgress == null) {
+                                        return child;
+                                      } else {
+                                        return loading();
+                                      }
+                                    },
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                            Positioned(
+                              bottom: 12,
+                              right: 3,
+                              child: Container(
+                                width: 150,
+                                height: 10,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    (!isRead && !isReceived)
+                                        ? Padding(
+                                            padding: const EdgeInsets.only(left: 4.0, right: 10),
+                                            child: Image.asset(
+                                              "assets/images/tick.png",
+                                              width: 14,
+                                              height: 10,
+                                              color: Colors.grey,
+                                            ),
+                                          )
+                                        : Padding(
+                                            padding: const EdgeInsets.only(left: 4.0, right: 10),
+                                            child: Image.asset(
+                                              "assets/images/read.png",
+                                              width: 14,
+                                              height: 14,
+                                              color: (isReceived && !isRead) ? Colors.grey : Colors.blue,
+                                            ),
+                                          )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -775,14 +891,39 @@ class RightMessageBubble extends StatelessWidget {
                                     text: '$msg',
                                     color: kPrimaryColor,
                                   ),
-                                  MyText(
-                                    paddingLeft: 13,
-                                    paddingRight: 30,
-                                    text: '$time',
-                                    paddingTop: 15,
-                                    align: TextAlign.end,
-                                    size: 10,
-                                    color: kPrimaryColor,
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      MyText(
+                                        paddingLeft: 10,
+                                        paddingRight: 5,
+                                        text: '$time',
+                                        paddingTop: 15,
+                                        align: TextAlign.end,
+                                        size: 10,
+                                        color: kPrimaryColor,
+                                      ),
+                                      (!isRead && !isReceived)
+                                          ? Padding(
+                                              padding: const EdgeInsets.only(left: 2.0, right: 25, bottom: 3),
+                                              child: Image.asset(
+                                                "assets/images/tick.png",
+                                                width: 14,
+                                                height: 10,
+                                                color: Colors.grey,
+                                              ),
+                                            )
+                                          : Padding(
+                                              padding: const EdgeInsets.only(left: 2.0, right: 25, bottom: 3),
+                                              child: Image.asset(
+                                                "assets/images/read.png",
+                                                width: 14,
+                                                height: 14,
+                                                color: (isReceived && !isRead) ? Colors.grey : Colors.blue,
+                                              ),
+                                            )
+                                    ],
                                   ),
                                 ],
                               ),

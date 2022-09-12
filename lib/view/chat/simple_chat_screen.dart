@@ -642,6 +642,7 @@ class _ChatScreenState extends State<ChatScreen> {
               }
               if (!isDeletedForMe) {
                 if (!sendByMe) {
+                  snapshot.data?.docs[index].reference.update({'isRead': true});
                   return LeftMessageBubble(
                     id: snapshot.data?.docs[index].id,
                     receiveImage: anotherUserImage,
@@ -663,6 +664,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     type: type,
                     thumbnail: type == "video" ? data["thumbnail"] : "",
                     sendByMe: true,
+                    isRead: data['isRead'],
+                    isReceived: data['isReceived'],
                   );
                 }
               } else {

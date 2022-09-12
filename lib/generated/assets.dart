@@ -60,6 +60,7 @@ class Assets {
   static const String imagesPlay = 'assets/images/play.png';
   static const String imagesPlusIcon = 'assets/images/plus_icon.png';
   static const String imagesProfileAvatar = 'assets/images/profile_avatar.png';
+  static const String imagesRead = 'assets/images/read.png';
   static const String imagesRoamcticePicnic = 'assets/images/roamctice_picnic.png';
   static const String imagesRoundedClose = 'assets/images/rounded_close.png';
   static const String imagesSearch = 'assets/images/search.png';
@@ -71,6 +72,7 @@ class Assets {
   static const String imagesSimpleLock = 'assets/images/simpleLock.png';
   static const String imagesStoryBg = 'assets/images/story_bg.png';
   static const String imagesSupport = 'assets/images/support.png';
+  static const String imagesTick = 'assets/images/tick.png';
   static const String imagesTrash = 'assets/images/trash.png';
   static const String imagesUploadPicture = 'assets/images/upload_picture.png';
   static const String imagesUpperGradient = 'assets/images/upper_gradient.png';

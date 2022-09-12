@@ -187,19 +187,20 @@ class ChatController extends GetxController {
   }
 
   messageReceivedStreamActivator(myId){
+    log(" messageReceivedStreamActivator caled");
     ffstore
-        .collection('ChatRoom')
+        .collection(chatRoomCollection)
         .where('users', arrayContains: myId)
         .snapshots()
-        .map((QuerySnapshot querySnap) {
-      List<ChatHeadModel> myChats = [];
+        .listen((QuerySnapshot querySnap) {
+          log("in messageReceivedStreamActivator listen");
       // log('stream inside the myChatHeadsList Snapshot and querySnap.docs.length = ${querySnap.docs.length} and chatHeads.length = ${chatHeads.value.length}:');
       querySnap.docs.forEach((doc) {
         // log("querySnap.docs.length = ${querySnap.docs.length} and doc: $doc");
         if (doc["notDeletedFor"].asMap().containsValue(myId)) {
-          // log("activeChatCount changed");
+          log("messageReceivedStreamActivator notDeletedFor changed");
           ffstore
-              .collection("ChatRoom")
+              .collection(chatRoomCollection)
               .doc(doc['chatRoomId'])
               .collection("messages")
               .where("isReceived", isEqualTo: false)
@@ -210,7 +211,6 @@ class ChatController extends GetxController {
               element.reference.update({'isReceived': true});
             });
           });
-          myChats.add(ChatHeadModel.fromDocumentSnapshot(doc));
         }
       });
     });

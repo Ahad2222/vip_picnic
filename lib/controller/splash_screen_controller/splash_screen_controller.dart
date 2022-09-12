@@ -22,6 +22,8 @@ class SplashScreenController extends GetxController {
   checkUser() async {
     if (_user != null) {
       try {
+        chatController.messageReceivedStreamActivator(auth.currentUser?.uid);
+
         Map<String,dynamic> data = await UserSimplePreference.getUserData();
         log('SPLASH SCREEN getUserData $data');
         userDetailsModel = UserDetailsModel.fromJson(data);

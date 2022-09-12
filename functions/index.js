@@ -23,14 +23,7 @@ function removeItemOnce(arr, value) {
   return arr;
 }
 
-async function TextChatsNotiSingle(
-  token_o,
-  msg,
-  url,
-  senderName,
-  recName,
-  chatRoomId
-) {
+async function TextChatsNotiSingle(token_o, msg, url, senderName, recName, chatRoomId) {
   functions.logger.log("Single Token function is executed");
   functions.logger.log("ChatRoomID is ");
   functions.logger.log(chatRoomId);
@@ -49,6 +42,7 @@ async function TextChatsNotiSingle(
         imageUrl: url,
         chatRoomId: chatRoomId,
         screenName: "chatScreen",
+//        messageId: messageId,
       },
     })
     .then((value) => {
@@ -111,6 +105,7 @@ async function TextGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) {
         imageUrl: groupImage,
         groupId: chatRoomId,
         screenName: "groupChatScreen",
+//        messageId: messageId,
       },
     })
     .then((value) => {
@@ -123,14 +118,7 @@ async function TextGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) {
     });
 }
 
-async function AudioChatsNotiSingle(
-  token_o,
-  msg,
-  url,
-  senderName,
-  recName,
-  chatRoomId
-) {
+async function AudioChatsNotiSingle(token_o, msg, url, senderName, recName, chatRoomId) {
   functions.logger.log("Single Token function is executed");
   functions.logger.log("ChatRoomID is ");
   functions.logger.log(chatRoomId);
@@ -159,12 +147,7 @@ async function AudioChatsNotiSingle(
     });
 }
 
-async function AudioGroupChatsNotiSingle(
-  msg,
-  senderId,
-  senderName,
-  chatRoomId
-) {
+async function AudioGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) {
   functions.logger.log("Single Token function is executed");
   functions.logger.log("ChatRoomID is ");
   functions.logger.log(chatRoomId);
@@ -225,12 +208,7 @@ async function AudioGroupChatsNotiSingle(
     });
 }
 
-async function VideoGroupChatsNotiSingle(
-  msg,
-  senderId,
-  senderName,
-  chatRoomId
-) {
+async function VideoGroupChatsNotiSingle(msg, senderId, senderName, chatRoomId) {
   functions.logger.log("Single Token function is executed");
   functions.logger.log("ChatRoomID is ");
   functions.logger.log(chatRoomId);
@@ -282,6 +260,7 @@ async function VideoGroupChatsNotiSingle(
         imageUrl: groupImage,
         groupId: chatRoomId,
         screenName: "groupChatScreen",
+//        messageId: messageId,
       },
     })
     .then((value) => {
@@ -294,15 +273,7 @@ async function VideoGroupChatsNotiSingle(
     });
 }
 
-async function VideoChatsNotiSingle(
-  token_o,
-  msg,
-  profileImageUrl,
-  generalImageUrl,
-  senderName,
-  recName,
-  chatRoomId
-) {
+async function VideoChatsNotiSingle(token_o, msg, profileImageUrl, generalImageUrl, senderName, recName, chatRoomId) {
   functions.logger.log("Single Token function is executed");
   functions.logger.log("ChatRoomID is ");
   functions.logger.log(chatRoomId);
@@ -322,6 +293,7 @@ async function VideoChatsNotiSingle(
         // generalImageUrl: generalImageUrl,
         chatRoomId: chatRoomId,
         screenName: "chatScreen",
+//        messageId: messageId
       },
     })
     .then((value) => {
@@ -333,15 +305,7 @@ async function VideoChatsNotiSingle(
 }
 //When chat is of type image,  profile image and general image will be sent
 // in the payload
-async function ImageChatsNotiSingle(
-  token_o,
-  msg,
-  profileImageUrl,
-  generalImageUrl,
-  senderName,
-  recName,
-  chatRoomId
-) {
+async function ImageChatsNotiSingle(token_o, msg, profileImageUrl, generalImageUrl, senderName, recName, chatRoomId) {
   functions.logger.log("Single Token function is executed");
   functions.logger.log("ChatRoomID is ");
   functions.logger.log(chatRoomId);
@@ -371,12 +335,7 @@ async function ImageChatsNotiSingle(
     });
 }
 
-async function ImageGroupChatsNotiSingle(
-  generalImage,
-  senderId,
-  senderName,
-  chatRoomId
-) {
+async function ImageGroupChatsNotiSingle(generalImage, senderId, senderName, chatRoomId) {
   functions.logger.log("Single Token function is executed");
   functions.logger.log("ChatRoomID is ");
   functions.logger.log(chatRoomId);

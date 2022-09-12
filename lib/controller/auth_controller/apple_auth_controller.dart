@@ -173,8 +173,8 @@ class AppleAuthController extends GetxController {
               await ffstore.collection(deactivatedCollection).doc(auth.currentUser?.uid).get().then((value) async {
                 if (!value.exists) {
                   if (isNewUser) {
-                    int emailLength = userEmail.length ?? 0;
-                    String email = userEmail ?? "";
+                    int emailLength = userEmail.length;
+                    String email = userEmail;
                     for (int i = 0; i < emailLength; i++) {
                       if (email[i] != " ") {
                         userSearchParameters.add(email[i]);
@@ -187,7 +187,7 @@ class AppleAuthController extends GetxController {
                     userDetailsModel = UserDetailsModel(
                       uID: userCredential.user?.uid ?? "",
                       profileImageUrl: userCredential.user?.photoURL ?? "",
-                      fullName: userName ?? "",
+                      fullName: userName,
                       email: (userEmail != "") ? userEmail : userCredential.user?.email,
                       accountType: 'Private',
                       iFollowed: [],
