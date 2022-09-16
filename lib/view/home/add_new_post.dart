@@ -38,7 +38,7 @@ class AddNewPost extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: myAppBar(
-        title: editPost! ? 'Edit Post' : 'New Post',
+        title: editPost! ? 'editPost'.tr : 'newPost'.tr,
         onTap: () => Navigator.pop(context),
       ),
       body: Column(
@@ -413,7 +413,7 @@ class AddNewPost extends StatelessWidget {
                   child: SimpleTextField(
                     controller: homeController.descriptionCon,
                     validator: (value) => emptyFieldValidator(value!),
-                    hintText: 'Description...',
+                    hintText: 'description'.tr + '...',
                     initialValue: title,
                     maxLines: 6,
                   ),
@@ -427,7 +427,7 @@ class AddNewPost extends StatelessWidget {
                   ),
                   child: SimpleTextField(
                     controller: homeController.tagCon,
-                    hintText: 'Tag people...',
+                    hintText: 'tagPeople'.tr + '...',
                     haveSuffix: false,
                     onChanged: (value) {
                       userSearchText.value = value;
@@ -683,7 +683,7 @@ class AddNewPost extends StatelessWidget {
                   ),
                   child: SimpleTextField(
                     controller: homeController.locationCon,
-                    hintText: 'Location (optional)...',
+                    hintText: 'locationOptional'.tr,
                   ),
                 ),
               ],
@@ -696,7 +696,7 @@ class AddNewPost extends StatelessWidget {
             ),
             child: MyButton(
               onTap: () => homeController.uploadPost(context),
-              buttonText: 'publish',
+              buttonText: 'publish'.tr,
             ),
           ),
         ],
@@ -722,8 +722,7 @@ class AddNewPost extends StatelessWidget {
             homeController.taggedPeople.addIf(!homeController.taggedPeople.asMap().containsValue(id), id);
             homeController.taggedPeopleToken
                 .addIf(!homeController.taggedPeopleToken.asMap().containsValue(userToken), userToken);
-            selectedUsers.addIf(
-                !selectedUsers.containsKey(id), id, {
+            selectedUsers.addIf(!selectedUsers.containsKey(id), id, {
               "id": id,
               "name": name,
               "email": email,
@@ -758,10 +757,10 @@ class AddNewPost extends StatelessWidget {
                   width: Get.width,
                   fit: BoxFit.cover,
                   errorBuilder: (
-                      BuildContext context,
-                      Object exception,
-                      StackTrace? stackTrace,
-                      ) {
+                    BuildContext context,
+                    Object exception,
+                    StackTrace? stackTrace,
+                  ) {
                     return const Text(' ');
                   },
                   loadingBuilder: (context, child, loadingProgress) {

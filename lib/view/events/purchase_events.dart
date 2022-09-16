@@ -1,9 +1,15 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:vip_picnic/config/routes/routes_config.dart';
 import 'package:vip_picnic/constant/color.dart';
+import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
+import 'package:vip_picnic/model/theme_model/theme_model.dart';
+import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/events/customize_event.dart';
 import 'package:vip_picnic/view/events/event_details.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
@@ -32,50 +38,43 @@ class PurchaseEvents extends StatelessWidget {
     },
     {
       'eventType': 'Wedding',
-      'thumbnail':
-          'https://www.vippicnic.com/img/packs/06_25__loc_7666588.jpeg',
+      'thumbnail': 'https://www.vippicnic.com/img/packs/06_25__loc_7666588.jpeg',
       'des':
           'Who doesn\'t want an unforgettable and unique wedding party? Nowadays we don\'t need to invest in a party for many guests, nor in grand scenery or sophistication, what counts is authenticity, that the party has the face of the newlyweds. Innovate and personalize your wedding day as much as possible with a unique and wonderful outdoor picnic.',
     },
     {
       'eventType': 'Birthday Party',
-      'thumbnail':
-          'https://www.vippicnic.com/img/packs/06_25__loc_9343192.jpeg',
+      'thumbnail': 'https://www.vippicnic.com/img/packs/06_25__loc_9343192.jpeg',
       'des':
           'We want your celebration to be a amazing experience, a small work of art of good taste. Exclusive ideas sculpted and decorated with dedication to make this day one of the most surprising of your life, for you and for your people. Do you have something to celebrate? Do not hesitate to contact us, we are experts in organizing party’s and picnics.',
     },
     {
       'eventType': 'Gender Reveal',
-      'thumbnail':
-          'https://www.vippicnic.com/img/packs/06_25__loc_7563604.jpeg',
+      'thumbnail': 'https://www.vippicnic.com/img/packs/06_25__loc_7563604.jpeg',
       'des':
           'Can you imagine super special event for a baby gender reveal, we are so happy to make our clients dreams come true and to be able to create such beautiful things for everyone who contacts us! Our picnics are always a different and creative surprise. Boy or girl ?',
     },
     {
       'eventType': 'Proposal Marriage',
-      'thumbnail':
-          'https://www.vippicnic.com/img/packs/06_25__loc_7447790.jpeg',
+      'thumbnail': 'https://www.vippicnic.com/img/packs/06_25__loc_7447790.jpeg',
       'des':
           'We are specialists in the field of carrying out your project party event the way you want it. together we can brainstorm about your amazing ideas to make your dreams come true, nothing is too crazy for us! to realize your dream party. Make your reservation now.',
     },
     {
       'eventType': 'Romantic Picnic',
-      'thumbnail':
-          'https://www.vippicnic.com/img/packs/06_25__loc_6146656.jpeg',
+      'thumbnail': 'https://www.vippicnic.com/img/packs/06_25__loc_6146656.jpeg',
       'des':
           'What do you think of a beach picnic together with your loved one ? your partner would be amazed how you organized everything so romantic, book this unforgettable experience now to enjoy together from this amazing moment.',
     },
     {
       'eventType': 'Mother\'s Day',
-      'thumbnail':
-          'https://www.vippicnic.com/img/packs/06_25__loc_1899010.jpeg',
+      'thumbnail': 'https://www.vippicnic.com/img/packs/06_25__loc_1899010.jpeg',
       'des':
           'What do you think of a beach picnic together with your loved one ? your partner would be amazed how you organized everything so romantic, book this unforgettable experience now to enjoy together from this amazing moment.',
     },
     {
       'eventType': 'Customize',
-      'thumbnail':
-          'https://www.vippicnic.com/img/packs/06_25__loc_6971336.jpeg',
+      'thumbnail': 'https://www.vippicnic.com/img/packs/06_25__loc_6971336.jpeg',
       'des':
           'We are specialists in the field of carrying out your project party event the way you want it. together we can brainstorm about your amazing ideas to make your dreams come true, nothing is too crazy for us! to realize your dream party. Make your reservation now.',
     },
@@ -85,38 +84,124 @@ class PurchaseEvents extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: myAppBar(
-        title: 'Purchase event',
+        title: 'purchaseEvent'.tr,
         onTap: () => Navigator.pop(context),
       ),
-      body: GridView.builder(
-        shrinkWrap: true,
-        padding: EdgeInsets.symmetric(
-          horizontal: 15,
-          vertical: 20,
-        ),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 7,
-          mainAxisSpacing: 10,
-          mainAxisExtent: 168,
-        ),
-        physics: BouncingScrollPhysics(),
-        itemCount: events.length,
-        itemBuilder: (context, index) {
-          var eventData = events[index];
-          return eventsCards(
-            context,
-            eventData,
-            index,
-          );
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: ffstore
+            .collection(themesCollection)
+            // .where("uID", isEqualTo: auth.currentUser!.uid)
+            // .orderBy("createdAtMilliSeconds", descending: true)
+            .snapshots(),
+        builder: (
+          BuildContext context,
+          AsyncSnapshot<QuerySnapshot> snapshot,
+        ) {
+          //log("inside stream-builder");
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            log("inside stream-builder in waiting state");
+            return noPostYet();
+          } else if (snapshot.connectionState == ConnectionState.active ||
+              snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError) {
+              return const Text('Some unknown error occurred');
+            } else if (snapshot.hasData) {
+              // log("inside hasData and ${snapshot.data!.docs}");
+              if (snapshot.data!.docs.length > 0) {
+                return GridView.builder(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 7,
+                    mainAxisSpacing: 10,
+                    mainAxisExtent: 168,
+                  ),
+                  physics: BouncingScrollPhysics(),
+                  itemCount: snapshot.data?.docs.length ?? 0,
+                  itemBuilder: (context, index) {
+                    ThemeModel themeModel =
+                        ThemeModel.fromJson(snapshot.data?.docs[index].data() as Map<String, dynamic>);
+                    // var eventData = events[index];
+                    return eventsCards(
+                      context,
+                      themeModel,
+                      index,
+                    );
+                  },
+                );
+              } else {
+                return noPostYet();
+              }
+            } else {
+              log("in else of hasData done and: ${snapshot.connectionState} and"
+                  " snapshot.hasData: ${snapshot.hasData}");
+              return noPostYet();
+            }
+          } else {
+            log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+            return noPostYet();
+          }
         },
+      ),
+
+      // GridView.builder(
+      //   shrinkWrap: true,
+      //   padding: EdgeInsets.symmetric(
+      //     horizontal: 15,
+      //     vertical: 20,
+      //   ),
+      //   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      //     crossAxisCount: 2,
+      //     crossAxisSpacing: 7,
+      //     mainAxisSpacing: 10,
+      //     mainAxisExtent: 168,
+      //   ),
+      //   physics: BouncingScrollPhysics(),
+      //   itemCount: events.length,
+      //   itemBuilder: (context, index) {
+      //     var eventData = events[index];
+      //     return eventsCards(
+      //       context,
+      //       eventData,
+      //       index,
+      //     );
+      //   },
+      // ),
+    );
+  }
+
+  Widget noPostYet() {
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: 50,
+      ),
+      child: Column(
+        children: [
+          Center(
+            child: Image.asset(
+              Assets.imagesNoDataFound,
+              height: 180,
+            ),
+          ),
+          MyText(
+            text: 'No Themes Yet',
+            size: 18,
+            weight: FontWeight.w700,
+          ),
+          MyText(
+            text: 'All event themes would appear here.',
+            size: 10,
+            weight: FontWeight.w500,
+          ),
+        ],
       ),
     );
   }
 
   Widget eventsCards(
     BuildContext context,
-    Map<String, dynamic> eventData,
+    ThemeModel eventData,
     int index,
   ) {
     return GestureDetector(
@@ -124,9 +209,9 @@ class PurchaseEvents extends StatelessWidget {
         context,
         MaterialPageRoute(
           builder: (_) => CustomizeEvent(
-            imageUrl: eventData['thumbnail'],
-            eventTheme: eventData['eventType'],
-            des: eventData['des'],
+            imageUrl: eventData.image,
+            eventTheme: eventData.name,
+            des: eventData.description,
           ),
         ),
       ),
@@ -136,7 +221,7 @@ class PurchaseEvents extends StatelessWidget {
           alignment: Alignment.bottomCenter,
           children: [
             Image.network(
-              eventData['thumbnail'],
+              eventData.image ?? "",
               fit: BoxFit.cover,
               width: Get.width,
               height: Get.height,
@@ -164,7 +249,7 @@ class PurchaseEvents extends StatelessWidget {
               child: MyText(
                 paddingLeft: 12,
                 paddingBottom: 10,
-                text: '${eventData['eventType']}',
+                text: '${eventData.name}',
                 size: 18,
                 weight: FontWeight.w600,
                 color: kPrimaryColor,

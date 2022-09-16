@@ -11,11 +11,7 @@ class EventModel {
   String duration;
   String eventDate;
   String details;
-  int flowers;
-  int champagne;
-  int wine;
-  int cake;
-  int candles;
+
   String bookerName;
   String bookerEmail;
   String bookerPhone;
@@ -23,6 +19,7 @@ class EventModel {
   String state;
   String zip;
   String address;
+  Map<String, int>? addons;
 
   EventModel({
     this.userID = '',
@@ -37,11 +34,12 @@ class EventModel {
     this.duration = '',
     this.eventDate = '',
     this.details = '',
-    this.flowers = 0,
-    this.champagne = 0,
-    this.wine = 0,
-    this.cake = 0,
-    this.candles = 0,
+    // this.flowers = 0,
+    // this.champagne = 0,
+    // this.wine = 0,
+    // this.cake = 0,
+    // this.candles = 0,
+    this.addons,
     this.bookerName = '',
     this.bookerEmail = '',
     this.bookerPhone = '',
@@ -64,11 +62,12 @@ class EventModel {
         duration: json[' duration'],
         eventDate: json['eventDate'],
         details: json['details'],
-        flowers: json['flowers'],
-        champagne: json['champagne'],
-        wine: json['wine'],
-        cake: json['cake'],
-        candles: json['candles'],
+        addons: json['addons'],
+        // flowers: json['flowers'],
+        // champagne: json['champagne'],
+        // wine: json['wine'],
+        // cake: json['cake'],
+        // candles: json['candles'],
         bookerName: json['bookerName'],
         bookerEmail: json['bookerEmail'],
         bookerPhone: json['bookerPhone'],
@@ -91,11 +90,12 @@ class EventModel {
         'duration': duration,
         'eventDate': eventDate,
         'details': details,
-        'flowers': flowers,
-        'champagne': champagne,
-        'wine': wine,
-        'cake': cake,
-        'candles': candles,
+        'addons': addons,
+        // 'flowers': flowers,
+        // 'champagne': champagne,
+        // 'wine': wine,
+        // 'cake': cake,
+        // 'candles': candles,
         'bookerName': bookerName,
         'bookerEmail': bookerEmail,
         'bookerPhone': bookerPhone,

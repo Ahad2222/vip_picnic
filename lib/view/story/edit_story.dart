@@ -343,18 +343,18 @@ class SearchTiles extends StatelessWidget {
                           Get.dialog(loading());
                           if (storyModel?.mediaType == "Image" || storyModel?.mediaType == "ImageWithCaption") {
                             String? url = storyModel?.storyImage ?? "";
-                            await ffstore.collection(storyCollection).doc(docId).delete();
+                            await ffstore.collection(storiesCollection).doc(docId).delete();
                             Get.back();
                             await fstorage.refFromURL(url).delete();
                           } else if (storyModel?.mediaType == "Video" || storyModel?.mediaType == "VideoWithCaption") {
                             String? url = storyModel?.storyVideo ?? "";
                             String? thumbnailUrl = storyModel?.storyImage ?? "";
-                            await ffstore.collection(storyCollection).doc(docId).delete();
+                            await ffstore.collection(storiesCollection).doc(docId).delete();
                             Get.back();
                             await fstorage.refFromURL(url).delete();
                             await fstorage.refFromURL(thumbnailUrl).delete();
                           } else {
-                            await ffstore.collection(storyCollection).doc(docId).delete();
+                            await ffstore.collection(storiesCollection).doc(docId).delete();
                             Get.back();
                           }
                         },

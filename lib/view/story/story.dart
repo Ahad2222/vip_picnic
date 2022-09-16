@@ -45,7 +45,7 @@ class _StoryState extends State<Story> {
     int twentyFourHourDifferenceMillisecondsSinceEpoch =
         DateTime.now().subtract(Duration(hours: 24)).millisecondsSinceEpoch;
     ffstore
-        .collection(storyCollection)
+        .collection(storiesCollection)
         .where("storyPersonId", isEqualTo: widget.storyPersonId)
         .where("createdAt", isGreaterThan: twentyFourHourDifferenceMillisecondsSinceEpoch)
         .orderBy("createdAt", descending: true)
@@ -175,7 +175,7 @@ class _StoryState extends State<Story> {
                   color: Colors.white,
                   child: Center(
                     child: MyText(
-                      text: "Loading...",
+                      text: "loading".tr + "...",
                       color: Colors.black,
                       size: 16,
                     ),

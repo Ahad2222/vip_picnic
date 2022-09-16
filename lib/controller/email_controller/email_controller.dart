@@ -15,7 +15,7 @@ class EmailController extends GetxController {
   }) async {
     final serviceId = "service_vippicnic_event";
     final templateId = "template_event_request";
-    final userId = "OGisBA4jrqRlW9TkY";
+    final userId = "tpvFg-ZzkoiQows9q";
 
     final url = Uri.parse("https://api.emailjs.com/api/v1.0/email/send");
     final response = await http.post(

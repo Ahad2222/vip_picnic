@@ -244,7 +244,7 @@ class PostNewStory extends StatelessWidget {
           (value) async {
             log('Data set to FIREBASE!');
             StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? storyDocStream;
-            storyDocStream = await ffstore.collection(storyCollection).doc(storyId).snapshots().listen((event) async {
+            storyDocStream = await ffstore.collection(storiesCollection).doc(storyId).snapshots().listen((event) async {
               log("inside the postDoc stream");
               bool containsUploadUrl = event.data()?.containsKey("uploadUrl") ?? false;
               if (containsUploadUrl) {
@@ -339,7 +339,7 @@ class PostNewStory extends StatelessWidget {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: myAppBar(
-        title: 'Post New Story',
+        title: 'postNewStory'.tr,
         onTap: () => Navigator.pop(context),
       ),
       body: Column(
@@ -626,7 +626,7 @@ class PostNewStory extends StatelessWidget {
                 //   Get.back();
                 // }
               },
-              buttonText: 'post',
+              buttonText: 'post'.tr,
             ),
           ),
         ],

@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +8,9 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:vip_picnic/constant/color.dart';
+import 'package:vip_picnic/constant/constant_variables.dart';
 import 'package:vip_picnic/generated/assets.dart';
+import 'package:vip_picnic/model/addon_model/addon_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/widget/curved_header.dart';
 import 'package:vip_picnic/view/widget/custom_drop_down.dart';
@@ -117,14 +122,44 @@ class _CustomizeEventState extends State<CustomizeEvent> {
                 physics: BouncingScrollPhysics(),
                 children: [
                   heading('Customize your event'),
-                  Obx(() {
-                    return CustomDropDown(
-                      heading: 'Pack Type',
-                      items: eventController.vipPackages,
-                      value: eventController.selectedVipPackage.value,
-                      onChanged: (value) => eventController.selectPackage(value),
-                    );
-                  }),
+                  StreamBuilder<QuerySnapshot>(
+                      stream: ffstore.collection(packagesCollection).snapshots(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const SizedBox();
+                        }
+                        if(snapshot.hasData){
+                          if((snapshot.data?.docs.length ?? 0) > 0){
+                            List<String>? tempList =
+                            List<String>.from(snapshot.data?.docs.map((e) => "${e["name"]} (${e["persons"].toString()} persons max)") ?? []);
+                            log("tempList: $tempList");
+                            eventController.vipPackages.clear();
+                            eventController.vipPackages.add("Select package type");
+                            eventController.selectedVipPackage.value = "Select package type";
+                            eventController.vipPackages.addAll(tempList);
+                          }
+                        }
+
+                        // log("snapshot data: ${snapshot.data?.docs[1].data()}");
+                        // // String firstCatName = snapshot.data?.docs.first["CategoryName"];
+                        // // log("firstCatName: $firstCatName");
+                        // Map<String, dynamic> catListMap = snapshot.data?.docs[1].data() as Map<String, dynamic>;
+                        // log("catListMap: $catListMap");
+                        // List<String>? tempList = List<String>.from(catListMap["categories"].map((e) => e["CategoryName"].toString()));
+                        // log("tempList: $tempList");
+                        // myList.clear();
+                        // myList.add("Select type");
+                        // myList.addAll(tempList ?? []);
+                        return Obx(() {
+                          return CustomDropDown(
+                            heading: 'Pack Type',
+                            items: eventController.vipPackages,
+                            value: eventController.selectedVipPackage.value,
+                            onChanged: (value) => eventController.selectPackage(value),
+                          );
+                        });
+                      }),
+
                   Obx(() {
                     return CustomDropDown(
                       heading: 'Event Type',
@@ -302,61 +337,112 @@ class _CustomizeEventState extends State<CustomizeEvent> {
                     height: 20,
                   ),
                   heading('Addons'),
-                  Obx(() {
-                    return AddOnsTiles(
-                      productImage: 'https://www.vippicnic.com/img/addons/flowers.jpg',
-                      productName: 'Flowers',
-                      price: '120',
-                      perPrice: 'set',
-                      quantity: eventController.followers.value,
-                      onIncrease: () => eventController.addAddons('Flowers'),
-                      onDecrease: () => eventController.removeAddons('Flowers'),
-                    );
-                  }),
-                  Obx(() {
-                    return AddOnsTiles(
-                      productImage: 'https://www.vippicnic.com/img/addons/champagne.PNG',
-                      productName: 'Champagne',
-                      price: '70',
-                      perPrice: 'Bottle',
-                      quantity: eventController.champagne.value,
-                      onIncrease: () => eventController.addAddons('Champagne'),
-                      onDecrease: () => eventController.removeAddons('Champagne'),
-                    );
-                  }),
-                  Obx(() {
-                    return AddOnsTiles(
-                      productImage: 'https://www.vippicnic.com/img/addons/wine.PNG',
-                      productName: 'Wine',
-                      price: '45',
-                      perPrice: 'Bottle',
-                      quantity: eventController.wine.value,
-                      onIncrease: () => eventController.addAddons('Wine'),
-                      onDecrease: () => eventController.removeAddons('Wine'),
-                    );
-                  }),
-                  Obx(() {
-                    return AddOnsTiles(
-                      productImage: 'https://www.vippicnic.com/img/addons/cake.PNG',
-                      productName: 'Cake',
-                      price: '150',
-                      perPrice: 'Piece',
-                      quantity: eventController.cake.value,
-                      onIncrease: () => eventController.addAddons('Cake'),
-                      onDecrease: () => eventController.removeAddons('Cake'),
-                    );
-                  }),
-                  Obx(() {
-                    return AddOnsTiles(
-                      productImage: 'https://www.vippicnic.com/img/addons/candles.PNG',
-                      productName: 'Candles',
-                      price: '30',
-                      perPrice: 'Set',
-                      quantity: eventController.candles.value,
-                      onIncrease: () => eventController.addAddons('Candles'),
-                      onDecrease: () => eventController.removeAddons('Candles'),
-                    );
-                  }),
+                  StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                    stream: ffstore.collection(addonsCollection).snapshots(),
+                    builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                      //log("inside stream-builder");
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        log("inside stream-builder in waiting state");
+                        return SizedBox();
+                      } else if (snapshot.connectionState == ConnectionState.active ||
+                          snapshot.connectionState == ConnectionState.done) {
+                        if (snapshot.hasError) {
+                          return const Text('Some unknown error occurred');
+                        } else if (snapshot.hasData) {
+                          // log("inside hasData and ${snapshot.data!.docs}");
+                          if (snapshot.data!.docs.length > 0) {
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+                              physics: BouncingScrollPhysics(),
+                              itemCount: snapshot.data?.docs.length ?? 0,
+                              itemBuilder: (context, index) {
+                                AddonModel addonsModel =
+                                    AddonModel.fromJson(snapshot.data?.docs[index].data() as Map<String, dynamic>);
+                                // var eventData = events[index];
+                                return AddOnsTiles(
+                                  productImage: addonsModel.image ?? "",
+                                  productName: addonsModel.name ?? "",
+                                  price: addonsModel.price.toString(),
+                                  perPrice: addonsModel.unit ?? "",
+                                  // quantity: eventController.followers.value,
+                                  // onIncrease: () => eventController.addAddons('Flowers'),
+                                  // onDecrease: () => eventController.removeAddons('Flowers'),
+                                );
+                              },
+                            );
+                          } else {
+                            return SizedBox();
+                          }
+                        } else {
+                          log("in else of hasData done and: ${snapshot.connectionState} and"
+                              " snapshot.hasData: ${snapshot.hasData}");
+                          return SizedBox();
+                        }
+                      } else {
+                        log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
+                        return SizedBox();
+                      }
+                    },
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  // Obx(() {
+                  //   return AddOnsTiles(
+                  //     productImage: 'https://www.vippicnic.com/img/addons/flowers.jpg',
+                  //     productName: 'Flowers',
+                  //     price: '120',
+                  //     perPrice: 'set',
+                  //     quantity: eventController.followers.value,
+                  //     onIncrease: () => eventController.addAddons('Flowers'),
+                  //     onDecrease: () => eventController.removeAddons('Flowers'),
+                  //   );
+                  // }),
+                  // Obx(() {
+                  //   return AddOnsTiles(
+                  //     productImage: 'https://www.vippicnic.com/img/addons/champagne.PNG',
+                  //     productName: 'Champagne',
+                  //     price: '70',
+                  //     perPrice: 'Bottle',
+                  //     quantity: eventController.champagne.value,
+                  //     onIncrease: () => eventController.addAddons('Champagne'),
+                  //     onDecrease: () => eventController.removeAddons('Champagne'),
+                  //   );
+                  // }),
+                  // Obx(() {
+                  //   return AddOnsTiles(
+                  //     productImage: 'https://www.vippicnic.com/img/addons/wine.PNG',
+                  //     productName: 'Wine',
+                  //     price: '45',
+                  //     perPrice: 'Bottle',
+                  //     quantity: eventController.wine.value,
+                  //     onIncrease: () => eventController.addAddons('Wine'),
+                  //     onDecrease: () => eventController.removeAddons('Wine'),
+                  //   );
+                  // }),
+                  // Obx(() {
+                  //   return AddOnsTiles(
+                  //     productImage: 'https://www.vippicnic.com/img/addons/cake.PNG',
+                  //     productName: 'Cake',
+                  //     price: '150',
+                  //     perPrice: 'Piece',
+                  //     quantity: eventController.cake.value,
+                  //     onIncrease: () => eventController.addAddons('Cake'),
+                  //     onDecrease: () => eventController.removeAddons('Cake'),
+                  //   );
+                  // }),
+                  // Obx(() {
+                  //   return AddOnsTiles(
+                  //     productImage: 'https://www.vippicnic.com/img/addons/candles.PNG',
+                  //     productName: 'Candles',
+                  //     price: '30',
+                  //     perPrice: 'Set',
+                  //     quantity: eventController.candles.value,
+                  //     onIncrease: () => eventController.addAddons('Candles'),
+                  //     onDecrease: () => eventController.removeAddons('Candles'),
+                  //   );
+                  // }),
                   SizedBox(
                     height: 10,
                   ),
@@ -830,14 +916,15 @@ class AddOnsTiles extends StatelessWidget {
     required this.productName,
     required this.price,
     required this.perPrice,
-    required this.quantity,
-    required this.onIncrease,
-    required this.onDecrease,
+    // required this.quantity,
+    // required this.onIncrease,
+    // required this.onDecrease,
   }) : super(key: key);
 
   String productImage, productName, price, perPrice;
-  int quantity;
-  VoidCallback onIncrease, onDecrease;
+
+  RxInt quantity = 0.obs;
+  // VoidCallback onIncrease, onDecrease;
 
   @override
   Widget build(BuildContext context) {
@@ -904,11 +991,14 @@ class AddOnsTiles extends StatelessWidget {
                   ),
                 ),
                 child: Center(
-                  child: MyText(
-                    text: '$quantity',
-                    size: 18,
-                    weight: FontWeight.w600,
-                  ),
+                  child: Obx(() {
+                    return MyText(
+                      text: '$quantity',
+                      //'${eventController.addonsMap.containsKey(productName) ? eventController.addonsMap[productName] : 0}',
+                      size: 18,
+                      weight: FontWeight.w600,
+                    );
+                  }),
                 ),
               ),
             ),
@@ -919,7 +1009,16 @@ class AddOnsTiles extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 GestureDetector(
-                  onTap: onIncrease,
+                  onTap: () {
+                    quantity++;
+                    if (quantity == 1) {
+                      eventController.addonsMap.putIfAbsent(productName, () => quantity.value);
+                      log("updated addons map in if of increase: ${eventController.addonsMap}");
+                    } else {
+                      eventController.addonsMap.update(productName, (value) => quantity.value);
+                      log("updated addons map in else of increase: ${eventController.addonsMap}");
+                    }
+                  },
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(3),
@@ -933,7 +1032,16 @@ class AddOnsTiles extends StatelessWidget {
                   ),
                 ),
                 GestureDetector(
-                  onTap: onDecrease,
+                  onTap: () {
+                    if (quantity > 0) quantity--;
+                    if (quantity == 0) {
+                      eventController.addonsMap.remove(productName);
+                      log("updated addons map in if of decrease: ${eventController.addonsMap}");
+                    } else {
+                      eventController.addonsMap.update(productName, (value) => value--);
+                      log("updated addons map in else of decrease: ${eventController.addonsMap}");
+                    }
+                  },
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(3),

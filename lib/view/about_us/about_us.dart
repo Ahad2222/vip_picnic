@@ -24,8 +24,7 @@ class AboutUs extends StatelessWidget {
         ),
         children: [
           MyText(
-            text:
-                'We specialize in creative outdoor and indoors picnic decorations, we carry out classic, romantic picnics, pijama party, wedding picnics, bachelor parties,baby shower, baptism, birthday party\'s and customize party\'s. we do picnics on the beach in the park and private area, venues according to the client\'s nescecity, The initial price of the Vip picnic includes our initial decoration for the desired theme, which also includes a standard menu, we also have a menu available for extra requests, but we can also make themes adapted to the picnic according to the desire of the client, with a small addition.',
+            text: 'aboutUsText'.tr,
             size: 16,
             color: kSecondaryColor,
             height: 1.5,
@@ -50,7 +49,7 @@ class AboutUs extends StatelessWidget {
           MyText(
             paddingTop: 5.0,
             align: TextAlign.center,
-            text: 'Version 1.0',
+            text: 'version'.tr + ' 1.0',
             size: 10,
             color: kSecondaryColor,
           ),

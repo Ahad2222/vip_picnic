@@ -27,7 +27,7 @@ class Profile extends StatelessWidget {
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
-              expandedHeight: 450,
+              expandedHeight: 430,
               // expandedHeight: 570,
               centerTitle: true,
               pinned: true,

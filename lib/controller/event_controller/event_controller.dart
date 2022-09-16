@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +14,8 @@ import 'package:vip_picnic/view/widget/snack_bar.dart';
 
 class EventController extends GetxController {
   static EventController instance = Get.find<EventController>();
+
+  RxMap<String, int> addonsMap = Map<String, int>.from({}).obs;
   RxList<String> vipPackages = [
     'VIP 2 Star\'s Package (2 persons max)',
     'VIP 3 Star\'s Package (10 persons max)',
@@ -143,6 +147,12 @@ class EventController extends GetxController {
         context: context,
         msg: 'Address cannot be empty!',
       );
+    } else if (selectedVipPackage.value == "Select package type") {
+      showMsg(
+        bgColor: Colors.red,
+        context: context,
+        msg: 'Select a suitable package type!',
+      );
     } else {
       try {
         showDialog(
@@ -164,11 +174,7 @@ class EventController extends GetxController {
           duration: selectedDuration.value,
           eventDate: selectedEventDate.value,
           details: detailsCon.text.trim(),
-          flowers: followers.value,
-          champagne: champagne.value,
-          wine: wine.value,
-          cake: cake.value,
-          candles: candles.value,
+          addons: addonsMap,
           bookerName: nameCon.text.trim(),
           bookerEmail: emailCon.text.trim(),
           bookerPhone: phoneCon.text.trim(),
@@ -202,11 +208,11 @@ class EventController extends GetxController {
             "Start Time: ${selectedStartTime.value}, \n"
             "Duration: ${selectedDuration.value}, \n"
             "Details: ${detailsCon.text.trim()}, \n"
-            "Flowers: ${followers.value}, \n"
-            "Champagne: ${champagne.value}, \n"
-            "Wine: ${wine.value}, \n"
-            "Cake: ${cake.value}, \n"
-            "Candles: ${candles.value} \n",
+            "Add-ons: ${addonsMap}, \n"
+            // "Champagne: ${champagne.value}, \n"
+            // "Wine: ${wine.value}, \n"
+            // "Cake: ${cake.value}, \n"
+            // "Candles: ${candles.value} \n",
         );
         await FirebaseFirestore.instance.collection('Events').doc(id).set(eventModel.toJson());
         Navigator.pop(context);

@@ -325,7 +325,7 @@ class SearchTiles extends StatelessWidget {
                             vertical: 3,
                           ),
                           child: MyText(
-                            text: isFollowed! ? 'UnFollow' : 'Follow',
+                            text: isFollowed! ? 'unfollow'.tr : 'follow'.tr,
                             color: kSecondaryColor,
                           ),
                         ),

@@ -422,7 +422,7 @@ Future<void> backgroundHandler() async {
               .child("$fileName.mp4");
           String url = await ref.getDownloadURL();
           FirebaseFirestore.instance
-              .collection(storyCollection)
+              .collection(storiesCollection)
               .doc(storyId)
               .update({
             "storyVideo": url,

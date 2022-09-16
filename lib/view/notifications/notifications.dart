@@ -238,17 +238,21 @@ class NotificationTiles extends StatelessWidget {
                             width: width(context, 1.0),
                             fit: BoxFit.cover,
                             errorBuilder: (
-                                BuildContext context,
-                                Object exception,
-                                StackTrace? stackTrace,
-                                ) {
+                              BuildContext context,
+                              Object exception,
+                              StackTrace? stackTrace,
+                            ) {
                               return const Text(' ');
                             },
                             loadingBuilder: (context, child, loadingProgress) {
                               if (loadingProgress == null) {
                                 return child;
                               } else {
-                                return loading();
+                                return SizedBox(
+                                  height: 48,
+                                  width: 48,
+                                  child: loading(),
+                                );
                               }
                             },
                           ),
@@ -263,17 +267,21 @@ class NotificationTiles extends StatelessWidget {
                         width: 48,
                         fit: BoxFit.cover,
                         errorBuilder: (
-                            BuildContext context,
-                            Object exception,
-                            StackTrace? stackTrace,
-                            ) {
+                          BuildContext context,
+                          Object exception,
+                          StackTrace? stackTrace,
+                        ) {
                           return const Text(' ');
                         },
                         loadingBuilder: (context, child, loadingProgress) {
                           if (loadingProgress == null) {
                             return child;
                           } else {
-                            return loading();
+                            return SizedBox(
+                              height: 48,
+                              width: 48,
+                              child: loading(),
+                            );
                           }
                         },
                       ),

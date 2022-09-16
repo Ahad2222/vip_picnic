@@ -227,7 +227,7 @@ class _HomeState extends State<Home> {
                           addStoryButton(context),
                           StreamBuilder<QuerySnapshot>(
                               stream: ffstore
-                                  .collection(storyCollection)
+                                  .collection(storiesCollection)
                                   .where("storyPersonId", isEqualTo: auth.currentUser?.uid)
                                   .where("createdAt",
                                       isGreaterThan:

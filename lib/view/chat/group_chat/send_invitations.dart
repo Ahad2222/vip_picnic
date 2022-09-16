@@ -33,7 +33,7 @@ class SendInvitations extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: myAppBar(
-        title: 'Send Invitation',
+        title: 'sendInvitation'.tr,
         onTap: () => Get.back(),
       ),
       body: ListView(
@@ -45,7 +45,7 @@ class SendInvitations extends StatelessWidget {
         shrinkWrap: true,
         children: [
           SimpleTextField(
-            hintText: 'Type username,  email...',
+            hintText: 'type'.tr + ' ' + 'email'.tr.toLowerCase() + '...',
             controller: userNameController,
             onChanged: (value) {
               userNameObsString.value = value;
@@ -141,7 +141,7 @@ class SendInvitations extends StatelessWidget {
                 bottom: MediaQuery.of(context).viewInsets.bottom),
             child: SimpleTextField(
               maxLines: 5,
-              hintText: 'Message...',
+              hintText: 'message'.tr + '...',
               controller: messageController,
             ),
           ),
@@ -205,7 +205,7 @@ class SendInvitations extends StatelessWidget {
                             "Please fill out both fields properly to send the invite.");
                   }
                 },
-                buttonText: 'Invite to the group',
+                buttonText: 'inviteToTheGroup'.tr,
               ),
             ],
           ),

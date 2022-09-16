@@ -273,7 +273,7 @@ class _EditPostState extends State<EditPost> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: myAppBar(
-        title: 'Edit Post',
+        title: 'editPost'.tr,
         onTap: () => Navigator.pop(context),
       ),
       body: Column(

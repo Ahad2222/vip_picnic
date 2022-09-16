@@ -676,7 +676,7 @@ class _ChatScreenState extends State<ChatScreen> {
         } else {
           return Container(
             child: Center(
-              child: Text("Loading...."),
+              child: Text("loading".tr + "..."),
             ),
           );
         }

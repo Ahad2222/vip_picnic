@@ -738,7 +738,7 @@ class _PostDetailsState extends State<PostDetails> {
                       //log("inside stream-builder");
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         log("inside stream-builder in waiting state");
-                        return const Center(child: Text('Loading...'));
+                        return Center(child: Text('loading'.tr + '...'));
                       } else if (snapshot.connectionState == ConnectionState.active ||
                           snapshot.connectionState == ConnectionState.done) {
                         if (snapshot.hasError) {
@@ -776,7 +776,7 @@ class _PostDetailsState extends State<PostDetails> {
                         }
                       } else {
                         log("in last else of ConnectionState.done and: ${snapshot.connectionState}");
-                        return const Center(child: Text('Loading...'));
+                        return Center(child: Text('loading'.tr + '...'));
                       }
                     },
                   ),

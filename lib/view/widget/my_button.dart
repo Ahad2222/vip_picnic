@@ -38,10 +38,12 @@ class MyButton extends StatelessWidget {
             : MainAxisAlignment.center,
         children: [
           Container(),
-          MyText(
-            size: textSize,
-            text: '$buttonText'.toUpperCase(),
-            color: kPrimaryColor,
+          Expanded(
+            child: MyText(
+              size: textSize,
+              text: '$buttonText'.toUpperCase(),
+              color: kPrimaryColor,
+            ),
           ),
           showIcon
               ? Image.asset(

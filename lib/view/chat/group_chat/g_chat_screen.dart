@@ -538,7 +538,7 @@ class _GroupChatState extends State<GroupChat> {
         } else {
           return Container(
             child: Center(
-              child: Text("Loading...."),
+              child: Text("loading".tr + "..."),
             ),
           );
         }

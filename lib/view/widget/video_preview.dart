@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
@@ -76,7 +77,7 @@ class _VideoPreviewState extends State<VideoPreview> {
                     children: [
                       loading(),
                       SizedBox(height: 20),
-                      Text('Loading'),
+                      Text('loading'.tr),
                     ],
                   ),
           ),

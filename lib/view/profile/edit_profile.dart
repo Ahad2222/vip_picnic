@@ -77,7 +77,7 @@ class _EditProfileState extends State<EditProfile> {
     return Scaffold(
       appBar: myAppBar(
         onTap: () => Get.back(),
-        title: 'Edit Account',
+        title: 'editAccount'.tr,
       ),
       body: ListView(
         shrinkWrap: true,
@@ -101,7 +101,7 @@ class _EditProfileState extends State<EditProfile> {
             height: 40,
           ),
           ETextField(
-            labelText: 'Name:',
+            labelText: 'name'.tr + ':',
             // initialValue: 'current name',
             controller: nameController,
             isReadOnly: true,
@@ -114,9 +114,9 @@ class _EditProfileState extends State<EditProfile> {
                 builder: (context) {
                   return bottomSheetForEdit(
                     context,
-                    title: 'Name',
+                    title: 'name'.tr,
                     selectedField: ETextField(
-                      labelText: 'Name:',
+                      labelText: 'name'.tr + ':',
                       controller: nameController,
                     ),
                     onSave: () async {
@@ -211,7 +211,7 @@ class _EditProfileState extends State<EditProfile> {
             builder: (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return ETextField(
-                  labelText: 'Email:',
+                  labelText: 'email'.tr + ':',
                   // initialValue: 'Current Email',
                   controller: emailController,
                   isReadOnly: true,
@@ -224,10 +224,10 @@ class _EditProfileState extends State<EditProfile> {
                       builder: (context) {
                         return bottomSheetForEdit(
                           context,
-                          title: 'Email',
+                          title: 'email'.tr,
                           selectedField: ETextField(
                             controller: emailController,
-                            labelText: 'Email:',
+                            labelText: 'email'.tr + ':',
                           ),
                           onSave: () {},
                         );
@@ -431,7 +431,7 @@ class _EditProfileState extends State<EditProfile> {
             height: 15,
           ),
           ETextField(
-            labelText: 'Phone:',
+            labelText: 'phone'.tr + ':',
             // initialValue: 'Current Phone Number',
             controller: phoneController,
             isReadOnly: true,
@@ -444,9 +444,9 @@ class _EditProfileState extends State<EditProfile> {
                 builder: (context) {
                   return bottomSheetForEdit(
                     context,
-                    title: 'Phone with country code +1',
+                    title: 'phone'.tr + ' with country code +1',
                     selectedField: ETextField(
-                      labelText: 'Phone:',
+                      labelText: 'phone'.tr + ':',
                       keyboardType: TextInputType.phone,
                       controller: phoneController,
                     ),
@@ -507,7 +507,7 @@ class _EditProfileState extends State<EditProfile> {
                         //   context: context,
                         // );
                       } catch (e) {
-                        log("error in phome updating: $e");
+                        log("error in phone updating: $e");
                         Get.back();
                         Get.back();
                         showMsg(
@@ -527,7 +527,7 @@ class _EditProfileState extends State<EditProfile> {
             height: 15,
           ),
           ETextField(
-            labelText: 'Address:',
+            labelText: 'address'.tr + ':',
             // initialValue: 'Current Address',
             controller: addressController,
             isReadOnly: true,
@@ -540,9 +540,9 @@ class _EditProfileState extends State<EditProfile> {
                 builder: (context) {
                   return bottomSheetForEdit(
                     context,
-                    title: 'Address',
+                    title: 'address'.tr + ':',
                     selectedField: ETextField(
-                      labelText: 'Address:',
+                      labelText: 'address'.tr + ':',
                       controller: addressController,
                     ),
                     onSave: () async {
@@ -576,7 +576,7 @@ class _EditProfileState extends State<EditProfile> {
             height: 15,
           ),
           ETextField(
-            labelText: 'City:',
+            labelText: 'city'.tr + ':',
             // initialValue: 'Current Address',
             controller: cityController,
             isReadOnly: true,
@@ -589,9 +589,9 @@ class _EditProfileState extends State<EditProfile> {
                 builder: (context) {
                   return bottomSheetForEdit(
                     context,
-                    title: 'City',
+                    title: 'city'.tr + ':',
                     selectedField: ETextField(
-                      labelText: 'City:',
+                      labelText: 'city'.tr + ':',
                       controller: cityController,
                     ),
                     onSave: () async {
@@ -625,7 +625,7 @@ class _EditProfileState extends State<EditProfile> {
             height: 15,
           ),
           ETextField(
-            labelText: 'State:',
+            labelText: 'state'.tr + ':',
             // initialValue: 'Current Address',
             controller: stateController,
             isReadOnly: true,
@@ -638,9 +638,9 @@ class _EditProfileState extends State<EditProfile> {
                 builder: (context) {
                   return bottomSheetForEdit(
                     context,
-                    title: 'State',
+                    title: 'state'.tr + ':',
                     selectedField: ETextField(
-                      labelText: 'State:',
+                      labelText: 'state'.tr + ':',
                       controller: stateController,
                     ),
                     onSave: () async {
@@ -674,7 +674,7 @@ class _EditProfileState extends State<EditProfile> {
             height: 15,
           ),
           ETextField(
-            labelText: 'Zip:',
+            labelText: 'zip'.tr + ':',
             // initialValue: 'Current Address',
             controller: zipController,
             isReadOnly: true,
@@ -687,9 +687,9 @@ class _EditProfileState extends State<EditProfile> {
                 builder: (context) {
                   return bottomSheetForEdit(
                     context,
-                    title: 'Zip',
+                    title: 'zip'.tr,
                     selectedField: ETextField(
-                      labelText: 'Zip:',
+                      labelText: 'zip'.tr + ':',
                       controller: zipController,
                       keyboardType: TextInputType.number,
                     ),
@@ -739,7 +739,7 @@ class _EditProfileState extends State<EditProfile> {
                   List<String> signInMethodsList = snapshot.data ?? [];
                   if (signInMethodsList.contains("password")) {
                     return ETextField(
-                      labelText: 'Password:',
+                      labelText: 'password'.tr + ':',
                       // initialValue: 'Current Password',
                       controller: passwordController,
                       isReadOnly: true,
@@ -753,9 +753,9 @@ class _EditProfileState extends State<EditProfile> {
                           builder: (context) {
                             return passwordBottomSheetForEdit(
                               context,
-                              title: 'Current Password',
+                              title: 'Current ' + 'password'.tr,
                               selectedField: ETextField(
-                                labelText: 'Current Password:',
+                                labelText: 'Current ' + 'password'.tr,
                                 controller: currentPasswordController,
                                 isObSecure: true,
                               ),
@@ -774,9 +774,9 @@ class _EditProfileState extends State<EditProfile> {
                                         builder: (context) {
                                           return bottomSheetForEdit(
                                             context,
-                                            title: 'Password',
+                                            title:  'password'.tr,
                                             selectedField: ETextField(
-                                              labelText: 'Password:',
+                                              labelText: 'password'.tr + ':',
                                               isObSecure: true,
                                               controller: newPasswordController,
                                             ),

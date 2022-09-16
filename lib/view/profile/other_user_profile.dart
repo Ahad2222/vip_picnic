@@ -44,7 +44,7 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
-              expandedHeight: 570,
+              expandedHeight: 430,
               centerTitle: true,
               pinned: true,
               toolbarHeight: 75,
@@ -79,14 +79,15 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                       color: kSecondaryColor,
                       align: TextAlign.center,
                       paddingTop: 15,
-                    ),
-                    MyText(
-                      text: '@Username',
-                      color: kSecondaryColor,
-                      align: TextAlign.center,
-                      paddingTop: 5,
                       paddingBottom: 30,
                     ),
+                    // MyText(
+                    //   text: '@Username',
+                    //   color: kSecondaryColor,
+                    //   align: TextAlign.center,
+                    //   paddingTop: 5,
+                    //   paddingBottom: 30,
+                    // ),
                     Wrap(
                       alignment: WrapAlignment.center,
                       crossAxisAlignment: WrapCrossAlignment.center,
@@ -127,8 +128,8 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                             buttonText: userDetailsModel.value.iFollowed != null
                                 ? !userDetailsModel.value.iFollowed!.asMap().containsValue(widget.otherUserModel!.uID)
                                     ? 'follow'.tr
-                                    : 'Unfollow'.tr
-                                : "follow",
+                                    : 'unfollow'.tr
+                                : "follow".tr,
                             onTap: userDetailsModel.value.iFollowed != null
                                 ? !userDetailsModel.value.iFollowed!.asMap().containsValue(widget.otherUserModel!.uID)
                                     ? () async {
@@ -204,9 +205,9 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                         ),
                       ],
                     ),
-                    bioBox(
-                      bio: 'Musician since 2018, available to new events. Love plant and planet 🌱',
-                    ),
+                    // bioBox(
+                    //   bio: 'Musician since 2018, available to new events. Love plant and planet 🌱',
+                    // ),
                   ],
                 ),
                 collapseMode: CollapseMode.none,

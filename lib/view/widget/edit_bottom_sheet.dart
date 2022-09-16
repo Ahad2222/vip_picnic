@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:vip_picnic/constant/color.dart';
 import 'package:vip_picnic/generated/assets.dart';
 import 'package:vip_picnic/view/widget/my_button.dart';
@@ -33,7 +34,7 @@ Widget bottomSheetForEdit(
               Container(),
               Expanded(
                 child: MyText(
-                  text: 'Edit ${title}',
+                  text: 'edit'.tr + ' ${title}',
                   size: 19,
                   color: kSecondaryColor,
                 ),
@@ -50,7 +51,7 @@ Widget bottomSheetForEdit(
           selectedField!,
           MyButton(
             onTap: onSave,
-            buttonText: 'Save',
+            buttonText: 'save'.tr,
           ),
         ],
       ),
