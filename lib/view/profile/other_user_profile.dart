@@ -11,6 +11,7 @@ import 'package:vip_picnic/model/i_followed_model/i_followed_model.dart';
 import 'package:vip_picnic/model/user_details_model/user_details_model.dart';
 import 'package:vip_picnic/utils/instances.dart';
 import 'package:vip_picnic/view/home/post_details.dart';
+import 'package:vip_picnic/view/profile/profile_image_preview.dart';
 import 'package:vip_picnic/view/widget/height_width.dart';
 import 'package:vip_picnic/view/widget/loading.dart';
 import 'package:vip_picnic/view/widget/my_text.dart';
@@ -31,7 +32,11 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    ffstore.collection(accountsCollection).doc(auth.currentUser!.uid).snapshots().listen((event) {
+    ffstore
+        .collection(accountsCollection)
+        .doc(auth.currentUser!.uid)
+        .snapshots()
+        .listen((event) {
       userDetailsModel.value = UserDetailsModel.fromJson(event.data() ?? {});
     });
   }
@@ -112,7 +117,8 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                           color: kSecondaryColor,
                         ),
                         eventFollowingFollower(
-                          count: widget.otherUserModel!.TheyFollowed?.length ?? 0,
+                          count:
+                              widget.otherUserModel!.TheyFollowed?.length ?? 0,
                           title: 'followers'.tr,
                         ),
                       ],
@@ -126,27 +132,43 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                         Obx(() {
                           return profileButtons(
                             buttonText: userDetailsModel.value.iFollowed != null
-                                ? !userDetailsModel.value.iFollowed!.asMap().containsValue(widget.otherUserModel!.uID)
+                                ? !userDetailsModel.value.iFollowed!
+                                        .asMap()
+                                        .containsValue(
+                                            widget.otherUserModel!.uID)
                                     ? 'follow'.tr
                                     : 'unfollow'.tr
                                 : "follow".tr,
                             onTap: userDetailsModel.value.iFollowed != null
-                                ? !userDetailsModel.value.iFollowed!.asMap().containsValue(widget.otherUserModel!.uID)
+                                ? !userDetailsModel.value.iFollowed!
+                                        .asMap()
+                                        .containsValue(
+                                            widget.otherUserModel!.uID)
                                     ? () async {
-                                        await ffstore.collection(accountsCollection).doc(auth.currentUser!.uid).update({
-                                          "iFollowed": FieldValue.arrayUnion([widget.otherUserModel!.uID]),
+                                        await ffstore
+                                            .collection(accountsCollection)
+                                            .doc(auth.currentUser!.uid)
+                                            .update({
+                                          "iFollowed": FieldValue.arrayUnion(
+                                              [widget.otherUserModel!.uID]),
                                         });
                                         await ffstore
                                             .collection(accountsCollection)
                                             .doc(widget.otherUserModel!.uID)
                                             .update({
-                                          "TheyFollowed": FieldValue.arrayUnion([auth.currentUser!.uid]),
+                                          "TheyFollowed": FieldValue.arrayUnion(
+                                              [auth.currentUser!.uid]),
                                         });
-                                        IFollowedModel iFollowedProfile = IFollowedModel(
-                                          followedId: widget.otherUserModel!.uID,
-                                          followedName: widget.otherUserModel!.fullName,
-                                          followedImage: widget.otherUserModel!.profileImageUrl,
-                                          followedAt: DateTime.now().millisecondsSinceEpoch,
+                                        IFollowedModel iFollowedProfile =
+                                            IFollowedModel(
+                                          followedId:
+                                              widget.otherUserModel!.uID,
+                                          followedName:
+                                              widget.otherUserModel!.fullName,
+                                          followedImage: widget
+                                              .otherUserModel!.profileImageUrl,
+                                          followedAt: DateTime.now()
+                                              .millisecondsSinceEpoch,
                                         );
 
                                         await ffstore
@@ -158,14 +180,20 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                                       }
                                     : () async {
                                         //+unfollow code goes here
-                                        await ffstore.collection(accountsCollection).doc(auth.currentUser!.uid).update({
-                                          "iFollowed": FieldValue.arrayRemove([widget.otherUserModel!.uID]),
+                                        await ffstore
+                                            .collection(accountsCollection)
+                                            .doc(auth.currentUser!.uid)
+                                            .update({
+                                          "iFollowed": FieldValue.arrayRemove(
+                                              [widget.otherUserModel!.uID]),
                                         });
                                         await ffstore
                                             .collection(accountsCollection)
                                             .doc(widget.otherUserModel!.uID)
                                             .update({
-                                          "TheyFollowed": FieldValue.arrayRemove([auth.currentUser!.uid]),
+                                          "TheyFollowed":
+                                              FieldValue.arrayRemove(
+                                                  [auth.currentUser!.uid]),
                                         });
                                         await ffstore
                                             .collection(accountsCollection)
@@ -195,9 +223,11 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                                 .doc(widget.otherUserModel!.uID)
                                 .get()
                                 .then((value) {
-                              umdl = UserDetailsModel.fromJson(value.data() ?? {});
+                              umdl =
+                                  UserDetailsModel.fromJson(value.data() ?? {});
                             });
-                            await chatController.createChatRoomAndStartConversation(
+                            await chatController
+                                .createChatRoomAndStartConversation(
                               user1Model: userDetailsModel.value,
                               user2Model: umdl,
                             );
@@ -250,11 +280,13 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                     ),
                     itemCount: snapshot.data?.docs.length,
                     itemBuilder: (context, index) {
-                      AddPostModel postModel =
-                          AddPostModel.fromJson(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                      AddPostModel postModel = AddPostModel.fromJson(
+                          snapshot.data!.docs[index].data()
+                              as Map<String, dynamic>);
                       return GestureDetector(
                         onTap: () {
-                          Get.to(() => PostDetails(isLikeByMe: false, postDocModel: postModel));
+                          Get.to(() => PostDetails(
+                              isLikeByMe: false, postDocModel: postModel));
                         },
                         child: postModel.postImages!.isNotEmpty
                             ? Image.network(
@@ -269,7 +301,8 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                                 ) {
                                   return const Text(' ');
                                 },
-                                loadingBuilder: (context, child, loadingProgress) {
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
                                   if (loadingProgress == null) {
                                     return child;
                                   } else {
@@ -290,10 +323,12 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                                         padding: EdgeInsets.all(5),
                                         decoration: BoxDecoration(
                                           color: kPrimaryColor,
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: kBlackColor.withOpacity(0.16),
+                                              color:
+                                                  kBlackColor.withOpacity(0.16),
                                               blurRadius: 6,
                                               offset: Offset(0, 0),
                                             ),
@@ -301,20 +336,22 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
                                         ),
                                         child: Center(
                                           child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(6),
+                                            borderRadius:
+                                                BorderRadius.circular(6),
                                             child: Image.network(
                                               postModel.thumbnailsUrls![0],
                                               height: 150,
                                               width: 150,
                                               fit: BoxFit.cover,
                                               errorBuilder: (
-                                                  BuildContext context,
-                                                  Object exception,
-                                                  StackTrace? stackTrace,
-                                                  ) {
+                                                BuildContext context,
+                                                Object exception,
+                                                StackTrace? stackTrace,
+                                              ) {
                                                 return const Text(' ');
                                               },
-                                              loadingBuilder: (context, child, loadingProgress) {
+                                              loadingBuilder: (context, child,
+                                                  loadingProgress) {
                                                 if (loadingProgress == null) {
                                                   return child;
                                                 } else {
@@ -497,44 +534,55 @@ class _OtherUserProfileState extends State<OtherUserProfile> {
   Widget profileImage(
     BuildContext context,
   ) {
-    return Center(
-      child: Container(
-        height: 128,
-        width: 128,
-        padding: EdgeInsets.all(5),
-        decoration: BoxDecoration(
-          color: kPrimaryColor,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: kBlackColor.withOpacity(0.16),
-              blurRadius: 6,
-              offset: Offset(0, 0),
-            ),
-          ],
+    return Hero(
+      tag: 'profileMedia',
+      transitionOnUserGestures: true,
+      child: GestureDetector(
+        onTap: () => Get.to(
+          () => ProfileImagePreview(
+            imageUrl: widget.otherUserModel!.profileImageUrl!,
+          ),
         ),
         child: Center(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(100),
-            child: Image.network(
-              widget.otherUserModel!.profileImageUrl!,
-              height: height(context, 1.0),
-              width: width(context, 1.0),
-              fit: BoxFit.cover,
-              errorBuilder: (
-                BuildContext context,
-                Object exception,
-                StackTrace? stackTrace,
-              ) {
-                return const Text(' ');
-              },
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) {
-                  return child;
-                } else {
-                  return loading();
-                }
-              },
+          child: Container(
+            height: 128,
+            width: 128,
+            padding: EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              color: kPrimaryColor,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: kBlackColor.withOpacity(0.16),
+                  blurRadius: 6,
+                  offset: Offset(0, 0),
+                ),
+              ],
+            ),
+            child: Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(100),
+                child: Image.network(
+                  widget.otherUserModel!.profileImageUrl!,
+                  height: height(context, 1.0),
+                  width: width(context, 1.0),
+                  fit: BoxFit.cover,
+                  errorBuilder: (
+                    BuildContext context,
+                    Object exception,
+                    StackTrace? stackTrace,
+                  ) {
+                    return const Text(' ');
+                  },
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) {
+                      return child;
+                    } else {
+                      return loading();
+                    }
+                  },
+                ),
+              ),
             ),
           ),
         ),
